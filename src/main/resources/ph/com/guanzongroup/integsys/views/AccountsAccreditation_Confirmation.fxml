@@ -385,7 +385,7 @@
                                                             <ColumnConstraints hgrow="SOMETIMES" prefWidth="650.0" />
                                                          </columnConstraints>
                                                          <rowConstraints>
-                                                            <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                          </rowConstraints>
@@ -400,7 +400,6 @@
                                                                      </columnConstraints>
                                                                      <rowConstraints>
                                                                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                      </rowConstraints>
                                                                      <children>
                                                                         <Label text="Attachment No">
@@ -408,13 +407,7 @@
                                                                               <Font size="12.0" />
                                                                            </font>
                                                                         </Label>
-                                                                        <Label text="Attachment Type" GridPane.rowIndex="1">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                        <TextField fx:id="tfAttachmentNo" disable="true" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="154.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
-                                                                        <ComboBox fx:id="cmbAttachmentType" prefHeight="26.0" prefWidth="207.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                        <TextField fx:id="tfAttachmentNo" disable="true" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="205.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
                                                                      </children>
                                                                   </GridPane>
                                                                </children>
