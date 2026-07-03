@@ -442,12 +442,12 @@
                                                                         <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
                                                                      </rowConstraints>
                                                                      <children>
-                                                                        <Button fx:id="btnAddAttachment" mnemonicParsing="false" styleClass="button_process" stylesheets="@../css/StyleSheet.css" GridPane.columnIndex="1">
+                                                                        <Button fx:id="btnAddAttachment" mnemonicParsing="false" onAction="#cmdButton_Click" styleClass="button_process" stylesheets="@../css/StyleSheet.css" GridPane.columnIndex="1">
                                                                            <graphic>
                                                                               <FontAwesomeIconView glyphName="PLUS" />
                                                                            </graphic>
                                                                         </Button>
-                                                                        <Button fx:id="btnRemoveAttachment" mnemonicParsing="false" styleClass="button_process" stylesheets="@../css/StyleSheet.css" GridPane.columnIndex="3">
+                                                                        <Button fx:id="btnRemoveAttachment" mnemonicParsing="false" onAction="#cmdButton_Click" styleClass="button_process" stylesheets="@../css/StyleSheet.css" GridPane.columnIndex="3">
                                                                            <graphic>
                                                                               <FontAwesomeIconView fill="WHITE" glyphName="TRASH" />
                                                                            </graphic>
@@ -469,12 +469,12 @@
                                                                   <StackPane fx:id="stackPane1" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
                                                                         <ImageView fx:id="imageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                                                        <Button fx:id="btnArrowLeft" mnemonicParsing="false" prefHeight="33.0" prefWidth="38.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" StackPane.alignment="CENTER_LEFT">
+                                                                        <Button fx:id="btnArrowLeft" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="33.0" prefWidth="38.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" StackPane.alignment="CENTER_LEFT">
                                                                            <graphic>
                                                                               <FontAwesomeIconView fill="WHITE" glyphName="ANGLE_LEFT" size="27.0" />
                                                                            </graphic>
                                                                         </Button>
-                                                                        <Button fx:id="btnArrowRight" mnemonicParsing="false" prefHeight="33.0" prefWidth="38.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" StackPane.alignment="CENTER_RIGHT">
+                                                                        <Button fx:id="btnArrowRight" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="33.0" prefWidth="38.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" StackPane.alignment="CENTER_RIGHT">
                                                                            <graphic>
                                                                               <FontAwesomeIconView fill="WHITE" glyphName="ANGLE_RIGHT" size="27.0" />
                                                                            </graphic>
