@@ -227,13 +227,14 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                     }
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray1)) {
+                poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray2)) {
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();

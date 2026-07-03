@@ -178,7 +178,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (poController.getEditMode() == EditMode.READY || poController.getEditMode() == EditMode.UPDATE || poController.getEditMode() == EditMode.ADDNEW) {
+                    if (poController.getEditMode() == EditMode.READY) {
                         JFXUtil.clearTextFields(apAttachments);
                         try {
                             poController.loadAttachments();
@@ -257,7 +257,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                             btnNew.fire();
                         });
                     } else {
-                        pnEditMode = poController.getEditMode();
+                        return;
                     }
                     break;
                 case "btnCancel":
@@ -271,7 +271,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                         });
                         break;
                     }
-                    break;
+                    return;
                 case "btnHistory":
                     if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
                         ShowMessageFX.Warning(null, pxeModuleName, "No transaction status history to load!");
@@ -379,13 +379,14 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     slideImage(-1);
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray1)) {
+                poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray2)) {
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();

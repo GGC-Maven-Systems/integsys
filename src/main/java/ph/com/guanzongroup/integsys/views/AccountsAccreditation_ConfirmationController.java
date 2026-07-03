@@ -177,7 +177,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (poController.getEditMode() == EditMode.READY || poController.getEditMode() == EditMode.UPDATE || poController.getEditMode() == EditMode.ADDNEW) {
+                    if (poController.getEditMode() == EditMode.READY) {
                         JFXUtil.clearTextFields(apAttachments);
                         try {
                             poController.loadAttachments();
@@ -249,7 +249,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                         pnEditMode = EditMode.UNKNOWN;
                         //reset data to avoid transaction errors
                     } else {
-                        pnEditMode = poController.getEditMode();
+                        return;
                     }
                     break;
                 case "btnConfirm":
@@ -295,7 +295,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                         });
                         break;
                     }
-                    break;
+                    return;
                 case "btnHistory":
 
                     if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
@@ -404,13 +404,14 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     slideImage(-1);
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid", "btnConfirm")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray1)) {
+                poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            if (JFXUtil.isObjectEqualTo(btnID, (Object) JFXUtil.buttonPackArray2)) {
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();
