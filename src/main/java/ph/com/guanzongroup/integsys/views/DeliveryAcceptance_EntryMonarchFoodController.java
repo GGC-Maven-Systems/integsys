@@ -2,10 +2,17 @@ package ph.com.guanzongroup.integsys.views;
 
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Detail;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Main;
+import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Attachment;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -65,16 +72,39 @@ import org.guanzon.cas.purchasing.status.PurchaseOrderReceivingStatus;
 import org.json.simple.JSONObject;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import javafx.animation.TranslateTransition;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import java.util.Arrays;
 import java.util.List;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
 import org.json.simple.parser.ParseException;
 import java.text.SimpleDateFormat;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.guanzon.appdriver.agent.ShowDialogFX;
+import org.guanzon.appdriver.constant.DocumentType;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.constant.UserRight;
 
 /**
@@ -104,10 +134,23 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
 
     private ObservableList<ModelDeliveryAcceptance_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelDeliveryAcceptance_Main> main_data = FXCollections.observableArrayList();
+    private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
+    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
     private FilteredList<ModelDeliveryAcceptance_Main> filteredData;
     private FilteredList<ModelDeliveryAcceptance_Detail> filteredDataDetail;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
+    Map<String, String> imageinfo_temp = new HashMap<>();
+
+    private double mouseAnchorX;
+    private double mouseAnchorY;
+    private double scaleFactor = 1.0;
+    private FileChooser fileChooser;
+    private int pnAttachment;
+
+    private int currentIndex = 0;
+    double ldstackPaneWidth = 0;
+    double ldstackPaneHeight = 0;
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private final Map<Integer, List<String>> highlightedRowsDetail = new HashMap<>();
@@ -119,13 +162,14 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
     private ChangeListener<String> mainSearchListener;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail, apAttachments, apAttachmentButtons;
 
     @FXML
     private HBox hbButtons, hboxid;
 
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnPrint, btnHistory, btnRetrieve, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnPrint, btnHistory, btnRetrieve, btnClose,
+            btnAddAttachment, btnRemoveAttachment, btnArrowLeft, btnArrowRight;
 
     @FXML
     private Label lblStatus, lblSource;
@@ -133,7 +177,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
     @FXML
     private TextField tfTransactionNo, tfSupplier, tfTrucking, tfReferenceNo, tfTerm, tfDiscountRate,
             tfDiscountAmount, tfTotal, tfOrderNo, tfBarcode, tfSupersede, tfDescription, tfBrand, tfModel, tfColor, tfInventoryType,
-            tfMeasure, tfCost, tfOrderQuantity, tfReceiveQuantity;
+            tfMeasure, tfCost, tfOrderQuantity, tfReceiveQuantity, tfAttachmentNo;
 
     @FXML
     private TextArea taRemarks;
@@ -142,14 +186,24 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
     private DatePicker dpTransactionDate, dpReferenceDate, dpExpiryDate;
 
     @FXML
-    private TableView tblViewOrderDetails, tblViewPuchaseOrder;
+    private TableView tblViewOrderDetails, tblViewPuchaseOrder, tblAttachments;
 
     @FXML
     private TableColumn tblRowNoDetail, tblOrderNoDetail, tblBarcodeDetail, tblDescriptionDetail, tblCostDetail, tblOrderQuantityDetail,
-            tblReceiveQuantityDetail, tblTotalDetail, tblRowNo, tblSupplier, tblDate, tblReferenceNo;
+            tblReceiveQuantityDetail, tblTotalDetail, tblRowNo, tblSupplier, tblDate, tblReferenceNo,
+            tblRowNoAttachment, tblFileNameAttachment;
 
     @FXML
     private Pagination pgPagination;
+
+    @FXML
+    private StackPane stackPane1;
+
+    @FXML
+    private ImageView imageView;
+
+    @FXML
+    private ComboBox cmbAttachmentType;
 
     /**
      * Initializes the controller class.
@@ -168,10 +222,13 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         initDatePickers();
         initMainGrid();
         initDetailsGrid();
+        initAttachmentsGrid();
         initTableOnClick();
         clearTextFields();
         loadRecordMaster();
         loadTableDetail();
+        initAttachmentPreviewPane();
+        initStackPaneListener();
         pgPagination.setPageCount(1);
         pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
         initButton(pnEditMode);
@@ -228,6 +285,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                         }
                         showRetainedHighlight(false);
                         pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
+                        poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
 //                        psCompanyId = poPurchaseReceivingController.PurchaseOrderReceiving().Master().getCompanyId();
                         psSupplierId = poPurchaseReceivingController.PurchaseOrderReceiving().Master().getSupplierId();
                         break;
@@ -278,6 +336,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
+                        poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                         pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
                         break;
                     case "btnSearch":
@@ -415,15 +474,101 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                             return;
                         }
                         break;
+                    case "btnAddAttachment":
+                        fileChooser = new FileChooser();
+                        fileChooser.setTitle("Choose Image");
+                        fileChooser.getExtensionFilters().addAll(
+                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                        );
+                        java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
+
+                        if (selectedFile != null) {
+                            Path imgPath = selectedFile.toPath();
+                            Image loimage = new Image(Files.newInputStream(imgPath));
+                            imageView.setImage(loimage);
+
+                            String lsFileName = selectedFile.getName();
+                            for (int lnCtr = 0; lnCtr <= poPurchaseReceivingController.PurchaseOrderReceiving().getTransactionAttachmentCount() - 1; lnCtr++) {
+                                if (lsFileName.equals(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(lnCtr).getModel().getFileName())
+                                        && RecordStatus.ACTIVE.equals(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, "File name already exists.");
+                                    pnAttachment = lnCtr;
+                                    loadRecordAttachment(true);
+                                    return;
+                                }
+                            }
+                            if (imageinfo_temp.containsKey(selectedFile.getName())) {
+                                ShowMessageFX.Warning(null, pxeModuleName, "File name already exists.");
+                                loadRecordAttachment(true);
+                                return;
+                            } else {
+                                imageinfo_temp.put(selectedFile.getName(), imgPath.toString());
+                            }
+
+                            if (lsFileName.toLowerCase().endsWith(".pdf")) {
+                                try (PDDocument document = PDDocument.load(selectedFile)) {
+                                    int pageCount = document.getNumberOfPages();
+                                    if (pageCount > 5) {
+                                        ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
+                                        return;
+                                    }
+                                }
+                            }
+
+                            pnAttachment = poPurchaseReceivingController.PurchaseOrderReceiving().addAttachment(lsFileName);
+                            poPurchaseReceivingController.PurchaseOrderReceiving().copyFile(selectedFile.toString());
+                            loadTableAttachment();
+                            tblAttachments.getFocusModel().focus(pnAttachment);
+                            tblAttachments.getSelectionModel().select(pnAttachment);
+                        }
+                        break;
+                    case "btnRemoveAttachment":
+                        if (poPurchaseReceivingController.PurchaseOrderReceiving().getTransactionAttachmentCount() <= 0) {
+                            return;
+                        } else {
+                            for (int lnCtr = 0; lnCtr < poPurchaseReceivingController.PurchaseOrderReceiving().getTransactionAttachmentCount(); lnCtr++) {
+                                if (RecordStatus.INACTIVE.equals(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    if (pnAttachment == lnCtr) {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().removeAttachment(pnAttachment);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            return;
+                        }
+                        attachment_data.remove(tblAttachments.getSelectionModel().getSelectedIndex());
+                        if (pnAttachment != 0) {
+                            pnAttachment -= 1;
+                        }
+                        imageinfo_temp.clear();
+                        loadRecordAttachment(false);
+                        loadTableAttachment();
+                        if (attachment_data.size() <= 0) {
+                            JFXUtil.clearTextFields(apAttachments);
+                        }
+                        initAttachmentsGrid();
+                        break;
+                    case "btnArrowRight":
+                        slideImage(1);
+                        break;
+                    case "btnArrowLeft":
+                        slideImage(-1);
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
 
-                if (lsButton.equals("btnPrint") || lsButton.equals("btnRetrieve")) { // || lsButton.equals("btnCancel")
+                if (lsButton.equals("btnPrint") || lsButton.equals("btnRetrieve")
+                        || lsButton.equals("btnAddAttachment") || lsButton.equals("btnRemoveAttachment")
+                        || lsButton.equals("btnArrowRight") || lsButton.equals("btnArrowLeft")) {
                 } else {
                     loadRecordMaster();
                     loadTableDetail();
+                    loadTableAttachment();
                 }
 
                 initButton(pnEditMode);
@@ -437,7 +582,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                 }
 
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -960,6 +1105,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 if (pnDetail != lnRow) {
+                                    poPurchaseReceivingController.PurchaseOrderReceiving().Detail(pnDetail).setBrandId("");
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                     tfReceiveQuantity.requestFocus();
@@ -979,11 +1125,12 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                             break;
 
                         case "tfDescription":
-                            poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().SearchDescription(lsValue, true, pnDetail, true);
+                            poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().SearchDescription(lsValue, false, pnDetail, true);
                             lnRow = (int) poJSON.get("row");
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 if (pnDetail != lnRow) {
+                                    poPurchaseReceivingController.PurchaseOrderReceiving().Detail(pnDetail).setBrandId("");
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                     tfReceiveQuantity.requestFocus();
@@ -1099,6 +1246,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         tfTerm.focusedProperty().addListener(txtMaster_Focus);
         tfDiscountRate.focusedProperty().addListener(txtMaster_Focus);
         tfDiscountAmount.focusedProperty().addListener(txtMaster_Focus);
+        tfAttachmentNo.focusedProperty().addListener(txtMaster_Focus);
 
         tfBarcode.focusedProperty().addListener(txtDetail_Focus);
         tfSupersede.focusedProperty().addListener(txtDetail_Focus);
@@ -1110,12 +1258,28 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
             tfTransactionNo, tfSupplier, tfTrucking, tfReferenceNo, tfTerm, tfDiscountRate,
             tfDiscountAmount, tfTotal, tfOrderNo, tfBarcode, tfSupersede, tfDescription,
             tfBrand, tfModel, tfColor, tfInventoryType, tfMeasure, tfCost, tfOrderQuantity,
-            tfReceiveQuantity
+            tfReceiveQuantity, tfAttachmentNo
         };
 
         for (TextField textField : textFields) {
             textField.setOnKeyPressed(this::txtField_KeyPressed);
         }
+
+        // Combobox
+        cmbAttachmentType.setItems(documentType);
+        cmbAttachmentType.setOnAction(event -> {
+            if (attachment_data.size() > 0) {
+                try {
+                    int selectedIndex = cmbAttachmentType.getSelectionModel().getSelectedIndex();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().setDocumentType("000" + String.valueOf(selectedIndex));
+                    cmbAttachmentType.getSelectionModel().select(selectedIndex);
+                } catch (Exception e) {
+
+                }
+
+            }
+        });
+
         JFXUtil.inputDecimalOnly(tfReceiveQuantity, tfDiscountRate, tfDiscountAmount, tfCost, tfReceiveQuantity);
     }
 
@@ -1484,9 +1648,21 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         tfOrderQuantity.clear();
         tfReceiveQuantity.clear();
 
+        pnAttachment = 0;
+        imageinfo_temp.clear();
+
         loadRecordMaster();
         loadTableDetail();
+        loadTableAttachment();
         loadTableMain();
+
+        imageView.setImage(null);
+        imageView.setTranslateX(0);
+        imageView.setTranslateY(0);
+        imageView.setScaleX(1.0);
+        imageView.setScaleY(1.0);
+        scaleFactor = 1.0;
+        currentIndex = 0;
     }
 
     public void loadRecordSearch() {
@@ -1496,6 +1672,196 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+
+    public void loadRecordAttachment(boolean lbloadImage) {
+        try {
+            if (attachment_data.size() > 0) {
+                tfAttachmentNo.setText(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+                String lsAttachmentType = poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                if (lsAttachmentType.equals("")) {
+                    poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().setDocumentType(DocumentType.OTHER);
+                    lsAttachmentType = poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                }
+                int lnAttachmentType = 0;
+                lnAttachmentType = Integer.parseInt(lsAttachmentType);
+                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
+
+                if (lbloadImage) {
+                    try {
+                        String filePath = (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        String filePath2 = "";
+                        if (imageinfo_temp.containsKey((String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02())) {
+                            filePath2 = imageinfo_temp.get((String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02());
+                        } else {
+                            // in server
+                            if (poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().getImagePath() != null && !"".equals(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().getImagePath())) {
+                                filePath2 = poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(pnAttachment).getModel().getImagePath() + "/" + (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                            } else {
+                                filePath2 = System.getProperty("sys.default.path.temp.attachments") + "/" + (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                            }
+                        }
+
+                        if (filePath != null && !filePath.isEmpty()) {
+                            Path imgPath = Paths.get(filePath2);
+                            String convertedPath = imgPath.toUri().toString();
+                            boolean isPdf = filePath.toLowerCase().endsWith(".pdf");
+
+                            // Clear previous content
+                            stackPane1.getChildren().clear();
+
+                            if (!isPdf) {
+                                // ----- IMAGE VIEW -----
+                                Image loimage = new Image(convertedPath);
+                                imageView.setImage(loimage);
+                                JFXUtil.adjustImageSize(loimage, imageView, ldstackPaneWidth, ldstackPaneHeight);
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(2)); // 2-second delay
+                                delay.setOnFinished(event -> {
+                                    Platform.runLater(() -> {
+                                        JFXUtil.stackPaneClip(stackPane1);
+                                    });
+                                });
+                                delay.play();
+
+                                // Add ImageView directly to stackPane
+                                stackPane1.getChildren().add(imageView);
+                                stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+
+                                // Align buttons on top
+                                StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                                StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+
+                                // Optional: add some margin
+                                StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                                StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+
+                            } else {
+                                // ----- PDF VIEW -----
+                                PDDocument document = PDDocument.load(new File(filePath2));
+                                PDFRenderer renderer = new PDFRenderer(document);
+                                int pageCount = document.getNumberOfPages();
+
+                                // Container for PDF pages
+                                VBox pdfContainer = new VBox(10);
+                                pdfContainer.setAlignment(Pos.CENTER); // center pages
+                                pdfContainer.setPrefWidth(ldstackPaneWidth);
+
+                                for (int i = 0; i < pageCount; i++) {
+                                    BufferedImage pageImage = renderer.renderImageWithDPI(i, 150);
+                                    Image fxImage = SwingFXUtils.toFXImage(pageImage, null);
+                                    ImageView pageView = new ImageView(fxImage);
+
+                                    pageView.setPreserveRatio(true);
+                                    pageView.setFitWidth(ldstackPaneWidth);
+                                    JFXUtil.adjustImageSize(fxImage, pageView, ldstackPaneWidth, ldstackPaneHeight);
+
+                                    pdfContainer.getChildren().add(pageView);
+                                }
+
+                                // Wrap VBox in a Group for scaling
+                                Group pdfGroup = new Group(pdfContainer);
+
+                                // Wrap Group in a StackPane to center content
+                                StackPane centerPane = new StackPane(pdfGroup);
+                                centerPane.setAlignment(Pos.CENTER);
+
+                                // ScrollPane wraps the centerPane
+                                ScrollPane scrollPane = new ScrollPane(centerPane);
+                                scrollPane.setPannable(true);
+                                scrollPane.setFitToWidth(true);
+                                scrollPane.setFitToHeight(true);
+
+                                // Stack PDF and buttons
+                                stackPane1.getChildren().setAll(scrollPane, btnArrowLeft, btnArrowRight);
+                                StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                                StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+                                StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                                StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(2)); // 2-second delay
+                                delay.setOnFinished(event -> {
+                                    Platform.runLater(() -> {
+                                        JFXUtil.stackPaneClip(stackPane1);
+                                    });
+                                });
+                                delay.play();
+                                document.close();
+
+                                // ----- ZOOM & PAN -----
+                                final DoubleProperty zoomFactor = new SimpleDoubleProperty(1.0);
+                                scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+                                    if (event.isControlDown()) {
+                                        event.consume(); // stop default scroll behavior
+
+                                        double delta = event.getDeltaY() > 0 ? 1.1 : 0.9; // multiplier for smooth zoom in/out
+                                        double oldZoom = zoomFactor.get();
+                                        zoomFactor.set(oldZoom * delta); // scale by multiplier
+
+                                        // Apply scale
+                                        pdfGroup.setScaleX(zoomFactor.get());
+                                        pdfGroup.setScaleY(zoomFactor.get());
+
+                                        // Keep mouse position centered during zoom
+                                        Bounds viewportBounds = scrollPane.getViewportBounds();
+                                        Bounds contentBounds = pdfGroup.getBoundsInParent();
+                                        double mouseX = event.getX();
+                                        double mouseY = event.getY();
+
+                                        double hRatio = (scrollPane.getHvalue() * (contentBounds.getWidth() - viewportBounds.getWidth()) + mouseX) / contentBounds.getWidth();
+                                        double vRatio = (scrollPane.getVvalue() * (contentBounds.getHeight() - viewportBounds.getHeight()) + mouseY) / contentBounds.getHeight();
+
+                                        Platform.runLater(() -> {
+                                            Bounds newBounds = pdfGroup.getBoundsInParent();
+                                            double newH = (hRatio * newBounds.getWidth() - mouseX) / (newBounds.getWidth() - viewportBounds.getWidth());
+                                            double newV = (vRatio * newBounds.getHeight() - mouseY) / (newBounds.getHeight() - viewportBounds.getHeight());
+
+                                            scrollPane.setHvalue(Double.isNaN(newH) ? 0.5 : Math.min(Math.max(0, newH), 1.0));
+                                            scrollPane.setVvalue(Double.isNaN(newV) ? 0.5 : Math.min(Math.max(0, newV), 1.0));
+                                        });
+                                    }
+                                });
+
+                                // Pan with mouse drag
+                                final ObjectProperty<Point2D> lastMouse = new SimpleObjectProperty<>();
+                                pdfGroup.setOnMousePressed(e -> lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY())));
+
+                                pdfGroup.setOnMouseDragged(e -> {
+                                    if (lastMouse.get() != null) {
+                                        double deltaX = e.getSceneX() - lastMouse.get().getX();
+                                        double deltaY = e.getSceneY() - lastMouse.get().getY();
+
+                                        pdfGroup.setTranslateX(pdfGroup.getTranslateX() + deltaX);
+                                        pdfGroup.setTranslateY(pdfGroup.getTranslateY() + deltaY);
+
+                                        lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY()));
+                                    }
+                                });
+                                pdfGroup.setOnMouseReleased(e -> lastMouse.set(null));
+                            }
+                        } else {
+                            imageView.setImage(null);
+                        }
+
+                    } catch (Exception e) {
+                        imageView.setImage(null);
+                    }
+                }
+            } else {
+                if (!lbloadImage) {
+                    imageView.setImage(null);
+                    // Clear previous content
+                    stackPane1.getChildren().clear();
+                    // Add ImageView directly to stackPane
+                    stackPane1.getChildren().add(imageView);
+                    stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                    Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1));
+                    pnAttachment = 0;
+                }
+            }
+        } catch (Exception e) {
         }
     }
 
@@ -1807,6 +2173,34 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                 }
             }
         });
+
+        tblAttachments.setOnMouseClicked(event -> {
+            if (attachment_data.size() > 0) {
+                if (event.getClickCount() == 1) {
+                    ModelDeliveryAcceptance_Attachment selected = (ModelDeliveryAcceptance_Attachment) tblAttachments.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        pnAttachment = Integer.parseInt(selected.getIndex01()) - 1;
+                        loadRecordAttachment(true);
+                    }
+                }
+            }
+        });
+
+        tblAttachments.setOnKeyPressed(event -> {
+            if (tblAttachments.getItems().size() > 0) {
+                TablePosition focusedCell = tblAttachments.getFocusModel().getFocusedCell();
+                int row = focusedCell.getRow();
+                switch (event.getCode()) {
+                    case ENTER:
+                        pnAttachment = row;
+                        loadRecordAttachment(true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
         tblViewOrderDetails.addEventFilter(KeyEvent.KEY_PRESSED, this::tableKeyEvents);
         JFXUtil.adjustColumnForScrollbar(tblViewOrderDetails, tblViewPuchaseOrder);  // need to use computed-size as min-width on particular column to work
 
@@ -1967,6 +2361,8 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                     goToPageBasedOnSelectedRow(String.valueOf(pnMain));
                 }
                 loadTableDetail();
+                loadTableAttachment();
+                resetImageBounds();
             } else {
                 ShowMessageFX.Warning(null, pxeModuleName, "Data can only be viewed when in ADD or UPDATE mode.");
             }
@@ -2160,6 +2556,9 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         tfDiscountAmount.setDisable(!lbShow);
 
         apDetail.setDisable(!lbShow);
+        apAttachments.setDisable(!lbShow);
+        btnAddAttachment.setDisable(!lbShow);
+        btnRemoveAttachment.setDisable(!lbShow);
 
         switch (poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus()) {
             case PurchaseOrderReceivingStatus.POSTED:
@@ -2175,6 +2574,230 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                 btnPrint.setManaged(false);
                 break;
         }
+    }
+
+    private void loadTableAttachment() {
+        // Setting data to table detail
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.setMaxHeight(50);
+        progressIndicator.setStyle("-fx-progress-color: #FF8201;");
+        StackPane loadingPane = new StackPane(progressIndicator);
+        loadingPane.setAlignment(Pos.CENTER);
+        tblAttachments.setPlaceholder(loadingPane);
+        progressIndicator.setVisible(true);
+
+        Label placeholderLabel = new Label("NO RECORD TO LOAD");
+        placeholderLabel.setStyle("-fx-font-size: 10px;"); // Adjust the size as needed
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+//                Thread.sleep(1000);
+                Platform.runLater(() -> {
+                    try {
+                        attachment_data.clear();
+                        int lnCtr;
+                        int lnCount = 0;
+                        for (lnCtr = 0; lnCtr < poPurchaseReceivingController.PurchaseOrderReceiving().getTransactionAttachmentCount(); lnCtr++) {
+                            if (RecordStatus.INACTIVE.equals(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                continue;
+                            }
+                            lnCount += 1;
+                            attachment_data.add(
+                                    new ModelDeliveryAcceptance_Attachment(String.valueOf(lnCount),
+                                            String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().TransactionAttachmentList(lnCtr).getModel().getFileName()),
+                                            String.valueOf(lnCtr)
+                                    ));
+                        }
+                        int lnTempRow = JFXUtil.getDetailRow(attachment_data, pnAttachment, 3); //this method is used only when Reverse is applied
+                        if (lnTempRow < 0 || lnTempRow
+                                >= attachment_data.size()) {
+                            if (!attachment_data.isEmpty()) {
+                                /* FOCUS ON FIRST ROW */
+                                JFXUtil.selectAndFocusRow(tblAttachments, 0);
+                                int lnRow = Integer.parseInt(attachment_data.get(0).getIndex03());
+                                pnAttachment = lnRow;
+                                loadRecordAttachment(true);
+                            }
+                        } else {
+                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                            JFXUtil.selectAndFocusRow(tblAttachments, lnTempRow);
+                            int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                            pnAttachment = lnRow;
+                            loadRecordAttachment(true);
+                        }
+                        if (attachment_data.size() <= 0) {
+                            loadRecordAttachment(false);
+                        }
+                    } catch (Exception e) {
+
+                    }
+
+                });
+
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                if (attachment_data == null || attachment_data.isEmpty()) {
+                    tblAttachments.setPlaceholder(placeholderLabel);
+                } else {
+                    tblAttachments.toFront();
+                }
+                progressIndicator.setVisible(false);
+
+            }
+
+            @Override
+            protected void failed() {
+                if (attachment_data == null || attachment_data.isEmpty()) {
+                    tblAttachments.setPlaceholder(placeholderLabel);
+                }
+                progressIndicator.setVisible(false);
+            }
+
+        };
+        new Thread(task).start(); // Run task in background
+
+    }
+
+    public void initAttachmentsGrid() {
+        JFXUtil.setColumnCenter(tblRowNoAttachment);
+        JFXUtil.setColumnLeft(tblFileNameAttachment);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblAttachments);
+        tblAttachments.setItems(attachment_data);
+    }
+
+    public void initAttachmentPreviewPane() {
+        Group group = new Group(imageView);
+        VBox outer = new VBox(group);
+        outer.setAlignment(Pos.CENTER);
+        outer.setPadding(new Insets(10));
+
+        stackPane1.getChildren().clear();
+        stackPane1.getChildren().add(outer);
+
+        imageView.setOnMousePressed((MouseEvent event) -> {
+            mouseAnchorX = event.getSceneX() - imageView.getTranslateX();
+            mouseAnchorY = event.getSceneY() - imageView.getTranslateY();
+        });
+
+        imageView.setOnMouseDragged((MouseEvent event) -> {
+            imageView.setTranslateX(event.getSceneX() - mouseAnchorX);
+            imageView.setTranslateY(event.getSceneY() - mouseAnchorY);
+        });
+
+        stackPane1.setOnScroll((ScrollEvent event) -> {
+            double deltaY = event.getDeltaY();
+            double zoomFactor = (deltaY > 0) ? 1.05 : 0.95;
+            scaleFactor *= zoomFactor;
+
+            Image image = imageView.getImage();
+            if (image == null) {
+                return;
+            }
+
+            double imageWidth = image.getWidth() * scaleFactor;
+            double imageHeight = image.getHeight() * scaleFactor;
+            double viewportWidth = stackPane1.getWidth();
+            double viewportHeight = stackPane1.getHeight();
+
+            if (imageWidth < viewportWidth || imageHeight < viewportHeight) {
+                scaleFactor /= zoomFactor;
+                return;
+            }
+
+            Point2D mouse = imageView.sceneToLocal(event.getSceneX(), event.getSceneY());
+            double f = (zoomFactor - 1);
+
+            double dx = mouse.getX() - imageView.getBoundsInLocal().getWidth() / 2;
+            double dy = mouse.getY() - imageView.getBoundsInLocal().getHeight() / 2;
+
+            imageView.setScaleX(scaleFactor);
+            imageView.setScaleY(scaleFactor);
+            imageView.setTranslateX(imageView.getTranslateX() - f * dx);
+            imageView.setTranslateY(imageView.getTranslateY() - f * dy);
+
+            event.consume();
+        });
+    }
+
+    public void initStackPaneListener() {
+        stackPane1.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() <= 0) {
+                return;
+            }
+            ldstackPaneWidth = newVal.doubleValue();
+            imageView.setFitWidth(ldstackPaneWidth);
+            stackPaneClip();
+        });
+
+        stackPane1.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() <= 0) {
+                return;
+            }
+            ldstackPaneHeight = newVal.doubleValue();
+            imageView.setFitHeight(ldstackPaneHeight);
+            stackPaneClip();
+        });
+    }
+
+    public void slideImage(int direction) {
+        if (attachment_data.isEmpty()) {
+            return;
+        }
+
+        int nextIndex = currentIndex + direction;
+        if (nextIndex < 0 || nextIndex >= attachment_data.size()) {
+            return;
+        }
+
+        TranslateTransition outTransition = new TranslateTransition(Duration.millis(300), imageView);
+        outTransition.setToX(-direction * stackPane1.getWidth());
+        outTransition.setOnFinished(event -> {
+            currentIndex = nextIndex;
+            pnAttachment = currentIndex;
+            loadRecordAttachment(true);
+
+            imageView.setTranslateX(direction * stackPane1.getWidth());
+
+            TranslateTransition inTransition = new TranslateTransition(Duration.millis(300), imageView);
+            inTransition.setToX(0);
+            inTransition.play();
+        });
+
+        outTransition.play();
+    }
+
+    private void resetImageBounds() {
+        Image image = imageView.getImage();
+        if (image == null) {
+            return;
+        }
+
+        double containerWidth = stackPane1.getWidth();
+        double containerHeight = stackPane1.getHeight();
+
+        double imageWidth = image.getWidth();
+        double imageHeight = image.getHeight();
+
+        double fitScale = Math.min(containerWidth / imageWidth, containerHeight / imageHeight);
+
+        imageView.setScaleX(fitScale);
+        imageView.setScaleY(fitScale);
+
+        imageView.setTranslateX(0);
+        imageView.setTranslateY(0);
+
+        scaleFactor = fitScale;
+    }
+
+    public void stackPaneClip() {
+        javafx.scene.shape.Rectangle clipRect = new javafx.scene.shape.Rectangle();
+        clipRect.widthProperty().bind(stackPane1.widthProperty());
+        clipRect.heightProperty().bind(stackPane1.heightProperty());
+        stackPane1.setClip(clipRect);
     }
 
     private void loadTab() {
