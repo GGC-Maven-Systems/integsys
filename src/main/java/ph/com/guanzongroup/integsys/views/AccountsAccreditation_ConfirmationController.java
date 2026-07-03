@@ -206,6 +206,8 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    clearAllInputs();
+                    JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
                 case "btnAddClompany":
                     poController.addCompany();

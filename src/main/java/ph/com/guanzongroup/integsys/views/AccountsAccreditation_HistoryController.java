@@ -185,10 +185,11 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
             String btnID = ((Button) event.getSource()).getId();
             switch (btnID) {
                 case "btnBrowse":
-                    if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false),
-                            "")) {
+                    if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    clearAllInputs();
+                    JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
                 case "btnHistory":
 

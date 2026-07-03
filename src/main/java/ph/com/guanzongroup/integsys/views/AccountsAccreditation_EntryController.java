@@ -206,6 +206,8 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    clearAllInputs();
+                    JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
                 case "btnAddClompany":
                     poController.addCompany();
