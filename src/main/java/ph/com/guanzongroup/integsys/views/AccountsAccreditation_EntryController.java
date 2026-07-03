@@ -337,7 +337,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                                     return;
                                 }
                             } catch (IOException ex) {
-                                Logger.getLogger(CashDisbursement_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 

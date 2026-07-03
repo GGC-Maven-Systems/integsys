@@ -366,7 +366,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                                     return;
                                 }
                             } catch (IOException ex) {
-                                Logger.getLogger(CashDisbursement_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
