@@ -432,6 +432,8 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                                     return;
                                 }
                                 loadRecordMaster();
+                                loadTableAttachment.reload();
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                                 initButtonDisplay(poController.getEditMode());
                                 break;
 

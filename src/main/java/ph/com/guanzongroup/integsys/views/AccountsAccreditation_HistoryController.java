@@ -264,6 +264,8 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                                     return;
                                 }
                                 loadRecordMaster();
+                                loadTableAttachment.reload();
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                                 initButtonDisplay(poController.getEditMode());
                                 break;
                         }
