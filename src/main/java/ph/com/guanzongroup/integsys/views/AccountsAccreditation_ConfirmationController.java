@@ -185,8 +185,8 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-                        loadTableAttachment.reload();
                     }
+                    loadTableAttachment.reload();
                     break;
             }
         });
@@ -415,7 +415,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                 poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
-                pnEditMode = EditMode.UNKNOWN;
             }
 
             if (JFXUtil.isObjectEqualTo(btnID, "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory", "btnPrint", "btnRemoveAttachment", "btnAddAttachment")) {

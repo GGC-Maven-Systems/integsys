@@ -171,8 +171,8 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-                        loadTableAttachment.reload();
                     }
+                    loadTableAttachment.reload();
                     break;
             }
         });
