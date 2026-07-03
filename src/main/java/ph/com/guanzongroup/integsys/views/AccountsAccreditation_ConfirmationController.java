@@ -231,13 +231,14 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
 
                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save client?") == true) {
                         if (!isJSONSuccess(poController.saveRecord(), "Initialize Save Record")) {
-                            return;
+                            break;
                         }
                         ShowMessageFX.Information(null, pxeModuleName, "Client saved successfully!");
 
                         if (poController.getModel().getRecordStatus().equals("0")) {
                             if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm transaction?") == true) {
                                 if (!isJSONSuccess(poController.openRecord(poController.getModel().getTransactionNo()), "Initialize Open Transaction")) {
+                                    break;
                                 } else {
                                     if (!isJSONSuccess(poController.CloseTransaction(), "Initialize Close Transaction")) {
                                         break;
@@ -246,8 +247,8 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                                 }
                             }
                         }
-                        pnEditMode = EditMode.UNKNOWN;
                         //reset data to avoid transaction errors
+                        isJSONSuccess(poController.openRecord(poController.getModel().getTransactionNo()), "Initialize Open Transaction");
                     } else {
                         return;
                     }
@@ -415,11 +416,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();
-            }
-            //manually reset button, edit mode not initialized on model
-            if (btnID.equalsIgnoreCase("btnSave")) {
-                initButtonDisplay(pnEditMode);
-                return;
             }
             initButtonDisplay(poController.getEditMode());
         } catch (Exception ex) {

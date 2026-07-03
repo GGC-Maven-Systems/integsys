@@ -236,12 +236,13 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
 
                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save client?") == true) {
                         if (!isJSONSuccess(poController.saveRecord(), "Initialize Save Record")) {
-                            return;
+                            break;
                         }
                         ShowMessageFX.Information(null, pxeModuleName, "Client saved successfully!");
 
                         if (poController.getModel().getRecordStatus().equals("0")) {
                             if (!isJSONSuccess(poController.openRecord(poController.getModel().getTransactionNo()), "Initialize Open Record")) {
+                                break;
                             } else {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm transaction?") == true) {
                                     if (!isJSONSuccess(poController.CloseTransaction(), "Initialize Close Transaction")) {
@@ -390,11 +391,6 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();
-            }
-            //manually reset button, edit mode not initialized on model
-            if (btnID.equalsIgnoreCase("btnSave")) {
-                initButtonDisplay(pnEditMode);
-                return;
             }
             initButtonDisplay(poController.getEditMode());
         } catch (Exception e) {
