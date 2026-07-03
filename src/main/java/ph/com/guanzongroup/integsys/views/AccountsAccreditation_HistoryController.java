@@ -189,9 +189,7 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                             "")) {
                         return;
                     }
-                    loadRecordMaster();
-                    initButtonDisplay(poController.getEditMode());
-                    return;
+                    break;
                 case "btnHistory":
 
                     if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
@@ -229,7 +227,17 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                     }
                     break;
             }
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid")) {
+                clearAllInputs();
+                JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
+                pnEditMode = EditMode.UNKNOWN;
+            }
 
+            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            } else {
+                loadRecordMaster();
+                loadTableAttachment.reload();
+            }
             initButtonDisplay(poController.getEditMode());
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);

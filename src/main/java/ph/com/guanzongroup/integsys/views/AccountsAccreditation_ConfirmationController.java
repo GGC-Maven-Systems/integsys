@@ -206,10 +206,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
-                    loadRecordMaster();
-                    initButtonDisplay(poController.getEditMode());
-                    return;
-
+                    break;
                 case "btnAddClompany":
                     poController.addCompany();
                     loadRecordMaster();
@@ -251,7 +248,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                         }
                         pnEditMode = EditMode.UNKNOWN;
                         //reset data to avoid transaction errors
-                        clearAllInputs();
                     } else {
                         pnEditMode = poController.getEditMode();
                     }
@@ -268,8 +264,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, "Transaction confirmed successfully");
                         }
-                        clearAllInputs();
-                        loadRecordMaster();
                         break;
                     } else {
                         return;
@@ -286,8 +280,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                             ShowMessageFX.Information(null, pxeModuleName, "Transaction voided successfully");
                         }
                         //reset data to avoid transaction errors
-                        clearAllInputs();
-                        loadRecordMaster();
                         break;
                     } else {
                         return;
@@ -301,7 +293,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
 
                             initButtonDisplay(poController.getEditMode());
                         });
-                        loadRecordMaster();
                         break;
                     }
                     break;
@@ -413,7 +404,17 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     slideImage(-1);
                     break;
             }
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid", "btnConfirm")) {
+                clearAllInputs();
+                JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
+                pnEditMode = EditMode.UNKNOWN;
+            }
 
+            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            } else {
+                loadRecordMaster();
+                loadTableAttachment.reload();
+            }
             //manually reset button, edit mode not initialized on model
             if (btnID.equalsIgnoreCase("btnSave")) {
                 initButtonDisplay(pnEditMode);

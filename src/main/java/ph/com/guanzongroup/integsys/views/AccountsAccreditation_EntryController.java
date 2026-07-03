@@ -230,6 +230,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                         break;
                     }
                     loadRecordMaster();
+                    loadTableAttachment.reload();
                     break;
                 case "btnSave":
                     if (tfTransactionNo.getText().isEmpty()) {
@@ -256,7 +257,6 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                         }
                         pnEditMode = EditMode.UNKNOWN;
                         //reset data to avoid transaction errors
-                        clearAllInputs();
                         Platform.runLater(() -> {
                             btnNew.fire();
                         });
@@ -273,7 +273,6 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
 
                             initButtonDisplay(poController.getEditMode());
                         });
-                        loadRecordMaster();
                         break;
                     }
                     break;
@@ -384,7 +383,17 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     slideImage(-1);
                     break;
             }
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid")) {
+                clearAllInputs();
+                JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
+                pnEditMode = EditMode.UNKNOWN;
+            }
 
+            if (JFXUtil.isObjectEqualTo(btnID, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+            } else {
+                loadRecordMaster();
+                loadTableAttachment.reload();
+            }
             //manually reset button, edit mode not initialized on model
             if (btnID.equalsIgnoreCase("btnSave")) {
                 initButtonDisplay(pnEditMode);
