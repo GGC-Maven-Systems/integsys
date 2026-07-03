@@ -226,6 +226,8 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     initButtonDisplay(poController.getEditMode());
                     break;
                 case "btnNew":
+                    poController.resetOthers();
+                    JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     if (!isJSONSuccess(poController.newRecord(), "Initialize New Transaction")) {
                         break;
                     }
@@ -382,14 +384,14 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     slideImage(-1);
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(btnID, (Object[]) JFXUtil.buttonPackArray1)) {
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid", "btnConfirm")) {
                 poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(btnID, (Object[]) JFXUtil.buttonPackArray2)) {
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory", "btnPrint", "btnRemoveAttachment", "btnAddAttachment")) {
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();

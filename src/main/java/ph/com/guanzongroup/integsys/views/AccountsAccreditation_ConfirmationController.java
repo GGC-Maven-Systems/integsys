@@ -407,14 +407,14 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     slideImage(-1);
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(btnID, (Object[]) JFXUtil.buttonPackArray1)) {
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSave", "btnCancel", "btnVoid", "btnConfirm")) {
                 poController.resetOthers();
                 clearAllInputs();
                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(btnID, (Object[]) JFXUtil.buttonPackArray2)) {
+            if (JFXUtil.isObjectEqualTo(btnID, "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory", "btnPrint", "btnRemoveAttachment", "btnAddAttachment")) {
             } else {
                 loadRecordMaster();
                 loadTableAttachment.reload();
