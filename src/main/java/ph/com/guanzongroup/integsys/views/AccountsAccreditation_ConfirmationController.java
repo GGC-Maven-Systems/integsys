@@ -107,7 +107,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
     @FXML
     private DatePicker dpTransactionDate;
     @FXML
-    private ComboBox cmbAccountType, cmbTransType, cmbAttachmentType;
+    private ComboBox cmbAccountType, cmbTransType;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -660,7 +660,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                 }
                 int lnAttachmentType = 0;
                 lnAttachmentType = Integer.parseInt(lsAttachmentType);
-                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
 //                tfAttachmentSource.setText(poController.TransactionAttachmentSource(pnAttachment));
                 if (lbloadImage) {
                     try {
@@ -736,20 +735,6 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
     }
 
     private void initComboboxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
-
-        // ComboBox setup
-        cmbAttachmentType.setOnAction(event -> {
-            if (attachment_data.size() > 0) {
-                try {
-                    int selectedIndex = cmbAttachmentType.getSelectionModel().getSelectedIndex();
-                    poController.TransactionAttachmentList(pnAttachment).getModel().setDocumentType("000" + String.valueOf(selectedIndex));
-                    cmbAttachmentType.getSelectionModel().select(selectedIndex);
-                } catch (Exception e) {
-                }
-            }
-        });
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbAttachmentType);
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistAccounttype, cmbAccountType), new JFXUtil.Pairs<>(comboboxlistTranstype, cmbTransType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbAccountType, cmbTransType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbAccountType, cmbTransType);
@@ -767,7 +752,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnBrowse);
         JFXUtil.setButtonsVisibility(!lbShow4, btnAddClompany);
-        JFXUtil.setDisabled(!lbShow1, cmbAttachmentType, btnAddAttachment, btnRemoveAttachment);
+        JFXUtil.setDisabled(!lbShow1, btnAddAttachment, btnRemoveAttachment);
         if (fnValue != EditMode.READY) {
             return;
         }

@@ -97,7 +97,7 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
     @FXML
     private DatePicker dpTransactionDate;
     @FXML
-    private ComboBox cmbAccountType, cmbTransType, cmbAttachmentType;
+    private ComboBox cmbAccountType, cmbTransType;
     @FXML
     private FontAwesomeIconView faAdd;
     @FXML
@@ -386,7 +386,6 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                 }
                 int lnAttachmentType = 0;
                 lnAttachmentType = Integer.parseInt(lsAttachmentType);
-                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
 //                tfAttachmentSource.setText(poController.TransactionAttachmentSource(pnAttachment));
                 if (lbloadImage) {
                     try {
@@ -462,20 +461,6 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
     }
 
     private void initComboboxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
-
-        // ComboBox setup
-        cmbAttachmentType.setOnAction(event -> {
-            if (attachment_data.size() > 0) {
-                try {
-                    int selectedIndex = cmbAttachmentType.getSelectionModel().getSelectedIndex();
-                    poController.TransactionAttachmentList(pnAttachment).getModel().setDocumentType("000" + String.valueOf(selectedIndex));
-                    cmbAttachmentType.getSelectionModel().select(selectedIndex);
-                } catch (Exception e) {
-                }
-            }
-        });
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbAttachmentType);
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistAccounttype, cmbAccountType), new JFXUtil.Pairs<>(comboboxlistTranstype, cmbTransType));
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbAccountType, cmbTransType);
     }
@@ -490,7 +475,6 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
         JFXUtil.setDisabled(true, apMaster);
         JFXUtil.setButtonsVisibility(true, btnBrowse);
         JFXUtil.setButtonsVisibility(false, btnAddClompany, btnCancel);
-        JFXUtil.setDisabled(true, cmbAttachmentType);
         if (fnValue != EditMode.READY) {
             return;
         }
