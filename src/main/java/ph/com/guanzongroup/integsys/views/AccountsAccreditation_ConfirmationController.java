@@ -458,6 +458,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                                         "")) {
                                     return;
                                 }
+                                pnEditMode = poController.getEditMode();
                                 loadRecordMaster();
                                 loadTableAttachment.reload();
                                 JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
