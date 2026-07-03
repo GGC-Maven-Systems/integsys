@@ -178,7 +178,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                    if (poController.getEditMode() == EditMode.READY || poController.getEditMode() == EditMode.UPDATE || poController.getEditMode() == EditMode.ADDNEW) {
                         JFXUtil.clearTextFields(apAttachments);
                         try {
                             poController.loadAttachments();
@@ -206,9 +206,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
-                    loadRecordMaster();
-                    initButtonDisplay(poController.getEditMode());
-                    return;
+                    break;
                 case "btnAddClompany":
                     poController.addCompany();
                     loadRecordMaster();
@@ -229,8 +227,6 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     if (!isJSONSuccess(poController.newRecord(), "Initialize New Transaction")) {
                         break;
                     }
-                    loadRecordMaster();
-                    loadTableAttachment.reload();
                     break;
                 case "btnSave":
                     if (tfTransactionNo.getText().isEmpty()) {

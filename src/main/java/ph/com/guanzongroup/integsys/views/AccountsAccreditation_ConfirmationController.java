@@ -177,7 +177,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                    if (poController.getEditMode() == EditMode.READY || poController.getEditMode() == EditMode.UPDATE || poController.getEditMode() == EditMode.ADDNEW) {
                         JFXUtil.clearTextFields(apAttachments);
                         try {
                             poController.loadAttachments();
