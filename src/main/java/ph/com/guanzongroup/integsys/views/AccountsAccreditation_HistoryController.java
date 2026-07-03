@@ -163,8 +163,8 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (poController.getEditMode() == EditMode.READY) {
-                        JFXUtil.clearTextFields(apAttachments);
+                    JFXUtil.clearTextFields(apAttachments);
+                    if (pnEditMode == EditMode.READY) {
                         try {
                             poController.loadAttachments();
                         } catch (GuanzonException | SQLException ex) {
@@ -188,6 +188,7 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    pnEditMode = poController.getEditMode();
                     clearAllInputs();
                     JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
@@ -217,6 +218,7 @@ public class AccountsAccreditation_HistoryController implements Initializable, S
                         }
                         loadRecordMaster();
                     }
+                    pnEditMode = poController.getEditMode();
                     break;
                 case "btnClose":
                     if (ShowMessageFX.YesNo("Are you sure you want to close this form?", pxeModuleName, null)) {

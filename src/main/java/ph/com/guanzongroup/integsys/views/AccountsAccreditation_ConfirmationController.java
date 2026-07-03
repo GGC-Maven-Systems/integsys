@@ -177,8 +177,8 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (poController.getEditMode() == EditMode.READY) {
-                        JFXUtil.clearTextFields(apAttachments);
+                    JFXUtil.clearTextFields(apAttachments);
+                    if (pnEditMode == EditMode.READY) {
                         try {
                             poController.loadAttachments();
                         } catch (GuanzonException | SQLException ex) {
@@ -206,6 +206,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    pnEditMode = poController.getEditMode();
                     clearAllInputs();
                     JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
@@ -222,6 +223,8 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                     if (!isJSONSuccess(poController.updateRecord(), "Initialize Update Record")) {
                         return;
                     }
+                    poController.loadAttachments();
+                    pnEditMode = poController.getEditMode();
                     loadRecordMaster();
                     initButtonDisplay(poController.getEditMode());
                     break;
@@ -251,6 +254,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
                         }
                         //reset data to avoid transaction errors
                         isJSONSuccess(poController.openRecord(poController.getModel().getTransactionNo()), "Initialize Open Transaction");
+                        pnEditMode = poController.getEditMode();
                     } else {
                         return;
                     }
@@ -293,7 +297,7 @@ public class AccountsAccreditation_ConfirmationController implements Initializab
 
                         Platform.runLater(() -> {
                             poController.setRecordStatus("01");
-
+                            pnEditMode = poController.getEditMode();
                             initButtonDisplay(poController.getEditMode());
                         });
                         break;

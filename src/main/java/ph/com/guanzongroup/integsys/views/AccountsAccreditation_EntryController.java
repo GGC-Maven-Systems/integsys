@@ -178,8 +178,8 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachments":
-                    if (poController.getEditMode() == EditMode.READY) {
-                        JFXUtil.clearTextFields(apAttachments);
+                    JFXUtil.clearTextFields(apAttachments);
+                    if (pnEditMode == EditMode.READY) {
                         try {
                             poController.loadAttachments();
                         } catch (GuanzonException | SQLException ex) {
@@ -206,6 +206,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     if (!isJSONSuccess(poController.searchRecord(tfSearchCompany.getText(), false), "")) {
                         return;
                     }
+                    pnEditMode = poController.getEditMode();
                     clearAllInputs();
                     JFXUtil.clickTabByTitleText(tabPaneMain, "Account Information");
                     break;
@@ -222,6 +223,8 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                     if (!isJSONSuccess(poController.updateRecord(), "Initialize Update Record")) {
                         return;
                     }
+                    pnEditMode = poController.getEditMode();
+                    poController.loadAttachments();
                     loadRecordMaster();
                     initButtonDisplay(poController.getEditMode());
                     break;
@@ -273,6 +276,7 @@ public class AccountsAccreditation_EntryController implements Initializable, Scr
                             poController.setRecordStatus("0");
 
                             initButtonDisplay(poController.getEditMode());
+                            pnEditMode = poController.getEditMode();
                         });
                         break;
                     }
