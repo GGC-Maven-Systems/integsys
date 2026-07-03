@@ -343,8 +343,8 @@ public class AccountChartController implements Initializable, ScreenInterface {
                                 break;
                             case "3": // VOID
                             case "2": // CANCEL
-                                CustomCommonUtil.setVisible(true, btnBrowse, btnClose);
-                                CustomCommonUtil.setManaged(true, btnBrowse, btnClose);
+                                CustomCommonUtil.setVisible(true, btnBrowse,btnNew, btnClose);
+                                CustomCommonUtil.setManaged(true, btnBrowse,btnNew, btnClose);
                                 break;
                             default:
                                 // Fallback: show Browse, New, Close
@@ -358,8 +358,8 @@ public class AccountChartController implements Initializable, ScreenInterface {
                 case EditMode.UNKNOWN:
                 default:
                     // Default fallback: show only Browse and Close
-                    CustomCommonUtil.setVisible(true, btnBrowse, btnClose);
-                    CustomCommonUtil.setManaged(true, btnBrowse, btnClose);
+                    CustomCommonUtil.setVisible(true, btnBrowse,btnNew, btnClose);
+                    CustomCommonUtil.setManaged(true, btnBrowse,btnNew, btnClose);
                     break;
             }
         } catch (SQLException | GuanzonException ex) {
@@ -436,6 +436,12 @@ public class AccountChartController implements Initializable, ScreenInterface {
                         break;
                     case 2:
                         poJSON = oParameters.AccountChart().getModel().setDescription(lsValue);
+                        if("error".equals((String)poJSON.get("result"))){
+                            ShowMessageFX.Warning((String)poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                    case 4:
+                        poJSON = oParameters.AccountChart().getModel().setParentAccountCode(lsValue);
                         if("error".equals((String)poJSON.get("result"))){
                             ShowMessageFX.Warning((String)poJSON.get("message"), pxeModuleName, null);
                             return;
@@ -529,8 +535,9 @@ public class AccountChartController implements Initializable, ScreenInterface {
                                 break;
                             }
                             txtSeeks01.setText((String) oParameters.AccountChart().getModel().getDescription());
-                            pnEditMode = EditMode.READY;
+                            pnEditMode = oParameters.AccountChart().getEditMode();
                             loadRecord();
+                            initButton(pnEditMode);
                             break;
                     }
                 case ENTER:
