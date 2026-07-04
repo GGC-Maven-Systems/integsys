@@ -474,9 +474,9 @@ public class DeliveryAcceptance_EntryLPController implements Initializable, Scre
                         break;
                     case "btnAddAttachment":
                         fileChooser = new FileChooser();
-                        fileChooser.setTitle("Choose Image");
+                        fileChooser.setTitle("Choose Attachment");
                         fileChooser.getExtensionFilters().addAll(
-                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                                new FileChooser.ExtensionFilter("Image / PDF Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.pdf")
                         );
                         java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
 

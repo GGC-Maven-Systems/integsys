@@ -362,14 +362,14 @@ public class DeliveryAcceptance_ConfirmationSPCarController implements Initializ
                             return;
                         }
                     case "btnHistory":
-                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
-                        } 
-                        
+                        }
+
                         try {
                             poPurchaseReceivingController.PurchaseOrderReceiving().ShowStatusHistory();
-                        }  catch (NullPointerException npe) {
+                        } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
                             ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
@@ -496,9 +496,9 @@ public class DeliveryAcceptance_ConfirmationSPCarController implements Initializ
                         break;
                     case "btnAddAttachment":
                         fileChooser = new FileChooser();
-                        fileChooser.setTitle("Choose Image");
+                        fileChooser.setTitle("Choose Attachment");
                         fileChooser.getExtensionFilters().addAll(
-                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                                new FileChooser.ExtensionFilter("Image / PDF Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.pdf")
                         );
                         java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
 
@@ -2634,7 +2634,6 @@ public class DeliveryAcceptance_ConfirmationSPCarController implements Initializ
         highlightMap.computeIfAbsent(rowIndex, k -> new ArrayList<>()).add(color);
         table.refresh(); // Refresh to apply changes
     }
-
 
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {

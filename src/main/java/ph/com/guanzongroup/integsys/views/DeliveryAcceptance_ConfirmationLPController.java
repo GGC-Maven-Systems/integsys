@@ -496,9 +496,9 @@ public class DeliveryAcceptance_ConfirmationLPController implements Initializabl
                         break;
                     case "btnAddAttachment":
                         fileChooser = new FileChooser();
-                        fileChooser.setTitle("Choose Image");
+                        fileChooser.setTitle("Choose Attachment");
                         fileChooser.getExtensionFilters().addAll(
-                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                                new FileChooser.ExtensionFilter("Image / PDF Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.pdf")
                         );
                         java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
 
@@ -2669,7 +2669,6 @@ public class DeliveryAcceptance_ConfirmationLPController implements Initializabl
         highlightMap.computeIfAbsent(rowIndex, k -> new ArrayList<>()).add(color);
         table.refresh(); // Refresh to apply changes
     }
-
 
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {
