@@ -2679,28 +2679,6 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
         }
     }
 
-    private void adjustImageSize(Image image) {
-        double imageRatio = image.getWidth() / image.getHeight();
-        double containerRatio = ldstackPaneWidth / ldstackPaneHeight;
-
-        // Unbind before setting new values
-        imageView.fitWidthProperty().unbind();
-        imageView.fitHeightProperty().unbind();
-
-        if (imageRatio > containerRatio) {
-            // Image is wider than container → fit width
-            imageView.setFitWidth(ldstackPaneWidth);
-            imageView.setFitHeight(ldstackPaneWidth / imageRatio);
-        } else {
-            // Image is taller than container → fit height
-            imageView.setFitHeight(ldstackPaneHeight);
-            imageView.setFitWidth(ldstackPaneHeight * imageRatio);
-        }
-
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-    }
-
     private void stackPaneClip() {
         javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(
                 stackPane1.getWidth() - 8, // Subtract 10 for padding (5 on each side)
