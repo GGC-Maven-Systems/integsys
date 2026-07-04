@@ -1638,8 +1638,10 @@ public class DeliveryAcceptance_EntryAppliancesController implements Initializab
         cmbAttachmentType.getSelectionModel().select(0);
 
         attachment_data.clear();
-        imageView.setImage(null);
-        stackPane1.getChildren().setAll(imageView, btnArrowLeft, btnArrowRight);
+        if (imageView != null) {
+            imageView.setImage(null);
+        }
+        pnAttachment = 0;
 
         loadRecordMaster();
         loadTableDetail();
@@ -2677,7 +2679,6 @@ public class DeliveryAcceptance_EntryAppliancesController implements Initializab
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
         // Manage visibility and managed state of other buttons
         btnNew.setVisible(!lbShow);
         btnNew.setManaged(!lbShow);

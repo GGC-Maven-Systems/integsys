@@ -1633,7 +1633,9 @@ public class DeliveryAcceptance_EntryMPController implements Initializable, Scre
         tfAttachmentNo.clear();
         cmbAttachmentType.setItems(documentType);
         cmbAttachmentType.getSelectionModel().select(0);
-        imageView.setImage(null);
+        if (imageView != null) {
+            imageView.setImage(null);
+        }
         pnAttachment = 0;
 
         loadRecordMaster();
