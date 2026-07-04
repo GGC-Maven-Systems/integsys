@@ -355,17 +355,23 @@ public class CheckRelease_EntryController implements Initializable, ScreenInterf
                             ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
                             poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
                         }
-                        if (poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckReleaseStatus.CONFIRMED)) {
-                            if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
-                                poJSON = poGLControllers.CheckReleases().printTransaction();
-                                if ("error".equals((String) poJSON.get("result"))) {
-                                    ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
-                                    ClearAll();
-                                    initButtons(pnEditMode);
-                                    return;
-                                }
-                            }
-                        }
+                    /*This Block of Codes was disabled
+                    * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                     * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                    * @Author  : TEEJEI
+                    * @Date    : 07-03-2026
+                    */
+//                        if (poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckReleaseStatus.CONFIRMED)) {
+//                            if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
+//                                poJSON = poGLControllers.CheckReleases().printTransaction();
+//                                if ("error".equals((String) poJSON.get("result"))) {
+//                                    ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
+//                                    ClearAll();
+//                                    initButtons(pnEditMode);
+//                                    return;
+//                                }
+//                            }
+//                        }
 
                     ClearAll();
                     btnNew.fire();

@@ -185,7 +185,7 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
         try {
             LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
             poGLControllers = new CashflowControllers(poApp, logwrapr);
-            poGLControllers.CheckReleases().setTransactionStatus("01");
+            poGLControllers.CheckReleases().setTransactionStatus("0");
             poJSON = poGLControllers.CheckReleases().InitTransaction();
 
             if (!"success".equals(poJSON.get("result"))) {
@@ -343,16 +343,23 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
                             poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
                         }
                     }
-                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
-                        poJSON = poGLControllers.CheckReleases().printTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
-                            ClearAll();
-                            initButtons(pnEditMode);
-                            return;
-                        }
 
-                    }
+                    /*This Block of Codes was disabled
+                     * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                     * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                     * @Author  : TEEJEI
+                     * @Date    : 07-03-2026
+                     */
+//                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
+//                        poJSON = poGLControllers.CheckReleases().printTransaction();
+//                        if ("error".equals((String) poJSON.get("result"))) {
+//                            ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
+//                            ClearAll();
+//                            initButtons(pnEditMode);
+//                            return;
+//                        }
+//
+//                    }
                     
                     pnEditMode = EditMode.READY;
                     ClearAll();
@@ -384,31 +391,44 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
                        }
                        ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
                        poJSON = poGLControllers.CheckReleases().OpenTransaction(lsTransNox);
-                       if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
 
-                        poJSON = poGLControllers.CheckReleases().printTransaction();
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
-                                return;
-                            }
-                        }
+                    /*This Block of Codes was disabled
+                     * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                     * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                     * @Author  : TEEJEI
+                     * @Date    : 07-03-2026
+                     */
+//                       if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
+//
+//                        poJSON = poGLControllers.CheckReleases().printTransaction();
+//                            if ("error".equals((String) poJSON.get("result"))) {
+//                                ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
+//                                return;
+//                            }
+//                        }
                        
                        ClearAll();
                        initializeObject();
                        pnEditMode = poGLControllers.CheckReleases().getEditMode();
                        initButtons(pnEditMode);
                 break;
-                
-                case "btnPrint":
-                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
-                        
-                        poJSON = poGLControllers.CheckReleases().printTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
-                            return;
-                        }
-                    }
-                break;
+
+                /* This Block of Codes was disabled
+                 * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                 * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                 * @Author  : TEEJEI
+                 * @Date    : 07-03-2026
+                 */
+//                case "btnPrint":
+//                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to print this transaction?")) {
+//
+//                        poJSON = poGLControllers.CheckReleases().printTransaction();
+//                        if ("error".equals((String) poJSON.get("result"))) {
+//                            ShowMessageFX.Error((String) poJSON.get("message"), psFormName, null);
+//                            return;
+//                        }
+//                    }
+//                break;
 
                 default:
                     ShowMessageFX.Warning("Please contact admin to assist about no button available", psFormName, null);
@@ -537,6 +557,8 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
     }
     
     private void initButtons(int fnEditMode) {
+        btnPrint.setVisible(false);
+        btnPrint.setManaged(false);
         CustomCommonUtil.setVisible(false,btnBrowse);
         CustomCommonUtil.setManaged(false,btnBrowse);
         boolean lbShow = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
@@ -548,8 +570,8 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
         CustomCommonUtil.setManaged(lbShow, btnSave, btnCancel,btnSearch);
 
         // Default hide Update
-        CustomCommonUtil.setVisible(false, btnUpdate,btnVoid,btnApprove,btnPrint,btnHistory);
-        CustomCommonUtil.setManaged(false, btnUpdate,btnVoid,btnApprove,btnPrint,btnHistory);
+        CustomCommonUtil.setVisible(false, btnUpdate,btnVoid,btnApprove,btnHistory);
+        CustomCommonUtil.setManaged(false, btnUpdate,btnVoid,btnApprove,btnHistory);
 
         String lsTransNo = poGLControllers.CheckReleases()
                 .Master()
@@ -559,14 +581,14 @@ public class CheckRelease_ConfirmationController implements Initializable, Scree
                 && lsTransNo != null
                 && !lsTransNo.isEmpty()) {
 
-        CustomCommonUtil.setVisible(true, btnUpdate,btnVoid,btnApprove,btnPrint,btnHistory);
-        CustomCommonUtil.setManaged(true, btnUpdate,btnVoid,btnApprove,btnPrint,btnHistory);
+        CustomCommonUtil.setVisible(true, btnUpdate,btnVoid,btnApprove,btnHistory);
+        CustomCommonUtil.setManaged(true, btnUpdate,btnVoid,btnApprove,btnHistory);
         }
         
         cbReverse.setDisable(true);
         if (fnEditMode == EditMode.UPDATE || fnEditMode == EditMode.ADDNEW) {
-            CustomCommonUtil.setVisible(false, btnUpdate,btnVoid,btnApprove,btnPrint);
-            CustomCommonUtil.setManaged(false, btnUpdate,btnVoid,btnApprove,btnPrint);
+            CustomCommonUtil.setVisible(false, btnUpdate,btnVoid,btnApprove);
+            CustomCommonUtil.setManaged(false, btnUpdate,btnVoid,btnApprove);
             cbReverse.setDisable(false);
         }
     }
