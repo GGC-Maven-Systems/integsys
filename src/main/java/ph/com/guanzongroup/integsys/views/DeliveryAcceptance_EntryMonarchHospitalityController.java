@@ -1488,7 +1488,10 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
         tfOrderQuantity.clear();
         tfReceiveQuantity.clear();
         tfAttachmentNo.clear();
-        imageView.setImage(null);
+        if (imageView != null) {
+            imageView.setImage(null);
+        }
+        pnAttachment = 0;
 
         loadRecordMaster();
         loadTableDetail();

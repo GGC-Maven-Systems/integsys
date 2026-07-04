@@ -1483,11 +1483,9 @@ public class DeliveryAcceptance_EntrySPCarController implements Initializable, S
         tfReceiveQuantity.clear();
         tfAttachmentNo.clear();
 
-        imageView.setImage(null);
-        stackPane1.getChildren().clear();
-        stackPane1.getChildren().add(imageView);
-        stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
-        Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1));
+        if (imageView != null) {
+            imageView.setImage(null);
+        }
         pnAttachment = 0;
 
         loadRecordMaster();

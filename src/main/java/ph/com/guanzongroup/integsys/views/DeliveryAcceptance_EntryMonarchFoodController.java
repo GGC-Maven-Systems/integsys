@@ -1507,6 +1507,9 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         tfOrderQuantity.clear();
         tfReceiveQuantity.clear();
 
+        if (imageView != null) {
+            imageView.setImage(null);
+        }
         pnAttachment = 0;
         imageinfo_temp.clear();
 
@@ -1514,14 +1517,6 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         loadTableDetail();
         loadTableAttachment();
         loadTableMain();
-
-        imageView.setImage(null);
-        imageView.setTranslateX(0);
-        imageView.setTranslateY(0);
-        imageView.setScaleX(1.0);
-        imageView.setScaleY(1.0);
-        scaleFactor = 1.0;
-        currentIndex = 0;
     }
 
     public void loadRecordSearch() {
@@ -2525,14 +2520,21 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         tblAttachments.setItems(attachment_data);
     }
 
-    public void initAttachmentPreviewPane() {
-        Group group = new Group(imageView);
-        VBox outer = new VBox(group);
-        outer.setAlignment(Pos.CENTER);
-        outer.setPadding(new Insets(10));
-
-        stackPane1.getChildren().clear();
-        stackPane1.getChildren().add(outer);
+    private void initAttachmentPreviewPane() {
+        stackPane1.layoutBoundsProperty().addListener((observable, oldBounds, newBounds) -> {
+            stackPane1.setClip(new javafx.scene.shape.Rectangle(
+                    newBounds.getMinX(),
+                    newBounds.getMinY(),
+                    newBounds.getWidth(),
+                    newBounds.getHeight()
+            ));
+        });
+        imageView.setOnScroll((ScrollEvent event) -> {
+            double delta = event.getDeltaY();
+            scaleFactor = Math.max(0.5, Math.min(scaleFactor * (delta > 0 ? 1.1 : 0.9), 5.0));
+            imageView.setScaleX(scaleFactor);
+            imageView.setScaleY(scaleFactor);
+        });
 
         imageView.setOnMousePressed((MouseEvent event) -> {
             mouseAnchorX = event.getSceneX() - imageView.getTranslateX();
@@ -2540,43 +2542,26 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
         });
 
         imageView.setOnMouseDragged((MouseEvent event) -> {
-            imageView.setTranslateX(event.getSceneX() - mouseAnchorX);
-            imageView.setTranslateY(event.getSceneY() - mouseAnchorY);
+            double translateX = event.getSceneX() - mouseAnchorX;
+            double translateY = event.getSceneY() - mouseAnchorY;
+            imageView.setTranslateX(translateX);
+            imageView.setTranslateY(translateY);
         });
 
-        stackPane1.setOnScroll((ScrollEvent event) -> {
-            double deltaY = event.getDeltaY();
-            double zoomFactor = (deltaY > 0) ? 1.05 : 0.95;
-            scaleFactor *= zoomFactor;
+        stackPane1.widthProperty().addListener((observable, oldValue, newWidth) -> {
+            double computedWidth = newWidth.doubleValue();
+            ldstackPaneWidth = computedWidth;
 
-            Image image = imageView.getImage();
-            if (image == null) {
-                return;
-            }
-
-            double imageWidth = image.getWidth() * scaleFactor;
-            double imageHeight = image.getHeight() * scaleFactor;
-            double viewportWidth = stackPane1.getWidth();
-            double viewportHeight = stackPane1.getHeight();
-
-            if (imageWidth < viewportWidth || imageHeight < viewportHeight) {
-                scaleFactor /= zoomFactor;
-                return;
-            }
-
-            Point2D mouse = imageView.sceneToLocal(event.getSceneX(), event.getSceneY());
-            double f = (zoomFactor - 1);
-
-            double dx = mouse.getX() - imageView.getBoundsInLocal().getWidth() / 2;
-            double dy = mouse.getY() - imageView.getBoundsInLocal().getHeight() / 2;
-
-            imageView.setScaleX(scaleFactor);
-            imageView.setScaleY(scaleFactor);
-            imageView.setTranslateX(imageView.getTranslateX() - f * dx);
-            imageView.setTranslateY(imageView.getTranslateY() - f * dy);
-
-            event.consume();
         });
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            ldstackPaneHeight = computedHeight;
+
+            //Placed to get height and width of stack pane in computed size before loading the image
+            initStackPaneListener();
+            initAttachmentsGrid();
+        });
+
     }
 
     public void initStackPaneListener() {
