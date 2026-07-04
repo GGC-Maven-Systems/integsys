@@ -2732,22 +2732,12 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
         cmbAttachmentType.getSelectionModel().select(0);
     }
 
-    public void generateAttachment() {
-        attachment_data.add(new ModelDeliveryAcceptance_Attachment("0", "C:/Users/User/Downloads/a4-blank-template_page-0001.jpg"));
-
-    }
-
 // Generic method to highlight with specific color
     public <T> void highlight(TableView<T> table, int rowIndex, String color, Map<Integer, List<String>> highlightMap) {
         highlightMap.computeIfAbsent(rowIndex, k -> new ArrayList<>()).add(color);
         table.refresh(); // Refresh to apply changes
     }
 
-// Generic method to remove highlight from a specific row
-    public <T> void disableHighlight(TableView<T> table, int rowIndex, Map<Integer, List<String>> highlightMap) {
-        highlightMap.remove(rowIndex);
-        table.refresh();
-    }
 
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {
