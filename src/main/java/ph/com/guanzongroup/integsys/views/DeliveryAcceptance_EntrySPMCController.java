@@ -55,7 +55,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -1502,49 +1501,9 @@ public class DeliveryAcceptance_EntrySPMCController implements Initializable, Sc
         }
     };
 
-    private void setDatePickerFormat(DatePicker datePicker) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        datePicker.setConverter(new StringConverter<LocalDate>() {
-            @Override
-            public String toString(LocalDate date) {
-                return (date != null) ? date.format(formatter) : "";
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, formatter) : null;
-            }
-        });
-    }
-
-    private void addKeyEventFilter(DatePicker datePicker) {
-        datePicker.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                Node source = (Node) event.getSource();
-                source.fireEvent(new KeyEvent(
-                        KeyEvent.KEY_PRESSED,
-                        "",
-                        "",
-                        KeyCode.TAB,
-                        false,
-                        false,
-                        false,
-                        false
-                ));
-                event.consume();
-            }
-        });
-    }
-
     public void initDatePickers() {
-
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpReferenceDate);
         JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpReferenceDate);
-
-//        dpTransactionDate.focusedProperty().addListener(datepicker_Focus);
-//        dpReferenceDate.focusedProperty().addListener(datepicker_Focus);
-//        addKeyEventFilter(dpTransactionDate);
-//        addKeyEventFilter(dpReferenceDate);
     }
 
     public void initDetailsGrid() {
@@ -2659,22 +2618,9 @@ public class DeliveryAcceptance_EntrySPMCController implements Initializable, Sc
         table.refresh(); // Refresh to apply changes
     }
 
-// Generic method to remove highlight from a specific row
-    public <T> void disableHighlight(TableView<T> table, int rowIndex, Map<Integer, List<String>> highlightMap) {
-        highlightMap.remove(rowIndex);
-        table.refresh();
-    }
-
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {
         highlightMap.clear();
-        table.refresh();
-    }
-
-// Generic method to remove all highlights of a specific color
-    public <T> void disableAllHighlightByColor(TableView<T> table, String color, Map<Integer, List<String>> highlightMap) {
-        highlightMap.forEach((key, colors) -> colors.removeIf(c -> c.equals(color)));
-        highlightMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         table.refresh();
     }
 
@@ -2688,21 +2634,8 @@ public class DeliveryAcceptance_EntrySPMCController implements Initializable, Sc
         }
     }
 
-    public <T> void disableHighlightByKey(TableView<T> table, String key, Map<String, List<String>> highlightMap) {
-        highlightMap.remove(key);
-        table.refresh();
-
-    }
-
     public <T> void disableAllHighlightByKey(TableView<T> table, Map<String, List<String>> highlightMap) {
         highlightMap.clear();
-        table.refresh();
-
-    }
-
-    public <T> void disableAllHighlightByColorForKey(TableView<T> table, String color, Map<String, List<String>> highlightMap) {
-        highlightMap.forEach((key, colors) -> colors.removeIf(c -> c.equals(color)));
-        highlightMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         table.refresh();
 
     }

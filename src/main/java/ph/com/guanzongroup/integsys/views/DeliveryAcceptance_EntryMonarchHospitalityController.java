@@ -55,7 +55,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -388,14 +387,14 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
                             return;
                         }
                     case "btnHistory":
-                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
-                        } 
-                        
+                        }
+
                         try {
                             poPurchaseReceivingController.PurchaseOrderReceiving().ShowStatusHistory();
-                        }  catch (NullPointerException npe) {
+                        } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
                             ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
@@ -1423,138 +1422,9 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
         }
     }
 
-    ChangeListener<Boolean> datepicker_Focus = (observable, oldValue, newValue) -> {
-        poJSON = new JSONObject();
-        poJSON.put("result", "success");
-        poJSON.put("message", "success");
-        try {
-            if (!newValue) { // Lost focus
-                DatePicker datePicker = (DatePicker) ((javafx.beans.property.ReadOnlyBooleanProperty) observable).getBean();
-                String lsID = datePicker.getId();
-                String inputText = datePicker.getEditor().getText();
-                LocalDate currentDate = LocalDate.now();
-                LocalDate selectedDate = null;
-
-                lastFocusedTextField = datePicker;
-                previousSearchedTextField = null;
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                if (inputText != null && !inputText.trim().isEmpty()) {
-                    try {
-                        LocalDate parsedDate = LocalDate.parse(inputText, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-                        datePicker.setValue(parsedDate);
-                        datePicker.getEditor().setText(formatter.format(parsedDate));
-                        inputText = datePicker.getEditor().getText();
-                    } catch (DateTimeParseException ignored) {
-                    }
-                }
-                // Check if the user typed something in the text field
-                if (inputText != null && !inputText.trim().isEmpty()) {
-                    try {
-                        selectedDate = LocalDate.parse(inputText, formatter);
-                        datePicker.setValue(selectedDate); // Update the DatePicker with the valid date
-                    } catch (Exception ex) {
-                        poJSON.put("result", "error");
-                        poJSON.put("message", "Invalid date format. Please use MM/dd/yyyy format.");
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        loadRecordMaster();
-                        // datePicker.requestFocus();
-                        return;
-                    }
-                } else {
-                    selectedDate = datePicker.getValue(); // Fallback to selected date if nothing was typed
-                }
-
-                String formattedDate = selectedDate.toString();
-
-                switch (lsID) {
-                    case "dpTransactionDate":
-                        if (selectedDate == null) {
-                            break;
-                        }
-                        if (selectedDate.isAfter(currentDate)) {
-                            poJSON.put("result", "error");
-                            poJSON.put("message", "Future dates are not allowed.");
-                        } else {
-                            poPurchaseReceivingController.PurchaseOrderReceiving().Master().setTransactionDate((SQLUtil.toDate(formattedDate, "yyyy-MM-dd")));
-                        }
-                        break;
-                    case "dpReferenceDate":
-                        if (selectedDate == null) {
-                            break;
-                        }
-                        if (selectedDate.isAfter(currentDate)) {
-                            poJSON.put("result", "error");
-                            poJSON.put("message", "Future dates are not allowed.");
-                        } else {
-                            poPurchaseReceivingController.PurchaseOrderReceiving().Master().setReferenceDate(SQLUtil.toDate(formattedDate, "yyyy-MM-dd"));
-                        }
-                        break;
-                    default:
-
-                        break;
-                }
-                datePicker.getEditor().setText(formattedDate);
-                if ("error".equals((String) poJSON.get("result"))) {
-                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                    // datePicker.requestFocus();
-                }
-                Platform.runLater(() -> {
-                    if (lsID.equals("dpExpiryDate")) {
-                        loadRecordDetail();
-                    } else {
-                        loadRecordMaster();
-                    }
-                });
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    };
-
-    private void setDatePickerFormat(DatePicker datePicker) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        datePicker.setConverter(new StringConverter<LocalDate>() {
-            @Override
-            public String toString(LocalDate date) {
-                return (date != null) ? date.format(formatter) : "";
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, formatter) : null;
-            }
-        });
-    }
-
-    private void addKeyEventFilter(DatePicker datePicker) {
-        datePicker.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                Node source = (Node) event.getSource();
-                source.fireEvent(new KeyEvent(
-                        KeyEvent.KEY_PRESSED,
-                        "",
-                        "",
-                        KeyCode.TAB,
-                        false,
-                        false,
-                        false,
-                        false
-                ));
-                event.consume();
-            }
-        });
-    }
-
     public void initDatePickers() {
-
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpReferenceDate);
         JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpReferenceDate);
-
-//        dpTransactionDate.focusedProperty().addListener(datepicker_Focus);
-//        dpReferenceDate.focusedProperty().addListener(datepicker_Focus);
-//        addKeyEventFilter(dpTransactionDate);
-//        addKeyEventFilter(dpReferenceDate);
     }
 
     public void initDetailsGrid() {
@@ -2071,18 +1941,6 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
         imageView.setTranslateX(0);
         imageView.setTranslateY(0);
         stackPane1.setAlignment(imageView, javafx.geometry.Pos.CENTER);
-    }
-
-    private void stackPaneClip() {
-        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(
-                stackPane1.getWidth() - 8,
-                stackPane1.getHeight() - 8
-        );
-        clip.setArcWidth(8);
-        clip.setArcHeight(8);
-        clip.setLayoutX(4);
-        clip.setLayoutY(4);
-        stackPane1.setClip(clip);
     }
 
     private int moveToNextRow(TableView table, TablePosition focusedCell) {
@@ -2715,22 +2573,9 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
         table.refresh(); // Refresh to apply changes
     }
 
-// Generic method to remove highlight from a specific row
-    public <T> void disableHighlight(TableView<T> table, int rowIndex, Map<Integer, List<String>> highlightMap) {
-        highlightMap.remove(rowIndex);
-        table.refresh();
-    }
-
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {
         highlightMap.clear();
-        table.refresh();
-    }
-
-// Generic method to remove all highlights of a specific color
-    public <T> void disableAllHighlightByColor(TableView<T> table, String color, Map<Integer, List<String>> highlightMap) {
-        highlightMap.forEach((key, colors) -> colors.removeIf(c -> c.equals(color)));
-        highlightMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         table.refresh();
     }
 
@@ -2744,21 +2589,8 @@ public class DeliveryAcceptance_EntryMonarchHospitalityController implements Ini
         }
     }
 
-    public <T> void disableHighlightByKey(TableView<T> table, String key, Map<String, List<String>> highlightMap) {
-        highlightMap.remove(key);
-        table.refresh();
-
-    }
-
     public <T> void disableAllHighlightByKey(TableView<T> table, Map<String, List<String>> highlightMap) {
         highlightMap.clear();
-        table.refresh();
-
-    }
-
-    public <T> void disableAllHighlightByColorForKey(TableView<T> table, String color, Map<String, List<String>> highlightMap) {
-        highlightMap.forEach((key, colors) -> colors.removeIf(c -> c.equals(color)));
-        highlightMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         table.refresh();
 
     }
