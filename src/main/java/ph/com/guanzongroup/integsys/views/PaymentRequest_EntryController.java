@@ -426,9 +426,9 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                         CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
                         tblVwRecurringExpense.getSelectionModel().clearSelection(pnTblDetailRow);
                         pnTblDetailRow = -1;
-                        loadRecordMaster();
                         loadTableDetailFromMain();
                         pnEditMode = poGLControllers.PaymentRequest().getEditMode();
+                        loadRecordMaster();
                         loadTableDetail();
                     } else {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Search Information", null);
@@ -485,9 +485,9 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                             if ("success".equals((String) poJSON.get("result"))) {
                                 CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
                                 pnTblDetailRow = -1;
+                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                 loadRecordMaster();
                                 clearDetailFields();
-                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                 loadTableDetail();
                             }
                             poGLControllers.PaymentRequest().loadAttachments();
@@ -523,9 +523,9 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                                 if ("success".equals((String) poJSON.get("result"))) {
                                     CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
                                     pnTblDetailRow = -1;
+                                    pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                     loadRecordMaster();
                                     clearDetailFields();
-                                    pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                     loadTableDetail();
                                 }
                                 poGLControllers.PaymentRequest().loadAttachments();
@@ -854,9 +854,9 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                                 }
 
                                 CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
+                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                 loadRecordMaster();
                                 pnTblDetailRow = 0;
-                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
                                 loadTableDetail();
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
