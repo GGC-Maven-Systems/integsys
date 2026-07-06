@@ -256,9 +256,9 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     poController.setTransactionStatus(CashDisbursementStatus.VERIFIED);
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     poController.setForm(CashDisbursementStatus.APPROVED);
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

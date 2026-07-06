@@ -256,10 +256,10 @@ public class CashDisbursement_EntryController implements Initializable, ScreenIn
 //                poController.setCategoryID(psCategoryId);
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     btnNew.fire();
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }

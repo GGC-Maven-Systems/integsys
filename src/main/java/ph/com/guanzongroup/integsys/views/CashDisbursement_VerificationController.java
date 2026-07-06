@@ -223,9 +223,9 @@ public class CashDisbursement_VerificationController implements Initializable, S
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     poController.setTransactionStatus(CashDisbursementStatus.CONFIRMED);
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     poController.setForm(CashDisbursementStatus.VERIFIED);
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

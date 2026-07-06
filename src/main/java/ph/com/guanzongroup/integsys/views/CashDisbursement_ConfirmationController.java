@@ -261,9 +261,9 @@ public class CashDisbursement_ConfirmationController implements Initializable, S
                     poController.setTransactionStatus(CashDisbursementStatus.OPEN + CashDisbursementStatus.CONFIRMED + CashDisbursementStatus.RETURNED);
                     poController.setForm(CashDisbursementStatus.CONFIRMED);
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
