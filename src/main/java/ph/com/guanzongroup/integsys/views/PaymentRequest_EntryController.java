@@ -324,6 +324,8 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                 }
 
                 JFXUtil.setDisabled(!PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus()), taRemarks);
+            } else {
+                 JFXUtil.setDisabled(false, tfBranch, tfPayee, tfDepartment);
             }
 
             JFXUtil.setStatusValue(lblStatus, PaymentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poGLControllers.PaymentRequest().Master().getTransactionStatus());
