@@ -4,12 +4,6 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
-import ph.com.guanzongroup.integsys.model.ModelPRFAttachment;
-import ph.com.guanzongroup.integsys.model.ModelTableDetail;
-import ph.com.guanzongroup.integsys.model.ModelTableMain;
-import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
-import javafx.scene.control.ComboBox;
-import javafx.scene.image.ImageView;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +32,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
@@ -50,6 +45,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import static javafx.scene.input.KeyCode.DOWN;
 import static javafx.scene.input.KeyCode.TAB;
 import static javafx.scene.input.KeyCode.UP;
@@ -80,6 +76,10 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
 import ph.com.guanzongroup.cas.cashflow.status.PaymentRequestStaticData;
 import ph.com.guanzongroup.cas.cashflow.status.PaymentRequestStatus;
+import ph.com.guanzongroup.integsys.model.ModelPRFAttachment;
+import ph.com.guanzongroup.integsys.model.ModelTableDetail;
+import ph.com.guanzongroup.integsys.model.ModelTableMain;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -310,12 +310,12 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
             if (lbShow) {
                 //Do not allow to update payee when there's a transaction source
                 if (poGLControllers.PaymentRequest().Master().getSourceNo() != null && !"".equals(poGLControllers.PaymentRequest().Master().getSourceNo())) {
-                    JFXUtil.setDisabled(true, tfBranch,tfPayee, tfDepartment);
+                    JFXUtil.setDisabled(true, tfBranch, tfPayee, tfDepartment);
                 } else {
                     //Do not allow to update payee when there's a transaction source
                     if (poGLControllers.PaymentRequest().getDetailCount() > 0) {
                         if ((poGLControllers.PaymentRequest().Detail(0).getRecurringNo() != null && !"".equals(poGLControllers.PaymentRequest().Detail(0).getRecurringNo()))) {
-                            JFXUtil.setDisabled(true, tfBranch,tfPayee, tfDepartment);
+                            JFXUtil.setDisabled(true, tfBranch, tfPayee, tfDepartment);
                         } else {
                             JFXUtil.setDisabled(!PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus()), tfPayee, tfDepartment);
                             JFXUtil.setDisabled(!PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus()) || !poApp.isMainOffice(), tfBranch);
@@ -364,9 +364,9 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
             JFXUtil.setDisabled(lbShow, cbReverse);
 
 //            boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "");
-            boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "") 
-                                    || (!JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Master().getSourceNo(), null, "") 
-                                        && PaymentRequestStaticData.recurring_expense_payment.equals(poGLControllers.PaymentRequest().Master().getSourceCode())) ;
+            boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "")
+                    || (!JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Master().getSourceNo(), null, "")
+                    && PaymentRequestStaticData.recurring_expense_payment.equals(poGLControllers.PaymentRequest().Master().getSourceCode()));
             if (lbIsRecurring) {
                 JFXUtil.setDisabled(lbIsRecurring, tfParticular);
             } else {
@@ -384,8 +384,8 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
 //                    chkbVatable.setSelected(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).isVatable());
                     cbReverse.setSelected(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).isReverse());
-                     
-                    if (lbIsRecurring && (poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo() == null || "".equals(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo())) ) {
+
+                    if (lbIsRecurring && (poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo() == null || "".equals(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo()))) {
                         tfRecurringNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getRecurringNo());
                         tfBranchDetail.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Branch().getBranchName());
                         tfAccountNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
@@ -396,7 +396,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                         tfAccountNo.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
                         tfEmployee.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Employee().getCompanyName());
                     }
-                    
+
 //                    tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getVatAmount(), true));
                     tfAmountDetail.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getNetTotal(), true));
 //                tfTaxAmount.setText("0.00");
@@ -435,43 +435,8 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                     }
                     break;
                 case "btnNew":
-                    clearDetailFields();
-                    clearMasterFields();
-                    detail_data.clear();
-                    attachment_data.clear();
-                    poGLControllers.PaymentRequest().resetMaster();
-                    poGLControllers.PaymentRequest().resetOthers();
-                    poGLControllers.PaymentRequest().Detail().clear();
-                    tblAttachments.getItems().clear();
-                    poJSON = poGLControllers.PaymentRequest().NewTransaction();
-                    if ("success".equals((String) poJSON.get("result"))) {
-                        poGLControllers.PaymentRequest().Master().setIndustryID(psIndustryID);
-                        poGLControllers.PaymentRequest().Master().setCompanyID(psCompanyID);
-                        poGLControllers.PaymentRequest().Master().setSeriesNo(poGLControllers.PaymentRequest().getSeriesNoByBranch());
-                        poGLControllers.PaymentRequest().Master().setPayeeID(prevPayee);
-                        if (poApp.isMainOffice() || poApp.isWarehouse()) {
-                            poGLControllers.PaymentRequest().Master().setDepartmentID(poApp.getDepartment());
-                            tfDepartment.setText(poGLControllers.PaymentRequest().Master().Department().getDescription());
-
-                        }
-
-                        //Load Recurring Detail
-                        if (psRecurringMonitor != null && !"".equals(psRecurringMonitor)) {
-                            poJSON = poGLControllers.PaymentRequest().populateRecurringDetail(psRecurringMonitor);
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                            }
-                        }
-
-                        CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
-                        loadRecordMaster();
-                        pnTblDetailRow = 0;
-                        pnEditMode = poGLControllers.PaymentRequest().getEditMode();
-                        loadTableDetail();
-                    } else {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                    }
-                    break;
+                    handleLoading(lsButton);
+                    return;
                 case "btnUpdate":
                     poJSON = poGLControllers.PaymentRequest().UpdateTransaction();
                     if ("error".equals((String) poJSON.get("result"))) {
@@ -486,86 +451,8 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                     JFXUtil.initiateBtnSearch(psFormName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster, apDetail);
                     break;
                 case "btnSave":
-                    if (!ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to save?")) {
-                        return;
-                    }
-                    prevPayee = poGLControllers.PaymentRequest().Master().getPayeeID();
-                    int detailCount = poGLControllers.PaymentRequest().getDetailCount();
-                    boolean hasValidItem = false; // True if at least one valid item exists
-
-                    if (detailCount == 0) {
-                        ShowMessageFX.Warning("Your order is empty. Please add at least one item.", psFormName, null);
-                        return;
-                    }
-                    for (int lnCntr = 0; lnCntr <= detailCount - 1; lnCntr++) {
-                        double lnAmount = poGLControllers.PaymentRequest().Detail(lnCntr).getAmount();
-                        String lsParticular = (String) poGLControllers.PaymentRequest().Detail(lnCntr).Particular().getDescription();
-                        if (detailCount == 1) {
-                            if ((lsParticular == null || "".equals(lsParticular)) && lnAmount <= 0.0000) {
-                                ShowMessageFX.Warning("Invalid item in payment request detail. Ensure all items have a valid Particular and Amount greater than 0.0000", psFormName, null);
-                                return;
-                            }
-                        }
-
-                        hasValidItem = true;
-                    }
-                    if (!hasValidItem) {
-                        ShowMessageFX.Warning("Your order must have at least one valid item with a Particular and Amount greater than 0.0000", psFormName, null);
-                        return;
-                    }
-
-                    // Assign modification details for Update Mode
-                    if (pnEditMode == EditMode.UPDATE) {
-                        poGLControllers.PaymentRequest().Master().setModifiedDate(poApp.getServerDate());
-                        poGLControllers.PaymentRequest().Master().setModifyingId(poApp.getUserID());
-                    }
-                    // Assign modification date to all details
-                    for (int lnCntr = 0; lnCntr < detailCount; lnCntr++) {
-                        poGLControllers.PaymentRequest().Detail(lnCntr).setModifiedDate(poApp.getServerDate());
-                    }
-                    // Save Transaction
-                    poJSON = poGLControllers.PaymentRequest().isDetailHasZeroAmount();
-                    if (!"success".equals((String) poJSON.get("result"))) {
-                        if ("true".equals((String) poJSON.get("warning"))) {
-                            ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                            pnTblDetailRow = (int) poJSON.get("tableRow");
-                            loadTableDetail();
-                            initDetailFocus();
-                            return;
-                        } else {
-                            if (!ShowMessageFX.YesNo((String) poJSON.get("message"), psFormName, null)) {
-                                pnTblDetailRow = (int) poJSON.get("tableRow");
-                                loadTableDetail();
-                                initDetailFocus();
-                                return;
-                            }
-                        }
-                    }
-                    poJSON = poGLControllers.PaymentRequest().SaveTransaction();
-                    if (!"success".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                        loadTableDetail();
-                        return;
-                    }
-                    psRecurringMonitor = ""; //Clear Recurring By Default
-                    ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
-                    poJSON = poGLControllers.PaymentRequest().OpenTransaction(poGLControllers.PaymentRequest().Master().getTransactionNo());
-                    // Confirmation Prompt
-                    if ("success".equals(poJSON.get("result"))) {
-                        if (poGLControllers.PaymentRequest().Master().getTransactionStatus().equals(PaymentRequestStatus.OPEN)) {
-                            if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm this transaction?")) {
-                                poGLControllers.PaymentRequest().setWithUI(true);
-                                if ("success".equals((poJSON = poGLControllers.PaymentRequest().ConfirmTransaction("")).get("result"))) {
-                                    ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
-                                } else {
-                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                    Platform.runLater(() -> btnNew.fire());
-                    break;
+                    handleLoading(lsButton);
+                    return;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to cancel?")) {
                         if (pnEditMode == EditMode.ADDNEW) {
@@ -691,7 +578,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
                         //Limit maximum pages of pdf to add
                         if (imgPath2.toLowerCase().endsWith(".pdf")) {
-                            try (PDDocument document = PDDocument.load(selectedFile)) {
+                            try ( PDDocument document = PDDocument.load(selectedFile)) {
                                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                                 int pageCount = document.getNumberOfPages();
                                 if (pageCount > 5) {
@@ -749,21 +636,265 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                     ShowMessageFX.Warning("Please contact admin to assist about no button available", psFormName, null);
                     break;
             }
-
-            if (lsButton.equals("btnRetrieve") || lsButton.equals("btnAddAttachment") || lsButton.equals("btnRemoveAttachment")
-                    || lsButton.equals("btnArrowRight") || lsButton.equals("btnArrowLeft") || lsButton.equals("btnRetrieve") || lsButton.equals("btnHistory")) {
-            } else {
-                loadRecordMaster();
-                loadTableDetail();
-                loadTableAttachment();
-            }
-            initButtons(pnEditMode);
-            initFields(pnEditMode);
+            cmdReloadProcess(lsButton);
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(PaymentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void cmdReloadProcess(String lsButton) {
+        if (lsButton.equals("btnRetrieve") || lsButton.equals("btnAddAttachment") || lsButton.equals("btnRemoveAttachment")
+                || lsButton.equals("btnArrowRight") || lsButton.equals("btnArrowLeft") || lsButton.equals("btnRetrieve") || lsButton.equals("btnHistory")) {
+        } else {
+            loadRecordMaster();
+            loadTableDetail();
+            loadTableAttachment();
+        }
+        initButtons(pnEditMode);
+        initFields(pnEditMode);
+    }
+
+    private Stage getOwnerStage() {
+        return AnchorMain != null
+                && AnchorMain.getScene() != null
+                ? (Stage) AnchorMain.getScene().getWindow()
+                : null;
+    }
+
+    private void handleLoading(String lsButton) {
+        switch (lsButton) {
+            case "btnSave":
+                AtomicReference<JSONObject> loSaveResultRef = new AtomicReference<>();
+                AtomicReference<JSONObject> loOpenResultRef = new AtomicReference<>();
+                if (!ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to save?")) {
+                    return;
+                }
+
+                try {
+                    prevPayee = poGLControllers.PaymentRequest().Master().getPayeeID();
+                    int detailCount = poGLControllers.PaymentRequest().getDetailCount();
+                    boolean hasValidItem = false;
+
+                    if (detailCount == 0) {
+                        ShowMessageFX.Warning("Your order is empty. Please add at least one item.", psFormName, null);
+                        return;
+                    }
+
+                    for (int lnCntr = 0; lnCntr <= detailCount - 1; lnCntr++) {
+                        double lnAmount = poGLControllers.PaymentRequest().Detail(lnCntr).getAmount();
+                        String lsParticular = String.valueOf(poGLControllers.PaymentRequest().Detail(lnCntr).Particular().getDescription());
+                        if (detailCount == 1) {
+                            if ((lsParticular == null || "".equals(lsParticular)) && lnAmount <= 0.0000) {
+                                ShowMessageFX.Warning("Invalid item in payment request detail. Ensure all items have a valid Particular and Amount greater than 0.0000", psFormName, null);
+                                return;
+                            }
+                        }
+                        hasValidItem = true;
+                    }
+
+                    if (!hasValidItem) {
+                        ShowMessageFX.Warning("Your order must have at least one valid item with a Particular and Amount greater than 0.0000", psFormName, null);
+                        return;
+                    }
+
+                    if (pnEditMode == EditMode.UPDATE) {
+                        poGLControllers.PaymentRequest().Master().setModifiedDate(poApp.getServerDate());
+                        poGLControllers.PaymentRequest().Master().setModifyingId(poApp.getUserID());
+                    }
+
+                    for (int lnCntr = 0; lnCntr < detailCount; lnCntr++) {
+                        poGLControllers.PaymentRequest().Detail(lnCntr).setModifiedDate(poApp.getServerDate());
+                    }
+
+                    poJSON = poGLControllers.PaymentRequest().isDetailHasZeroAmount();
+                    if (!"success".equals(String.valueOf(poJSON.get("result")))) {
+                        if ("true".equals(String.valueOf(poJSON.get("warning")))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                            pnTblDetailRow = (int) poJSON.get("tableRow");
+                            loadTableDetail();
+                            initDetailFocus();
+                            return;
+                        } else {
+                            if (!ShowMessageFX.YesNo((String) poJSON.get("message"), psFormName, null)) {
+                                pnTblDetailRow = (int) poJSON.get("tableRow");
+                                loadTableDetail();
+                                initDetailFocus();
+                                return;
+                            }
+                        }
+                    }
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+                    return;
+                }
+
+                runWithLoadingAllowFxDialogs(
+                        () -> {
+                            try {
+                                JSONObject loSaveJSON = poGLControllers.PaymentRequest().SaveTransaction();
+                                loSaveResultRef.set(loSaveJSON);
+                                if ("success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                    JSONObject loOpenJSON = poGLControllers.PaymentRequest().OpenTransaction(poGLControllers.PaymentRequest().Master().getTransactionNo());
+                                    loOpenResultRef.set(loOpenJSON);
+                                }
+                            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+
+                        },
+                        () -> {
+                            try {
+                                JSONObject loSaveJSON = loSaveResultRef.get();
+                                if (loSaveJSON == null) {
+                                    ShowMessageFX.Error("Unable to save transaction.", psFormName, null);
+                                    return;
+                                }
+
+                                if (!"success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                    ShowMessageFX.Warning((String) loSaveJSON.get("message"), psFormName, null);
+                                    loadTableDetail();
+                                    return;
+                                }
+
+                                ShowMessageFX.Information((String) loSaveJSON.get("message"), psFormName, null);
+
+                                psRecurringMonitor = "";
+                                JSONObject loOpenJSON = loOpenResultRef.get();
+
+                                if (loOpenJSON != null
+                                && "success".equals(String.valueOf(loOpenJSON.get("result"))
+                                ) && PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus())) {
+                                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm this transaction?")) {
+                                        poGLControllers.PaymentRequest().setWithUI(true);
+                                        JSONObject loConfirmJSON = poGLControllers.PaymentRequest().ConfirmTransaction("");
+                                        if (!"success".equals(String.valueOf(loConfirmJSON.get("result")))) {
+                                            ShowMessageFX.Warning((String) loConfirmJSON.get("message"), psFormName, null);
+                                        } else {
+                                            ShowMessageFX.Information((String) loConfirmJSON.get("message"), psFormName, null);
+                                        }
+                                    }
+                                }
+
+                                Platform.runLater(() -> btnNew.fire());
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+                            }
+                        },
+                        ex -> {
+                            Throwable loRoot = ex.getCause() != null ? ex.getCause() : ex;
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, loRoot);
+                            ShowMessageFX.Error(MiscUtil.getException(loRoot), psFormName, null);
+                        });
+                break;
+            case "btnNew":
+                AtomicReference<JSONObject> loNewResultRef = new AtomicReference<>();
+                AtomicReference<JSONObject> loRecurringResultRef = new AtomicReference<>();
+
+                clearDetailFields();
+                clearMasterFields();
+                detail_data.clear();
+                attachment_data.clear();
+                tblAttachments.getItems().clear();
+
+                runWithLoadingAllowFxDialogs(
+                        () -> {
+                            try {
+                                poGLControllers.PaymentRequest().resetMaster();
+                                poGLControllers.PaymentRequest().resetOthers();
+                                poGLControllers.PaymentRequest().Detail().clear();
+
+                                JSONObject loNewJSON = poGLControllers.PaymentRequest().NewTransaction();
+                                loNewResultRef.set(loNewJSON);
+                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
+                                if (!"success".equals(String.valueOf(loNewJSON.get("result")))) {
+                                    return;
+                                }
+
+                                poGLControllers.PaymentRequest().Master().setIndustryID(psIndustryID);
+                                poGLControllers.PaymentRequest().Master().setCompanyID(psCompanyID);
+                                poGLControllers.PaymentRequest().Master().setSeriesNo(poGLControllers.PaymentRequest().getSeriesNoByBranch());
+                                poGLControllers.PaymentRequest().Master().setPayeeID(prevPayee);
+
+                                if (poApp.isMainOffice() || poApp.isWarehouse()) {
+                                    poGLControllers.PaymentRequest().Master().setDepartmentID(poApp.getDepartment());
+                                }
+
+                                if (psRecurringMonitor != null && !"".equals(psRecurringMonitor)) {
+                                    JSONObject loRecurringJSON = poGLControllers.PaymentRequest().populateRecurringDetail(psRecurringMonitor);
+                                    loRecurringResultRef.set(loRecurringJSON);
+                                }
+                            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        },
+                        () -> {
+                            try {
+                                JSONObject loNewJSON = loNewResultRef.get();
+                                if (loNewJSON == null) {
+                                    ShowMessageFX.Error("Unable to create a new transaction.", psFormName, null);
+                                    return;
+                                }
+
+                                if (!"success".equals(String.valueOf(loNewJSON.get("result")))) {
+                                    ShowMessageFX.Warning((String) loNewJSON.get("message"), "Warning", null);
+                                    return;
+                                }
+
+                                JSONObject loRecurringJSON = loRecurringResultRef.get();
+                                if (loRecurringJSON != null && !"success".equals(String.valueOf(loRecurringJSON.get("result")))) {
+                                    ShowMessageFX.Warning((String) loRecurringJSON.get("message"), "Warning", null);
+                                }
+
+                                if (poApp.isMainOffice() || poApp.isWarehouse()) {
+                                    tfDepartment.setText(poGLControllers.PaymentRequest().Master().Department().getDescription());
+                                }
+
+                                CustomCommonUtil.switchToTab(tabDetails, ImTabPane);
+                                loadRecordMaster();
+                                pnTblDetailRow = 0;
+                                pnEditMode = poGLControllers.PaymentRequest().getEditMode();
+                                loadTableDetail();
+                            } catch (SQLException | GuanzonException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+                            }
+                            cmdReloadProcess(lsButton);
+                        },
+                        ex -> {
+                            Throwable loRoot = ex.getCause() != null ? ex.getCause() : ex;
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, loRoot);
+                            ShowMessageFX.Error(MiscUtil.getException(loRoot), "Warning", null);
+                        });
+                break;
+        }
+
+    }
+
+    private void runWithLoadingAllowFxDialogs(Runnable fxTask, Runnable onSuccess, java.util.function.Consumer<Throwable> onError) {
+        AtomicReference<Throwable> loError = new AtomicReference<>();
+
+        JFXUtil.runWithLoading(
+                getOwnerStage(),
+                apButton,
+                () -> {
+                    try {
+                        fxTask.run();
+                    } catch (Throwable ex) {
+                        loError.set(ex);
+                    }
+                },
+                () -> {
+                    if (loError.get() != null) {
+                        onError.accept(loError.get());
+                        return;
+                    }
+                    onSuccess.run();
+                }
+        );
     }
 
     public void loadTableDetailFromMain() {
@@ -1595,7 +1726,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
                             double lnDetailDiscountRate = poGLControllers.PaymentRequest().Detail(lnCtr).getAmount() * poGLControllers.PaymentRequest().Detail(lnCtr).getDiscount();
                             double lnTotalDiscountAmount = poGLControllers.PaymentRequest().Detail(lnCtr).getAddDiscount() + lnDetailDiscountRate;
-                            
+
                             detail_data.add(new ModelTableDetail(
                                     String.valueOf(lnRowCount),
                                     poGLControllers.PaymentRequest().Detail(lnCtr).Particular().getDescription(),
@@ -1780,8 +1911,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                 }
             }
         });
-        
-        
+
         tfBranch.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
             if (!isNowFocused) { // lost focus
                 try {
@@ -1903,8 +2033,8 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
         return false;
     }
-    
-    private void reloadDetails() throws SQLException, GuanzonException{
+
+    private void reloadDetails() throws SQLException, GuanzonException {
         int detailCount = poGLControllers.PaymentRequest().getDetailCount();
         for (int lnCtr = detailCount - 1; lnCtr >= 0; lnCtr--) {
             if (poGLControllers.PaymentRequest().Detail(lnCtr).getParticularID().isEmpty()
@@ -1922,6 +2052,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
     }
 
     boolean pbShow = false;
+
     private boolean isExchangingPayee(String fsPayeeID, boolean keyPressed) {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             try {
@@ -1941,7 +2072,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                             tfPayee.setText(poGLControllers.PaymentRequest().Master().Payee().getPayeeName());
                             return false;
                         }
-                        
+
                         //Reload Details
                         reloadDetails();
 
@@ -2066,7 +2197,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
         return true;
     }
-    
+
     //Added by Arsiela 05-16-2026 05:09 PM
     private boolean isExchangingBranch(String fsBranchID, boolean keyPressed) {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -2170,6 +2301,10 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                                 loadTableDetailAndSelectedRow();
                                 loadTableMain();
                             }
+                            loadTableAttachment();
+                            tblAttachments.getFocusModel().focus(pnAttachment);
+                            tblAttachments.getSelectionModel().select(pnAttachment);
+
                         } else {
                             if ("true".equals((String) poJSON.get("warning"))) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
