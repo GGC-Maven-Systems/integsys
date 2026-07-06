@@ -1928,96 +1928,6 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
             }
         });
     }
-//
-//    private boolean isExchangingPayee() {
-//        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//            try {
-//                boolean isHaveAmountAndStockId = false;
-//                if (poGLControllers.PaymentRequest().getDetailCount() >= 1) {
-//                    if (poGLControllers.PaymentRequest().Detail(0).getParticularID() != null && poGLControllers.PaymentRequest().Detail(0).getAmount() != 0.0000) {
-//                        if (!poGLControllers.PaymentRequest().Detail(0).getParticularID().isEmpty()
-//                                || poGLControllers.PaymentRequest().Detail(0).getAmount() != 0.0000) {
-//                            isHaveAmountAndStockId = true;
-//                        }
-//                    }
-//                }
-//                if (isHaveAmountAndStockId) {
-//                    if (ShowMessageFX.YesNo("Payment Request Details already have items, are you sure you want to change payee?", psFormName, null)) {
-//                        int detailCount = poGLControllers.PaymentRequest().getDetailCount();
-//                        for (int lnCtr = detailCount - 1; lnCtr >= 0; lnCtr--) {
-//                            if (poGLControllers.PaymentRequest().Detail(lnCtr).getParticularID().isEmpty()
-//                                    || poGLControllers.PaymentRequest().Detail(lnCtr).getAmount() == 0.0000) {
-//                                continue; // Skip deleting this row
-//                            }
-//                            poGLControllers.PaymentRequest().Detail().remove(lnCtr);
-//                        }
-//                        pnTblDetailRow = -1;
-//                        pnTblMainRow = -1;
-//                        clearDetailFields();
-//                        loadTableDetail();
-//                    } else {
-//                        try {
-//                            poJSON = new JSONObject();
-//                            poJSON = poGLControllers.PaymentRequest().SearchPayee(poGLControllers.PaymentRequest().Master().getPayeeID(), true);
-//                            if (!"success".equals((String) poJSON.get("result"))) {
-//                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-//                                return false;
-//                            }
-//                            tfPayee.setText(poGLControllers.PaymentRequest().Master().Payee().getPayeeName());
-//                            return false;
-//
-//                        } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
-//                            Logger.getLogger(getClass()
-//                                    .getName()).log(Level.SEVERE, null, ex);
-//
-//                        }
-//                    }
-//                }
-//            } catch (SQLException | GuanzonException ex) {
-//                Logger.getLogger(getClass()
-//                        .getName()).log(Level.SEVERE, null, ex);
-//
-//            }
-//        }
-//        if (pnEditMode == EditMode.READY) {
-//            try {
-//                if (!tfTransactionNo.getText().isEmpty()
-//                        && !tfSeriesNo.getText().isEmpty()) {
-//                    if (ShowMessageFX.YesNo("You have an open transaction. Are you sure you want to change the payee?", psFormName, null)) {
-//                        clearDetailFields();
-//                        clearMasterFields();
-//                        detail_data.clear();
-//                        tblVwPRDetail.getItems().clear();
-//                        pnEditMode = EditMode.UNKNOWN;
-//                        poGLControllers.PaymentRequest().Master().setPayeeID(prevPayee);
-//                        tfPayee.setText(poGLControllers.PaymentRequest().Master().Payee().getPayeeName());
-//                        pnTblMainRow = -1;
-//                        tblVwRecurringExpense.getItems().clear();
-//                        tblVwRecurringExpense.setPlaceholder(new Label("NO RECORD TO LOAD"));
-//                        initButtons(pnEditMode);
-//                        initFields(pnEditMode);
-//                        return true;
-//                    } else {
-//                        poJSON = new JSONObject();
-//                        poJSON = poGLControllers.PaymentRequest().SearchPayee(poGLControllers.PaymentRequest().Master().getPayeeID(), true);
-//                        if (!"success".equals((String) poJSON.get("result"))) {
-//                            ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-//                            return false;
-//                        }
-//                        tfPayee.setText(poGLControllers.PaymentRequest().Master().Payee().getPayeeName());
-//
-//                        return false;
-//
-//                    }
-//                }
-//            } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
-//                Logger.getLogger(getClass()
-//                        .getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//
-//        return true;
-//    }
 
     //revised by Arsiela 05-05-2026
     private boolean checkSource() throws SQLException, GuanzonException {
@@ -2235,8 +2145,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                             }
 
                         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
-                            Logger.getLogger(getClass()
-                                    .getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                         }
                     }
@@ -2254,19 +2163,15 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                             return false;
 
                         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
-                            Logger.getLogger(getClass()
-                                    .getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                         }
                     }
                 }
             } catch (SQLException | GuanzonException ex) {
-                Logger.getLogger(getClass()
-                        .getName()).log(Level.SEVERE, null, ex);
-
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         return true;
     }
 
@@ -2321,8 +2226,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
                             }
                         }
                     } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
-                        Logger.getLogger(getClass()
-                                .getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         ShowMessageFX.Warning("Error loading data: " + ex.getMessage(), psFormName, null);
                     }
                 }
