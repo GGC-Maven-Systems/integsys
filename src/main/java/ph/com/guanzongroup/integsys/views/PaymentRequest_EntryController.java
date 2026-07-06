@@ -325,7 +325,7 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
 
                 JFXUtil.setDisabled(!PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus()), taRemarks);
             } else {
-                 JFXUtil.setDisabled(false, tfBranch, tfPayee, tfDepartment);
+                JFXUtil.setDisabled(false, tfBranch, tfPayee, tfDepartment);
             }
 
             JFXUtil.setStatusValue(lblStatus, PaymentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poGLControllers.PaymentRequest().Master().getTransactionStatus());
@@ -361,54 +361,53 @@ public class PaymentRequest_EntryController implements Initializable, ScreenInte
     }
 
     private void loadRecordDetail() {
-        try {
-            boolean lbShow = !PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus());
-            JFXUtil.setDisabled(lbShow, cbReverse);
+        if (pnTblDetailRow >= 0) {
+            try {
+                boolean lbShow = !PaymentRequestStatus.OPEN.equals(poGLControllers.PaymentRequest().Master().getTransactionStatus());
+                JFXUtil.setDisabled(lbShow, cbReverse);
 
-//            boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "");
-            boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "")
-                    || (!JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Master().getSourceNo(), null, "")
-                    && PaymentRequestStaticData.recurring_expense_payment.equals(poGLControllers.PaymentRequest().Master().getSourceCode()));
-            if (lbIsRecurring) {
-                JFXUtil.setDisabled(lbIsRecurring, tfParticular);
-            } else {
-                JFXUtil.setDisabled(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getEditMode() == EditMode.UPDATE, tfParticular);
-            }
+                boolean lbIsRecurring = !JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo(), null, "")
+                        || (!JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Master().getSourceNo(), null, "")
+                        && PaymentRequestStaticData.recurring_expense_payment.equals(poGLControllers.PaymentRequest().Master().getSourceCode()));
+             
+                boolean lbShow2 = JFXUtil.isObjectEqualTo(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getParticularID(), null, "");
+                boolean lbisUpdate = poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getEditMode() == EditMode.UPDATE;
 
-            if (pnTblDetailRow >= 0) {
-                try {
+                if (lbisUpdate && !lbShow2) {
+                    JFXUtil.setDisabled(true, tfParticular);
+                } else {
+                    JFXUtil.setDisabled(false, tfParticular);
+                }
 
-                    tfParticular.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).Particular().getDescription());
-                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(
-                            poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getAmount(), true));
-                    tfDiscRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getDiscount())); // rate
-                    tfDiscAmountDetail.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getAddDiscount(), true)); // amount
+                tfParticular.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).Particular().getDescription());
+                tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(
+                        poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getAmount(), true));
+                tfDiscRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getDiscount())); // rate
+                tfDiscAmountDetail.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getAddDiscount(), true)); // amount
 
 //                    chkbVatable.setSelected(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).isVatable());
-                    cbReverse.setSelected(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).isReverse());
+                cbReverse.setSelected(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).isReverse());
 
-                    if (lbIsRecurring && (poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo() == null || "".equals(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo()))) {
-                        tfRecurringNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getRecurringNo());
-                        tfBranchDetail.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Branch().getBranchName());
-                        tfAccountNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
-                        tfEmployee.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Employee().getCompanyName());
-                    } else {
-                        tfRecurringNo.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getRecurringNo());
-                        tfBranchDetail.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Branch().getBranchName());
-                        tfAccountNo.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
-                        tfEmployee.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Employee().getCompanyName());
-                    }
+                if (lbIsRecurring && (poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo() == null || "".equals(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getRecurringNo()))) {
+                    tfRecurringNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getRecurringNo());
+                    tfBranchDetail.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Branch().getBranchName());
+                    tfAccountNo.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
+                    tfEmployee.setText(poGLControllers.PaymentRequest().Master().RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Employee().getCompanyName());
+                } else {
+                    tfRecurringNo.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getRecurringNo());
+                    tfBranchDetail.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Branch().getBranchName());
+                    tfAccountNo.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().getAccountNo());
+                    tfEmployee.setText(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).RecurringExpensePaymentMonitor().RecurringExpenseSchedule().Employee().getCompanyName());
+                }
 
 //                    tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getVatAmount(), true));
-                    tfAmountDetail.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getNetTotal(), true));
+                tfAmountDetail.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poGLControllers.PaymentRequest().Detail(pnTblDetailRow).getNetTotal(), true));
 //                tfTaxAmount.setText("0.00");
-                } catch (SQLException | GuanzonException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                }
+            } catch (SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(PaymentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     private void initButtonsClickActions() {
