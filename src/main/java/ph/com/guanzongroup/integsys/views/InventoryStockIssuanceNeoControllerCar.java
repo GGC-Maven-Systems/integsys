@@ -46,12 +46,15 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.constant.EditMode;
 import javafx.concurrent.Task;
-import static javafx.scene.input.KeyCode.ENTER;
-import static javafx.scene.input.KeyCode.F3;
-import static javafx.scene.input.KeyCode.TAB;
+import javafx.event.EventHandler;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONObject;
 import org.guanzon.cas.inv.warehouse.InventoryStockIssuanceNeo;
 import org.guanzon.cas.inv.warehouse.status.DeliveryIssuanceType;
@@ -94,7 +97,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
 
     @FXML
     TextField tfSearchSerial, tfSearchBarcode, tfSearchDescription, tfSupersede, tfBrand, tfModel, tfColor,
-            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty;
+            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty, tfProjectCode, tfQOH;
 
     @FXML
     Button btnNew, btnUpdate, btnSearch, btnBrowse, btnSave, btnCancel, btnHistory, btnRetrieve, btnClose, btnVoid;
@@ -110,7 +113,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
 
     @FXML
     TableColumn<Model_Inventory_Transfer_Detail, String> tblColDetailNo, tblColDetailOrderNo, tblColDetailSerial, tblColDetailBarcode, tblColDetailDescr,
-            tblColDetailBrand, tblColDetailVariant, tblColDetailCost, tblColDetailOrderQty;
+            tblColDetailBrand, tblColDetailVariant, tblColDetailCost, tblColDetailQOH, tblColDetailOrderQty;
 
     @FXML
     Label lblSource, lblStatus;
@@ -199,6 +202,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                 }
 
                 getLoadedTransaction();
+
                 initButtonDisplay(poAppController.getEditMode());
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
 
@@ -374,10 +378,10 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                     if (ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to save transaction?") != true) {
                         return;
                     }
-
                     if (!isJSONSuccess(poAppController.SaveTransaction(), "Initialize Save Transaction")) {
                         return;
                     }
+
                     if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
                         if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
                             return;
@@ -388,6 +392,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                             }
                         }
                     }
+
                     reloadTableDetail();
                     getLoadedTransaction();
                     pnEditMode = poAppController.getEditMode();
@@ -405,7 +410,6 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                         }
 
                         Platform.runLater(() -> {
-
                             poAppController.setTransactionStatus("10");
                             poAppController.getMaster().setIndustryId(psIndustryID);
                             poAppController.setIndustryID(psIndustryID);
@@ -470,6 +474,29 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                         appUnload.unloadForm(apMainAnchor, poApp, psFormName);
                     }
                     break;
+                case "btnVoid":
+                    if (tfTransNo.getText().isEmpty()) {
+                        ShowMessageFX.Information("Please load transaction before proceeding..", null, "Issuance Approval");
+                        return;
+                    }
+
+                    if (ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to Void/Cancel transaction?") == true) {
+                        if (btnVoid.getText().equals("Void")) {
+                            if (!isJSONSuccess(poAppController.VoidTransaction(), "Initialize Void Transaction")) {
+                                return;
+                            }
+                        } else {
+                            if (!isJSONSuccess(poAppController.CancelTransaction(), "Initialize Cancel Transaction")) {
+                                return;
+                            }
+
+                        }
+                        reloadTableDetail();
+                        getLoadedTransaction();
+                        pnEditMode = poAppController.getEditMode();
+                        break;
+                    }
+                    break;
             }
 
             initButtonDisplay(poAppController.getEditMode());
@@ -501,6 +528,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
             loTextField.selectAll();
         }
     };
+
     private final ChangeListener<? super Boolean> txtField_Focus = (o, ov, nv) -> {
         TextField loTextField = (TextField) ((ReadOnlyBooleanPropertyBase) o).getBean();
         String lsTextFieldID = loTextField.getId();
@@ -521,8 +549,6 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                         }
 
                         poAppController.getMaster().setFreight(Double.parseDouble(lsValue));
-                        poAppController.getMaster().setTransactionTotal(poAppController.getMaster().getFreight() - computeDiscount(
-                                poAppController.getMaster().getFreight(), poAppController.getMaster().getDiscount()));
                         loadTransactionMaster();
                         break;
 
@@ -535,7 +561,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                         if (tfDiscountRate.getText() != null && !tfDiscountRate.getText().isEmpty()) {
                             try {
                                 double discountRate = Double.parseDouble(tfDiscountRate.getText());
-                                if (discountRate < 0) {
+                                if (discountRate <= 0) {
                                     ShowMessageFX.Information(
                                             "Invalid discount amount. Please add freight amount first.",
                                             psFormName, null
@@ -545,7 +571,16 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                                     poAppController.getMaster().setDiscount(0.0);
                                     return;
                                 }
-                                // Continue with valid discount rate logic here...
+                                if (discountRate > 99) {
+                                    ShowMessageFX.Information(
+                                            "Invalid discount amount",
+                                            psFormName, null
+                                    );
+                                    tfDiscountRate.requestFocus();
+                                    tfDiscountAmount.setText("0.0");
+                                    poAppController.getMaster().setDiscount(0.0);
+                                    return;
+                                }
 
                             } catch (NumberFormatException e) {
                                 ShowMessageFX.Information(
@@ -617,12 +652,15 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                             lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
                             ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
                             loTextField.setText(String.valueOf(lnIssuedQty));
+                            tfIssuedQty.requestFocus();
                         }
+
                         poAppController.getDetail(pnTransactionDetail).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
                         loadSelectedTransactionDetail(pnTransactionDetail);
                         break;
+
                 }
             } else {
                 loTextField.selectAll();
@@ -700,6 +738,13 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                                 }
                                 tfTrucking.setText(poAppController.getMaster().TruckingCompany().getCompanyName());
                                 break;
+                            case "tfProjectCode":
+                                if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
+                                        "Initialize Search Trucking! ")) {
+                                    return;
+                                }
+                                tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+                                break;
                             case "tfSearchSerial":
                                 if (pnTransactionDetail > 0) {
                                     if (!isJSONSuccess(poAppController.searchDetailByIssuance(pnTransactionDetail, tfSearchSerial.getText(), false, true),
@@ -743,6 +788,8 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                                     loadSelectedTransactionDetail(pnTransactionDetail);
                                 }
                                 break;
+                            
+
                         }
                         break;
                 }
@@ -880,6 +927,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
         tfVariant.setText(tblColDetailVariant.getCellData(tblIndex));
         tfCost.setText(tblColDetailCost.getCellData(tblIndex));
         tfIssuedQty.setText(tblColDetailOrderQty.getCellData(tblIndex));
+        tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
 
 //        taNote.setText(poAppController.getDetail(fnRow).getNote());
@@ -971,6 +1019,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                 }
             }
         });
+      
         clearAllInputs();
     }
 
@@ -1071,6 +1120,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
 
             tblColDetailCost.setStyle("-fx-alignment: CENTER-RIGHT; -fx-padding: 0 5 0 0;");
             tblColDetailOrderQty.setStyle("-fx-alignment: CENTER; -fx-padding: 0 5 0 0;");
+            tblColDetailQOH.setStyle("-fx-alignment: CENTER; -fx-padding: 0 5 0 0;");
 
             tblColDetailNo.setCellValueFactory((loModel) -> {
                 int index = tblViewDetails.getItems().indexOf(loModel.getValue()) + 1;
@@ -1143,6 +1193,15 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
                 }
             });
 
+            tblColDetailQOH.setCellValueFactory((loModel) -> {
+                try {
+                    return new SimpleStringProperty(String.valueOf(loModel.getValue().InventoryMaster().getQuantityOnHand()));
+                } catch (SQLException | GuanzonException e) {
+                    poLogWrapper.severe(psFormName, e.getMessage());
+                    return new SimpleStringProperty("");
+                }
+            });
+
             tblColDetailOrderQty.setCellValueFactory((loModel) -> new SimpleStringProperty(String.valueOf(loModel.getValue().getQuantity())));
 
         }
@@ -1161,6 +1220,7 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
 
         pnTransactionDetail = tblViewDetails.getSelectionModel().getSelectedIndex() + 1; // Not focusedIndex
         tblViewDetails.refresh();
+        computeTotal();
     }
 
     private void getLoadedTransaction() throws SQLException, GuanzonException, CloneNotSupportedException {
@@ -1285,4 +1345,5 @@ public class InventoryStockIssuanceNeoControllerCar implements Initializable, Sc
         poAppController.getMaster().setTransactionTotal(lnTotalAmount);
         tfTotal.setText(CommonUtils.NumberFormat(poAppController.getMaster().getTransactionTotal(), "###,###,##0.00"));
     }
+    
 }
