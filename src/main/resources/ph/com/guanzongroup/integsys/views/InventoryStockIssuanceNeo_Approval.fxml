@@ -539,7 +539,7 @@
                                                                         </AnchorPane>
                                                                         <TextField fx:id="tfTotalDebitAmount" alignment="CENTER_RIGHT" disable="true" editable="false" maxWidth="1.7976931348623157E308" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="5" />
                                                                         <TextField fx:id="tfTotalCreditAmount" alignment="CENTER_RIGHT" disable="true" editable="false" maxWidth="1.7976931348623157E308" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="6" />
-                                                                        <TextArea fx:id="taJournalRemarks" maxWidth="1.7976931348623157E308" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.rowSpan="3">
+                                                                        <TextArea fx:id="taJournalRemarks" editable="false" maxWidth="1.7976931348623157E308" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.rowSpan="3">
                                                                            <GridPane.margin>
                                                                               <Insets top="1.0" />
                                                                            </GridPane.margin>
@@ -548,7 +548,7 @@
                                                                   </GridPane>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane fx:id="apJournalDetails" minWidth="800.0" style="-fx-border-color: FF8201;">
+                                                            <AnchorPane fx:id="apJournalDetails" disable="true" minWidth="800.0" style="-fx-border-color: FF8201;">
                                                                <children>
                                                                   <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <columnConstraints>
@@ -574,8 +574,8 @@
                                                                         <Label text="Reverse" GridPane.columnIndex="6" />
                                                                         <Label text="Debit Amount" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                                                                         <Label text="Credit Amount" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                                                        <TextField fx:id="tfAccountCode" promptText="Press F3: Search" GridPane.columnIndex="2" />
-                                                                        <TextField fx:id="tfAccountDescription" maxWidth="1.7976931348623157E308" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                                                                        <TextField fx:id="tfAccountCode" GridPane.columnIndex="2" />
+                                                                        <TextField fx:id="tfAccountDescription" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                                                                         <DatePicker fx:id="dpReportMonthYear" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                         <CheckBox fx:id="cbJEReverse" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="8" />
                                                                         <TextField fx:id="tfDebitAmount" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="1" />
