@@ -43,7 +43,6 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -84,8 +83,6 @@ public class POReturnPosting_SPCarController implements Initializable, ScreenInt
     private String psSupplierId = "";
     private String psBranchId = "";
     private String psSearchSupplierId = "";
-    private String psSearchBranchId = "";
-    private String openedAttachment = "";
     private boolean pbEntered = false;
     private boolean pbEnteredJE = false;
 
@@ -96,13 +93,11 @@ public class POReturnPosting_SPCarController implements Initializable, ScreenInt
     private FilteredList<ModelDeliveryAcceptance_Detail> filteredDataDetail;
     Map<String, String> imageinfo_temp = new HashMap<>();
 
-    private FileChooser fileChooser;
 
     private int currentIndex = 0;
     boolean lbSelectTabJE = false;
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    private final Map<String, List<String>> highlightedRowsDetail = new HashMap<>();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean tooltipShown = false;
@@ -1216,7 +1211,6 @@ public class POReturnPosting_SPCarController implements Initializable, ScreenInt
             }
         });
         JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelDeliveryAcceptance_Main) item).getIndex01(), highlightedRowsMain);
-        JFXUtil.applyRowHighlighting(tblViewDetails, item -> ((ModelDeliveryAcceptance_Detail) item).getIndex01(), highlightedRowsDetail);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails, tblViewJEDetails);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList, tblViewDetails, tblViewJEDetails);
     }
@@ -1297,9 +1291,10 @@ public class POReturnPosting_SPCarController implements Initializable, ScreenInt
                     }
                     break;
                 case "tblViewJEDetails":
-                    if (!details_data.isEmpty()) {
-                        pnJEDetail = Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07());
-                        loadRecordDetail();
+                    if (!JEdetails_data.isEmpty()) {
+                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07()) : 
+                                Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        loadRecordJEDetail();
                     }
                     break;
             }
@@ -1310,8 +1305,6 @@ public class POReturnPosting_SPCarController implements Initializable, ScreenInt
         Platform.runLater(() -> {
             imageinfo_temp.clear();
             JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-            psSearchSupplierId = "";
-            psSearchBranchId = "";
             psSupplierId = "";
             psBranchId = "";
 
