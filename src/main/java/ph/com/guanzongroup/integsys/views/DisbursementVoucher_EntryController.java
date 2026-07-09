@@ -699,6 +699,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                             try {
                                 poController.initFields();
                                 JSONObject loNewJSON = poController.NewTransaction();
+                                poJSON = loNewJSON;
                                 loProcessResult.set(loNewJSON);
                             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                                 throw new RuntimeException(ex);
@@ -934,25 +935,25 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                 }
             }
         } else {
-            ShowMessageFX.Warning(null, pxeModuleName, "Data can only be viewed when in ADD or UPDATE mode.");
-//            if ("error".equals(poJSON.get("result"))) {
-//                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                return;
-//            }
-//            Platform.runLater(() -> {
-//                btnNew.fire();
-//                if ("error".equals(poJSON.get("result"))) {
-//                    return;
-//                }
-//                JFXUtil.runWithDelay(0.30, () -> {
-//                    tblViewMainList.getSelectionModel().select(pnMain);
-//                    pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-//                    if (pnMain >= 0) {
-//                        loadTableDetailFromMain();
-//                        initButton(pnEditMode);
-//                    }
-//                });
-//            });
+//            ShowMessageFX.Warning(null, pxeModuleName, "Data can only be viewed when in ADD or UPDATE mode.");
+            if ("error".equals(poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                return;
+            }
+            Platform.runLater(() -> {
+                btnNew.fire();
+                if ("error".equals(poJSON.get("result"))) {
+                    return;
+                }
+                JFXUtil.runWithDelay(0.30, () -> {
+                    tblViewMainList.getSelectionModel().select(pnMain);
+                    pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                    if (pnMain >= 0) {
+                        loadTableDetailFromMain();
+                        initButton(pnEditMode);
+                    }
+                });
+            });
         }
     }
 
