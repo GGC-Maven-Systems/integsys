@@ -2336,7 +2336,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                                 loadRecordMasterCheck();
                                 break;
                             case "tfPayeeName":
-                                poJSON = poController.SearchPayee(poController.Master().getSupplierClientID(), true, false);
+                                poJSON = poController.SearchPayee(poController.Master().getSupplierClientID(), false, false);
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     loadRecordMasterCheck();
@@ -3518,7 +3518,6 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             case JournalProposalStatus.CANCELLED:
                 lsMessage = lbIsCbChecked ? "activate" : "cancel";
                 return ShowMessageFX.YesNo(null, pxeModuleName, "This action will " + lsMessage + " the selected proposal.\nWould you like to proceed?");
-
         }
         return true;
     }
