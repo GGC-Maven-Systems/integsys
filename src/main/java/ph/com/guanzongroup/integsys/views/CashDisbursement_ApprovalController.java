@@ -74,7 +74,6 @@ import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
-import org.guanzon.appdriver.constant.UserRight;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.cashflow.CashDisbursement;
@@ -257,9 +256,9 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     poController.setTransactionStatus(CashDisbursementStatus.VERIFIED);
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     poController.setForm(CashDisbursementStatus.APPROVED);
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -521,73 +520,8 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apDVMaster1, apDVDetail, apJournalDetails, apJournalProposalDetails, apJournalProposalMaster, apBIRDetail);
                     break;
                 case "btnSave":
-                    //Recheck transaction status
-                    if (pnEditMode == EditMode.UPDATE) {
-                        poJSON = poController.checkUpdateTransaction(false);
-                        if (!"success".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                    }
-
-                    if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
-                        return;
-                    }
-
-//                        if (oApp.getUserLevel() > UserRight.ENCODER) {
-//                            if (!pbIsCheckedJournalTab) {
-//                                ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Entry before saving."); //only require check this only if higher than encoder
-//                                return;
-//                            }
-//                        }
-//                        if (!pbIsCheckedBIRTab && poController.Master().getVATAmount() > 0.0000) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, "Please check the BIR 2307 before saving."); // check this for encoder or and higher
-//                            return;
-//                        }
-                    poJSON = poController.SaveTransaction();
-                    if (!"success".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
-
-                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
-                    //Arsiela 03-05-2026 Moved to class save others
-//                    poJSON = poController.updatePaymentsStatus();
-//                    if ("error".equals(poJSON.get("result"))) {
-//                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                    }
-                    poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                    if ("success".equals(poJSON.get("result"))) {
-                        pnEditMode = poController.getEditMode();
-                        initButton(pnEditMode);
-                    }
-                    if (pnEditMode == EditMode.READY) {
-                        if (CashDisbursementStatus.VERIFIED.equals(poController.Master().getTransactionStatus())) {
-                            if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) { //requires to review journal entry
-                                if (!checkJEorJEPSaving()) {
-                                    break;
-                                }
-                                if (!pbIsCheckedBIRTab && poController.Master().getVatAmount() > 0.0000) {
-                                    ShowMessageFX.Warning(null, pxeModuleName, "Please check the BIR 2307 before approving.");
-                                    break;
-                                } else {
-                                    poJSON = poController.ApproveTransaction();
-                                    if ("error".equals((String) poJSON.get("result"))) {
-                                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                        break;
-                                    } else {
-                                        ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                        JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
-                                    }
-                                }
-
-                            }
-                        }
-
-                    }
-                    JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
-                    break;
+                    handleLoading(lsButton);
+                    return;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to disregard changes?")) {
                         JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
@@ -702,34 +636,166 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     ShowMessageFX.Warning(null, pxeModuleName, "Button is not registered, Please contact admin to assist about the unregistered button");
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnReturn")) {
-                pbIsCheckedJournalTab = false;
-                pbIsCheckedBIRTab = false;
-                poController.resetTransaction();
-//                poController.Master().setSupplierClientID(psSupplierPayeeId);
-                clearTextFields();
-                JFXUtil.clickTabByTitleText(tabPaneMain, "Cash Disbursement");
-                pnEditMode = EditMode.UNKNOWN;
-            }
-
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
-            } else {
-                loadRecordMaster();
-                loadTableDetail.reload();
-                loadTableDetailJE.reload();
-                loadTableDetailBIR.reload();
-                loadTableAttachment.reload();
-                loadTableMainJEP.reload();
-                loadTableDetailJEP.reload();
-            }
-            initButton(pnEditMode);
-            if (lsButton.equals("btnUpdate")) {
-                moveNext(false, false);
-            }
+            cmdReloadProcess(lsButton);
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    private void cmdReloadProcess(String lsButton) {
+        if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnReturn")) {
+            pbIsCheckedJournalTab = false;
+            pbIsCheckedBIRTab = false;
+            poController.resetTransaction();
+            clearTextFields();
+            JFXUtil.clickTabByTitleText(tabPaneMain, "Cash Disbursement");
+            pnEditMode = EditMode.UNKNOWN;
+        }
+
+        if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+        } else {
+            loadRecordMaster();
+            loadTableDetail.reload();
+            loadTableDetailJE.reload();
+            loadTableDetailBIR.reload();
+            loadTableAttachment.reload();
+            loadTableMainJEP.reload();
+            loadTableDetailJEP.reload();
+        }
+        initButton(pnEditMode);
+        if (lsButton.equals("btnUpdate")) {
+            moveNext(false, false);
+        }
+    }
+
+    private Stage getOwnerStage() {
+        return AnchorMain != null
+                && AnchorMain.getScene() != null
+                ? (Stage) AnchorMain.getScene().getWindow()
+                : null;
+    }
+
+    private void handleLoading(String lsButton) {
+        switch (lsButton) {
+            case "btnSave":
+                AtomicReference<JSONObject> loSaveResultRef = new AtomicReference<>();
+                AtomicReference<JSONObject> loOpenResultRef = new AtomicReference<>();
+
+                try {
+                    if (pnEditMode == EditMode.UPDATE) {
+                        poJSON = poController.checkUpdateTransaction(false);
+                        if (!"success".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            return;
+                        }
+                    }
+                } catch (SQLException | CloneNotSupportedException | GuanzonException | ScriptException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    return;
+                }
+
+                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+                    return;
+                }
+
+                runWithLoadingAllowFxDialogs(
+                        () -> {
+                            try {
+                                JSONObject loSaveJSON = poController.SaveTransaction();
+                                loSaveResultRef.set(loSaveJSON);
+
+                                if ("success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                    JSONObject loOpenJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+                                    loOpenResultRef.set(loOpenJSON);
+                                }
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        },
+                        () -> {
+                            try {
+                                JSONObject loSaveJSON = loSaveResultRef.get();
+                                if (loSaveJSON == null) {
+                                    ShowMessageFX.Error(null, pxeModuleName, "Unable to save transaction.");
+                                    return;
+                                }
+
+                                if (!"success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(loSaveJSON.get("message")));
+                                    return;
+                                }
+
+                                ShowMessageFX.Information(null, pxeModuleName, String.valueOf(loSaveJSON.get("message")));
+
+                                JSONObject loOpenJSON = loOpenResultRef.get();
+                                if (loOpenJSON != null && "success".equals(String.valueOf(loOpenJSON.get("result")))) {
+                                    pnEditMode = poController.getEditMode();
+                                    initButton(pnEditMode);
+                                }
+
+                                if (pnEditMode == EditMode.READY) {
+                                    if (CashDisbursementStatus.VERIFIED.equals(poController.Master().getTransactionStatus())) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+                                            if (!checkJEorJEPSaving()) {
+                                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                                cmdReloadProcess("btnSave");
+                                                return;
+                                            }
+                                            if (!pbIsCheckedBIRTab && poController.Master().getVatAmount() > 0.0000) {
+                                                ShowMessageFX.Warning(null, pxeModuleName, "Please check the BIR 2307 before approving.");
+                                            } else {
+                                                poJSON = poController.ApproveTransaction();
+                                                if ("error".equals((String) poJSON.get("result"))) {
+                                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                                } else {
+                                                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                                    JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                cmdReloadProcess("btnSave");
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
+                        },
+                        ex -> {
+                            Throwable loRoot = ex.getCause() != null ? ex.getCause() : ex;
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, loRoot);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(loRoot));
+                        }
+                );
+                break;
+        }
+    }
+
+    private void runWithLoadingAllowFxDialogs(Runnable fxTask, Runnable onSuccess, java.util.function.Consumer<Throwable> onError) {
+        AtomicReference<Throwable> loError = new AtomicReference<>();
+
+        JFXUtil.runWithLoading(
+                getOwnerStage(),
+                apButton,
+                () -> {
+                    try {
+                        fxTask.run();
+                    } catch (Throwable ex) {
+                        loError.set(ex);
+                    }
+                },
+                () -> {
+                    if (loError.get() != null) {
+                        onError.accept(loError.get());
+                        return;
+                    }
+                    onSuccess.run();
+                }
+        );
     }
 
     private List<String> checkJEorJEP() {

@@ -230,9 +230,9 @@ public class CashDisbursement_HistoryController implements Initializable, Screen
                     poController.setIndustryId(psIndustryId);
                     poController.setCompanyId(psCompanyId);
                     loadRecordSearch();
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                     TriggerWindowEvent();
                     filterIndustry();
-                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
