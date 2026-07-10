@@ -478,11 +478,8 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
                         return;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
-                    ClearAll();
-
-                    initializeObject();
-                    pnEditMode = poTBJControllers.TBJParameter().getEditMode();
-                    initButtons(pnEditMode);
+                        ClearAll();
+                        btnNew.fire();
                 } catch (ParseException ex) {
                     Logger.getLogger(TBJ_ParameterController.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -496,11 +493,8 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
                         return;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
-                    ClearAll();
-
-                    initializeObject();
-                    pnEditMode = poTBJControllers.TBJParameter().getEditMode();
-                    initButtons(pnEditMode);
+                        ClearAll();
+                        btnNew.fire();
                 } catch (ParseException ex) {
                     Logger.getLogger(TBJ_ParameterController.class.getName()).log(Level.SEVERE, null, ex);
                     ShowMessageFX.Error(ex.getMessage(), psFormName, null);
@@ -664,6 +658,11 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
                             poTBJControllers.TBJParameter()
                                 .Detail(pnSelectedDetail)
                                 .setAccountType("C");
+                    }
+                    poJSON = poTBJControllers.TBJParameter().checkDuplicateDetail();
+                    if (!"success".equals((String) poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                        return;
                     }
                     loadTableDetail(); // refresh table after change
                 }
