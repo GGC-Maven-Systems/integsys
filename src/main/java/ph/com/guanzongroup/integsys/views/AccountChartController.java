@@ -300,8 +300,8 @@ public class AccountChartController implements Initializable, ScreenInterface {
                     btnBrowse, btnNew, btnClose,btnHistory);
             CustomCommonUtil.setManaged(false, btnSave, btnUpdate, btnVoid, btnDeactivate, btnCancel, btnConfirm,
                     btnBrowse, btnNew, btnClose,btnHistory);
-            txtSeeks01.setDisable(false);
-            AnchorInputs.setDisable(true);
+//            txtSeeks01.setDisable(false);
+//            AnchorInputs.setDisable(true);
 
             switch (fnValue) {
                 case EditMode.ADDNEW:
@@ -309,12 +309,12 @@ public class AccountChartController implements Initializable, ScreenInterface {
                     // When adding or updating, only show Save and Cancel
                     CustomCommonUtil.setVisible(true, btnSave, btnCancel);
                     CustomCommonUtil.setManaged(true, btnSave, btnCancel);
-                    txtSeeks01.setDisable(true);
+//                    txtSeeks01.setDisable(true);
                     AnchorInputs.setDisable(false);
                     break;
 
                 case EditMode.READY:
-                    txtSeeks01.setDisable(false);
+//                    txtSeeks01.setDisable(false);
                     AnchorInputs.setDisable(true);
                     
                     boolean projectExists = oParameters.AccountChart().getModel().getAccountCode()!= null
@@ -440,17 +440,19 @@ public class AccountChartController implements Initializable, ScreenInterface {
                             ShowMessageFX.Warning((String)poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
+                        break;
                     case 4:
                         poJSON = oParameters.AccountChart().getModel().setParentAccountCode(lsValue);
                         if("error".equals((String)poJSON.get("result"))){
                             ShowMessageFX.Warning((String)poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
+                        break;
 //                    case 5:
 //                        oParameters.AccountChart().getModel().setAccountGroup(lsValue);
 //                    case 6:
 //                        oParameters.AccountChart().getModel().setReportGroup(lsValue);
-                        break;
+
                     default:
                         break;
                 }
@@ -472,7 +474,6 @@ public class AccountChartController implements Initializable, ScreenInterface {
             ClientControllers oAPClient;
             switch (event.getCode()) {
                 case F3:
-
                     switch (lnIndex) {
 
                         case 03:
@@ -501,6 +502,7 @@ public class AccountChartController implements Initializable, ScreenInterface {
                             break;
 
                     }
+                    break;
                 case ENTER:
             }
             switch (event.getCode()) {
@@ -528,12 +530,29 @@ public class AccountChartController implements Initializable, ScreenInterface {
                 case F3:
                     switch (lnIndex) {
                         case 01:
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                boolean proceed = ShowMessageFX.YesNo(
+                                        "Unsaved changes will be discarded if you continue with the search.\nDo you want to proceed?",
+                                        pxeModuleName,
+                                        null);
+
+                                if (!proceed) {
+                                    return;
+                                }
+                            }
+
                             poJson = oParameters.AccountChart().searchRecord(lsValue, false);
+
                             if ("error".equals((String) poJson.get("result"))) {
-                                ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
+                                ShowMessageFX.Information(
+                                        (String) poJson.get("message"),
+                                        "Computerized Accounting System",
+                                        pxeModuleName);
+
                                 txtSeeks01.clear();
                                 break;
                             }
+
                             txtSeeks01.setText((String) oParameters.AccountChart().getModel().getDescription());
                             pnEditMode = oParameters.AccountChart().getEditMode();
                             loadRecord();
