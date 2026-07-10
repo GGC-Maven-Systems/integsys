@@ -1040,6 +1040,7 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
             tfDiscountAmount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
             tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
             taRemarks.setText(poAppController.getMaster().getRemarks());
+            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
 
             computeTotal();
             cbDelType.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getDeliveryType()));
@@ -1534,13 +1535,27 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
                     break;
                 case "Journal":
                     if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
-                        JFXUtil.clearTextFields(apJournalDetails, apJournalMaster);
-                        if (laTransactionDetail != null && !laTransactionDetail.isEmpty()) {
-                            pbIsCheckedJournalTab = true;
-                            populateJE();
-                        } else {
+                        try {
+                            JFXUtil.clearTextFields(apJournalDetails, apJournalMaster);
+                            //if all ready posted/confirmed/cancell block population of journal
+                            if (!poAppController.getMaster().getTransactionStatus().equals("0")) {
+                                if (poAppController.existJournal().isEmpty()) {
+                                    JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                    ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+
+                                    return;
+                                }
+                            }
+                            if (laTransactionDetail != null && !laTransactionDetail.isEmpty()) {
+                                pbIsCheckedJournalTab = true;
+                                populateJE();
+                            } else {
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                ShowMessageFX.Warning(null, psFormName, lsValidDisbMessage);
+                            }
+                        } catch (SQLException ex) {
                             JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
-                            ShowMessageFX.Warning(null, psFormName, lsValidDisbMessage);
+                            ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
                         }
                     }
                     break;

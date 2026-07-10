@@ -304,6 +304,13 @@ public class InventoryStockIssuanceNeoControllerMC_SP implements Initializable, 
                                 loadSelectedTransactionDetail(pnTransactionDetail);
                             }
                             break;
+                        case "tfProjectCode":
+                            if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
+                                    "Initialize Search Trucking! ")) {
+                                return;
+                            }
+                            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+                            break;
                     }
                     break;
 
@@ -788,7 +795,6 @@ public class InventoryStockIssuanceNeoControllerMC_SP implements Initializable, 
                                     loadSelectedTransactionDetail(pnTransactionDetail);
                                 }
                                 break;
-                            
 
                         }
                         break;
@@ -897,6 +903,7 @@ public class InventoryStockIssuanceNeoControllerMC_SP implements Initializable, 
             tfDiscountAmount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
             tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
             taRemarks.setText(poAppController.getMaster().getRemarks());
+            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
 
             computeTotal();
             cbDelType.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getDeliveryType()));
@@ -1019,7 +1026,7 @@ public class InventoryStockIssuanceNeoControllerMC_SP implements Initializable, 
                 }
             }
         });
-      
+
         clearAllInputs();
     }
 
@@ -1345,5 +1352,5 @@ public class InventoryStockIssuanceNeoControllerMC_SP implements Initializable, 
         poAppController.getMaster().setTransactionTotal(lnTotalAmount);
         tfTotal.setText(CommonUtils.NumberFormat(poAppController.getMaster().getTransactionTotal(), "###,###,##0.00"));
     }
-    
+
 }
