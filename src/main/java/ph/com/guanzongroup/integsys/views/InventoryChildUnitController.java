@@ -226,7 +226,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     private void processAction(String action) {
-        try {
+//        try {
             //        try {
             if (checkedItem.stream().anyMatch("1"::equals)) {
             } else {
@@ -271,11 +271,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             }
             checkedItem.clear();
             loadTableMain.reload();
-        } catch (SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
+//        } catch (SQLException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+//        } catch (GuanzonException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     private void initCheckboxes() {
