@@ -148,6 +148,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
+                        checkedItem.clear();
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -244,13 +245,13 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             for (Object item : tblViewMainList.getItems()) {
                 ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
                 String lschecked = item1.getIndex01();
-                int lnReference = Integer.valueOf(item1.getIndex02());
+                int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
                 if (lschecked.equals("1")) {
                     checkedItems.add(poController.Detail(lnReference));
                     System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
                 }
             }
-            if (!checkedItems.isEmpty()) {
+            if (checkedItems.isEmpty()) {
                 return;
             }
             switch (action) {
@@ -271,8 +272,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
             }
-            checkedItem.clear();
-            loadTableMain.reload();
+            pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
@@ -283,7 +283,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 (row, rowIndex, colIndex, newVal) -> {
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
-                        case 1:
+                        case 0:
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
@@ -330,9 +330,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                         new ModelInventoryChildUnit(checkedItem.get(lnCtr),
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Measure().getDescription(),
-                                                poController.Detail(lnCtr).UnitConversion().getConversionId(),
-                                                "",
-                                                poController.Detail(lnCtr).Inventory().isRecordActive() ? "Active" : "Inactive"
+                                                poController.Detail(lnCtr).UnitConversion().getConversionID(),
+                                                String.valueOf(poController.Detail(lnCtr).UnitConversion().getQuantityConverted()),
+                                                poController.getStatus(poController.Detail(lnCtr).getRecordStatus())
                                         ));
                             }
                             if (pnMain < 0 || pnMain
@@ -368,6 +368,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     public void loadRecordMaster() {
         try {
+            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
@@ -378,7 +379,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfMeasure.setText(poController.Detail(pnMain).Measure().getDescription());
-            tfConversion.setText(poController.Detail(pnMain).UnitConversion().getConversionId());
+            tfConversion.setText(poController.Detail(pnMain).UnitConversion().getConversionID());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -407,6 +408,16 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                poJSON = poController.populateDetail();
+                                if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                    return;
+                                }
+                                checkedItem.clear();
+                                main_data.clear();
+                                JFXUtil.clearTextFields(apMaster);
+                                pnEditMode = poController.getEditMode();
                             }
                             break;
                         case "tfBarcode":
@@ -536,7 +547,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     private void initButton(int fnValue) {
-        disableRowCheckbox.set(!main_data.isEmpty()); // set enable/disable in checkboxes in requirements
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
