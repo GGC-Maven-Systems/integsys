@@ -554,14 +554,14 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             return;
         }
 
-        switch (poController.Master().getRecordStatus()) {
+        switch (poController.Detail(pnMain).getRecordStatus()) {
             case InventoryChildUnit.RecordStatus.DEACTIVATE:
-                JFXUtil.setButtonsVisibility(false, btnDeactivate);
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(true, btnActivate);
                 break;
             case InventoryChildUnit.RecordStatus.ACTIVE:
-                JFXUtil.setButtonsVisibility(true, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(true, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnActivate);
                 break;
             default:
                 break;
