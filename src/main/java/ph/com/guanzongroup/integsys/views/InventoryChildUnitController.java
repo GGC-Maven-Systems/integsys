@@ -97,6 +97,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 //                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 loadRecordSearch();
+                poController.setRecordStatus("0134");
                 btnNew.fire();
             });
         } catch (SQLException | GuanzonException ex) {
@@ -141,13 +142,14 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
+                        } else {
+                            poJSON = poController.populateDetail();
+                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            }
                         }
 
-                        poJSON = poController.populateDetail();
-                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
