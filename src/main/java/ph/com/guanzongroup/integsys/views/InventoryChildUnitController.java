@@ -148,7 +148,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        checkedItem.clear();
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -415,7 +414,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
                                 }
-                                checkedItem.clear();
                                 main_data.clear();
                                 JFXUtil.clearTextFields(apMaster);
                                 pnEditMode = poController.getEditMode();
