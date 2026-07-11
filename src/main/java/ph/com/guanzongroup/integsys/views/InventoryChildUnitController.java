@@ -432,6 +432,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         }
     }
     boolean lbProceed = true;
+    boolean pbKeyPressed = false;
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
@@ -470,6 +471,22 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             }
                             break;
                         case "tfBarcode":
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (poController.getDetailCount() > 1) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
+                                        poController.Detail().clear();
+                                        clearTextFields();
+                                        loadTableMain.reload();
+                                        loadRecordMaster();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
+                            lbProceed = false;
                             poJSON = poController.SearchInventory(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -478,6 +495,22 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             }
                             break;
                         case "tfDescription":
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (poController.getDetailCount() > 1) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
+                                        poController.Detail().clear();
+                                        clearTextFields();
+                                        loadTableMain.reload();
+                                        loadRecordMaster();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
+                            lbProceed = false;
                             poJSON = poController.SearchInventory(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -524,12 +557,60 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 switch (lsID) {
                     case "tfBarcode":
                         if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setStockId("");
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnMain).getStockId(), null, "") && lbProceed) {
+                                    if (poController.getDetailCount() > 1) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
+                                                poController.Detail().clear();
+                                                clearTextFields();
+                                                loadTableMain.reload();
+                                                loadRecordMaster();
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        } else {
+                                            loadRecordMaster();
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                            if (lbProceed) { // uniquely inserted due to retrieval delay
+                                poController.Detail(pnMain).setStockId("");
+                                loadRecordMaster();
+                            }
                         }
                         break;
                     case "tfDescription":
                         if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setStockId("");
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnMain).getStockId(), null, "") && lbProceed) {
+                                    if (poController.getDetailCount() > 1) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
+                                                poController.Detail().clear();
+                                                clearTextFields();
+                                                loadTableMain.reload();
+                                                loadRecordMaster();
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        } else {
+                                            loadRecordMaster();
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                            if (lbProceed) { // uniquely inserted due to retrieval delay
+                                poController.Detail(pnMain).setStockId("");
+                                loadRecordMaster();
+                            }
                         }
                         break;
                     case "tfMeasure":
