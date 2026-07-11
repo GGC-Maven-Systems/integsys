@@ -227,50 +227,50 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     private void processAction(String action) {
 //        try {
-            //        try {
-            if (checkedItem.stream().anyMatch("1"::equals)) {
-            } else {
-                ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + action + ".");
-                return;
-            }
+        //        try {
+        if (checkedItem.stream().anyMatch("1"::equals)) {
+        } else {
+            ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + action + ".");
+            return;
+        }
 
-            if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + action + " selected item/s?")) {
-                return;
-            }
-            checkedItems.clear();
-            for (Object item : tblViewMainList.getItems()) {
-                ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
-                String lschecked = item1.getIndex01();
-                String lsReference = item1.getIndex09();
+        if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + action + " selected item/s?")) {
+            return;
+        }
+        checkedItems.clear();
+        for (Object item : tblViewMainList.getItems()) {
+            ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
+            String lschecked = item1.getIndex01();
+            String lsReference = item1.getIndex09();
 
-                if (lschecked.equals("1")) {
-                    checkedItems.add(lsReference);
-                    System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
-                }
+            if (lschecked.equals("1")) {
+                checkedItems.add(lsReference);
+                System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
             }
-            if (!checkedItems.isEmpty()) {
-                return;
-            }
-            switch (action) {
-                case "btnActivate":
+        }
+        if (!checkedItems.isEmpty()) {
+            return;
+        }
+        switch (action) {
+            case "btnActivate":
 //                    poJSON = poController.Activate(checkedItems);
-                    break;
-                case "btnDeactivate":
+                break;
+            case "btnDeactivate":
 //                    poJSON = poController.Deactivate(checkedItems);
-                    break;
-                case "btnDisapprove":
+                break;
+            case "btnDisapprove":
 //                poJSON = poController.Disapprove(checkedItems);
-                    break;
-                default:
-                    break;
-            }
-            if (!"success".equals((String) poJSON.get("result"))) {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            } else {
-                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-            }
-            checkedItem.clear();
-            loadTableMain.reload();
+                break;
+            default:
+                break;
+        }
+        if (!"success".equals((String) poJSON.get("result"))) {
+            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+        } else {
+            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+        }
+        checkedItem.clear();
+        loadTableMain.reload();
 //        } catch (SQLException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //        } catch (GuanzonException ex) {
@@ -301,6 +301,16 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 }, 0);//starts 0,1,2 
     }
 
+    private void checkedItems(int lnCtr) {
+        try {
+            if (checkedItem.get(lnCtr) == null) {
+                checkedItem.add("0");
+            }
+        } catch (Exception e) {
+            checkedItem.add("0");
+        }
+    }
+
     public void initLoadTable() {
         loadTableMain = new JFXUtil.ReloadableTableTask(
                 tblViewMainList,
@@ -315,8 +325,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             int lnRowCount = 0;
                             for (int lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 lnRowCount += 1;
+                                checkedItems(lnCtr);
                                 main_data.add(
-                                        new ModelInventoryChildUnit("",
+                                        new ModelInventoryChildUnit(checkedItem.get(lnCtr),
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Inventory().Measure().getDescription(),
                                                 poController.Detail(lnCtr).Inventory().Measure().getDescription(),
@@ -365,7 +376,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
-            tfMeasure.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
+            tfMeasure.setText(poController.Detail(pnMain).Inventory().Measure().getMeasureId());
             tfConversion.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
@@ -461,7 +472,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         break;
                     case "tfMeasure":
                         if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setMeasureId("");
+//                            poController.Detail(pnMain).setMeasureId("");
                         }
                         break;
                 }
@@ -518,7 +529,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     private void initButton(int fnValue) {
-        disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+        disableRowCheckbox.set(!main_data.isEmpty()); // set enable/disable in checkboxes in requirements
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
@@ -535,7 +546,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         if (pnEditMode != EditMode.READY) {
             return;
         }
-      
+
         switch (poController.Master().getRecordStatus()) {
             case "3":
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
