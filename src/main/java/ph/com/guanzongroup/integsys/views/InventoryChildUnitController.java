@@ -68,7 +68,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     @FXML
     private TextField tfStockID, tfBarcode, tfConversion, tfDescription, tfMeasure, tfSearchStock;
     @FXML
-    private Label lblStatus2, lblSource1;
+    private Label lblStatus, lblSource1;
     @FXML
     private TableView tblViewMainList;
     @FXML
@@ -371,8 +371,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-            boolean lbShow = JFXUtil.isObjectEqualTo(pnEditMode, EditMode.ADDNEW, EditMode.UPDATE, EditMode.READY) & !main_data.isEmpty();
 
+            boolean lbShow = JFXUtil.isObjectEqualTo(pnEditMode, EditMode.ADDNEW, EditMode.UPDATE, EditMode.READY) & !main_data.isEmpty();
+            JFXUtil.setStatusValue(lblStatus, InventoryChildUnit.RecordStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
@@ -548,11 +549,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         }
 
         switch (poController.Master().getRecordStatus()) {
-            case "3":
+            case InventoryChildUnit.RecordStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
                 break;
-            case "1":
+            case InventoryChildUnit.RecordStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
                 break;
