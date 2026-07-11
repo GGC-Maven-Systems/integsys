@@ -356,7 +356,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                         new ModelInventoryChildUnit(checkedItem.get(lnCtr),
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Measure().getDescription(),
-                                                poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription(),
+                                                poController.Detail(lnCtr).UnitConversion().ConvertTo().getDescription(),
                                                 String.valueOf(poController.Detail(lnCtr).UnitConversion().getQuantityConverted()),
                                                 poController.getStatus(poController.Detail(lnCtr).getRecordStatus())
                                         ));
