@@ -240,11 +240,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             checkedItems.clear();
             for (Object item : tblViewMainList.getItems()) {
                 ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
-                String lschecked = item1.getIndex02();
-                String lsDVNO = item1.getIndex09();
+                String lschecked = item1.getIndex01();
+                String lsReference = item1.getIndex09();
 
                 if (lschecked.equals("1")) {
-                    checkedItems.add(lsDVNO);
+                    checkedItems.add(lsReference);
                     System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
                 }
             }
@@ -253,13 +253,13 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             }
             switch (action) {
                 case "btnActivate":
-                    poJSON = poController.activateRecord();
+//                    poJSON = poController.Activate(checkedItems);
                     break;
                 case "btnDeactivate":
-                    poJSON = poController.deactivateRecord();
+//                    poJSON = poController.Deactivate(checkedItems);
                     break;
                 case "btnDisapprove":
-//                poJSON = poController.Activate(checkedItems);
+//                poJSON = poController.Disapprove(checkedItems);
                     break;
                 default:
                     break;
