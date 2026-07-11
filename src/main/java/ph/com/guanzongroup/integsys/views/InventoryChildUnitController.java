@@ -453,6 +453,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 main_data.clear();
                                 JFXUtil.clearTextFields(apMaster);
                                 pnEditMode = poController.getEditMode();
+                                initButton(pnEditMode);
                             }
                             break;
                         case "tfBarcode":
@@ -560,7 +561,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow, tblDetailStatus);
-        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert);
+        JFXUtil.setColumnRight(tblDetailConversion);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailQtyConvert);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
