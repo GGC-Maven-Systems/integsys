@@ -236,14 +236,27 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     private void processAction(String action) {
         try {
-            //        try {
+            String lsMessage = "";
+            switch (action) {
+                case "btnActivate":
+                    lsMessage = "activate";
+                    break;
+                case "btnDeactivate":
+                    lsMessage = "deactivate";
+                    break;
+                case "btnDisapprove":
+                    lsMessage = "disapprove";
+                    break;
+                default:
+                    break;
+            }
             if (checkedItem.stream().anyMatch("1"::equals)) {
             } else {
-                ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + action + ".");
+                ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + lsMessage + ".");
                 return;
             }
 
-            if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + action + " selected item/s?")) {
+            if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
                 return;
             }
             checkedItems.clear();
