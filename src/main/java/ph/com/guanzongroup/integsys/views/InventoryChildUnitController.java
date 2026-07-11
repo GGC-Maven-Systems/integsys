@@ -371,9 +371,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-
-            boolean lbShow = JFXUtil.isObjectEqualTo(pnEditMode, EditMode.ADDNEW, EditMode.UPDATE, EditMode.READY) & !main_data.isEmpty();
-            JFXUtil.setStatusValue(lblStatus, InventoryChildUnit.RecordStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
+            boolean lbShow = poController.getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, apMaster);
+            lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
