@@ -158,7 +158,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         }
                         break;
                     case "btnNew":
-//                        poController.Detail().clear();
+                        poController.Detail().clear();
                         clearTextFields();
                         poController.initialize();
                         poJSON = poController.NewTransaction();
@@ -357,6 +357,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     public void loadRecordMaster() {
         try {
+            if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
+                return;
+            }
             boolean lbShow = JFXUtil.isObjectEqualTo(pnEditMode, EditMode.ADDNEW, EditMode.UPDATE, EditMode.READY) & !main_data.isEmpty();
 
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
