@@ -6,7 +6,6 @@ package ph.com.guanzongroup.integsys.views;
 
 import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelDisbursementVoucher_Detail;
-import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
@@ -26,7 +25,6 @@ import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -63,7 +61,6 @@ import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.Logical;
 import org.guanzon.appdriver.constant.RecordStatus;
-import org.guanzon.cas.purchasing.services.PurchaseOrderReceivingControllers;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.cashflow.DisbursementVoucher;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
@@ -93,12 +90,9 @@ public class DisbursementVoucher_ViewController implements Initializable, Screen
     private String psCategoryId = "";
     private String psTransactionNo = "";
 
-    private unloadForm poUnload = new unloadForm();
     private ObservableList<ModelDisbursementVoucher_Detail> details_data = FXCollections.observableArrayList();
-    private FilteredList<ModelDisbursementVoucher_Detail> filteredDataDetailDV;
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     private ObservableList<ModelBIR_Detail> BIR_data = FXCollections.observableArrayList();
-    private FilteredList<ModelJournalEntry_Detail> filteredJournal_Data;
     Map<String, String> imageinfo_temp = new HashMap<>();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
@@ -248,7 +242,7 @@ public class DisbursementVoucher_ViewController implements Initializable, Screen
                             try {
                                 poController.loadAttachments();
                             } catch (GuanzonException | SQLException ex) {
-                                Logger.getLogger(DisbursementVoucher_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                             loadTableAttachment.reload();
                         } else {
@@ -453,7 +447,8 @@ public class DisbursementVoucher_ViewController implements Initializable, Screen
                             }
                             loadRecordMaster();
                         } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(DisbursementVoucher_ViewController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });

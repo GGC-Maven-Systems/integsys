@@ -380,14 +380,14 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
                             return;
                         }
                     case "btnHistory":
-                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
-                        } 
-                        
+                        }
+
                         try {
                             poPurchaseReceivingController.PurchaseOrderReceiving().ShowStatusHistory();
-                        }  catch (NullPointerException npe) {
+                        } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
                             ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
@@ -513,9 +513,9 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
                         break;
                     case "btnAddAttachment":
                         fileChooser = new FileChooser();
-                        fileChooser.setTitle("Choose Image");
+                        fileChooser.setTitle("Choose Attachment");
                         fileChooser.getExtensionFilters().addAll(
-                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                                new FileChooser.ExtensionFilter("Image / PDF Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.pdf")
                         );
                         java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
 
@@ -2679,28 +2679,6 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
         }
     }
 
-    private void adjustImageSize(Image image) {
-        double imageRatio = image.getWidth() / image.getHeight();
-        double containerRatio = ldstackPaneWidth / ldstackPaneHeight;
-
-        // Unbind before setting new values
-        imageView.fitWidthProperty().unbind();
-        imageView.fitHeightProperty().unbind();
-
-        if (imageRatio > containerRatio) {
-            // Image is wider than container → fit width
-            imageView.setFitWidth(ldstackPaneWidth);
-            imageView.setFitHeight(ldstackPaneWidth / imageRatio);
-        } else {
-            // Image is taller than container → fit height
-            imageView.setFitHeight(ldstackPaneHeight);
-            imageView.setFitWidth(ldstackPaneHeight * imageRatio);
-        }
-
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-    }
-
     private void stackPaneClip() {
         javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(
                 stackPane1.getWidth() - 8, // Subtract 10 for padding (5 on each side)
@@ -2754,22 +2732,12 @@ public class DeliveryAcceptance_ConfirmationMCController implements Initializabl
         cmbAttachmentType.getSelectionModel().select(0);
     }
 
-    public void generateAttachment() {
-        attachment_data.add(new ModelDeliveryAcceptance_Attachment("0", "C:/Users/User/Downloads/a4-blank-template_page-0001.jpg"));
-
-    }
-
 // Generic method to highlight with specific color
     public <T> void highlight(TableView<T> table, int rowIndex, String color, Map<Integer, List<String>> highlightMap) {
         highlightMap.computeIfAbsent(rowIndex, k -> new ArrayList<>()).add(color);
         table.refresh(); // Refresh to apply changes
     }
 
-// Generic method to remove highlight from a specific row
-    public <T> void disableHighlight(TableView<T> table, int rowIndex, Map<Integer, List<String>> highlightMap) {
-        highlightMap.remove(rowIndex);
-        table.refresh();
-    }
 
 // Generic method to remove all highlights
     public <T> void disableAllHighlight(TableView<T> table, Map<Integer, List<String>> highlightMap) {

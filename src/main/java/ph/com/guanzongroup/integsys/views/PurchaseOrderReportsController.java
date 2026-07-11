@@ -78,7 +78,8 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
     private String searchSupplier = "";
     private String searchCategory = "";
     private LocalDate datefrom ;
-    private Boolean isSearching = true;
+    private Boolean isSearching = false;
+    private volatile boolean isLoading = false;
     
     private static final int ROWS_PER_PAGE = 50;
     private List<ModelTableDetail> allData = new ArrayList<>();
@@ -359,43 +360,77 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
 
                             case "tfCategory":
                                 isSearching = true;
-                                poJSON = poPurchasingController.PurchaseOrder().SearchCategory(lsValue, false);
-                                if ("error".equals(poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                    return;
+
+                                try {
+                                    poJSON = poPurchasingController.PurchaseOrder().
+                                            SearchCategoryReports(lsValue, false);
+
+                                    if ("error".equals(poJSON.get("result"))) {
+                                        return;
+                                    }
+
+                                    tfCategory.setText((String)poJSON.get("category"));
+                                    searchCategory = (String)poJSON.get("categoryID");
+                                    loadTableMaster();
+                                } finally {
+                                    isSearching = false;
                                 }
-                                tfCategory.setText(poPurchasingController.PurchaseOrder().Master().Category().getDescription());
-                                searchCategory = poPurchasingController.PurchaseOrder().Master().Category().getCategoryId();
+
                                 break;
                             case "tfBranch":
                                 isSearching = true;
-                                poJSON = poPurchasingController.PurchaseOrder().SearchBranch(lsValue, false);
-                                if ("error".equals(poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                    return;
+
+                                try {
+                                    poJSON = poPurchasingController.PurchaseOrder()
+                                            .SearchBranchReports(lsValue, false);
+
+                                    if ("error".equals(poJSON.get("result"))) {
+                                        return;
+                                    }
+
+                                    tfBranch.setText((String)poJSON.get("branch"));
+                                    searchBranch = (String)poJSON.get("branchID");
+                                    loadTableMaster();
+                                } finally {
+                                    isSearching = false;
                                 }
-                                tfBranch.setText(poPurchasingController.PurchaseOrder().Master().Branchx().getBranchName());
-                                searchBranch= poPurchasingController.PurchaseOrder().Master().Branchx().getBranchCode();
+
                                 break;
                             case "tfDestination":
                                 isSearching = true;
-                                poJSON = poPurchasingController.PurchaseOrder().SearchDestination(lsValue, false);
-                                if ("error".equals(poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                    return;
+
+                                try {
+                                    poJSON = poPurchasingController.PurchaseOrder()
+                                            .SearchDestinationReports(lsValue, false);
+
+                                    if ("error".equals(poJSON.get("result"))) {
+                                        return;
+                                    }
+
+                                    tfDestination.setText((String)poJSON.get("destination"));
+                                    searchDestination = (String)poJSON.get("destinationID");
+                                    loadTableMaster();
+                                } finally {
+                                    isSearching = false;
                                 }
-                                tfDestination.setText(poPurchasingController.PurchaseOrder().Master().Branch().getBranchName());
-                                searchDestination = poPurchasingController.PurchaseOrder().Master().Branch().getBranchCode();
                                 break;
                             case "tfSupplier":
                                 isSearching = true;
-                                poJSON = poPurchasingController.PurchaseOrder().SearchSupplier(lsValue, false);
-                                if ("error".equals(poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                    return;
+
+                                try {
+                                    poJSON = poPurchasingController.PurchaseOrder()
+                                            .SearchSupplierReports(lsValue, false);
+
+                                    if ("error".equals(poJSON.get("result"))) {
+                                        return;
+                                    }
+
+                                    tfSupplier.setText((String) poJSON.get("supplier"));
+                                    searchSupplier = (String) poJSON.get("supplierID");
+                                    loadTableMaster();
+                                } finally {
+                                    isSearching = false;
                                 }
-                                tfSupplier.setText(poPurchasingController.PurchaseOrder().Master().Supplier().getCompanyName());
-                                searchSupplier = poPurchasingController.PurchaseOrder().Master().Supplier().getClientId();
                                 break;
                         }
                         break;
@@ -405,10 +440,7 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
                         break;
                     default:
                         break;
-                        
-
                 }
-                loadTableMaster();
             } catch (SQLException | GuanzonException | ExceptionInInitializerError ex) {
                 Logger.getLogger(PurchaseOrderReportsController.class.getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(ex.getMessage(), psFormName, null);
@@ -418,37 +450,36 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
 
     ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-
+                if (isSearching) {
+                    return;
+                }
 //            try {
                 /* Lost Focus */
                 switch (lsID) {
                     case "tfCategory":
                         if(lsValue == null || lsValue.isEmpty()){
-                            poPurchasingController.PurchaseOrder().Master().setCategoryCode("");
                             searchCategory = "";
+                            loadTableMaster();
                         }
                         break;
                     case "tfBranch":
                         if(lsValue == null || lsValue.isEmpty()){
-                            poPurchasingController.PurchaseOrder().Master().setBranchCode("");
                             searchBranch = "";
+                            loadTableMaster();
                         }
                         break;
                     case "tfDestination":
                         if(lsValue == null || lsValue.isEmpty()){
-                            poPurchasingController.PurchaseOrder().Master().setDestinationID("");
                             searchDestination = "";
+                            loadTableMaster();
                         }
                         break;
                     case "tfSupplier":
-                        if(lsValue == null || lsValue.isEmpty()){
-                            poPurchasingController.PurchaseOrder().Master().setSupplierID("");
+                        if (lsValue == null || lsValue.isEmpty()) {
                             searchSupplier = "";
+                            loadTableMaster();
                         }
                         break;
-                }
-                if (!isSearching) {
-                    loadTableMaster();
                 }
             });
 
@@ -569,11 +600,19 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
     }
 
     private void loadTableMaster() {
+
+        if (isLoading) {
+            return;
+        }
+
+        isLoading = true;
+
         btnRetrieve.setDisable(true);
 
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setMaxHeight(50);
         progressIndicator.setStyle("-fx-progress-color: #FF8201;");
+
         StackPane loadingPane = new StackPane(progressIndicator);
         loadingPane.setAlignment(Pos.CENTER);
 
@@ -585,27 +624,34 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
         Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
+
                 try {
-                    detail_data.clear();
+
+                    ObservableList<ModelTableDetail> tempData
+                            = FXCollections.observableArrayList();
+
+                    if (data != null) {
+                        data.clear();
+                    }
 
                     if (isSummarized) {
                         poJSON = poPurchasingController.PurchaseOrder()
-                                .RetriveSummaryReports(true, 
-                                          dpDateFrom.getValue(),
-                                          dpDateThru.getValue(),
-                                           searchBranch,
+                                .RetriveSummaryReports(true,
+                                        dpDateFrom.getValue(),
+                                        dpDateThru.getValue(),
+                                        searchBranch,
                                         searchDestination,
-                                          searchSupplier,
-                                          searchCategory);
+                                        searchSupplier,
+                                        searchCategory);
                     } else {
                         poJSON = poPurchasingController.PurchaseOrder()
-                                .RetriveSummaryDetailedReports(true, 
-                                          dpDateFrom.getValue(),
-                                          dpDateThru.getValue(),
-                                           searchBranch,
+                                .RetriveSummaryDetailedReports(false,
+                                        dpDateFrom.getValue(),
+                                        dpDateThru.getValue(),
+                                        searchBranch,
                                         searchDestination,
-                                          searchSupplier,
-                                          searchCategory);
+                                        searchSupplier,
+                                        searchCategory);
                     }
 
                     if ("success".equals(poJSON.get("result"))) {
@@ -613,10 +659,11 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
                         data = (JSONArray) poJSON.get("data");
 
                         for (int i = 0; i < data.size(); i++) {
+
                             JSONObject obj = (JSONObject) data.get(i);
 
                             if (isSummarized) {
-                                detail_data.add(new ModelTableDetail(
+                                tempData.add(new ModelTableDetail(
                                         String.valueOf(i + 1),
                                         obj.get("Supplier") == null ? "" : obj.get("Supplier").toString(),
                                         obj.get("Destination") == null ? "" : obj.get("Destination").toString(),
@@ -631,7 +678,7 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
 
                                 ));
                             } else {
-                                detail_data.add(new ModelTableDetail(
+                                tempData.add(new ModelTableDetail(
                                         String.valueOf(i + 1),
                                         obj.get("Supplier") == null ? "" : obj.get("Supplier").toString(),
                                         obj.get("Destination") == null ? "" : obj.get("Destination").toString(),
@@ -647,10 +694,10 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
                                         obj.get("nReceived") == null ? "" : obj.get("nReceived").toString(),
                                         obj.get("nCancelld") == null ? "" : obj.get("nCancelld").toString(),
                                         obj.get("UnitPrice") == null ? ""
-                                        : CustomCommonUtil.setIntegerValueToDecimalFormat(
+                                                : CustomCommonUtil.setIntegerValueToDecimalFormat(
                                                 Double.parseDouble(obj.get("UnitPrice").toString()), true),
                                         obj.get("Total") == null ? ""
-                                        : CustomCommonUtil.setIntegerValueToDecimalFormat(
+                                                : CustomCommonUtil.setIntegerValueToDecimalFormat(
                                                 Double.parseDouble(obj.get("Total").toString()), true)
                                 ));
                             }
@@ -658,34 +705,58 @@ public class PurchaseOrderReportsController implements Initializable, ScreenInte
                     }
 
                     Platform.runLater(() -> {
+
+                        detail_data.setAll(tempData);
+
                         if (detail_data.isEmpty()) {
-                            tblVwOrderDetails.setPlaceholder(new Label("NO RECORD TO LOAD"));
+                            tblVwOrderDetails.setPlaceholder(
+                                    new Label("NO RECORD TO LOAD"));
                         }
+
                         tblVwOrderDetails.setItems(detail_data);
                     });
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+
                 return null;
             }
 
             @Override
             protected void succeeded() {
+
+                isLoading = false;
+
                 progressIndicator.setVisible(false);
                 btnRetrieve.setDisable(false);
+
                 initPrint();
-                if (detail_data == null || detail_data.isEmpty()) {
-                    tblVwOrderDetails.setPlaceholder(new Label("NO RECORD TO LOAD"));
-                    ShowMessageFX.Warning("NO RECORD TO LOAD.", psFormName, null);
+
+                if (detail_data.isEmpty()) {
+                    tblVwOrderDetails.setPlaceholder(
+                            new Label("NO RECORD TO LOAD"));
+
+                    ShowMessageFX.Warning(
+                            "NO RECORD TO LOAD.",
+                            psFormName,
+                            null);
                 }
+
                 setupPagination();
             }
 
             @Override
             protected void failed() {
+
+                isLoading = false;
+
                 progressIndicator.setVisible(false);
                 btnRetrieve.setDisable(false);
+
+                if (getException() != null) {
+                    getException().printStackTrace();
+                }
             }
         };
 

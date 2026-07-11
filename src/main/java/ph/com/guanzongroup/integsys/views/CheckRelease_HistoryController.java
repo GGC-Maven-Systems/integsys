@@ -187,17 +187,22 @@ public class CheckRelease_HistoryController implements Initializable, ScreenInte
         }
     }
     private void initButton(int fnEditMode) {
-       if (fnEditMode == EditMode.UNKNOWN){
+
         btnPrint.setVisible(false);
         btnPrint.setManaged(false);
         btnPost.setVisible(false);
         btnPost.setManaged(false);
-       }else if(fnEditMode == EditMode.READY){
-           btnPrint.setVisible(true);
-           btnPrint.setManaged(true);
-           btnPost.setVisible(true);
-           btnPost.setManaged(true);
-       }
+//       if (fnEditMode == EditMode.UNKNOWN){
+////        btnPrint.setVisible(false);
+////        btnPrint.setManaged(false);
+//        btnPost.setVisible(false);
+//        btnPost.setManaged(false);
+////       }else if(fnEditMode == EditMode.READY){
+////           btnPrint.setVisible(true);
+////           btnPrint.setManaged(true);
+//           btnPost.setVisible(true);
+//           btnPost.setManaged(true);
+//       }
     }
     private void ClearAll() {
         Arrays.asList(
@@ -269,78 +274,90 @@ public class CheckRelease_HistoryController implements Initializable, ScreenInte
                     }
 
                     break;
-                case "btnPrint":
-                   if(poGLControllers.CheckReleases().Master().getTransactionNo() != null ||
-                            poGLControllers.CheckReleases().Master().getTransactionNo().isEmpty()){
-                       
-                            poJSON = poGLControllers.CheckReleases().printTransaction();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                return;
-                            }
-                   }
-                   
-                    break;
-                    
-                case "btnPost":
-                    
-                    if (poGLControllers.CheckReleases().Master().getTransactionNo() == null
-                            || poGLControllers.CheckReleases().Master().getTransactionNo().isEmpty()) {
+                /*This Block of Codes was disabled
+                 * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                 * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                 * @Author  : TEEJEI
+                 * @Date    : 07-03-2026
+                 */
+//                case "btnPrint":
+//                   if(poGLControllers.CheckReleases().Master().getTransactionNo() != null ||
+//                            poGLControllers.CheckReleases().Master().getTransactionNo().isEmpty()){
+//
+//                            poJSON = poGLControllers.CheckReleases().printTransaction();
+//                            if (!"success".equals((String) poJSON.get("result"))) {
+//                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+//                                return;
+//                            }
+//                   }
+//
+//                    break;
 
-                        ShowMessageFX.Warning("No transaction selected.", psFormName, null);
-                        return;
-                    }
-                    poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                return;
-                            }
-                            pnEditMode = poGLControllers.CheckReleases().getEditMode();
-                    if(poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.VOID)){
-                     ShowMessageFX.Warning(
-                                "Transaction already voided.\n Posting of this transaction is not allowed.",
-                                psFormName, null
-                        );
-                        
-                        return;
-                    }
-                     if(poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.POSTED)){
-                     ShowMessageFX.Warning(
-                                "Transaction already posted.\n Posting of this transaction is not allowed.",
-                                psFormName, null
-                        );
-                        
-                        return;
-                    }
-                    if(!poGLControllers.CheckReleases().Master().isPrintedStatus()){
-                     ShowMessageFX.Warning(
-                                "Posting is not allowed. Please print the transaction before proceeding.",
-                                psFormName, null
-                        );
-                        return;
-                    }
-
-                    if (!poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.CONFIRMED)) {
-                        ShowMessageFX.Warning(
-                                "Posting is not allowed. Please confirm  the transaction before proceeding.",
-                                psFormName, null
-                        );
-                        return;
-                    }
-
-                    poJSON = poGLControllers.CheckReleases().PostTransaction("");
-
-                    if (!"success".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                        return;
-                    }
-
-                    ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
-                    
-                    ClearAll();
-                    initializeObject();
-                    pnEditMode = poGLControllers.CheckReleases().getEditMode();
-                    break;
+                  /*This Block of Codes was disabled
+                  * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
+                  * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725
+                  * @Author  : TEEJEI
+                  * @Date    : 07-03-2026
+                  */
+//                case "btnPost":
+//
+//                    if (poGLControllers.CheckReleases().Master().getTransactionNo() == null
+//                            || poGLControllers.CheckReleases().Master().getTransactionNo().isEmpty()) {
+//
+//                        ShowMessageFX.Warning("No transaction selected.", psFormName, null);
+//                        return;
+//                    }
+//                    poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
+//                            if (!"success".equals((String) poJSON.get("result"))) {
+//                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+//                                return;
+//                            }
+//                            pnEditMode = poGLControllers.CheckReleases().getEditMode();
+//                    if(poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.VOID)){
+//                     ShowMessageFX.Warning(
+//                                "Transaction already voided.\n Posting of this transaction is not allowed.",
+//                                psFormName, null
+//                        );
+//
+//                        return;
+//                    }
+//                     if(poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.POSTED)){
+//                     ShowMessageFX.Warning(
+//                                "Transaction already posted.\n Posting of this transaction is not allowed.",
+//                                psFormName, null
+//                        );
+//
+//                        return;
+//                    }
+//                    if(!poGLControllers.CheckReleases().Master().isPrintedStatus()){
+//                     ShowMessageFX.Warning(
+//                                "Posting is not allowed. Please print the transaction before proceeding.",
+//                                psFormName, null
+//                        );
+//                        return;
+//                    }
+//
+//                    if (!poGLControllers.CheckReleases().Master().getTransactionStatus().equals(CheckTransferStatus.CONFIRMED)) {
+//                        ShowMessageFX.Warning(
+//                                "Posting is not allowed. Please confirm  the transaction before proceeding.",
+//                                psFormName, null
+//                        );
+//                        return;
+//                    }
+//
+//                    poJSON = poGLControllers.CheckReleases().PostTransaction("");
+//
+//                    if (!"success".equals((String) poJSON.get("result"))) {
+//                        ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+//                        return;
+//                    }
+//
+//                    ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
+//
+//                    ClearAll();
+//                    initializeObject();
+//                    pnEditMode = poGLControllers.CheckReleases().getEditMode();
+//                    break;
                 
 
                 default:

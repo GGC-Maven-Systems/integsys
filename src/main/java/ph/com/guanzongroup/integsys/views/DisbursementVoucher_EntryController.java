@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -46,14 +47,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import static javafx.scene.input.KeyCode.DOWN;
-import static javafx.scene.input.KeyCode.ENTER;
-import static javafx.scene.input.KeyCode.F3;
-import static javafx.scene.input.KeyCode.TAB;
-import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -223,6 +220,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
     }
+
     ChangeListener<Scene> WindowKeyEvent = (obs, oldScene, newScene) -> {
         if (newScene != null) {
             setKeyEvent(newScene);
@@ -533,20 +531,9 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                     poController.populateJournal();
                     break;
                 case "btnNew":
-                    clearTextFields();
-                    poController.initFields();
-                    poJSON = poController.NewTransaction();
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
-                    poController.Master().setDisbursementType(DisbursementStatic.DisbursementType.CHECK);
-                    poController.Master().setSupplierClientID(psSupplierPayeeId);
-                    JFXUtil.clickTabByTitleText(tabPaneMain, "Disbursement Voucher");
-                    pnEditMode = poController.getEditMode();
-                    System.out.println("UI JOURNAL EDIT MODE :  " + poController.Journal().getEditMode());
-                    JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
-                    break;
+                case "btnSave":
+                    handleWithLoading(lsButton);
+                    return;
                 case "btnUpdate":
                     String lsUserId = oApp.getUserID();
                     String lsPosition = poController.checkPosition(DisbursementStatic.OPEN, lsUserId);
@@ -575,56 +562,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                 case "btnSearch":
                     JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apJournalProposalMaster, apJournalProposalDetails, apBrowse, apDVMaster1, apMasterDVCheck, apMasterDVBTransfer, apMasterDVOp, apDVDetail, apJournalDetails, apBIRDetail);
                     break;
-                case "btnSave":
-                    //Recheck transaction status
-                    if (pnEditMode == EditMode.UPDATE) {
-                        poJSON = poController.checkUpdateTransaction(true);
-                        if (!"success".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                    }
 
-                    if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
-                        return;
-                    }
-                    poJSON = poController.SaveTransaction();
-                    if (!"success".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
-                    JFXUtil.showRetainedHighlight(true, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
-
-                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
-                    //Arsiela 03-05-2026 Moved to class save others
-//                    poJSON = poController.updatePaymentsStatus();
-//                    if ("error".equals(poJSON.get("result"))) {
-//                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                    }
-                    poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                    if ("success".equals(poJSON.get("result"))) {
-                        pnEditMode = poController.getEditMode();
-                        initButton(pnEditMode);
-                    }
-                    if (pnEditMode == EditMode.READY) {
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-                            if (!pbIsCheckedBIRTab && poController.Master().getVATAmount() > 0.0000) {
-                                ShowMessageFX.Warning(null, pxeModuleName, "Please check the BIR 2307 before confirming.");
-                                break;
-                            } else {
-                                poJSON = poController.ConfirmTransaction("");
-                                if ("error".equals((String) poJSON.get("result"))) {
-                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                    break;
-                                } else {
-                                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                }
-                            }
-                        }
-                    }
-                    Platform.runLater(() -> btnNew.fire());
-                    break;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to disregard changes?")) {
                         JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
@@ -638,7 +576,6 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                         ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                         return;
                     }
-
                     try {
                         poController.ShowStatusHistory();
                     } catch (NullPointerException npe) {
@@ -709,32 +646,169 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                     ShowMessageFX.Warning(null, pxeModuleName, "Button is not registered, Please contact admin to assist about the unregistered button");
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVoid")) {
-                pbIsCheckedBIRTab = false;
-                poController.resetTransaction();
-                poController.Master().setSupplierClientID(psSupplierPayeeId);
-                clearTextFields();
-                JFXUtil.clickTabByTitleText(tabPaneMain, "Disbursement Voucher");
-                pnEditMode = EditMode.UNKNOWN;
-            }
-
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
-            } else {
-                loadRecordMaster();
-                loadTableDetail.reload();
-                loadTableDetailJE.reload();
-                loadTableDetailBIR.reload();
-                loadTableAttachment.reload();
-                loadTableMainJEP.reload();
-                loadTableDetailJEP.reload();
-            }
-            initButton(pnEditMode);
-            if (lsButton.equals("btnUpdate")) {
-                moveNext(false, false);
-            }
+            cmdReloadProcess(lsButton);
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void cmdReloadProcess(String lsButton) {
+        if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVoid")) {
+            pbIsCheckedBIRTab = false;
+            poController.resetTransaction();
+            poController.Master().setSupplierClientID(psSupplierPayeeId);
+            clearTextFields();
+            JFXUtil.clickTabByTitleText(tabPaneMain, "Disbursement Voucher");
+            pnEditMode = EditMode.UNKNOWN;
+        }
+
+        if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
+        } else {
+            loadRecordMaster();
+            loadTableDetail.reload();
+            loadTableDetailJE.reload();
+            loadTableDetailBIR.reload();
+            loadTableAttachment.reload();
+            loadTableMainJEP.reload();
+            loadTableDetailJEP.reload();
+        }
+        initButton(pnEditMode);
+        if (lsButton.equals("btnUpdate")) {
+            moveNext(false, false);
+        }
+    }
+
+    private Stage getOwnerStage() {
+        return AnchorMain != null
+                && AnchorMain.getScene() != null
+                ? (Stage) AnchorMain.getScene().getWindow()
+                : null;
+    }
+
+    private void handleWithLoading(String lsButton) {
+        AtomicReference<JSONObject> loProcessResult = new AtomicReference<>();
+        AtomicReference<JSONObject> loOpenResultRef = new AtomicReference<>();
+        switch (lsButton) {
+            case "btnNew":
+                clearTextFields();
+                JFXUtil.runWithLoading(
+                        getOwnerStage(),
+                        apButton,
+                        () -> {
+                            try {
+                                poController.initFields();
+                                JSONObject loNewJSON = poController.NewTransaction();
+                                poJSON = loNewJSON;
+                                loProcessResult.set(loNewJSON);
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        },
+                        () -> {
+                            JSONObject loNewJSON = loProcessResult.get();
+                            if (loNewJSON == null) {
+                                ShowMessageFX.Error(null, pxeModuleName, "Unable to create a new transaction.");
+                                return;
+                            }
+
+                            if ("error".equals(String.valueOf(loNewJSON.get("result")))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(loNewJSON.get("message")));
+                                return;
+                            }
+
+                            poController.Master().setDisbursementType(DisbursementStatic.DisbursementType.CHECK);
+                            poController.Master().setSupplierClientID(psSupplierPayeeId);
+                            JFXUtil.clickTabByTitleText(tabPaneMain, "Disbursement Voucher");
+                            pnEditMode = poController.getEditMode();
+                            JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
+
+                            cmdReloadProcess(lsButton);
+                        }
+                );
+                break;
+            case "btnSave":
+                      try {
+                if (pnEditMode == EditMode.UPDATE) {
+                    JSONObject loCheckJSON = poController.checkUpdateTransaction(true);
+                    if (!"success".equals(String.valueOf(loCheckJSON.get("result")))) {
+                        ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(loCheckJSON.get("message")));
+                        return;
+                    }
+                }
+
+                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+                    return;
+                }
+                JFXUtil.runWithLoading(
+                        getOwnerStage(),
+                        apButton,
+                        () -> {
+                            try {
+                                JSONObject loSaveJSON = poController.SaveTransaction();
+                                loProcessResult.set(loSaveJSON);
+
+                                if ("success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                    JSONObject loOpenJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+                                    loOpenResultRef.set(loOpenJSON);
+                                }
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                throw new RuntimeException(ex);
+                            }
+                        },
+                        () -> {
+                            JSONObject loSaveJSON = loProcessResult.get();
+                            if (loSaveJSON == null) {
+                                ShowMessageFX.Error(null, pxeModuleName, "Unable to save transaction.");
+                                return;
+                            }
+
+                            if (!"success".equals(String.valueOf(loSaveJSON.get("result")))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(loSaveJSON.get("message")));
+                                return;
+                            }
+
+                            JFXUtil.showRetainedHighlight(true, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
+                            ShowMessageFX.Information(null, pxeModuleName, String.valueOf(loSaveJSON.get("message")));
+
+                            JSONObject loOpenJSON = loOpenResultRef.get();
+                            if (loOpenJSON != null && "success".equals(String.valueOf(loOpenJSON.get("result")))) {
+                                pnEditMode = poController.getEditMode();
+                                initButton(pnEditMode);
+                            }
+
+                            if (pnEditMode == EditMode.READY && ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
+                                if (!pbIsCheckedBIRTab && poController.Master().getVATAmount() > 0.0000) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, "Please check the BIR 2307 before confirming.");
+                                    btnNew.fire();
+                                    return;
+                                }
+
+                                try {
+                                    poJSON = poController.ConfirmTransaction("");
+                                    if ("error".equals(String.valueOf(poJSON.get("result")))) {
+                                        ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                        btnNew.fire();
+                                        return;
+                                    }
+                                    ShowMessageFX.Information(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                    btnNew.fire();
+                                    return;
+                                }
+                            }
+                            btnNew.fire();
+                        }
+                );
+            } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+            }
+            break;
         }
     }
 
@@ -871,12 +945,14 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                 if ("error".equals(poJSON.get("result"))) {
                     return;
                 }
-                tblViewMainList.getSelectionModel().select(pnMain);
-                pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-                if (pnMain >= 0) {
-                    loadTableDetailFromMain();
-                    initButton(pnEditMode);
-                }
+                JFXUtil.runWithDelay(0.30, () -> {
+                    tblViewMainList.getSelectionModel().select(pnMain);
+                    pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                    if (pnMain >= 0) {
+                        loadTableDetailFromMain();
+                        initButton(pnEditMode);
+                    }
+                });
             });
         }
     }
@@ -1455,9 +1531,10 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
         }
         );
         tblVwJournalProposalList.setOnMouseClicked(event -> {
-            pnMainJEP = tblVwJournalProposalList.getSelectionModel().getSelectedIndex();;
+            pnMainJEP = tblVwJournalProposalList.getSelectionModel().getSelectedIndex();
             if (pnMainJEP >= 0 && event.getClickCount() == 1) {
                 loadTableDetailFromMainJEP();
+                moveNextJEPMain(false, false);
                 initButton(pnEditMode);
             }
         });
@@ -1479,7 +1556,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             }
         });
         JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelDisbursementVoucher_Main) item).getIndex10(), highlightedRowsMain);
-        JFXUtil.setKeyEventFilter(tableKeyEvents, tblVwDetails, tblVwJournalDetails, tblVwBIRDetails);
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblVwDetails, tblVwJournalDetails, tblVwJournalProposalList, tblVwJournalProposalDetails, tblVwBIRDetails, tblAttachments);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList, tblVwDetails, tblVwJournalDetails, tblVwBIRDetails, tblVwJournalProposalList, tblVwJournalProposalDetails);
     }
 
@@ -1548,6 +1625,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
+
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
         protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
@@ -1570,6 +1648,14 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                             : Integer.parseInt(journal_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                     pnDetailJE = newIndex;
                     loadRecordDetailJE();
+                    break;
+                case "tblVwJournalProposalList":
+                    if (journalproposalmain_data.isEmpty()) {
+                        return;
+                    }
+                    newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
+                    pnMainJEP = newIndex;
+                    loadTableDetailFromMainJEP();
                     break;
                 case "tblVwJournalProposalDetails":
                     if (journalproposal_data.isEmpty()) {
@@ -1629,6 +1715,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
         JFXUtil.setCommaFormatter(tfDebitAmount, tfCreditAmount, tfBaseAmount, tfCheckAmount, tfJournalProposalDebitAmount, tfJournalProposalCreditAmount);
 
 //        JFXUtil.setCheckboxHoverCursor(chbkPrintByBank, chbkIsCrossCheck, chbkIsPersonOnly, chbkVatClassification);
+        taJournalProposalRemarks.setOnKeyPressed(this::txtField_KeyPressed);
         JFXUtil.setCommaFormatter2(tfVatExemptDetail);
         JFXUtil.applyHoverTooltip("Undo Reversed item", btnUndo);
         Platform.runLater(() -> {
@@ -1645,6 +1732,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             }
         });
     }
+
     ChangeListener<Boolean> txtSearch_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 /*Lost Focus*/
@@ -2145,9 +2233,9 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
     );
 
     private void txtField_KeyPressed(KeyEvent event) {
-        TextField txtField = (TextField) event.getSource();
-        String lsID = (((TextField) event.getSource()).getId());
-        String lsValue = (txtField.getText() == null ? "" : txtField.getText());
+        TextInputControl txtInput = (TextInputControl) event.getSource();
+        String lsID = txtInput.getId();
+        String lsValue = txtInput.getText() == null ? "" : txtInput.getText();
         String lsBranchCode = "";
         String lsDeparment = "";
         poJSON = new JSONObject();
@@ -2168,7 +2256,10 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                         if (tfBaseAmount.isFocused()) {
                             pbEnteredBIR = true;
                         }
-                        CommonUtils.SetNextFocus(txtField);
+                        if (txtInput instanceof TextField) {
+                            TextField txtField = (TextField) txtInput;
+                            CommonUtils.SetNextFocus(txtField);
+                        }
                         event.consume();
                         break;
                     case F3:
@@ -2246,7 +2337,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                                 loadRecordMasterCheck();
                                 break;
                             case "tfPayeeName":
-                                poJSON = poController.SearchPayee(poController.Master().getSupplierClientID(), true, false);
+                                poJSON = poController.SearchPayee(poController.Master().getSupplierClientID(), false, false);
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     loadRecordMasterCheck();
@@ -2470,6 +2561,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                             {new String[]{"tfPurchasedAmountDetail", "tfTaxCodeDetail", "tfParticularsDetail"}, (Runnable) () -> moveNext(true, true)},
                             {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(true, true)},
                             {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalCreditAmount"}, (Runnable) () -> moveNextJEP(true, true)},
+                            {new String[]{"tfJournalProposalBranch", "tfJournalProposalDepartment", "taJournalProposalRemarks"}, (Runnable) () -> moveNextJEPMain(true, true)},
                             {new String[]{"tfTaxCode", "tfParticular", "tfBaseAmount", "tfTaxRate"}, (Runnable) () -> moveNextBIR(true, true)}
                         });
                         event.consume();
@@ -2479,6 +2571,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                             {new String[]{"tfPurchasedAmountDetail", "tfTaxCodeDetail", "tfParticularsDetail"}, (Runnable) () -> moveNext(false, true)},
                             {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(false, true)},
                             {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalCreditAmount"}, (Runnable) () -> moveNextJEP(false, true)},
+                            {new String[]{"tfJournalProposalBranch", "tfJournalProposalDepartment", "taJournalProposalRemarks"}, (Runnable) () -> moveNextJEPMain(false, true)},
                             {new String[]{"tfTaxCode", "tfParticular", "tfBaseAmount", "tfTaxRate"}, (Runnable) () -> moveNextBIR(false, true)}
                         });
                         event.consume();
@@ -2527,6 +2620,21 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    public void moveNextJEPMain(boolean isUp, boolean continueNext) {
+        if (continueNext) {
+            apJournalProposalMaster.requestFocus();
+            pnMainJEP = isUp ? JFXUtil.moveToPreviousRow(tblVwJournalProposalList) : JFXUtil.moveToNextRow(tblVwJournalProposalList);
+        }
+        loadTableDetailFromMainJEP();
+        if (pnMainJEP < 0 || pnMainJEP > poController.getJournalProposalList().size()) {
+            return;
+        }
+        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+            {poController.JournalProposal(pnMainJEP).Master().getBranchCode(), tfJournalProposalBranch},
+            {poController.JournalProposal(pnMainJEP).Master().getDepartmentId(), tfJournalProposalDepartment},
+            {poController.JournalProposal(pnMainJEP).Master().getRemarks(), taJournalProposalRemarks},}, taJournalProposalRemarks); // default
     }
 
     public void moveNextJE(boolean isUp, boolean continueNext) {
@@ -2997,6 +3105,7 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
         } catch (Exception ex) {
         }
     }
+
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -3319,7 +3428,6 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
                         }
                         loadTableDetail.reload();
                     }
-
                     break;
                 case "cbReverse":
                     if (!checkedBox.isSelected()) {

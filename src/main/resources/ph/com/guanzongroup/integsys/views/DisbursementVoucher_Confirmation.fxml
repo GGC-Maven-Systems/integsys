@@ -134,14 +134,6 @@
                                                 <Blend />
                                             </effect>
                                         </Button>
-                                        <Button fx:id="btnRetrieve" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
-                                            <graphic>
-                                                <FontAwesomeIconView glyphName="LIST_ALT" size="20" />
-                                            </graphic>
-                                            <effect>
-                                                <Blend />
-                                            </effect>
-                                        </Button>
                                         <Button fx:id="btnHistory" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
                                             <effect>
                                                 <Blend />
@@ -149,6 +141,14 @@
                                             <graphic>
                                                 <FontAwesomeIconView glyphName="BOOK" size="20" />
                                             </graphic>
+                                        </Button>
+                                        <Button fx:id="btnRetrieve" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
+                                            <graphic>
+                                                <FontAwesomeIconView glyphName="LIST_ALT" size="20" />
+                                            </graphic>
+                                            <effect>
+                                                <Blend />
+                                            </effect>
                                         </Button>
                                         <Button fx:id="btnClose" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">
                                             <graphic>
@@ -1060,7 +1060,7 @@
                                                                <children>
                                           <TableView fx:id="tblAttachments" prefHeight="200.0" prefWidth="850.0" stylesheets="@../css/Tables.css" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                             <columns>
-                                              <TableColumn fx:id="tblRowNoAttachment" editable="false" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" sortable="false" style="-fx-font-size: 12;" text="No" />
+                                              <TableColumn fx:id="tblRowNoAttachment" editable="false" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" sortable="false" style="-fx-font-size: 12;" text="No" />
                                               <TableColumn fx:id="tblFileNameAttachment" editable="false" maxWidth="283.0" minWidth="-1.0" prefWidth="283.0" sortable="false" style="-fx-font-size: 12;" text="File Name" />
                                             </columns>
                                           </TableView>
@@ -1131,7 +1131,7 @@
                                                         </AnchorPane>
                                                         <TableView fx:id="tblViewMainList" minWidth="242.0" GridPane.rowIndex="1">
                                                             <columns>
-                                                                <TableColumn fx:id="tblRowNo" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false" text="No." />
+                                                                <TableColumn fx:id="tblRowNo" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" sortable="false" text="No." />
                                                                 <TableColumn fx:id="tblSupplier" maxWidth="236.0" minWidth="-1.0" prefWidth="236.0" resizable="false" sortable="false" text="Supplier" />
                                                                 <TableColumn fx:id="tblPaymentForm" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Payment Form" />
                                                                 <TableColumn fx:id="tblTransDate" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Date" />

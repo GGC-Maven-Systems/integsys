@@ -866,21 +866,21 @@ public class JFXUtil {
         imageView.setSmooth(true);
     }
 
-    /* Used for table column value alignment */
+    /* Used for table column value alignment to CENTER */
     public static void setColumnCenter(TableColumn... columns) {
         for (TableColumn column : columns) {
             column.setStyle("-fx-alignment: CENTER;");
         }
     }
 
-    /* Used for table column value alignment */
+    /* Used for table column value alignment to CENTER-LEFT */
     public static void setColumnLeft(TableColumn... columns) {
         for (TableColumn column : columns) {
             column.setStyle("-fx-alignment: CENTER-LEFT;-fx-padding: 0 5 0 5;");
         }
     }
 
-    /* Used for table column value alignment */
+    /* Used for table column value alignment to CENTER-RIGHT */
     public static void setColumnRight(TableColumn... columns) {
         for (TableColumn column : columns) {
             column.setStyle("-fx-alignment: CENTER-RIGHT;-fx-padding: 0 5 0 5;");
@@ -941,6 +941,7 @@ public class JFXUtil {
         }
     }
 
+    //private
     private static void clearTextInputsRecursive(Parent parent) {
         for (Node node : parent.getChildrenUnmodifiable()) {
             if (node instanceof TextInputControl) {
@@ -1365,6 +1366,29 @@ public class JFXUtil {
         return new LoadScreenComponents(progressIndicator, loadingPane, placeholderLabel);
     }
 
+    /*Usage sample
+        private Stage getOwnerStage() {
+        return AnchorMain != null
+                && AnchorMain.getScene() != null
+                ? (Stage) AnchorMain.getScene().getWindow()
+                : null;
+    }
+
+    private void handleSaveWithLoading() {
+        AtomicReference<JSONObject> loProcessResult = new AtomicReference<>();
+        AtomicReference<JSONObject> loOpenResultRef = new AtomicReference<>();
+        JFXUtil.runWithLoading(
+                getOwnerStage(),
+                apButton,
+                () -> {
+               
+                },
+                () -> {
+          
+                }
+        );
+    }
+     */
     // Shared loading helper for controllers that need a modal progress screen.
     public static void runWithLoading(
             Stage foOwner,
@@ -1427,6 +1451,7 @@ public class JFXUtil {
         loProgressIndicator.setStyle("-fx-progress-color: #FF8201;");
 
         Label loLabel = new Label(fsMessage);
+        loLabel.setStyle("-fx-text-fill: #808080; -fx-font-weight: 700;");
 
         VBox loContainer = new VBox(12, loProgressIndicator, loLabel);
         loContainer.setAlignment(Pos.CENTER);
@@ -3338,7 +3363,7 @@ public class JFXUtil {
                 });
     }
 
-    /*Validator for confirmation*/
+    /*Validator for confirmation for selection in lists*/
     public static boolean loadValidation(int pnEditMode, String pxeModuleName, String lsCurrentTransNo, String lsTransactionNo) {
 
         if (pnEditMode == EditMode.UPDATE) {
@@ -3357,7 +3382,7 @@ public class JFXUtil {
         return true;
     }
 
-    /*Validator for entry*/
+    /*Validator for entry for selection in lists*/
     public static boolean loadValidation2(int pnEditMode, String pxeModuleName, String lsCurrentTransNo, String lsTransactionNo, double lnTotal) {
         if (pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
             String lsTrans = pnEditMode == EditMode.UPDATE ? "update mode." : "edit mode.";
@@ -3593,7 +3618,8 @@ public class JFXUtil {
     }
 
     private static Timeline radialTimeline;
-/*Anim used in login*/
+
+    /*Anim used in login*/
     public static void applyClockwiseFillAnimation(AnchorPane targetPane, double speed) {
         Platform.runLater(() -> {
             double width = targetPane.getPrefWidth();

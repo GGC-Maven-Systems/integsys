@@ -508,7 +508,8 @@ public class SIPosting_VerificationSPMCController implements Initializable, Scre
                                 // Confirmation Prompt
                                 JSONObject loJSON = poPurchaseReceivingController.PurchaseOrderReceiving().OpenTransaction(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionNo());
                                 if ("success".equals(loJSON.get("result"))) {
-                                    if (poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus().equals(PurchaseOrderReceivingStatus.OPEN)) {
+                                    if (poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus().equals(PurchaseOrderReceivingStatus.CONFIRMED_I)) {
+                                        populateJE();
                                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to verify this transaction?")) {
                                             loJSON = poPurchaseReceivingController.PurchaseOrderReceiving().VerifySIPosting("");
                                             if ("success".equals((String) loJSON.get("result"))) {

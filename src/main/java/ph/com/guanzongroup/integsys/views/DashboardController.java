@@ -1605,6 +1605,8 @@ public class DashboardController implements Initializable {
             this.controllerClass = entry.getValue();
         }
     }
+    
+    //Utility for Transaction Attachment F5
     ControllerBinding[] controllerArray = new ControllerBinding[]{
         new ControllerBinding(SIPosting_Controller.class),
         new ControllerBinding(SIPosting_CarController.class),
@@ -1662,6 +1664,7 @@ public class DashboardController implements Initializable {
         new ControllerBinding(POQuotation_HistoryController.class),
         new ControllerBinding(CashDisbursement_EntryController.class),
         new ControllerBinding(CashDisbursement_ConfirmationController.class),
+        new ControllerBinding(CashDisbursement_VerificationController.class),
         new ControllerBinding(CashDisbursement_ApprovalController.class),
         new ControllerBinding(CashDisbursement_HistoryController.class),
         new ControllerBinding(PettyCashDisbursement_EntryController.class),
