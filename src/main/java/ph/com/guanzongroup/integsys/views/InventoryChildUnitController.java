@@ -377,7 +377,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     public void loadRecordMaster() {
         try {
             lblStatus.setText("UNKNOWN");
-            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+            } else {
+                disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+            }
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
