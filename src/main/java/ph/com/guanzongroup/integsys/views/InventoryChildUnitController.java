@@ -143,11 +143,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             return;
                         }
 
-                        poController.initialize();
-                        loadRecordMaster();
-                        loadTableMain.reload();
-                        initButton(pnEditMode);
-
+                        poJSON = poController.populateDetail();
+                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            return;
+                        }
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -406,31 +406,35 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         case "tfSearchStock":
                             poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
                         case "tfBarcode":
-                            poJSON = poController.SearchInventory(lsValue, false);
+                            poJSON = poController.SearchInventory(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfMeasure);
                             }
                             break;
                         case "tfDescription":
                             poJSON = poController.SearchInventory(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
                         case "tfMeasure":
                             poJSON = poController.SearchMeasure(lsValue, false, pnMain);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfConversion);
                             }
                             break;
                         case "tfConversion":
                             poJSON = poController.SearchConversion(lsValue, false, pnMain);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
                     }
@@ -440,6 +444,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
@@ -518,7 +524,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (!main_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryChildUnit selected = (ModelInventoryChildUnit) tblViewMainList.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    pnMain = Integer.parseInt(selected.getIndex01()) - 1;
+                    pnMain = Integer.parseInt(selected.getIndex02()) - 1;
                     loadRecordMaster();
                 }
             }
