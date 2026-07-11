@@ -592,6 +592,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
-        JFXUtil.setButtonsVisibility(!lbShow2, btnActivate, btnDeactivate, btnDisapprove);
+        JFXUtil.setButtonsVisibility(lbShow2, btnActivate, btnDeactivate, btnDisapprove);
     }
 }
