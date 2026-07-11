@@ -85,7 +85,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             initButton(pnEditMode);
             initLoadTable();
             initTableOnClick();
-            initDetailsGrid();
+            initMainGrid();
             initCheckboxes();
             Platform.runLater(() -> {
 //                poController.setIndustryID(psIndustryId);
@@ -322,7 +322,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                                 poController.Detail(lnCtr).Inventory().Measure().getDescription(),
                                                 poController.Detail(lnCtr).Inventory().getDescription(),
                                                 "",
-                                                "status"
+                                                poController.Detail(lnCtr).Inventory().isRecordActive() ? "Active" : "Inactive"
                                         ));
                             }
                             if (pnMain < 0 || pnMain
@@ -423,6 +423,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             }
                             break;
                     }
+                    loadTableMain.reload();
                     break;
             }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
@@ -439,6 +440,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         }
                         break;
                 }
+                loadTableMain.reload();
             });
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -464,6 +466,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         }
                         break;
                 }
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableMain.reload();
+                });
             });
 
     public void initTextFields() {
@@ -490,9 +495,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         }
     };
 
-    private void initDetailsGrid() {
-        JFXUtil.setColumnCenter(tblDetailRow1);
-        JFXUtil.setColumnLeft(tblDetailRow, tblDetailMeasure, tblDetailConversion, s, tblDetailStatus);
+    private void initMainGrid() {
+        JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, s, tblDetailStatus);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
