@@ -252,9 +252,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             for (Object item : tblViewMainList.getItems()) {
                 ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
                 String lschecked = item1.getIndex01();
-                list.add(item1.getIndex06());
                 int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
                 if (lschecked.equals("1")) {
+                    list.add(item1.getIndex06());
                     checkedItems.add(poController.Detail(lnReference));
                     System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
                 }
@@ -269,7 +269,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     }
                 }
             }
-            if (!lbAllSame) {
+            if (lbAllSame) {
+            } else {
                 ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items are similar.");
                 return;
             }
