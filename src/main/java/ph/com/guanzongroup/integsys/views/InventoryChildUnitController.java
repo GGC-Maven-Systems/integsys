@@ -24,6 +24,7 @@ import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.TAB;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -31,8 +32,10 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.cas.parameter.InventoryChildUnit;
+import org.guanzon.cas.parameter.model.Model_Inventory_Child_Unit;
 import org.guanzon.cas.parameter.services.ParamControllers;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.integsys.model.ModelInventoryChildUnit;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -52,7 +55,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     private boolean pbEntered = false;
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     ArrayList<String> checkedItem = new ArrayList<>();
-    ArrayList<String> checkedItems = new ArrayList<>();
+    ArrayList<Model_Inventory_Child_Unit> checkedItems = new ArrayList<>();
 
     private ObservableList<ModelInventoryChildUnit> main_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableMain;
@@ -226,56 +229,53 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     private void processAction(String action) {
-//        try {
-        //        try {
-        if (checkedItem.stream().anyMatch("1"::equals)) {
-        } else {
-            ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + action + ".");
-            return;
-        }
-
-        if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + action + " selected item/s?")) {
-            return;
-        }
-        checkedItems.clear();
-        for (Object item : tblViewMainList.getItems()) {
-            ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
-            String lschecked = item1.getIndex01();
-            String lsReference = item1.getIndex09();
-
-            if (lschecked.equals("1")) {
-                checkedItems.add(lsReference);
-                System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
+        try {
+            //        try {
+            if (checkedItem.stream().anyMatch("1"::equals)) {
+            } else {
+                ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + action + ".");
+                return;
             }
+
+            if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + action + " selected item/s?")) {
+                return;
+            }
+            checkedItems.clear();
+            for (Object item : tblViewMainList.getItems()) {
+                ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
+                String lschecked = item1.getIndex01();
+                int lnReference = Integer.valueOf(item1.getIndex02());
+                if (lschecked.equals("1")) {
+                    checkedItems.add(poController.Detail(lnReference));
+                    System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
+                }
+            }
+            if (!checkedItems.isEmpty()) {
+                return;
+            }
+            switch (action) {
+                case "btnActivate":
+                    poJSON = poController.Activate(checkedItems);
+                    break;
+                case "btnDeactivate":
+                    poJSON = poController.Deactivate(checkedItems);
+                    break;
+                case "btnDisapprove":
+                    poJSON = poController.Disapprove(checkedItems);
+                    break;
+                default:
+                    break;
+            }
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+            } else {
+                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+            }
+            checkedItem.clear();
+            loadTableMain.reload();
+        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        if (!checkedItems.isEmpty()) {
-            return;
-        }
-        switch (action) {
-            case "btnActivate":
-//                    poJSON = poController.Activate(checkedItems);
-                break;
-            case "btnDeactivate":
-//                    poJSON = poController.Deactivate(checkedItems);
-                break;
-            case "btnDisapprove":
-//                poJSON = poController.Disapprove(checkedItems);
-                break;
-            default:
-                break;
-        }
-        if (!"success".equals((String) poJSON.get("result"))) {
-            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-        } else {
-            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-        }
-        checkedItem.clear();
-        loadTableMain.reload();
-//        } catch (SQLException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        } catch (GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     private void initCheckboxes() {
@@ -376,7 +376,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
-            tfMeasure.setText(poController.Detail(pnMain).Inventory().Measure().getMeasureId());
+            tfMeasure.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
             tfConversion.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
