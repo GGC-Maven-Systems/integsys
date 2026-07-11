@@ -19,7 +19,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="AnchorMain" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="AnchorMain" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane layoutX="107.0" layoutY="129.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -70,6 +70,11 @@
                               <Button fx:id="btnDeactivate" contentDisplay="TOP" graphicTextGap="3.0" layoutX="503.0" layoutY="23.0" maxHeight="70.0" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Deactivate">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="TIMES" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="btnHistory" contentDisplay="TOP" graphicTextGap="3.0" layoutX="555.0" layoutY="23.0" maxHeight="70.0" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="BOOK" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
                               <Button fx:id="btnClose" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">

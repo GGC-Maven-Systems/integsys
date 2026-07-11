@@ -65,7 +65,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster, apBrowse;
     @FXML
-    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnClose;
+    private Button btnHistory, btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnClose;
     @FXML
     private TextField tfStockID, tfBarcode, tfConversion, tfDescription, tfMeasure, tfSearchStock;
     @FXML
@@ -138,6 +138,22 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 Button clickedButton = (Button) source;
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
+                    case "btnHistory":
+                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+
+                        try {
+                            poController.ShowStatusHistory(pnMain);
+                        }  catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
+                        break;
                     case "btnBrowse":
                         poController.setRecordStatus("0134");
                         poJSON = poController.searchRecord("", false);
@@ -421,7 +437,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             JFXUtil.setDisabled(lbShow, apMaster);
             boolean lbShow2 = pnEditMode == EditMode.UPDATE;
             JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
-
+            boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
+            JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
