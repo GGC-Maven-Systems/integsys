@@ -69,7 +69,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     @FXML
     private TableView tblViewMainList;
     @FXML
-    private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, s, tblDetailStatus;
+    private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert, tblDetailStatus;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -497,7 +497,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow);
-        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, s, tblDetailStatus);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert, tblDetailStatus);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
