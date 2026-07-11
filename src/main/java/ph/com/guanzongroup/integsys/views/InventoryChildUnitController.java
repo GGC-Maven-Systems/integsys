@@ -158,7 +158,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                         }
                         break;
                     case "btnNew":
-                        poController.Detail().clear();
                         clearTextFields();
                         poController.initialize();
                         poJSON = poController.NewTransaction();
@@ -320,7 +319,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                         new ModelInventoryChildUnit("",
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Inventory().Measure().getDescription(),
-                                                poController.Detail(lnCtr).Inventory().getDescription(),
+                                                poController.Detail(lnCtr).Inventory().Measure().getDescription(),
                                                 "",
                                                 poController.Detail(lnCtr).Inventory().isRecordActive() ? "Active" : "Inactive"
                                         ));
@@ -366,8 +365,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
-            tfConversion.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
             tfMeasure.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
+            tfConversion.setText(poController.Detail(pnMain).Inventory().Measure().getDescription());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -496,8 +495,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     };
 
     private void initMainGrid() {
-        JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow);
-        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert, tblDetailStatus);
+        JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow, tblDetailStatus);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
@@ -536,14 +535,17 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         if (pnEditMode != EditMode.READY) {
             return;
         }
+      
         switch (poController.Master().getRecordStatus()) {
-            case "0":
+            case "3":
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
                 break;
             case "1":
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
+                break;
+            default:
                 break;
 
         }
