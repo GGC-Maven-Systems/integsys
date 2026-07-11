@@ -65,11 +65,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     @FXML
     private TextField tfStockID, tfBarcode, tfConversion, tfDescription, tfMeasure, tfSearchStock;
     @FXML
-    private Label lblStatus, lblSource1;
+    private Label lblStatus2, lblSource1;
     @FXML
     private TableView tblViewMainList;
     @FXML
-    private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, tblDetailStatus;
+    private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, s, tblDetailStatus;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -321,6 +321,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Inventory().Measure().getDescription(),
                                                 poController.Detail(lnCtr).Inventory().getDescription(),
+                                                "",
                                                 "status"
                                         ));
                             }
@@ -490,7 +491,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     };
 
     private void initDetailsGrid() {
-        JFXUtil.setColumnLeft(tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, tblDetailStatus);
+        JFXUtil.setColumnCenter(tblDetailRow1);
+        JFXUtil.setColumnLeft(tblDetailRow, tblDetailMeasure, tblDetailConversion, s, tblDetailStatus);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
@@ -524,11 +526,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
 
         if (pnEditMode != EditMode.READY) {
             return;
         }
-        JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
         switch (poController.Master().getRecordStatus()) {
             case "0":
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);

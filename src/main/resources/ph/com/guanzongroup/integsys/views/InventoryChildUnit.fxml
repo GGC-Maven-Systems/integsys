@@ -175,7 +175,7 @@
                                               <TableColumn fx:id="tblDetailRow" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" text="No." />
                                               <TableColumn fx:id="tblDetailMeasure" maxWidth="265.0" minWidth="211.0" prefWidth="242.0" text="From UOM" />
                                                 <TableColumn fx:id="tblDetailConversion" maxWidth="239.0" minWidth="143.0" prefWidth="218.0" text="To UOM" />
-                                                <TableColumn fx:id="tblDetailConversion1" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Qty. Convert" />
+                                                <TableColumn fx:id="s" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Qty. Convert" />
                                                 <TableColumn fx:id="tblDetailStatus" maxWidth="85.0" minWidth="85.0" prefWidth="85.0" text="Status" />
                                             </columns>
                                           </TableView>
