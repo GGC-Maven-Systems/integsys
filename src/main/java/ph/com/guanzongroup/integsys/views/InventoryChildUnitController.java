@@ -272,6 +272,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
             }
+            poController.populateDetail();
             pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
