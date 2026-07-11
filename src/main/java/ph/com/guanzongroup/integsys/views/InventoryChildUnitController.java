@@ -373,7 +373,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             }
             boolean lbShow = poController.getEditMode() == EditMode.UPDATE;
             JFXUtil.setDisabled(lbShow, apMaster);
-            lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()));
+            lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
@@ -467,11 +467,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             poController.Detail(pnMain).setStockId("");
                         }
                         break;
-                    case "tfConversion":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setConversionId("");
-                        }
-                        break;
                     case "tfDescription":
                         if (lsValue.isEmpty()) {
                             poController.Detail(pnMain).setStockId("");
@@ -480,6 +475,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     case "tfMeasure":
                         if (lsValue.isEmpty()) {
                             poController.Detail(pnMain).setMeasureId("");
+                        }
+                        break;
+                    case "tfConversion":
+                        if (lsValue.isEmpty()) {
+                            poController.Detail(pnMain).setConversionId("");
                         }
                         break;
                 }
