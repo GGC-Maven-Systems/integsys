@@ -3,6 +3,7 @@ package ph.com.guanzongroup.integsys.views;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -246,14 +247,31 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 return;
             }
             checkedItems.clear();
+            List<String> list = new ArrayList<>();
+            boolean lbAllSame = true;
             for (Object item : tblViewMainList.getItems()) {
                 ModelInventoryChildUnit item1 = (ModelInventoryChildUnit) item;
                 String lschecked = item1.getIndex01();
+                list.add(item1.getIndex06());
                 int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
                 if (lschecked.equals("1")) {
                     checkedItems.add(poController.Detail(lnReference));
                     System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
                 }
+            }
+            if (!list.isEmpty()) {
+                String first = list.get(0);
+
+                for (String value : list) {
+                    if (!first.equals(value)) {
+                        lbAllSame = false;
+                        break;
+                    }
+                }
+            }
+            if (!lbAllSame) {
+                ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items are similar.");
+                return;
             }
             if (checkedItems.isEmpty()) {
                 return;
