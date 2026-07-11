@@ -417,6 +417,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, apMaster);
+            boolean lbShow2 = pnEditMode == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
+
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
@@ -556,7 +561,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     case "tfBarcode":
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnMain).getStockId(), null, "") && lbProceed) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Master().getStockId(), null, "") && lbProceed) {
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
@@ -585,7 +590,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     case "tfDescription":
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnMain).getStockId(), null, "") && lbProceed) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Master().getStockId(), null, "") && lbProceed) {
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
@@ -628,7 +633,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtBrowse_Focus, apBrowse);
         JFXUtil.setFocusListener(txtMaster_Focus, apMaster);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
