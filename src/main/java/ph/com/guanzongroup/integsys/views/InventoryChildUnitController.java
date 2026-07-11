@@ -138,6 +138,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnBrowse":
+                        poController.setRecordStatus("0134");
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -149,7 +150,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
-
+                        if (!checkedItem.isEmpty()) {
+                            checkedItem.clear();
+                        }
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -273,6 +276,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
             }
+            if (!checkedItem.isEmpty()) {
+                checkedItem.clear();
+            }
             poController.populateDetail();
             pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
@@ -332,7 +338,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                         new ModelInventoryChildUnit(checkedItem.get(lnCtr),
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Measure().getDescription(),
-                                                poController.Detail(lnCtr).UnitConversion().getConversionID(),
+                                                poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription(),
                                                 String.valueOf(poController.Detail(lnCtr).UnitConversion().getQuantityConverted()),
                                                 poController.getStatus(poController.Detail(lnCtr).getRecordStatus())
                                         ));
@@ -370,18 +376,19 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     public void loadRecordMaster() {
         try {
+            lblStatus.setText("UNKNOWN");
             disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-            boolean lbShow = poController.getEditMode() == EditMode.UPDATE;
+            boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
             JFXUtil.setDisabled(lbShow, apMaster);
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfMeasure.setText(poController.Detail(pnMain).Measure().getDescription());
-            tfConversion.setText(poController.Detail(pnMain).UnitConversion().getConversionID());
+            tfConversion.setText(poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -407,6 +414,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 case F3:
                     switch (lsID) {
                         case "tfSearchStock":
+                            poController.setRecordStatus("0134");
                             poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -415,6 +423,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
+                                }
+                                if (!checkedItem.isEmpty()) {
+                                    checkedItem.clear();
                                 }
                                 main_data.clear();
                                 JFXUtil.clearTextFields(apMaster);
@@ -559,24 +570,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
-        JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
-
-        if (pnEditMode != EditMode.READY) {
-            return;
-        }
-
-        switch (poController.Detail(pnMain).getRecordStatus()) {
-            case InventoryChildUnit.RecordStatus.DEACTIVATE:
-                JFXUtil.setButtonsVisibility(false, btnDeactivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(true, btnActivate);
-                break;
-            case InventoryChildUnit.RecordStatus.ACTIVE:
-                JFXUtil.setButtonsVisibility(true, btnDeactivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnActivate);
-                break;
-            default:
-                break;
-
-        }
+        JFXUtil.setButtonsVisibility(!lbShow2, btnActivate, btnDeactivate, btnDisapprove);
     }
 }
