@@ -2192,6 +2192,66 @@ public class JFXUtil {
         timeline.play();
     }
 
+    public static void applyButtonHoverFade(Button button, String colorHex) {
+        if (button == null) {
+            return;
+        }
+
+        final String baseStyle = (button.getStyle() == null || button.getStyle().trim().isEmpty())
+                ? ""
+                : button.getStyle().trim() + (button.getStyle().trim().endsWith(";") ? "" : ";");
+        final Color accent = Color.web(colorHex);
+        final int red = (int) Math.round(accent.getRed() * 255);
+        final int green = (int) Math.round(accent.getGreen() * 255);
+        final int blue = (int) Math.round(accent.getBlue() * 255);
+        final DoubleProperty backgroundOpacity = new SimpleDoubleProperty(1.0);
+        final AtomicReference<Timeline> activeAnimation = new AtomicReference<>();
+        final int fadeMillis = 100;
+
+        ChangeListener<Number> styleUpdater = (obs, oldVal, newVal) -> {
+            boolean isTransparent = backgroundOpacity.get() < 0.999;
+            button.setStyle(baseStyle + String.format(Locale.US,
+                " -fx-background-color: rgba(%d,%d,%d,%.3f); -fx-text-fill: %s;",
+                red,
+                green,
+                blue,
+                backgroundOpacity.get(),
+                isTransparent ? String.format(Locale.US, "rgba(%d,%d,%d,1.000)", red, green, blue) : "rgba(255,255,255,1.000)"
+            ));
+        };
+        backgroundOpacity.addListener(styleUpdater);
+        styleUpdater.changed(null, null, null);
+
+        EventHandler<? super MouseEvent> previousOnMouseEntered = button.getOnMouseEntered();
+        EventHandler<? super MouseEvent> previousOnMouseExited = button.getOnMouseExited();
+
+        button.setOnMouseEntered(event -> {
+            if (previousOnMouseEntered != null) {
+                previousOnMouseEntered.handle(event);
+            }
+            Timeline timeline = activeAnimation.getAndSet(new Timeline(
+                    new KeyFrame(Duration.millis(fadeMillis), new KeyValue(backgroundOpacity, 0.0))
+            ));
+            if (timeline != null) {
+                timeline.stop();
+            }
+            activeAnimation.get().play();
+        });
+
+        button.setOnMouseExited(event -> {
+            if (previousOnMouseExited != null) {
+                previousOnMouseExited.handle(event);
+            }
+            Timeline timeline = activeAnimation.getAndSet(new Timeline(
+                    new KeyFrame(Duration.millis(fadeMillis), new KeyValue(backgroundOpacity, 1.0))
+            ));
+            if (timeline != null) {
+                timeline.stop();
+            }
+            activeAnimation.get().play();
+        });
+    }
+
     /*Used in Dashboard*/
     public static void applyToggleHoverAnimation(ToggleButton... toggleButtons) {
         for (ToggleButton toggleButton : toggleButtons) {
@@ -2695,6 +2755,16 @@ public class JFXUtil {
             BooleanProperty disableAll,
             TriConsumer<T, Integer, Integer, Boolean> onChange,
             int... columnIndexes) {
+        addCheckboxColumns(modelClass, table, disableAll, onChange, null, columnIndexes);
+        }
+
+        public static <T> void addCheckboxColumns(
+            Class<T> modelClass,
+            TableView<T> table,
+            BooleanProperty disableAll,
+            TriConsumer<T, Integer, Integer, Boolean> onChange,
+            TriConsumer3<T, Integer, Integer> onDisabledClick,
+            int... columnIndexes) {
 
         for (int colIndex : columnIndexes) {
             @SuppressWarnings("unchecked")
@@ -2763,6 +2833,29 @@ public class JFXUtil {
                                     }
                                 }
                             });
+
+                            // Capture clicks while disabled so caller can react with row/column context.
+                            setOnMouseClicked(evt -> {
+                                if (!disableAll.get()) {
+                                    return;
+                                }
+
+                                if (onDisabledClick == null) {
+                                    return;
+                                }
+
+                                if (getTableRow() == null || getTableRow().getItem() == null) {
+                                    return;
+                                }
+
+                                @SuppressWarnings("unchecked")
+                                T row = (T) getTableRow().getItem();
+                                int rowIndex = getTableRow().getIndex();
+
+                                onDisabledClick.accept(row, rowIndex, finalColIndex);
+
+                                evt.consume();
+                            });
                         }
 
                         @Override
@@ -2785,6 +2878,12 @@ public class JFXUtil {
     public interface TriConsumer<T, U, V, W> {
 
         void accept(T t, U u, V v, W w);
+    }
+
+    @FunctionalInterface
+    public interface TriConsumer3<T, U, V> {
+
+        void accept(T t, U u, V v);
     }
 
     /*Programmatically clicks particular tab based on its title*/

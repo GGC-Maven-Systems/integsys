@@ -389,7 +389,17 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             });
                             break;
                     }
-                }, 0);//starts 0,1,2 
+                },
+                (row, rowIndex, colIndex) -> {
+                    switch (colIndex) {
+                        case 0:
+                            ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+                            break;
+                        default:
+                            break;
+                    }
+                },
+                0);//starts 0,1,2 
     }
 
     private void checkedItems(int lnCtr) {
