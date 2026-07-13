@@ -139,8 +139,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnHistory":
-                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
-                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                        if(poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE){
+                            ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
                             return;
                         }
 
@@ -148,7 +148,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             poController.ShowStatusHistory(pnMain);
                         }  catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
@@ -433,15 +433,20 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-            boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
-            JFXUtil.setDisabled(lbShow, apMaster);
-            boolean lbShow2 = pnEditMode == EditMode.UPDATE;
-            JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
-            boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
-            JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
+            if(pnEditMode == EditMode.UNKNOWN || pnEditMode == EditMode.READY  ){
+                JFXUtil.setDisabled(true, apMaster);
+            } else {
+                boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
+                JFXUtil.setDisabled(lbShow, apMaster);
+                boolean lbShow2 = pnEditMode == EditMode.UPDATE;
+                JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
+                boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
+                JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
+            }
+            
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
-            tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
+            tfBarcode.setText(poController.Detail(pnMain).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfMeasure.setText(poController.Detail(pnMain).Measure().getDescription());
             tfConversion.setText(poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription());
@@ -495,11 +500,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 if (poController.getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                        poController.Detail().clear();
-                                        clearTextFields();
-                                        loadTableMain.reload();
-                                        loadRecordMaster();
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        btnNew.fire();
                                     } else {
                                         return;
                                     }
@@ -507,6 +509,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 }
                             }
                             lbProceed = false;
+                            
                             poJSON = poController.SearchInventory(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -519,11 +522,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 if (poController.getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                        poController.Detail().clear();
-                                        clearTextFields();
-                                        loadTableMain.reload();
-                                        loadRecordMaster();
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        btnNew.fire();
                                     } else {
                                         return;
                                     }
@@ -554,12 +554,10 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     loadTableMain.reload();
                     break;
             }
-        } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
+        } catch (ExceptionInInitializerError | SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -582,11 +580,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                                poController.Detail().clear();
-                                                clearTextFields();
-                                                loadTableMain.reload();
-                                                loadRecordMaster();
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                btnNew.fire();
                                             } else {
                                                 loadRecordMaster();
                                                 return;
@@ -611,11 +606,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                                poController.Detail().clear();
-                                                clearTextFields();
-                                                loadTableMain.reload();
-                                                loadRecordMaster();
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                btnNew.fire();
                                             } else {
                                                 loadRecordMaster();
                                                 return;
@@ -706,6 +698,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
+        JFXUtil.setButtonsVisibility(fnValue != EditMode.UNKNOWN, btnHistory);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnActivate, btnDeactivate, btnDisapprove);
