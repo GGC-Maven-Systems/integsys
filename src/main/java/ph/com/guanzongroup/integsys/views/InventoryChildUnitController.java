@@ -170,10 +170,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
-                        chckSelectAll.setSelected(false);
-                        if (!checkedItem.isEmpty()) {
-                            checkedItem.clear();
-                        }
+                        resetCheckboxSelection();
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -203,10 +200,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             return;
                         }
                         pnEditMode = poController.getEditMode();
-                        chckSelectAll.setSelected(false);
-                        if (!checkedItem.isEmpty()) {
-                            checkedItem.clear();
-                        }
+                        resetCheckboxSelection();
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -335,15 +329,19 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                chckSelectAll.setSelected(false);
-                if (!checkedItem.isEmpty()) {
-                    checkedItem.clear();
-                }
+                resetCheckboxSelection();
             }
             poController.populateDetail();
             pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void resetCheckboxSelection() {
+        chckSelectAll.setSelected(false);
+        if (!checkedItem.isEmpty()) {
+            checkedItem.clear();
         }
     }
 
@@ -529,10 +527,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
                                 }
-                                chckSelectAll.setSelected(false);
-                                if (!checkedItem.isEmpty()) {
-                                    checkedItem.clear();
-                                }
+                                resetCheckboxSelection();
                                 main_data.clear();
                                 JFXUtil.clearTextFields(apMaster);
                                 pnEditMode = poController.getEditMode();
@@ -760,10 +755,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     public void clearTextFields() {
-        chckSelectAll.setSelected(false);
-        if (!checkedItem.isEmpty()) {
-            checkedItem.clear();
-        }
+        resetCheckboxSelection();
         JFXUtil.clearTextFields(apBrowse, apMaster);
     }
 
