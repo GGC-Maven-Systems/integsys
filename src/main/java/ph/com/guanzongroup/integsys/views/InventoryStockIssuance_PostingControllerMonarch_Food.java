@@ -23,6 +23,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -42,6 +46,7 @@ import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.F3;
 import static javafx.scene.input.KeyCode.TAB;
 import static javafx.scene.input.KeyCode.UP;
+import javax.script.ScriptException;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -53,6 +58,7 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import org.guanzon.cas.inv.warehouse.InventoryStockIssuanceNeo;
@@ -61,6 +67,9 @@ import org.guanzon.cas.inv.warehouse.status.InventoryStockIssuanceStatus;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Detail;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
+import ph.com.guanzongroup.cas.cashflow.status.JournalStatus;
+import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  *
@@ -97,7 +106,7 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
             tfFreight, tfDiscount, tfTotal, tfOrderNo, tfQuantity,
             tfInvType, tfBarcode, tfDescription, tfSupersede,
             tfBrand, tfCost, tfMeasure, tfVariant, tfSerialNo,
-            tfModel, tfReceiveQuantity;
+            tfModel, tfReceiveQuantity, tfProjectCode;
     @FXML
     private ComboBox cbDeliveryTp;
     @FXML
@@ -139,6 +148,38 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
     public void setCategoryID(String fsValue) {
         psCategoryID = fsValue;
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //JOURNAL CODE HERE
+    private boolean pbIsCheckedJournalTab = false;
+    private int pnDetailJE = 0;
+    private boolean pbEnteredJE = false;
+    private ObservableList<ModelJournalEntry_Detail> journal_data = FXCollections.observableArrayList();
+    JFXUtil.ReloadableTableTask loadTableDetailJE;
+    String lsValidDisbMessage = "Please provide at least one valid issuance detail to proceed.";
+    @FXML
+    Label lblJournalTransactionStatus;
+    @FXML
+    TextField tfJournalTransactionNo, tfTotalDebitAmount, tfTotalCreditAmount,
+            tfAccountCode, tfAccountDescription, tfDebitAmount, tfCreditAmount;
+    @FXML
+    DatePicker dpJournalTransactionDate, dpReportMonthYear;
+    @FXML
+    TextArea taJournalRemarks;
+    @FXML
+    CheckBox cbJEReverse;
+
+    @FXML
+    AnchorPane apJournalDetails, apJournalMaster;
+
+    @FXML
+    TabPane tabPaneMain;
+    @FXML
+    TableView<ModelJournalEntry_Detail> tblVwJournalDetails;
+    @FXML
+    TableColumn<ModelJournalEntry_Detail, String> tblJournalRowNo, tblJournalReportMonthYear,
+            tblJournalAccountCode, tblJournalAccountDescription, tblJournalDebitAmount, tblJournalCreditAmount;
+    @FXML
+    Tab tabJournal;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -151,7 +192,7 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
                 unloadForm appUnload = new unloadForm();
                 appUnload.unloadForm(apMainAnchor, poApp, psFormName);
             }
-
+            poAppController.setIsPostingForm(true);
             Platform.runLater(() -> {
                 poAppController.setTransactionStatus("1");
                 poAppController.setIndustryID(psIndustryID);
@@ -164,6 +205,11 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
 
             initializeTableDetail();
             initControlEvents();
+            initLoadTable();
+            initDetailJEGrid();
+            initTabPane();
+            initDatePicker();
+
             poAppController.getMaster().setIndustryId(psIndustryID);
             poAppController.getMaster().setCompanyID(psCompanyID);
             lblSource.setText(poAppController.getMaster().Company().getCompanyName() + " - " + poAppController.getMaster().Industry().getDescription());
@@ -254,7 +300,7 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
             }
             initButtonDisplay(poAppController.getEditMode());
 
-        } catch (GuanzonException | SQLException | CloneNotSupportedException ex) {
+        } catch (GuanzonException | SQLException | CloneNotSupportedException | ScriptException ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
@@ -283,8 +329,6 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
 
                 }
                 getLoadedTransaction();
-
-                dpReceivedDate.requestFocus();
                 poAppController.UpdateTransactionPosting();
                 initButtonDisplay(poAppController.getEditMode());
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
@@ -438,12 +482,12 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
         }
     }
 
-      private void initButtonDisplay(int fnEditMode) {
+    private void initButtonDisplay(int fnEditMode) {
         boolean lbEditing = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
 
         String lsTransNo = tfTransactionNo.getText();
         boolean lbHasTransaction = lsTransNo != null && !lsTransNo.isEmpty();
-        boolean lbIsPosted= lbHasTransaction
+        boolean lbIsPosted = lbHasTransaction
                 && "2".equals(poAppController.getMaster().getTransactionStatus());
 
         // Always visible
@@ -453,13 +497,13 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
         initButtonControls(!lbEditing, "btnBrowse");
 
         // Transaction-dependent buttons (only when not editing)
-        initButtonControls(lbEditing && lbHasTransaction,  "btnHistory");
-        initButtonControls(lbEditing && lbHasTransaction && !lbIsPosted,  "btnPost");
+        initButtonControls(lbEditing && lbHasTransaction, "btnHistory");
+        initButtonControls(lbEditing && lbHasTransaction && !lbIsPosted, "btnPost");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
         apDetail.setDisable(!lbEditing);
-        
+
     }
 
     final ChangeListener<? super Boolean> txtField_Focus = (o, ov, nv) -> {
@@ -543,7 +587,6 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
                                 }
 
                                 getLoadedTransaction();
-                                dpReceivedDate.requestFocus();
                                 initButtonDisplay(poAppController.getEditMode());
 
                                 return;
@@ -554,8 +597,6 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
                                     return;
                                 }
                                 getLoadedTransaction();
-
-                                dpReceivedDate.requestFocus();
                                 initButtonDisplay(poAppController.getEditMode());
                                 return;
                             default:
@@ -718,11 +759,13 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
         tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
         dpTransactionDate.setValue(ParseDate(poAppController.getMaster().getTransactionDate()));
 
+        tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
         dpReceivedDate.setValue(
                 poAppController.getMaster().getReceivedDate() != null ? ParseDate(poAppController.getMaster().getReceivedDate()) : LocalDate.now());
         if (poAppController.getMaster().getReceivedDate() == null) {
             poAppController.getMaster().setReceivedDate(LocalDateTime.now());
         }
+
         taRemarks.setText(poAppController.getMaster().getRemarks());
         lblStatus.setText(InventoryStockIssuanceStatus.STATUS.get(Integer.parseInt(poAppController.getMaster().getTransactionStatus())));
         lblSource.setText(poAppController.getMaster().Company().getCompanyName() + " - " + poAppController.getMaster().Industry().getDescription());
@@ -1005,5 +1048,191 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
         loadTransactionMaster();
         reloadTableDetail();
         loadSelectedTransactionDetail(pnDetailRow);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //JOURNAL CODE HERE
+    private void initDetailJEGrid() {
+        JFXUtil.setColumnCenter(tblJournalRowNo, tblJournalReportMonthYear);
+        JFXUtil.setColumnLeft(tblJournalAccountCode, tblJournalAccountDescription);
+        JFXUtil.setColumnRight(tblJournalDebitAmount, tblJournalCreditAmount);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblVwJournalDetails);
+        tblVwJournalDetails.setItems(journal_data);
+    }
+
+    private void initDatePicker() {
+        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpJournalTransactionDate, dpReportMonthYear);
+        JFXUtil.setActionListener(datepicker_Action, dpReportMonthYear);
+    }
+    EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
+            (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
+                if ("dpReportMonthYear".equals(datePicker.getId())) {
+                    if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                        if (ldSelectedDate.isAfter(ldCurrentDate)) {
+                            ShowMessageFX.Information("Future dates are not allowed.", psFormName, null);
+                            return;
+                        }
+                        poAppController.Journal().Detail(pnDetailJE).setForMonthOf(
+                                SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
+                        loadTableDetailJE.reload();
+                    }
+                }
+            });
+
+    public void initTabPane() {
+        JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
+            switch (tabTitle) {
+                case "Stock Issuance":
+                    if (poAppController.getEditMode() == EditMode.UNKNOWN) {
+                        pnDetailJE = 0;
+                    }
+                    break;
+                case "Journal":
+                    if (poAppController.getEditMode() == EditMode.READY || poAppController.getEditMode() == EditMode.UPDATE || poAppController.getEditMode() == EditMode.ADDNEW) {
+                        try {
+                            JFXUtil.clearTextFields(apJournalDetails, apJournalMaster);
+                            //if all ready posted/confirmed/cancell block population of journal
+                            if (poAppController.getMaster().getTransactionStatus().equals("0")) {
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+                                return;
+                            }
+                            if (poAppController.getMaster().getTransactionStatus().equals("2")) {
+                                if (poAppController.existJournal().isEmpty()) {
+                                    JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                    ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+                                    return;
+                                }
+                            }
+                            if (laTransactionDetail != null && !laTransactionDetail.isEmpty()) {
+                                pbIsCheckedJournalTab = true;
+                                populateJE();
+                            } else {
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                ShowMessageFX.Warning(null, psFormName, lsValidDisbMessage);
+                            }
+                        } catch (SQLException ex) {
+                            JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                            ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+                        }
+                    }
+                    break;
+            }
+        });
+    }
+
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            if ("cbJEReverse".equals(checkedBox.getId())) {
+                if (poAppController.Journal().Detail(pnDetailJE).getEditMode() == EditMode.ADDNEW) {
+                    poAppController.Journal().Detail().remove(pnDetailJE);
+                } else {
+                    poAppController.Journal().Detail(pnDetailJE).isReverse(cbJEReverse.isSelected());
+                }
+                loadRecordMasterJE();
+                loadTableDetailJE.reload();
+            }
+        }
+    }
+
+    private void populateJE() {
+        try {
+            poAppController.getEditMode();
+            if (!isJSONSuccess(poAppController.populateJournal(), "Populate Journal")) {
+                journal_data.clear();
+                return;
+            }
+            loadTableDetailJE.reload();
+        } catch (SQLException | GuanzonException | CloneNotSupportedException | ScriptException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    private void loadRecordMasterJE() {
+        JFXUtil.setStatusValue(lblJournalTransactionStatus, JournalStatus.class,
+                pnEditMode == EditMode.UNKNOWN ? "-1" : poAppController.Journal().Master().getTransactionStatus());
+        tfJournalTransactionNo.setText(poAppController.Journal().Master().getTransactionNo());
+        dpJournalTransactionDate.setValue(ParseDate(poAppController.Journal().Master().getTransactionDate()));
+
+        double lnTotalDebit = 0;
+        double lnTotalCredit = 0;
+        for (int lnCtr = 0; lnCtr < poAppController.Journal().getDetailCount(); lnCtr++) {
+            if (!poAppController.Journal().Detail(lnCtr).isReverse()) {
+                continue;
+            }
+            lnTotalDebit += poAppController.Journal().Detail(lnCtr).getDebitAmount();
+            lnTotalCredit += poAppController.Journal().Detail(lnCtr).getCreditAmount();
+        }
+        tfTotalDebitAmount.setText(CommonUtils.NumberFormat(lnTotalDebit, "###,###,##0.00"));
+        tfTotalCreditAmount.setText(CommonUtils.NumberFormat(lnTotalCredit, "###,###,##0.00"));
+        taJournalRemarks.setText(poAppController.Journal().Master().getRemarks());
+    }
+
+    public void loadRecordDetailJE() {
+        try {
+            if (pnDetailJE < 0 || pnDetailJE > poAppController.Journal().getDetailCount() - 1) {
+                return;
+            }
+            boolean lbShow = poAppController.Journal().Detail(pnDetailJE).getEditMode() == EditMode.UPDATE;
+            tfAccountCode.setDisable(lbShow);
+            tfAccountDescription.setDisable(lbShow);
+
+            cbJEReverse.setSelected(poAppController.Journal().Detail(pnDetailJE).isReverse());
+            tfAccountCode.setText(poAppController.Journal().Detail(pnDetailJE).getAccountCode());
+            tfAccountDescription.setText(poAppController.Journal().Detail(pnDetailJE).Account_Chart().getDescription());
+            dpReportMonthYear.setValue(ParseDate(poAppController.Journal().Detail(pnDetailJE).getForMonthOf()));
+            tfDebitAmount.setText(CommonUtils.NumberFormat(poAppController.Journal().Detail(pnDetailJE).getDebitAmount(), "###,###,##0.00"));
+            tfCreditAmount.setText(CommonUtils.NumberFormat(poAppController.Journal().Detail(pnDetailJE).getCreditAmount(), "###,###,##0.00"));
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    private void initLoadTable() {
+        loadTableDetailJE = new JFXUtil.ReloadableTableTask(
+                tblVwJournalDetails,
+                journal_data,
+                () -> Platform.runLater(() -> {
+                    journal_data.clear();
+                    try {
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            poAppController.ReloadJournal();
+                        }
+                        int lnRowCount = 0;
+                        for (int lnCtr = 0; lnCtr < poAppController.Journal().getDetailCount(); lnCtr++) {
+                            if (!poAppController.Journal().Detail(lnCtr).isReverse()) {
+                                continue;
+                            }
+                            lnRowCount++;
+                            journal_data.add(new ModelJournalEntry_Detail(
+                                    String.valueOf(lnRowCount),
+                                    String.valueOf(poAppController.Journal().Detail(lnCtr).getForMonthOf()),
+                                    poAppController.Journal().Detail(lnCtr).getAccountCode(),
+                                    poAppController.Journal().Detail(lnCtr).Account_Chart().getDescription(),
+                                    CommonUtils.NumberFormat(poAppController.Journal().Detail(lnCtr).getDebitAmount(), "###,###,##0.00"),
+                                    CommonUtils.NumberFormat(poAppController.Journal().Detail(lnCtr).getCreditAmount(), "###,###,##0.00"),
+                                    String.valueOf(lnCtr)
+                            ));
+                        }
+                        if (!journal_data.isEmpty()) {
+                            int lnSelect = (pnDetailJE >= 0 && pnDetailJE < journal_data.size()) ? pnDetailJE : 0;
+                            tblVwJournalDetails.getSelectionModel().select(lnSelect);
+                            pnDetailJE = lnSelect;
+                            loadRecordDetailJE();
+                        }
+                        loadRecordMasterJE();
+                    } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+                        poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+                    }
+                }));
     }
 }
