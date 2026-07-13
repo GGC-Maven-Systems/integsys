@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="apMainAnchor" prefHeight="789.0" stylesheets="@../css/Tables.css" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="apMainAnchor" prefHeight="789.0" stylesheets="@../css/Tables.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
     <children>
     <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -235,6 +235,7 @@
                                                       <RowConstraints fillHeight="false" maxHeight="-Infinity" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="45.0" minHeight="45.0" prefHeight="45.0" vgrow="SOMETIMES" />
                                               </rowConstraints>
@@ -260,7 +261,7 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                  <Label text="Remarks" GridPane.rowIndex="6">
+                                                  <Label text="Remarks" GridPane.rowIndex="7">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
@@ -280,7 +281,7 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <Label layoutX="31.0" layoutY="14.0" text="Total" GridPane.columnIndex="10" GridPane.rowIndex="6">
+                                                      <Label layoutX="31.0" layoutY="14.0" text="Total" GridPane.columnIndex="10" GridPane.rowIndex="7">
                                                          <font>
                                                             <Font name="System Bold" size="15.0" />
                                                          </font>
@@ -291,8 +292,8 @@
                                                   <TextField fx:id="tfTrucking" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="5" />
                                                       <TextField fx:id="tfDiscountRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="12" GridPane.rowIndex="3" />
                                                       <TextField fx:id="tfDiscountAmount" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="12" GridPane.rowIndex="4" />
-                                                      <TextField fx:id="tfTotal" alignment="CENTER_RIGHT" disable="true" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="12" GridPane.rowIndex="6" />
-                              <TextArea fx:id="taRemarks" maxHeight="40.0" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="6">
+                                                      <TextField fx:id="tfTotal" alignment="CENTER_RIGHT" disable="true" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="12" GridPane.rowIndex="7" />
+                              <TextArea fx:id="taRemarks" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="7">
                                  <GridPane.margin>
                                     <Insets top="1.0" />
                                  </GridPane.margin>
@@ -303,6 +304,12 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
+                                                      <Label text="Project Code" GridPane.rowIndex="6">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <TextField fx:id="tfProjectCode" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="6" />
                                               </children>
                                           </GridPane>
                                       </children>
@@ -413,6 +420,12 @@
                                                          </font>
                                                       </Label>
                                                       <TextField fx:id="tfInvType" disable="true" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                      <Label text="QOH" GridPane.columnIndex="10" GridPane.rowIndex="4">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <TextField fx:id="tfQOH" alignment="CENTER_RIGHT" editable="false" promptText="0.00" GridPane.columnIndex="12" GridPane.rowIndex="4" />
                                               </children>
                                           </GridPane>
                                       </children>
@@ -435,6 +448,7 @@
                                                       <TableColumn fx:id="tblColDetailBrand" editable="false" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Brand" />
                                                       <TableColumn fx:id="tblColDetailVariant" editable="false" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Variant" />
                                               <TableColumn fx:id="tblColDetailCost" editable="false" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Cost" />
+                                                      <TableColumn fx:id="tblColDetailQOH" editable="false" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="QOH" />
                                                       <TableColumn fx:id="tblColDetailOrderQty" editable="false" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="QTY" />
                                                   </columns>
                                                    <columnResizePolicy>

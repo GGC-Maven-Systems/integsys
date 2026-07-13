@@ -46,12 +46,18 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.constant.EditMode;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.F3;
 import static javafx.scene.input.KeyCode.TAB;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONObject;
 import org.guanzon.cas.inv.warehouse.InventoryStockIssuanceNeo;
 import org.guanzon.cas.inv.warehouse.status.DeliveryIssuanceType;
@@ -59,6 +65,9 @@ import org.guanzon.cas.inv.warehouse.status.InventoryStockIssuanceStatus;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Detail;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
+import ph.com.guanzongroup.cas.cashflow.status.JournalStatus;
+import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  * FXML Controller class
@@ -94,7 +103,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
 
     @FXML
     TextField tfSearchSerial, tfSearchBarcode, tfSearchDescription, tfSupersede, tfBrand, tfModel, tfColor,
-            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty;
+            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty, tfProjectCode, tfQOH;
 
     @FXML
     Button btnSearch, btnBrowse, btnUpdate, btnPrint, btnApprove, btnVoid, btnSave, btnCancel, btnHistory, btnRetrieve, btnClose;
@@ -110,7 +119,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
 
     @FXML
     TableColumn<Model_Inventory_Transfer_Detail, String> tblColDetailNo, tblColDetailOrderNo, tblColDetailSerial, tblColDetailBarcode, tblColDetailDescr,
-            tblColDetailBrand, tblColDetailVariant, tblColDetailCost, tblColDetailOrderQty;
+            tblColDetailBrand, tblColDetailVariant, tblColDetailCost, tblColDetailQOH, tblColDetailOrderQty;
 
     @FXML
     Label lblSource, lblStatus;
@@ -134,6 +143,38 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
     public void setCategoryID(String fsValue) {
         psCategoryID = fsValue;
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //JOURNAL CODE HERE
+    private boolean pbIsCheckedJournalTab = false;
+    private int pnDetailJE = 0;
+    private boolean pbEnteredJE = false;
+    private ObservableList<ModelJournalEntry_Detail> journal_data = FXCollections.observableArrayList();
+    JFXUtil.ReloadableTableTask loadTableDetailJE;
+    String lsValidDisbMessage = "Please provide at least one valid issuance detail to proceed.";
+    @FXML
+    Label lblJournalTransactionStatus;
+    @FXML
+    TextField tfJournalTransactionNo, tfTotalDebitAmount, tfTotalCreditAmount,
+            tfAccountCode, tfAccountDescription, tfDebitAmount, tfCreditAmount;
+    @FXML
+    DatePicker dpJournalTransactionDate, dpReportMonthYear;
+    @FXML
+    TextArea taJournalRemarks;
+    @FXML
+    CheckBox cbJEReverse;
+
+    @FXML
+    AnchorPane apJournalDetails, apJournalMaster;
+
+    @FXML
+    TabPane tabPaneMain;
+    @FXML
+    TableView<ModelJournalEntry_Detail> tblVwJournalDetails;
+    @FXML
+    TableColumn<ModelJournalEntry_Detail, String> tblJournalRowNo, tblJournalReportMonthYear,
+            tblJournalAccountCode, tblJournalAccountDescription, tblJournalDebitAmount, tblJournalCreditAmount;
+    @FXML
+    Tab tabJournal;
 
     /**
      * Initializes the controller class.
@@ -144,7 +185,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
         try {
             poLogWrapper = new LogWrapper(psFormName, psFormName);
             poAppController = new DeliveryIssuanceControllers(poApp, poLogWrapper).InventoryStockIssuanceNeo();
-
+            poAppController.setIsConfirmationForm(true);
             //initlalize and validate transaction objects from class controller
             if (!isJSONSuccess(poAppController.initTransaction(), psFormName)) {
                 unloadForm appUnload = new unloadForm();
@@ -167,6 +208,11 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
 
             initializeTableDetail();
             initControlEvents();
+
+            initLoadTable();
+            initDetailJEGrid();
+            initTabPane();
+            initDatePicker();
             poAppController.getMaster().setIndustryId(psIndustryID);
             poAppController.getMaster().setCompanyID(psCompanyID);
             lblSource.setText(poAppController.getMaster().Company().getCompanyName() + " - " + poAppController.getMaster().Industry().getDescription());
@@ -290,6 +336,13 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
                                 return;
                             }
                             tfTrucking.setText(poAppController.getMaster().TruckingCompany().getCompanyName());
+                            break;
+                        case "tfProjectCode":
+                            if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
+                                    "Initialize Search Trucking! ")) {
+                                return;
+                            }
+                            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
                             break;
                         case "tfSearchSerial":
                             if (pnTransactionDetail > 0) {
@@ -715,13 +768,51 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
                             lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
                             ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
                             loTextField.setText(String.valueOf(lnIssuedQty));
+                            tfIssuedQty.requestFocus();
                         }
-
                         poAppController.getDetail(pnTransactionDetail).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
                         loadSelectedTransactionDetail(pnTransactionDetail);
                         break;
+                    case "tfAccountCode":
+                        if (lsValue.isEmpty()) {
+                            poAppController.Journal().Detail(pnDetailJE).setAccountCode("");
+                            loadTableDetailJE.reload();
+                        }
+                        break;
+                    case "tfAccountDescription":
+                        if (lsValue.isEmpty()) {
+                            poAppController.Journal().Detail(pnDetailJE).setAccountCode("");
+                            loadTableDetailJE.reload();
+                        }
+                        break;
+
+                    case "tfDebitAmount":
+                        if (poAppController.Journal().Detail(pnDetailJE).getCreditAmount() > 0.0000
+                                && Double.parseDouble(lsValue.isEmpty() ? "0" : lsValue) > 0) {
+                            ShowMessageFX.Information("Debit and credit amounts cannot both have values.", psFormName, null);
+                            poAppController.Journal().Detail(pnDetailJE).setDebitAmount(0.0000);
+                            loTextField.setText("0.00");
+                            loadTableDetailJE.reload();
+                            return;
+                        }
+                        poAppController.Journal().Detail(pnDetailJE).setDebitAmount(Double.parseDouble(lsValue));
+                        loadTableDetailJE.reload();
+                        break;
+                    case "tfCreditAmount":
+                        if (poAppController.Journal().Detail(pnDetailJE).getDebitAmount() > 0.0000
+                                && Double.parseDouble(lsValue.isEmpty() ? "0" : lsValue) > 0) {
+                            ShowMessageFX.Information("Debit and credit amounts cannot both have values.", psFormName, null);
+                            poAppController.Journal().Detail(pnDetailJE).setCreditAmount(0.0000);
+                            loTextField.setText("0.00");
+                            loadTableDetailJE.reload();
+                            return;
+                        }
+                        poAppController.Journal().Detail(pnDetailJE).setCreditAmount(Double.parseDouble(lsValue));
+                        loadTableDetailJE.reload();
+                        break;
+
                 }
             } else {
                 loTextField.selectAll();
@@ -949,6 +1040,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
             tfDiscountAmount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
             tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
             taRemarks.setText(poAppController.getMaster().getRemarks());
+            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
 
             computeTotal();
             cbDelType.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getDeliveryType()));
@@ -980,6 +1072,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
         tfVariant.setText(tblColDetailVariant.getCellData(tblIndex));
         tfCost.setText(tblColDetailCost.getCellData(tblIndex));
         tfIssuedQty.setText(tblColDetailOrderQty.getCellData(tblIndex));
+        tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
 
 //        taNote.setText(poAppController.getDetail(fnRow).getNote());
@@ -1068,6 +1161,14 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
                             null,
                             psFormName, "Unable to Select delivery please Use Cluster Issuance.");
                 }
+            }
+        });
+        tblVwJournalDetails.setOnMouseClicked(event -> {
+            if (!journal_data.isEmpty() && event.getClickCount() == 1) {
+                int lnRow = Integer.parseInt(
+                        journal_data.get(tblVwJournalDetails.getSelectionModel().getSelectedIndex()).getIndex07());
+                pnDetailJE = lnRow;
+                loadRecordDetailJE();
             }
         });
         clearAllInputs();
@@ -1168,6 +1269,7 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
 
             tblColDetailCost.setStyle("-fx-alignment: CENTER-RIGHT; -fx-padding: 0 5 0 0;");
             tblColDetailOrderQty.setStyle("-fx-alignment: CENTER; -fx-padding: 0 5 0 0;");
+            tblColDetailQOH.setStyle("-fx-alignment: CENTER; -fx-padding: 0 5 0 0;");
 
             tblColDetailNo.setCellValueFactory((loModel) -> {
                 int index = tblViewDetails.getItems().indexOf(loModel.getValue()) + 1;
@@ -1234,6 +1336,15 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
             tblColDetailCost.setCellValueFactory((loModel) -> {
                 try {
                     return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
+                } catch (SQLException | GuanzonException e) {
+                    poLogWrapper.severe(psFormName, e.getMessage());
+                    return new SimpleStringProperty("");
+                }
+            });
+
+            tblColDetailQOH.setCellValueFactory((loModel) -> {
+                try {
+                    return new SimpleStringProperty(String.valueOf(loModel.getValue().InventoryMaster().getQuantityOnHand()));
                 } catch (SQLException | GuanzonException e) {
                     poLogWrapper.severe(psFormName, e.getMessage());
                     return new SimpleStringProperty("");
@@ -1383,5 +1494,187 @@ public class InventoryStockIssuanceNeoController_ApprovalAppliance implements In
 
         poAppController.getMaster().setTransactionTotal(lnTotalAmount);
         tfTotal.setText(CommonUtils.NumberFormat(poAppController.getMaster().getTransactionTotal(), "###,###,##0.00"));
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //JOURNAL CODE HERE
+    private void initDetailJEGrid() {
+        JFXUtil.setColumnCenter(tblJournalRowNo, tblJournalReportMonthYear);
+        JFXUtil.setColumnLeft(tblJournalAccountCode, tblJournalAccountDescription);
+        JFXUtil.setColumnRight(tblJournalDebitAmount, tblJournalCreditAmount);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblVwJournalDetails);
+        tblVwJournalDetails.setItems(journal_data);
+    }
+
+    private void initDatePicker() {
+        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpJournalTransactionDate, dpReportMonthYear);
+        JFXUtil.setActionListener(datepicker_Action, dpReportMonthYear);
+    }
+    EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
+            (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
+                if ("dpReportMonthYear".equals(datePicker.getId())) {
+                    if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                        if (ldSelectedDate.isAfter(ldCurrentDate)) {
+                            ShowMessageFX.Information("Future dates are not allowed.", psFormName, null);
+                            return;
+                        }
+                        poAppController.Journal().Detail(pnDetailJE).setForMonthOf(
+                                SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
+                        loadTableDetailJE.reload();
+                    }
+                }
+            });
+
+    public void initTabPane() {
+        JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
+            switch (tabTitle) {
+                case "Stock Issuance":
+                    if (pnEditMode == EditMode.UNKNOWN) {
+                        pnDetailJE = 0;
+                    }
+                    break;
+                case "Journal":
+                    if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                        try {
+                            JFXUtil.clearTextFields(apJournalDetails, apJournalMaster);
+                            //if all ready posted/confirmed/cancell block population of journal
+                            if (!poAppController.getMaster().getTransactionStatus().equals("0")) {
+                                if (poAppController.existJournal().isEmpty()) {
+                                    JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                    ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+
+                                    return;
+                                }
+                            }
+                            if (laTransactionDetail != null && !laTransactionDetail.isEmpty()) {
+                                pbIsCheckedJournalTab = true;
+                                populateJE();
+                            } else {
+                                JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                                ShowMessageFX.Warning(null, psFormName, lsValidDisbMessage);
+                            }
+                        } catch (SQLException ex) {
+                            JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
+                            ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
+                        }
+                    }
+                    break;
+            }
+        });
+    }
+
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            if ("cbJEReverse".equals(checkedBox.getId())) {
+                if (poAppController.Journal().Detail(pnDetailJE).getEditMode() == EditMode.ADDNEW) {
+                    poAppController.Journal().Detail().remove(pnDetailJE);
+                } else {
+                    poAppController.Journal().Detail(pnDetailJE).isReverse(cbJEReverse.isSelected());
+                }
+                loadRecordMasterJE();
+                loadTableDetailJE.reload();
+            }
+        }
+    }
+
+    private void populateJE() {
+        try {
+            poAppController.getEditMode();
+            if (!isJSONSuccess(poAppController.populateJournal(), "Populate Journal")) {
+                journal_data.clear();
+                return;
+            }
+            loadTableDetailJE.reload();
+        } catch (SQLException | GuanzonException | CloneNotSupportedException | ScriptException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    private void loadRecordMasterJE() {
+        JFXUtil.setStatusValue(lblJournalTransactionStatus, JournalStatus.class,
+                pnEditMode == EditMode.UNKNOWN ? "-1" : poAppController.Journal().Master().getTransactionStatus());
+        tfJournalTransactionNo.setText(poAppController.Journal().Master().getTransactionNo());
+        dpJournalTransactionDate.setValue(ParseDate(poAppController.Journal().Master().getTransactionDate()));
+
+        double lnTotalDebit = 0;
+        double lnTotalCredit = 0;
+        for (int lnCtr = 0; lnCtr < poAppController.Journal().getDetailCount(); lnCtr++) {
+            if (!poAppController.Journal().Detail(lnCtr).isReverse()) {
+                continue;
+            }
+            lnTotalDebit += poAppController.Journal().Detail(lnCtr).getDebitAmount();
+            lnTotalCredit += poAppController.Journal().Detail(lnCtr).getCreditAmount();
+        }
+        tfTotalDebitAmount.setText(CommonUtils.NumberFormat(lnTotalDebit, "###,###,##0.00"));
+        tfTotalCreditAmount.setText(CommonUtils.NumberFormat(lnTotalCredit, "###,###,##0.00"));
+        taJournalRemarks.setText(poAppController.Journal().Master().getRemarks());
+    }
+
+    public void loadRecordDetailJE() {
+        try {
+            if (pnDetailJE < 0 || pnDetailJE > poAppController.Journal().getDetailCount() - 1) {
+                return;
+            }
+            boolean lbShow = poAppController.Journal().Detail(pnDetailJE).getEditMode() == EditMode.UPDATE;
+            tfAccountCode.setDisable(lbShow);
+            tfAccountDescription.setDisable(lbShow);
+
+            cbJEReverse.setSelected(poAppController.Journal().Detail(pnDetailJE).isReverse());
+            tfAccountCode.setText(poAppController.Journal().Detail(pnDetailJE).getAccountCode());
+            tfAccountDescription.setText(poAppController.Journal().Detail(pnDetailJE).Account_Chart().getDescription());
+            dpReportMonthYear.setValue(ParseDate(poAppController.Journal().Detail(pnDetailJE).getForMonthOf()));
+            tfDebitAmount.setText(CommonUtils.NumberFormat(poAppController.Journal().Detail(pnDetailJE).getDebitAmount(), "###,###,##0.00"));
+            tfCreditAmount.setText(CommonUtils.NumberFormat(poAppController.Journal().Detail(pnDetailJE).getCreditAmount(), "###,###,##0.00"));
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    private void initLoadTable() {
+        loadTableDetailJE = new JFXUtil.ReloadableTableTask(
+                tblVwJournalDetails,
+                journal_data,
+                () -> Platform.runLater(() -> {
+                    journal_data.clear();
+                    try {
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            poAppController.ReloadJournal();
+                        }
+                        int lnRowCount = 0;
+                        for (int lnCtr = 0; lnCtr < poAppController.Journal().getDetailCount(); lnCtr++) {
+                            if (!poAppController.Journal().Detail(lnCtr).isReverse()) {
+                                continue;
+                            }
+                            lnRowCount++;
+                            journal_data.add(new ModelJournalEntry_Detail(
+                                    String.valueOf(lnRowCount),
+                                    String.valueOf(poAppController.Journal().Detail(lnCtr).getForMonthOf()),
+                                    poAppController.Journal().Detail(lnCtr).getAccountCode(),
+                                    poAppController.Journal().Detail(lnCtr).Account_Chart().getDescription(),
+                                    CommonUtils.NumberFormat(poAppController.Journal().Detail(lnCtr).getDebitAmount(), "###,###,##0.00"),
+                                    CommonUtils.NumberFormat(poAppController.Journal().Detail(lnCtr).getCreditAmount(), "###,###,##0.00"),
+                                    String.valueOf(lnCtr)
+                            ));
+                        }
+                        if (!journal_data.isEmpty()) {
+                            int lnSelect = (pnDetailJE >= 0 && pnDetailJE < journal_data.size()) ? pnDetailJE : 0;
+                            tblVwJournalDetails.getSelectionModel().select(lnSelect);
+                            pnDetailJE = lnSelect;
+                            loadRecordDetailJE();
+                        }
+                        loadRecordMasterJE();
+                    } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+                        poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+                    }
+                }));
     }
 }
