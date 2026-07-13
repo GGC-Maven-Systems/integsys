@@ -393,7 +393,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 (row, rowIndex, colIndex) -> {
                     switch (colIndex) {
                         case 0:
-                            ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
                             break;
                         default:
                             break;
@@ -695,7 +695,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
             if (nodeID.equals("chckSelectAll")) {
                 if (!main_data.isEmpty()) {
-                    ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
                 }
             }
         });
