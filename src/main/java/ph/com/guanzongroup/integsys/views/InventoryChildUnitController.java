@@ -700,7 +700,9 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
         JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
             if (nodeID.equals("chckSelectAll")) {
-                ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+                if (!main_data.isEmpty()) {
+                    ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+                }
             }
         });
     }
