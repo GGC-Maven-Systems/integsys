@@ -458,13 +458,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     public void loadRecordSearch() {
-//        try {
-//        tfSearchStock.setText(poController.Master().Payee().getPayeeName());
-//        JFXUtil.updateCaretPositions(apBrowse);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
+
     }
 
     public void loadRecordMaster() {
@@ -619,17 +613,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfSearchStock":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setStockId("");
-                        }
-                        break;
-                }
-                loadTableMain.reload();
-            });
+
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
