@@ -165,7 +165,7 @@
                                     </GridPane>
                                  </children>
                               </AnchorPane>
-                              <AnchorPane layoutX="20.0" layoutY="20.0" style="-fx-border-color: FF8201; -fx-border-radius: 5;" VBox.vgrow="ALWAYS">
+                              <AnchorPane fx:id="apTable" layoutX="20.0" layoutY="20.0" style="-fx-border-color: FF8201; -fx-border-radius: 5;" VBox.vgrow="ALWAYS">
                                  <children>
                                     <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                        <columnConstraints>

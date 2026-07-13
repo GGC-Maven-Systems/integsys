@@ -64,7 +64,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     private int pnMain = 0;
 
     @FXML
-    private AnchorPane AnchorMain, AnchorInputs, apMaster, apBrowse;
+    private AnchorPane AnchorMain, AnchorInputs, apMaster, apTable, apBrowse;
     @FXML
     private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnHistory, btnClose;
     @FXML
@@ -203,6 +203,10 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             return;
                         }
                         pnEditMode = poController.getEditMode();
+                        chckSelectAll.setSelected(false);
+                        if (!checkedItem.isEmpty()) {
+                            checkedItem.clear();
+                        }
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -211,7 +215,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
                             poController.Master().setIndustryCode(psIndustryId);
                             pnEditMode = EditMode.UNKNOWN;
-
                             break;
                         } else {
                             return;
@@ -694,6 +697,12 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewMainList);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList);
+
+        JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
+            if (nodeID.equals("chckSelectAll")) {
+                ShowMessageFX.Information(null, pxeModuleName, "This function is available only when the record is not in Add or Update mode.");
+            }
+        });
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
@@ -753,6 +762,10 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     public void clearTextFields() {
+        chckSelectAll.setSelected(false);
+        if (!checkedItem.isEmpty()) {
+            checkedItem.clear();
+        }
         JFXUtil.clearTextFields(apBrowse, apMaster);
     }
 
