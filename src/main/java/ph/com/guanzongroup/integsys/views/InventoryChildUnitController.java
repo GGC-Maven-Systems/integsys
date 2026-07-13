@@ -243,6 +243,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 loadRecordMaster();
                 loadTableMain.reload();
                 initButton(pnEditMode);
+                JFXUtil.runWithDelay(.5, () -> {
+                    if (JFXUtil.isObjectEqualTo(lsButton, "btnUpdate", "btnNew")) {
+                        moveNext(false, false);
+                    }
+                });
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -553,6 +558,18 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     }
                     loadTableMain.reload();
                     break;
+                case UP:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBarcode", "tfDescription", "tfMeasure", "tfConversion"}, (Runnable) () -> moveNext(true, true)}
+                    });
+                    event.consume();
+                    break;
+                case DOWN:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBarcode", "tfDescription", "tfMeasure", "tfConversion"}, (Runnable) () -> moveNext(false, true)}
+                    });
+                    event.consume();
+                    break;
             }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -657,12 +674,33 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 case "tblViewMainList":
                     if (!main_data.isEmpty()) {
                         pnMain = newIndex;
-                        loadRecordMaster();
+                        moveNext(false, false);
                     }
                     break;
             }
         }
     };
+
+    public void moveNext(boolean isUp, boolean continueNext) {
+        try {
+            if (continueNext) {
+                apMaster.requestFocus();
+                pnMain = isUp ? JFXUtil.moveToPreviousRow(tblViewMainList) : JFXUtil.moveToNextRow(tblViewMainList);
+            }
+            loadRecordMaster();
+            if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Detail(pnMain).Inventory().getBarCode(), tfBarcode},
+                {poController.Detail(pnMain).Inventory().getDescription(), tfDescription}, // if null or empty, then requesting focus to the txtfield
+                {poController.Detail(pnMain).Measure().getDescription(), tfMeasure},
+                {poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription(), tfConversion},}, tfConversion); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
 
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow, tblDetailStatus);
@@ -678,7 +716,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 ModelInventoryChildUnit selected = (ModelInventoryChildUnit) tblViewMainList.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnMain = Integer.parseInt(selected.getIndex02()) - 1;
-                    loadRecordMaster();
+                    moveNext(false, false);
                 }
             }
         });
