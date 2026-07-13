@@ -335,10 +335,10 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-            }
-            chckSelectAll.setSelected(false);
-            if (!checkedItem.isEmpty()) {
-                checkedItem.clear();
+                chckSelectAll.setSelected(false);
+                if (!checkedItem.isEmpty()) {
+                    checkedItem.clear();
+                }
             }
             poController.populateDetail();
             pnEditMode = poController.getEditMode();
@@ -376,6 +376,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     switch (colIndex) {
                         case 0:
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            boolean allOnes = checkedItem.stream().allMatch("1"::equals);
+                            chckSelectAll.setSelected(allOnes);
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
                             pnMain = rowIndex;
