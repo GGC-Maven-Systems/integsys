@@ -155,6 +155,8 @@ public class UnitConversionController implements Initializable, ScreenInterface 
         btnCancel.setOnAction(this::handleButtonAction);
         btnDeactivate.setOnAction(this::handleButtonAction);
         btnClose.setOnAction(this::handleButtonAction);
+        btnHistory.setOnAction(this::handleButtonAction);
+        btnConfirm.setOnAction(this::handleButtonAction);
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -246,7 +248,7 @@ public class UnitConversionController implements Initializable, ScreenInterface 
                         JSONObject saveResult = oParameters.UnitConversion().saveRecord();
                         if ("success".equals((String) saveResult.get("result"))) {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
-                            if(ShowMessageFX.YesNo("Do you want to approve this record?",pxeModuleName, null) == true){
+                            if(ShowMessageFX.YesNo("Do you want to activate this record?",pxeModuleName, null) == true){
                                 oParameters.UnitConversion().openRecord(conversionID);
                                 poJSON = oParameters.UnitConversion().ActivateRecord("");
                                 if ("error".equals((String) poJSON.get("result"))) {
@@ -272,55 +274,81 @@ public class UnitConversionController implements Initializable, ScreenInterface 
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                        pnEditMode = EditMode.UNKNOWN;
+                        initButton(pnEditMode);
+                        clearAllFields();
                         break;
-                    case "btnActivate":
-                        String Status = oParameters.UnitConversion().getModel().getRecordStatus();
-                        String id = oParameters.UnitConversion().getModel().getConversionID();
-                        JSONObject poJsON;
-                        
-                        switch (Status) {
-                            case "0":
-                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-                                    oParameters.UnitConversion().initialize();
-                                    poJsON = oParameters.UnitConversion().activateRecord();
-                                    if ("error".equals(poJsON.get("result"))) {
-                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                        break;
-                                    }
-                                    poJsON = oParameters.UnitConversion().openRecord(id);
-                                    if ("error".equals(poJsON.get("result"))) {
-                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                        break;
-                                    }
-                                    clearAllFields();
-                                    loadRecord();
-                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                }
-                                break;
-                            case "1":
-                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                                  
-                                    poJsON = oParameters.UnitConversion().deactivateRecord();
-                                    if ("error".equals(poJsON.get("result"))) {
-                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                        break;
-                                    }
-                                    poJsON = oParameters.UnitConversion().openRecord(id);
-                                    if ("error".equals(poJsON.get("result"))) {
-                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                        break;
-                                    }
-                                    clearAllFields();
-                                    loadRecord();
-                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
-                                }
-                                break;
+                    case "btnConfirm" :
+                        if(!ShowMessageFX.YesNo("Are you sure you want to activate this record?",pxeModuleName,null)){
+                            return;
                         }
-                    break;
+                        poJSON = oParameters.UnitConversion().ActivateRecord("");
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                        pnEditMode = EditMode.UNKNOWN;
+                        initButton(pnEditMode);
+                        clearAllFields();
+                        break;
+                    case "btnHistory" :
+                        if (oParameters.UnitConversion().getModel().getConversionID() == null) {
+                            ShowMessageFX.Error("Unable to proceed. No record is currently loaded.", pxeModuleName, null);
+                            return;
+                        }
+                        oParameters.UnitConversion().ShowStatusHistory();
+                        break;
+//                    case "btnActivate":
+//                        String Status = oParameters.UnitConversion().getModel().getRecordStatus();
+//                        String id = oParameters.UnitConversion().getModel().getConversionID();
+//                        JSONObject poJsON;
+//
+//                        switch (Status) {
+//                            case "0":
+//                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
+//                                    oParameters.UnitConversion().initialize();
+//                                    poJsON = oParameters.UnitConversion().activateRecord();
+//                                    if ("error".equals(poJsON.get("result"))) {
+//                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                        break;
+//                                    }
+//                                    poJsON = oParameters.UnitConversion().openRecord(id);
+//                                    if ("error".equals(poJsON.get("result"))) {
+//                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                        break;
+//                                    }
+//                                    clearAllFields();
+//                                    loadRecord();
+//                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                }
+//                                break;
+//                            case "1":
+//                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
+//
+//                                    poJsON = oParameters.UnitConversion().deactivateRecord();
+//                                    if ("error".equals(poJsON.get("result"))) {
+//                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                        break;
+//                                    }
+//                                    poJsON = oParameters.UnitConversion().openRecord(id);
+//                                    if ("error".equals(poJsON.get("result"))) {
+//                                        ShowMessageFX.Warning((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                        break;
+//                                    }
+//                                    clearAllFields();
+//                                    loadRecord();
+//                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+//                                }
+//                                break;
+//                        }
+//                    break;
                 }
             } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                 Logger.getLogger(UnitConversionController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -417,9 +445,9 @@ public class UnitConversionController implements Initializable, ScreenInterface 
                         break;
                     case UnitConversion.UnitConversionConstant.INACTIVE:
                         CustomCommonUtil.setVisible(true,
-                                btnBrowse, btnNew,btnHistory,btnClose);
+                                btnBrowse, btnNew,btnConfirm,btnHistory,btnClose);
                         CustomCommonUtil.setManaged(true,
-                                btnBrowse, btnNew,btnHistory,btnClose);
+                                btnBrowse, btnNew,btnConfirm,btnHistory,btnClose);
                         break;
                     case UnitConversion.UnitConversionConstant.DISAPPROVE:
                         CustomCommonUtil.setVisible(true,
