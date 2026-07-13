@@ -139,14 +139,14 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnHistory":
-                        if(poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE){
+                        if (poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
                             return;
                         }
 
                         try {
                             poController.ShowStatusHistory(pnMain);
-                        }  catch (NullPointerException npe) {
+                        } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
                             ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
@@ -433,17 +433,17 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-            if(pnEditMode == EditMode.UNKNOWN || pnEditMode == EditMode.READY  ){
+            if (pnEditMode == EditMode.UNKNOWN || pnEditMode == EditMode.READY) {
                 JFXUtil.setDisabled(true, apMaster);
             } else {
                 boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
                 JFXUtil.setDisabled(lbShow, apMaster);
                 boolean lbShow2 = pnEditMode == EditMode.UPDATE;
-                JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
+                JFXUtil.setDisabled(lbShow2, tfBarcode, tfDescription);
                 boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
                 JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
             }
-            
+
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
             tfBarcode.setText(poController.Detail(pnMain).Inventory().getBarCode());
@@ -509,7 +509,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 }
                             }
                             lbProceed = false;
-                            
+
                             poJSON = poController.SearchInventory(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -557,7 +557,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         } catch (ExceptionInInitializerError | SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } 
+        }
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -666,8 +666,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow, tblDetailStatus);
-        JFXUtil.setColumnRight(tblDetailConversion);
-        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailQtyConvert);
+        JFXUtil.setColumnRight(tblDetailQtyConvert);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
