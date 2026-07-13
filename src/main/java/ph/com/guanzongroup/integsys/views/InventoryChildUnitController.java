@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -65,15 +66,17 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster, apBrowse;
     @FXML
-    private Button btnHistory, btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnClose;
+    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnHistory, btnClose;
     @FXML
-    private TextField tfStockID, tfBarcode, tfConversion, tfDescription, tfMeasure, tfSearchStock;
+    private TextField tfStockID, tfBarcode, tfDescription, tfMeasure, tfConversion, tfSearchStock;
     @FXML
     private Label lblStatus, lblSource1;
     @FXML
     private TableView tblViewMainList;
     @FXML
     private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert, tblDetailStatus;
+    @FXML
+    private CheckBox chckSelectAll;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -167,6 +170,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
+                        chckSelectAll.setSelected(false);
                         if (!checkedItem.isEmpty()) {
                             checkedItem.clear();
                         }
@@ -305,7 +309,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             }
             if (lbAllSame) {
             } else {
-                ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items are similar.");
+                ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items status are similar.");
                 return;
             }
             if (checkedItems.isEmpty()) {
@@ -329,6 +333,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
             }
+            chckSelectAll.setSelected(false);
             if (!checkedItem.isEmpty()) {
                 checkedItem.clear();
             }
@@ -336,6 +341,28 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        poJSON = new JSONObject();
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "chckSelectAll": // this is the id
+                    //set to 1 all of column 2 row data value to enable checked
+                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
+                        if (checkedBox.isSelected()) {
+                            checkedItem.set(lnCtr, "1");
+                        } else {
+                            checkedItem.set(lnCtr, "0");
+                        }
+                    }
+                    loadTableMain.reload();
+                    break;
+            }
         }
     }
 
@@ -432,8 +459,10 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             lblStatus.setText("UNKNOWN");
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
             } else {
                 disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(true, chckSelectAll);
             }
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
@@ -491,6 +520,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
                                 }
+                                chckSelectAll.setSelected(false);
                                 if (!checkedItem.isEmpty()) {
                                     checkedItem.clear();
                                 }
