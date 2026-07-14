@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -63,17 +64,19 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     private int pnMain = 0;
 
     @FXML
-    private AnchorPane AnchorMain, AnchorInputs, apMaster, apBrowse;
+    private AnchorPane AnchorMain, AnchorInputs, apMaster, apTable, apBrowse;
     @FXML
-    private Button btnHistory, btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnClose;
+    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDisapprove, btnDeactivate, btnHistory, btnClose;
     @FXML
-    private TextField tfStockID, tfBarcode, tfConversion, tfDescription, tfMeasure, tfSearchStock;
+    private TextField tfStockID, tfBarcode, tfDescription, tfMeasure, tfConversion, tfSearchStock;
     @FXML
     private Label lblStatus, lblSource1;
     @FXML
     private TableView tblViewMainList;
     @FXML
     private TableColumn tblDetailRow1, tblDetailRow, tblDetailMeasure, tblDetailConversion, tblDetailQtyConvert, tblDetailStatus;
+    @FXML
+    private CheckBox chckSelectAll;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -139,16 +142,16 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnHistory":
-                        if(pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE){
-                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                        if (poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
                             return;
                         }
 
                         try {
                             poController.ShowStatusHistory(pnMain);
-                        }  catch (NullPointerException npe) {
+                        } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
@@ -167,9 +170,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
-                        if (!checkedItem.isEmpty()) {
-                            checkedItem.clear();
-                        }
+                        resetCheckboxSelection();
                         main_data.clear();
                         JFXUtil.clearTextFields(apMaster);
                         pnEditMode = poController.getEditMode();
@@ -199,6 +200,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             return;
                         }
                         pnEditMode = poController.getEditMode();
+                        resetCheckboxSelection();
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -207,7 +209,6 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
 
                             poController.Master().setIndustryCode(psIndustryId);
                             pnEditMode = EditMode.UNKNOWN;
-
                             break;
                         } else {
                             return;
@@ -243,6 +244,11 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 loadRecordMaster();
                 loadTableMain.reload();
                 initButton(pnEditMode);
+                JFXUtil.runWithDelay(.5, () -> {
+                    if (JFXUtil.isObjectEqualTo(lsButton, "btnUpdate", "btnNew")) {
+                        moveNext(false, false);
+                    }
+                });
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -300,7 +306,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             }
             if (lbAllSame) {
             } else {
-                ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items are similar.");
+                ShowMessageFX.Warning(null, pxeModuleName, "Ensure all selected items status are similar.");
                 return;
             }
             if (checkedItems.isEmpty()) {
@@ -323,14 +329,41 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-            }
-            if (!checkedItem.isEmpty()) {
-                checkedItem.clear();
+                resetCheckboxSelection();
             }
             poController.populateDetail();
             pnEditMode = poController.getEditMode();
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void resetCheckboxSelection() {
+        chckSelectAll.setSelected(false);
+        if (!checkedItem.isEmpty()) {
+            checkedItem.clear();
+        }
+    }
+
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        poJSON = new JSONObject();
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "chckSelectAll": // this is the id
+                    //set to 1 all of column 2 row data value to enable checked
+                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
+                        if (checkedBox.isSelected()) {
+                            checkedItem.set(lnCtr, "1");
+                        } else {
+                            checkedItem.set(lnCtr, "0");
+                        }
+                    }
+                    loadTableMain.reload();
+                    break;
+            }
         }
     }
 
@@ -341,6 +374,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     switch (colIndex) {
                         case 0:
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            boolean allOnes = checkedItem.stream().allMatch("1"::equals);
+                            chckSelectAll.setSelected(allOnes);
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
                             pnMain = rowIndex;
@@ -354,7 +389,17 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                             });
                             break;
                     }
-                }, 0);//starts 0,1,2 
+                },
+                (row, rowIndex, colIndex) -> {
+                    switch (colIndex) {
+                        case 0:
+                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
+                            break;
+                        default:
+                            break;
+                    }
+                },
+                0);//starts 0,1,2 
     }
 
     private void checkedItems(int lnCtr) {
@@ -413,13 +458,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     }
 
     public void loadRecordSearch() {
-//        try {
-//        tfSearchStock.setText(poController.Master().Payee().getPayeeName());
-//        JFXUtil.updateCaretPositions(apBrowse);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
+
     }
 
     public void loadRecordMaster() {
@@ -427,21 +466,28 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
             lblStatus.setText("UNKNOWN");
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
             } else {
                 disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(true, chckSelectAll);
             }
             if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
                 return;
             }
-            boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
-            JFXUtil.setDisabled(lbShow, apMaster);
-            boolean lbShow2 = pnEditMode == EditMode.UPDATE;
-            JFXUtil.setDisabled(lbShow2, tfBarcode,tfDescription);
-            boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
-            JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
+            if (pnEditMode == EditMode.UNKNOWN || pnEditMode == EditMode.READY) {
+                JFXUtil.setDisabled(true, apMaster);
+            } else {
+                boolean lbShow = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE;
+                JFXUtil.setDisabled(lbShow, apMaster);
+                boolean lbShow2 = pnEditMode == EditMode.UPDATE;
+                JFXUtil.setDisabled(lbShow2, tfBarcode, tfDescription);
+                boolean lbShow3 = poController.Detail(pnMain).getEditMode() == EditMode.UPDATE || poController.Detail(pnMain).getEditMode() == EditMode.READY;
+                JFXUtil.setButtonsVisibility(lbShow3, btnHistory);
+            }
+
             lblStatus.setText(poController.getStatus(poController.Detail(pnMain).getRecordStatus()));
             tfStockID.setText(poController.Detail(pnMain).Inventory().getStockId());
-            tfBarcode.setText(poController.Detail(pnMain).Inventory().getDescription());
+            tfBarcode.setText(poController.Detail(pnMain).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnMain).Inventory().getDescription());
             tfMeasure.setText(poController.Detail(pnMain).Measure().getDescription());
             tfConversion.setText(poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription());
@@ -481,9 +527,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
                                 }
-                                if (!checkedItem.isEmpty()) {
-                                    checkedItem.clear();
-                                }
+                                resetCheckboxSelection();
                                 main_data.clear();
                                 JFXUtil.clearTextFields(apMaster);
                                 pnEditMode = poController.getEditMode();
@@ -495,11 +539,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 if (poController.getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                        poController.Detail().clear();
-                                        clearTextFields();
-                                        loadTableMain.reload();
-                                        loadRecordMaster();
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        btnNew.fire();
                                     } else {
                                         return;
                                     }
@@ -507,6 +548,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 }
                             }
                             lbProceed = false;
+
                             poJSON = poController.SearchInventory(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -519,11 +561,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                 if (poController.getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                        poController.Detail().clear();
-                                        clearTextFields();
-                                        loadTableMain.reload();
-                                        loadRecordMaster();
+                                            "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        btnNew.fire();
                                     } else {
                                         return;
                                     }
@@ -553,25 +592,25 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                     }
                     loadTableMain.reload();
                     break;
+                case UP:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBarcode", "tfDescription", "tfMeasure", "tfConversion"}, (Runnable) () -> moveNext(true, true)}
+                    });
+                    event.consume();
+                    break;
+                case DOWN:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBarcode", "tfDescription", "tfMeasure", "tfConversion"}, (Runnable) () -> moveNext(false, true)}
+                    });
+                    event.consume();
+                    break;
             }
-        } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
+        } catch (ExceptionInInitializerError | SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
-    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfSearchStock":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnMain).setStockId("");
-                        }
-                        break;
-                }
-                loadTableMain.reload();
-            });
+
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -582,11 +621,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                                poController.Detail().clear();
-                                                clearTextFields();
-                                                loadTableMain.reload();
-                                                loadRecordMaster();
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                btnNew.fire();
                                             } else {
                                                 loadRecordMaster();
                                                 return;
@@ -611,11 +647,8 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the inventory?\nPlease note that this action will delete all records.\n\nDo you wish to proceed?") == true) {
-                                                poController.Detail().clear();
-                                                clearTextFields();
-                                                loadTableMain.reload();
-                                                loadRecordMaster();
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                btnNew.fire();
                                             } else {
                                                 loadRecordMaster();
                                                 return;
@@ -655,6 +688,14 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewMainList);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList);
+
+        JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
+            if (nodeID.equals("chckSelectAll")) {
+                if (!main_data.isEmpty()) {
+                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
+                }
+            }
+        });
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
@@ -665,17 +706,38 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 case "tblViewMainList":
                     if (!main_data.isEmpty()) {
                         pnMain = newIndex;
-                        loadRecordMaster();
+                        moveNext(false, false);
                     }
                     break;
             }
         }
     };
 
+    public void moveNext(boolean isUp, boolean continueNext) {
+        try {
+            if (continueNext) {
+                apMaster.requestFocus();
+                pnMain = isUp ? JFXUtil.moveToPreviousRow(tblViewMainList) : JFXUtil.moveToNextRow(tblViewMainList);
+            }
+            loadRecordMaster();
+            if (pnMain < 0 || pnMain > poController.getDetailCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Detail(pnMain).Inventory().getBarCode(), tfBarcode},
+                {poController.Detail(pnMain).Inventory().getDescription(), tfDescription}, // if null or empty, then requesting focus to the txtfield
+                {poController.Detail(pnMain).Measure().getDescription(), tfMeasure},
+                {poController.Detail(pnMain).UnitConversion().ConvertTo().getDescription(), tfConversion},}, tfConversion); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblDetailRow1, tblDetailRow, tblDetailStatus);
-        JFXUtil.setColumnRight(tblDetailConversion);
-        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailQtyConvert);
+        JFXUtil.setColumnRight(tblDetailQtyConvert);
+        JFXUtil.setColumnLeft(tblDetailMeasure, tblDetailConversion);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
     }
@@ -686,13 +748,14 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                 ModelInventoryChildUnit selected = (ModelInventoryChildUnit) tblViewMainList.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnMain = Integer.parseInt(selected.getIndex02()) - 1;
-                    loadRecordMaster();
+                    moveNext(false, false);
                 }
             }
         });
     }
 
     public void clearTextFields() {
+        resetCheckboxSelection();
         JFXUtil.clearTextFields(apBrowse, apMaster);
     }
 
@@ -706,6 +769,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
+        JFXUtil.setButtonsVisibility(fnValue != EditMode.UNKNOWN, btnHistory);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnActivate, btnDeactivate, btnDisapprove);
