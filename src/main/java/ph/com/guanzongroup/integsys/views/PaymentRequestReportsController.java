@@ -30,6 +30,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.cashflow.PaymentRequest;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
+import ph.com.guanzongroup.cas.cashflow.status.PaymentRequestStatus;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -63,10 +64,10 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     private String psCategoryID = "";
     boolean isSummarized = true;
     
-    private String searchBranch = "";
-    private String searchDestination = "";
-    private String searchSupplier = "";
-    private String searchCategory = "";
+    private String searchReqBranch = "";
+    private String searchExpBranch = "";
+    private String searchDept = "";
+    private String searchPayee = "";
     private LocalDate datefrom ;
     private Boolean isSearching = false;
     private volatile boolean isLoading = false;
@@ -89,8 +90,8 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     private ToggleGroup presentation;
 
     @FXML
-    private TextField tfCategory,
-            tfBranch, tfDestination, tfSupplier;
+    private TextField tfSearchReqBranch,
+            tfSearchExpBranch, tfSearchDept, tfSearchPayee;
 
     @FXML
     private DatePicker dpDateFrom, dpDateThru;
@@ -111,7 +112,7 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     private TableColumn<ModelTableDetail, String> index01, index02, index03, index04,
             index05, index06, index07, index08,
             index09, index10, index11, index12,
-            index13, index14, index15, index16;
+            index13, index14, index15, index16,index17;
 
     @FXML
     private Pagination pagination;
@@ -153,7 +154,7 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
         InitCriterea();
         initComboboxes();
         initDefaultDateRange();
-        poPaymentRequest.PaymentRequest().setTransactionStatus("E01234569");
+        poPaymentRequest.PaymentRequest().setTransactionStatus("1234560");
         initTableDetail();
         initPrint();
         } catch (SQLException e) {
@@ -201,7 +202,6 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                 } catch (SQLException | GuanzonException e) {
                     throw new RuntimeException(e);
                 }
-//                loadRecordMaster();
             }
     );
 
@@ -248,25 +248,27 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     private String getTranStatus(String status) {
         switch (status) {
             case "ALL":
-                return "E01234569";
+                return PaymentRequestStatus.OPEN
+                        + PaymentRequestStatus.CONFIRMED
+                        + PaymentRequestStatus.PAID
+                        + PaymentRequestStatus.CANCELLED
+                        + PaymentRequestStatus.VOID
+                        + PaymentRequestStatus.POSTED
+                        + PaymentRequestStatus.RETURNED;
             case "OPEN":
-                return "0";
+                return PaymentRequestStatus.OPEN;
             case "CONFIRMED":
-                return "1";
+                return PaymentRequestStatus.CONFIRMED;
             case "PROCESSED":
-                return "2";
+                return PaymentRequestStatus.PAID;
             case "CANCELLED":
-                return "3";
+                return PaymentRequestStatus.CANCELLED;
             case "VOID":
-                return "4";
-            case "APPROVED":
-                return "5";
+                return PaymentRequestStatus.VOID;
             case "POSTED":
-                return "6";
+                return PaymentRequestStatus.POSTED;
             case "RETURNED":
-                return "9";
-            case "APPROVED+":
-                return "E";
+                return PaymentRequestStatus.RETURNED;
             default:
                 return null;
         }
@@ -308,12 +310,11 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     }
 
     private void InitCriterea() {
-        try {
         TextField[] textFields = {
-            tfCategory,
-            tfBranch,
-            tfDestination,
-            tfSupplier
+                tfSearchReqBranch,
+                tfSearchExpBranch,
+                tfSearchDept,
+                tfSearchPayee
         };
 
         for (TextField tf : textFields) {
@@ -353,9 +354,6 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                 initPrint();
             });
         }
-        } catch (SQLException | GuanzonException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -375,80 +373,90 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                     case ENTER:
                     case F3:
                         switch (txtFieldID) {
-
-                            case "tfCategory":
+                            case "tfSearchReqBranch":
                                 isSearching = true;
 
                                 try {
                                     poJSON = poPaymentRequest.PaymentRequest().
-                                            SearchCategoryReports(lsValue, false);
+                                            SearchReqBranch(lsValue, false);
 
                                     if ("error".equals(poJSON.get("result"))) {
                                         return;
                                     }
 
-                                    tfCategory.setText((String)poJSON.get("category"));
-                                    searchCategory = (String)poJSON.get("categoryID");
+                                    tfSearchReqBranch.setText((String)poJSON.get("reqbranch"));
+                                    searchReqBranch = (String)poJSON.get("reqbranchID");
                                     loadTableMaster();
-                                } finally {
+                                } catch (GuanzonException | SQLException e) {
+                                    throw new RuntimeException(e);
+                                }  finally {
                                     isSearching = false;
                                 }
 
                                 break;
-                            case "tfBranch":
+                            case "tfSearchExpBranch":
                                 isSearching = true;
 
                                 try {
-                                    poJSON = poPaymentRequest.PaymentRequest()
-                                            .SearchBranchReports(lsValue, false);
+                                    poJSON = poPaymentRequest.PaymentRequest().
+                                            SearchExpBranch(lsValue, false);
 
                                     if ("error".equals(poJSON.get("result"))) {
                                         return;
                                     }
 
-                                    tfBranch.setText((String)poJSON.get("branch"));
-                                    searchBranch = (String)poJSON.get("branchID");
+                                    tfSearchExpBranch.setText((String)poJSON.get("expbranch"));
+                                    searchExpBranch = (String)poJSON.get("expbranchID");
                                     loadTableMaster();
-                                } finally {
+                                } catch (GuanzonException | SQLException e) {
+                                    throw new RuntimeException(e);
+                                }  finally {
                                     isSearching = false;
                                 }
 
                                 break;
-                            case "tfDestination":
+
+                            case "tfSearchDept":
                                 isSearching = true;
 
                                 try {
-                                    poJSON = poPaymentRequest.PaymentRequest()
-                                            .SearchDestinationReports(lsValue, false);
+                                    poJSON = poPaymentRequest.PaymentRequest().
+                                    SearchDepartmentReport(lsValue, false);
 
                                     if ("error".equals(poJSON.get("result"))) {
                                         return;
                                     }
 
-                                    tfDestination.setText((String)poJSON.get("destination"));
-                                    searchDestination = (String)poJSON.get("destinationID");
+                                    tfSearchDept.setText((String)poJSON.get("department"));
+                                    searchDept = (String)poJSON.get("departmentID");
                                     loadTableMaster();
-                                } finally {
+                                } catch (GuanzonException | SQLException e) {
+                                    throw new RuntimeException(e);
+                                }  finally {
                                     isSearching = false;
                                 }
+
                                 break;
-                            case "tfSupplier":
+                            case "tfSearchPayee":
                                 isSearching = true;
 
                                 try {
-                                    poJSON = poPaymentRequest.PaymentRequest()
-                                            .SearchSupplierReports(lsValue, false);
+                                    poJSON = poPaymentRequest.PaymentRequest().
+                                            SearchPayeeReport(lsValue, false);
 
                                     if ("error".equals(poJSON.get("result"))) {
                                         return;
                                     }
 
-                                    tfSupplier.setText((String) poJSON.get("supplier"));
-                                    searchSupplier = (String) poJSON.get("supplierID");
+                                    tfSearchPayee.setText((String)poJSON.get("payee"));
+                                    searchPayee = (String)poJSON.get("payeeID");
                                     loadTableMaster();
-                                } finally {
+                                } catch (GuanzonException | SQLException e) {
+                                    throw new RuntimeException(e);
+                                }  finally {
                                     isSearching = false;
                                 }
+
                                 break;
                         }
                         break;
@@ -459,7 +467,7 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                     default:
                         break;
                 }
-            } catch (SQLException | GuanzonException | ExceptionInInitializerError ex) {
+            } catch (ExceptionInInitializerError ex) {
                 Logger.getLogger(PaymentRequestReportsController.class.getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(ex.getMessage(), psFormName, null);
             }
@@ -474,27 +482,27 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
 //            try {
                 /* Lost Focus */
                 switch (lsID) {
-                    case "tfCategory":
+                    case "tfSearchReqBranch":
                         if(lsValue == null || lsValue.isEmpty()){
-                            searchCategory = "";
+                            searchReqBranch = "";
                             loadTableMaster();
                         }
                         break;
-                    case "tfBranch":
+                    case "tfSearchExpBranch":
                         if(lsValue == null || lsValue.isEmpty()){
-                            searchBranch = "";
+                            searchExpBranch = "";
                             loadTableMaster();
                         }
                         break;
-                    case "tfDestination":
+                    case "tfSearchDept":
                         if(lsValue == null || lsValue.isEmpty()){
-                            searchDestination = "";
+                            searchDept = "";
                             loadTableMaster();
                         }
                         break;
-                    case "tfSupplier":
+                    case "tfSearchPayee":
                         if (lsValue == null || lsValue.isEmpty()) {
-                            searchSupplier = "";
+                            searchPayee = "";
                             loadTableMaster();
                         }
                         break;
@@ -540,80 +548,110 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
         if (isSummarized) {
 
             // SUMMARY MODE
-            index02.setText("Supplier");
-            index03.setText("Destination");
-            index04.setText("Branch");
-            index05.setText("Transaction No.");
-            index06.setText("Reference No.");
-            index07.setText("Date Trans");
-            index08.setText("Category");
-            index09.setText("Term");
-            index10.setText("Status");
-            index11.setText("Total");
+            index02.setText("Transaction No");
+            index03.setText("Date");
+            index04.setText("Requesting Branch");
+            index05.setText("Expense Branch");
+            index06.setText("Department");
+            index07.setText("Payee");
+            index08.setText("Series No");
+            index09.setText("Source");
+            index10.setText("Source No");
+            index11.setText("Disc. Amt.");
+            index12.setText("Tax Amt.");
+            index13.setText("Net Total");
+            index14.setText("Amt. Paid");
+            index15.setText("Total");
+            index16.setText("Status");
 
             // 🔥 ALIGNMENT
             index02.setStyle("-fx-alignment: CENTER-LEFT;");
-            index03.setStyle("-fx-alignment: CENTER-LEFT;");
+            index03.setStyle("-fx-alignment: CENTER;");
             index04.setStyle("-fx-alignment: CENTER-LEFT;");
             index05.setStyle("-fx-alignment: CENTER-LEFT;");
             index06.setStyle("-fx-alignment: CENTER-LEFT;");
-            index07.setStyle("-fx-alignment: CENTER;");
+            index07.setStyle("-fx-alignment: CENTER-LEFT;");
             index08.setStyle("-fx-alignment: CENTER-LEFT;");
             index09.setStyle("-fx-alignment: CENTER;");
-            index10.setStyle("-fx-alignment: CENTER;");
-            index11.setStyle("-fx-alignment: CENTER-RIGHT;"); // 💰 amount
-//            index09.setPrefWidth(80);
+            index10.setStyle("-fx-alignment: CENTER-LEFT;");
+            index11.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index12.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index13.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index14.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index15.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index16.setStyle("-fx-alignment: CENTER-LEFT;");
+            index02.setPrefWidth(100);
+            index03.setPrefWidth(80);
+            index04.setPrefWidth(150);
+            index05.setPrefWidth(150);
+            index06.setPrefWidth(150);
+            index07.setPrefWidth(180);
+            index08.setPrefWidth(80);
+            index09.setPrefWidth(50);
+            index10.setPrefWidth(100);
+            index11.setPrefWidth(100);
+            index12.setPrefWidth(100);
+            index13.setPrefWidth(100);
+            index14.setPrefWidth(100);
+            index15.setPrefWidth(100);
+            index16.setPrefWidth(80);
 
-            // HIDE UNUSED
-            index12.setVisible(false);
-            index13.setVisible(false);
-            index14.setVisible(false);
-            index15.setVisible(false);
-            index16.setVisible(false);
+            index17.setVisible(false);
 
         } else {
 
 
             // DETAIL MODE
-            index02.setText("Supplier");
-            index03.setText("Destination");
-            index03.setText("Destination");
-            index04.setText("Transaction No.");
-            index05.setText("Date Trans.");
-            index06.setText("Barrcode");
-            index07.setText("Description");
-            index08.setText("Brand");
-            index09.setText("Model Code");
-            index10.setText("Model Name");
-            index11.setText("Color");
-            index12.setText("Qty");
-            index13.setText("Rcvd.");
-            index14.setText("Canc.");
-            index15.setText("Unit Price");
-            index16.setText("Total");
+            index02.setText("Transaction No");
+            index03.setText("Date");
+            index04.setText("Requesting Branch");
+            index05.setText("Expense Branch");
+            index06.setText("Department");
+            index07.setText("Payee");
+            index08.setText("Particular");
+            index09.setText("Recurring");
+            index10.setText("Remarks");
+            index11.setText("Tax Withheld");
+            index12.setText("Vatable");
+            index13.setText("Add.Disc.");
+            index14.setText("Disc. Amt.");
+            index15.setText("Amount");
+            index16.setText("Status");
 
             // 🔥 ALIGNMENT
             index02.setStyle("-fx-alignment: CENTER-LEFT;");
-            index03.setStyle("-fx-alignment: CENTER-LEFT;");
+            index03.setStyle("-fx-alignment: CENTER;");
             index04.setStyle("-fx-alignment: CENTER-LEFT;");
-            index05.setStyle("-fx-alignment: CENTER;");
+            index05.setStyle("-fx-alignment: CENTER-LEFT;");
             index06.setStyle("-fx-alignment: CENTER-LEFT;");
             index07.setStyle("-fx-alignment: CENTER-LEFT;");
             index08.setStyle("-fx-alignment: CENTER-LEFT;");
             index09.setStyle("-fx-alignment: CENTER-LEFT;");
             index10.setStyle("-fx-alignment: CENTER-LEFT;");
-            index11.setStyle("-fx-alignment: CENTER-LEFT;");
-            index12.setStyle("-fx-alignment: CENTER;");
-            index13.setStyle("-fx-alignment: CENTER;");
-            index14.setStyle("-fx-alignment: CENTER;"); // 🔢 qty
+            index11.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index12.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index13.setStyle("-fx-alignment: CENTER-RIGHT;");
+            index14.setStyle("-fx-alignment: CENTER-RIGHT;"); // 🔢 qty
             index15.setStyle("-fx-alignment: CENTER-RIGHT;"); // 💰 price
-            index16.setStyle("-fx-alignment: CENTER-RIGHT;"); // 💰 total
+            index16.setStyle("-fx-alignment: CENTER-LEFT;"); // 💰 total
+
+            index02.setPrefWidth(100);
+            index03.setPrefWidth(80);
+            index04.setPrefWidth(150);
+            index05.setPrefWidth(150);
+            index06.setPrefWidth(150);
+            index07.setPrefWidth(180);
+            index08.setPrefWidth(130);
+            index09.setPrefWidth(130);
+            index10.setPrefWidth(130);
+            index11.setPrefWidth(100);
+            index12.setPrefWidth(60);
+            index13.setPrefWidth(100);
+            index14.setPrefWidth(100);
+            index15.setPrefWidth(100);
+            index16.setPrefWidth(80);
             // SHOW
-            index12.setVisible(true);
-            index13.setVisible(true);
-            index14.setVisible(true);
-            index15.setVisible(true);
-            index16.setVisible(true);
+            index17.setVisible(false);
         }
     }
 
@@ -657,19 +695,19 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                                 .RetriveSummaryReports(true,
                                         dpDateFrom.getValue(),
                                         dpDateThru.getValue(),
-                                        searchBranch,
-                                        searchDestination,
-                                        searchSupplier,
-                                        searchCategory);
+                                        searchReqBranch,
+                                        searchExpBranch,
+                                        searchDept,
+                                        searchPayee);
                     } else {
                         poJSON = poPaymentRequest.PaymentRequest()
                                 .RetriveSummaryDetailedReports(false,
                                         dpDateFrom.getValue(),
                                         dpDateThru.getValue(),
-                                        searchBranch,
-                                        searchDestination,
-                                        searchSupplier,
-                                        searchCategory);
+                                        searchReqBranch,
+                                        searchExpBranch,
+                                        searchDept,
+                                        searchPayee);
                     }
 
                     if ("success".equals(poJSON.get("result"))) {
@@ -683,40 +721,48 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
                             if (isSummarized) {
                                 tempData.add(new ModelTableDetail(
                                         String.valueOf(i + 1),
-                                        obj.get("Supplier") == null ? "" : obj.get("Supplier").toString(),
-                                        obj.get("Destination") == null ? "" : obj.get("Destination").toString(),
-                                        obj.get("Branch") == null ? "" : obj.get("Branch").toString(),
                                         obj.get("sTransNox") == null ? "" : obj.get("sTransNox").toString(),
-                                        obj.get("sReferNox") == null ? "" : obj.get("sReferNox").toString(),
                                         obj.get("dTransact") == null ? "" : obj.get("dTransact").toString(),
-                                        obj.get("Category") == null ? "" : obj.get("Category").toString(),
-                                        obj.get("Term") == null ? "" : obj.get("Term").toString(),
-                                        obj.get("cTranStat") == null ? "" : obj.get("cTranStat").toString(),
-                                        obj.get("Total") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("Total").toString()), true)
-
+                                        obj.get("req_branch") == null ? "" : obj.get("req_branch").toString(),
+                                        obj.get("expense_branch") == null ? "" : obj.get("expense_branch").toString(),
+                                        obj.get("sDeptName") == null ? "" : obj.get("sDeptName").toString(),
+                                        obj.get("sPayeeNme") == null ? "" : obj.get("sPayeeNme").toString(),
+                                        obj.get("sSeriesNo") == null ? "" : obj.get("sSeriesNo").toString(),
+                                        obj.get("sSourceCd") == null ? "" : obj.get("sSourceCd").toString(),
+                                        obj.get("sSourceNo") == null ? "" : obj.get("sSourceNo").toString(),
+                                        obj.get("nDiscAmtx") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("nDiscAmtx").toString()), true),
+                                        obj.get("nTaxAmntx") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("nTaxAmntx").toString()), true),
+                                        obj.get("nNetTotal") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("nNetTotal").toString()), true),
+                                        obj.get("nAmtPaidx") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("nAmtPaidx").toString()), true),
+                                        obj.get("nTranTotl") == null ? "" : CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(obj.get("nTranTotl").toString()), true),
+                                        obj.get("cTranStat") == null ? "" : obj.get("cTranStat").toString()
                                 ));
                             } else {
                                 tempData.add(new ModelTableDetail(
                                         String.valueOf(i + 1),
-                                        obj.get("Supplier") == null ? "" : obj.get("Supplier").toString(),
-                                        obj.get("Destination") == null ? "" : obj.get("Destination").toString(),
                                         obj.get("sTransNox") == null ? "" : obj.get("sTransNox").toString(),
                                         obj.get("dTransact") == null ? "" : obj.get("dTransact").toString(),
-                                        obj.get("sBarCodex") == null ? "" : obj.get("sBarCodex").toString(),
-                                        obj.get("Description") == null ? "" : obj.get("Description").toString(),
-                                        obj.get("Brand") == null ? "" : obj.get("Brand").toString(),
-                                        obj.get("ModelCode") == null ? "" : obj.get("ModelCode").toString(),
-                                        obj.get("ModelName") == null ? "" : obj.get("ModelName").toString(),
-                                        obj.get("Color") == null ? "" : obj.get("Color").toString(),
-                                        obj.get("Quantity") == null ? "" : obj.get("Quantity").toString(),
-                                        obj.get("nReceived") == null ? "" : obj.get("nReceived").toString(),
-                                        obj.get("nCancelld") == null ? "" : obj.get("nCancelld").toString(),
-                                        obj.get("UnitPrice") == null ? ""
+                                        obj.get("req_branch") == null ? "" : obj.get("req_branch").toString(),
+                                        obj.get("expense_branch") == null ? "" : obj.get("expense_branch").toString(),
+                                        obj.get("sDeptName") == null ? "" : obj.get("sDeptName").toString(),
+                                        obj.get("sPayeeNme") == null ? "" : obj.get("sPayeeNme").toString(),
+                                        obj.get("particular_name") == null ? "" : obj.get("particular_name").toString(),
+                                        obj.get("recurring_name") == null ? "" : obj.get("recurring_name").toString(),
+                                        obj.get("sPRFRemxx") == null ? "" : obj.get("sPRFRemxx").toString(),
+                                        obj.get("nTWithHld") == null ? ""
                                                 : CustomCommonUtil.setIntegerValueToDecimalFormat(
-                                                Double.parseDouble(obj.get("UnitPrice").toString()), true),
-                                        obj.get("Total") == null ? ""
+                                                Double.parseDouble(obj.get("nTWithHld").toString()), true),
+                                        obj.get("cVATaxabl") == null ? "" : obj.get("cVATaxabl").toString(),
+                                        obj.get("nAddDiscx") == null ? ""
                                                 : CustomCommonUtil.setIntegerValueToDecimalFormat(
-                                                Double.parseDouble(obj.get("Total").toString()), true)
+                                                Double.parseDouble(obj.get("nAddDiscx").toString()), true),
+                                        obj.get("nDiscount") == null ? ""
+                                                : CustomCommonUtil.setIntegerValueToDecimalFormat(
+                                                Double.parseDouble(obj.get("nDiscount").toString()), true),
+                                        obj.get("nAmountxx") == null ? ""
+                                                : CustomCommonUtil.setIntegerValueToDecimalFormat(
+                                                Double.parseDouble(obj.get("nAmountxx").toString()), true),
+                                        obj.get("cTranStat") == null ? "" : obj.get("cTranStat").toString()
                                 ));
                             }
                         }
@@ -817,15 +863,15 @@ public class PaymentRequestReportsController implements Initializable, ScreenInt
     }
     private void clear() {
 
-        tfBranch.clear();
-        tfCategory.clear();
-        tfDestination.clear();
-        tfSupplier.clear();
+        tfSearchPayee.clear();
+        tfSearchExpBranch.clear();
+        tfSearchDept.clear();
+        tfSearchPayee.clear();
 
-        searchBranch = "";
-        searchCategory = "";
-        searchDestination = "";
-        searchSupplier = "";
+        searchReqBranch = "";
+        searchExpBranch = "";
+        searchDept = "";
+        searchPayee = "";
 
         cmbStatus.getSelectionModel().select(0);
 
