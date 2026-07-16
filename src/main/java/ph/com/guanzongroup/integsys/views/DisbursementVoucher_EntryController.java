@@ -936,22 +936,24 @@ public class DisbursementVoucher_EntryController implements Initializable, Scree
             }
         } else {
 //            ShowMessageFX.Warning(null, pxeModuleName, "Data can only be viewed when in ADD or UPDATE mode.");
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                return;
-            }
             Platform.runLater(() -> {
-                btnNew.fire();
                 if ("error".equals(poJSON.get("result"))) {
+                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                     return;
                 }
-                JFXUtil.runWithDelay(0.30, () -> {
-                    tblViewMainList.getSelectionModel().select(pnMain);
-                    pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-                    if (pnMain >= 0) {
-                        loadTableDetailFromMain();
-                        initButton(pnEditMode);
-                    }
+                Platform.runLater(() -> {
+                    btnNew.fire();
+                    JFXUtil.runWithDelay(0.30, () -> {
+                        if ("error".equals(poJSON.get("result"))) {
+                            return;
+                        }
+                        tblViewMainList.getSelectionModel().select(pnMain);
+                        pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                        if (pnMain >= 0) {
+                            loadTableDetailFromMain();
+                            initButton(pnEditMode);
+                        }
+                    });
                 });
             });
         }
