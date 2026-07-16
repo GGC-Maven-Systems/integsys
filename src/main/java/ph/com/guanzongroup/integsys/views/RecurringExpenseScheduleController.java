@@ -182,6 +182,7 @@ public class RecurringExpenseScheduleController implements Initializable, Screen
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         } else {
                             return;
                         }
@@ -867,6 +868,7 @@ public class RecurringExpenseScheduleController implements Initializable, Screen
                         break;
                 }
             }
+
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
