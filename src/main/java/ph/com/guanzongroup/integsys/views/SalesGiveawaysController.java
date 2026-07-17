@@ -41,6 +41,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.t1.SalesGiveaways;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.t1.status.SalesGiveawaysStatus;
 import ph.com.guanzongroup.integsys.model.ModelListParameter;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -90,6 +91,12 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     public void initialize(URL location, ResourceBundle resources) {
 
         poController = new SalesControllers(oApp, null).SalesGiveaways();
+        poJSON = new JSONObject();
+        poController.setWithUI(true);
+        poJSON = poController.InitTransaction(); // Initialize transaction
+        if (!"success".equals((String) poJSON.get("result"))) {
+            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+        }
         pnEditMode = EditMode.UNKNOWN;
         initButton(pnEditMode);
         initLoadTable();
@@ -102,15 +109,20 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         pnEditMode = EditMode.UNKNOWN;
 
         initButton(pnEditMode);
-
         Platform.runLater(() -> {
-            poController.Master().setIndustryId(psIndustryId);
+            try {
+                poController.Master().setIndustryId(psIndustryId);
 //            poController.Master().setCompanyId(psCompanyId);
-            poController.setIndustryId(psIndustryId);
-            poController.setCompanyId(psCompanyId);
+                poController.setIndustryId(psIndustryId);
+                poController.setCompanyId(psCompanyId);
+                lblSource.setText(poController.Master().Industry().getDescription());
 //                poController.setCategoryID(psCategoryId);
 //            poController.Master().setBranchCode(oApp.getBranchCode());
-            btnNew.fire();
+                poController.setTransactionStatus("0134");
+                btnNew.fire();
+            } catch (SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            }
         });
         JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
     }
@@ -143,7 +155,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             String lsButton = ((Button) event.getSource()).getId();
             switch (lsButton) {
                 case "btnBrowse":
-                    poController.setTransactionStatus(POQuotationStatus.OPEN);
+//                    poController.setTransactionStatus(POQuotationStatus.OPEN);
+                    poController.setTransactionStatus("0134");
                     poJSON = poController.searchTransaction("", false);
                     if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -325,6 +338,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     switch (lsTextField) {
                         //apBrowse
                         case "tfSearchGiveaway":
+                            poController.setTransactionStatus("0134");
                             poJSON = poController.searchTransaction("", false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -653,6 +667,26 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
+        if (fnValue != EditMode.READY) {
+            return;
+        }
+        switch (poController.Master().getTransactionStatus()) {
+            case SalesGiveawaysStatus.OPEN:
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate, btnDisapprove);
+                break;
+            case SalesGiveawaysStatus.ACTIVE:
+                JFXUtil.setButtonsVisibility(true, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
+                break;
+            case SalesGiveawaysStatus.DEACTIVATE:
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
+                break;
+            case SalesGiveawaysStatus.DISAPPROVE:
+                JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
+                break;
+        }
     }
 
     private void initTextFields() {
