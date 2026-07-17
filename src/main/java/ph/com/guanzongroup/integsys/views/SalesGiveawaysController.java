@@ -69,7 +69,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     @FXML
     private Label lblSource, lblStatus;
     @FXML
-    private TextField tfSearchGiveaway, tfGiveawaycode, tfDescription, tfCategory, tfBarcode, tfDescription, tfQuantity;
+    private TextField tfSearchGiveaway, tfGiveawaycode, tfMasterDescription, tfCategory, tfBarcode, tfDescription, tfQuantity;
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
@@ -397,7 +397,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 //        try {
         lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
         tfGiveawaycode.setText(poController.Master().getGiveawayCode());
-        tfDescription.setText(poController.Master().getDescription());
+        tfMasterDescription.setText(poController.Master().getDescription());
         tfCategory.setText(poController.Master().getCategoryCode());
 
         dbFromDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)));
@@ -458,6 +458,12 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
+                    case "tfMasterDescription":
+                        poJSON = poController.Master().setDescription(lsValue);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                     case "tfCategory":
                         if (lsValue.isEmpty()) {
                             poController.Master().setCategoryCode("");
