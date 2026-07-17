@@ -346,6 +346,9 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                pnEditMode = poController.Master().getEditMode();
+                                initButton(pnEditMode);
                             }
                             loadTableDetail.reload();
                             break;
