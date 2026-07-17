@@ -202,13 +202,15 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         pnEditMode = poController.getEditMode();
                     }
                     if (pnEditMode == EditMode.READY) {
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate this transaction?")) { //requires to review journal entry
-                            poJSON = poController.ActivateTransaction("");
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                break;
-                            } else {
-                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                        if (!(poController.Master().getTransactionStatus()).equals(SalesGiveawaysStatus.ACTIVE)) {
+                            if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate this transaction?")) { //requires to review journal entry
+                                poJSON = poController.ActivateTransaction("");
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                    break;
+                                } else {
+                                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                }
                             }
                         }
                     }
