@@ -144,7 +144,7 @@ public class OtherPaymentStatusController implements Initializable, ScreenInterf
             clearTextFields();
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
-            pagination.setPageCount(0);
+            pagination.setPageCount(1);
             Platform.runLater(() -> {
                 poController.setTransactionStatus(OtherPaymentStatus.OPEN + OtherPaymentStatus.FLOAT);
                 poController.setCompanyID(psCompanyId);
@@ -265,13 +265,13 @@ public class OtherPaymentStatusController implements Initializable, ScreenInterf
                 case "btnClose":
                     if (ShowMessageFX.YesNo("Are you sure you want to close this Tab?", "Close Tab", null)) {
                         poUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
-                    } else {
+                    } else { 
                         return;
                     }
                     break;
                 default:
                     ShowMessageFX.Warning("Please contact admin to assist about no button available", pxeModuleName, null);
-                    break;
+                    break; 
             }
             if (lsButton.equals("btnSave") || lsButton.equals("btnCancel")) {
                 clearTextFields();
@@ -568,7 +568,9 @@ public class OtherPaymentStatusController implements Initializable, ScreenInterf
             poJSON = poController.loadTransactionList(tfSearchIndustry.getText(), tfSearchBankName.getText(), tfSearchBankAccount.getText(), tfSearchDVNo.getText());
             if ("success".equals(poJSON.get("result"))) {
             } else {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                if (tfSearchIndustry.getText().isEmpty()) {
+                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                }
             }
             loadTableMain.reload();
         } catch (SQLException | GuanzonException ex) {
@@ -664,7 +666,7 @@ public class OtherPaymentStatusController implements Initializable, ScreenInterf
                 if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getTransactionNo(), lsTransactionNo)) {
                     return;
                 }
-                
+
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
 

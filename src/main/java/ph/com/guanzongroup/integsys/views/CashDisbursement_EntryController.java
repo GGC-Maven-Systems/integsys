@@ -371,16 +371,6 @@ public class CashDisbursement_EntryController implements Initializable, ScreenIn
         if (poController.Master().getTransactionTotal() <= 0.0000) {
             return false;
         }
-//        try {
-//            if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
-//                lsParticular = poController.Detail(0).CashAdvanceDetail(poController.Master().getSourceNo()).getParticular();
-//            } else {
-//                lsParticular = poController.Detail(0).Particular().getDescription();
-//            }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(CashDisbursement_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return !JFXUtil.isObjectEqualTo(lsParticular, null, "");
         return true;
     }
     String lsValidDisbMessage = "Please provide at least one valid disbursement detail with amount to proceed.";
@@ -631,7 +621,7 @@ public class CashDisbursement_EntryController implements Initializable, ScreenIn
 
                         //Limit maximum pages of pdf to add
                         if (imgPath2.toLowerCase().endsWith(".pdf")) {
-                            try ( PDDocument document = PDDocument.load(selectedFile)) {
+                            try (PDDocument document = PDDocument.load(selectedFile)) {
                                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                                 int pageCount = document.getNumberOfPages();
                                 if (pageCount > 5) {
@@ -695,7 +685,7 @@ public class CashDisbursement_EntryController implements Initializable, ScreenIn
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (IOException ex) {
-            Logger.getLogger(CashDisbursement_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -890,53 +880,6 @@ public class CashDisbursement_EntryController implements Initializable, ScreenIn
                     onSuccess.run();
                 }
         );
-    }
-
-    private List<String> checkJEorJEP() {
-        List<String> titles = new ArrayList<>();
-        try {
-            // allows JE and JEP to have value
-            // require to review, either of two, if one have value then require it to check tab
-            // if two have value require to check it both
-            // if neither have value message that any of JE or JEP or both must have value
-            // question is how to define valid entry for both
-            if (!poController.existJournal().equals("")) {
-                titles.add("Journal Entry");
-            }
-            if (poController.getJournalProposalList().size() >= 1) {
-                if (!JFXUtil.isObjectEqualTo(poController.JournalProposal(0).Detail(0).getAccountCode(), null, "")) {
-                    titles.add("Journal Proposal");
-                }
-            }
-            return titles;
-        } catch (SQLException ex) {
-            Logger.getLogger(DisbursementVoucher_VerificationController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return titles;
-    }
-
-    private boolean checkJEorJEPSaving() {
-        List<String> titles = checkJEorJEP();
-        if ((titles.contains("Journal Entry")) && (titles.contains("Journal Proposal"))) {
-            if (!pbIsCheckedJournalTab && !pbIsCheckedJEPTab) {
-                ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Entry & Journal Proposal before saving.");
-                return false;
-            }
-        } else if ((titles.contains("Journal Proposal"))) {
-            if (!pbIsCheckedJEPTab) {
-                ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Proposal before saving.");
-                return false;
-            }
-        } else if (titles.contains("Journal Entry")) {
-            if (!pbIsCheckedJournalTab) {
-                ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Entry before saving.");
-                return false;
-            }
-        } else {
-            ShowMessageFX.Warning(null, pxeModuleName, "No journal entry or journal proposal found. Add either one or both and save before verifying.");
-            return false;
-        }
-        return true;
     }
 
     private void populateBIR() {
