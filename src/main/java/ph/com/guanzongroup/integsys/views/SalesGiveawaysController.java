@@ -410,19 +410,19 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     }
 
     private void loadRecordMaster() {
-//        try {
-        lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
-        tfGiveawaycode.setText(poController.Master().getGiveawayCode());
-        tfMasterDescription.setText(poController.Master().getDescription());
-        tfCategory.setText(poController.Master().getCategoryCode());
+        try {
+            lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
+            tfGiveawaycode.setText(poController.Master().getGiveawayCode());
+            tfMasterDescription.setText(poController.Master().getDescription());
+            tfCategory.setText(poController.Master().Category().getDescription());
 
-        dbFromDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)));
-        dpThruDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)));
-        taRemarks.setText(poController.Master().getRemarks());
-        JFXUtil.updateCaretPositions(apMaster);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//        }
+            dbFromDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)));
+            dpThruDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)));
+            taRemarks.setText(poController.Master().getRemarks());
+            JFXUtil.updateCaretPositions(apMaster);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+        }
     }
 
     private void loadRecordDetail() {
@@ -614,6 +614,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             if (toDate != null && ldSelectedDate.isAfter(toDate)) {
                                 JFXUtil.setJSONError(poJSON, "Invalid Date, The 'From' date cannot be after the 'To' date.");
 //                                    ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
+                                pbSuccess = false;
                             }
 
                             if (pbSuccess) {
@@ -635,6 +636,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             if (fromDate != null && ldSelectedDate.isBefore(fromDate)) {
                                 JFXUtil.setJSONError(poJSON, "Invalid Date, The 'To' date cannot be before the 'From' date.");
 //                                    ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
+                                pbSuccess = false;
                             }
                             if (pbSuccess) {
                                 poController.Master().setThruDate(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -706,9 +708,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     }
 
     public void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblRowNoDetail);
+        JFXUtil.setColumnCenter(tblRowNoDetail, tblQuantityDetail);
         JFXUtil.setColumnLeft(tblBarcodeDetail, tblDescriptionDetail);
-        JFXUtil.setColumnRight(tblQuantityDetail);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewTransDetails);
         tblViewTransDetails.setItems(details_data);
     }
