@@ -155,7 +155,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             String lsButton = ((Button) event.getSource()).getId();
             switch (lsButton) {
                 case "btnBrowse":
-//                    poController.setTransactionStatus(POQuotationStatus.OPEN);
                     poController.setTransactionStatus("0134");
                     poJSON = poController.searchRecord();
                     if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
@@ -176,21 +175,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     pnEditMode = poController.getEditMode();
                     break;
                 case "btnUpdate":
-                    String lsUserId = oApp.getUserID();
-//                    String lsPosition = poController.checkPosition(DisbursementStatic.OPEN, lsUserId);
-//                    if (lsPosition == null || "".equals(lsPosition)) {
-//                        poJSON.put("result", "error");
-//                        poJSON.put("message", "User is not an authorized officer.");
-//                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                        return;
-//                    }
-                    //Recheck transaction status
-//                    poJSON = poController.checkUpdateTransaction(true);
-//                    if (!"success".equals((String) poJSON.get("result"))) {
-//                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                        return;
-//                    }
-
                     poJSON = poController.UpdateTransaction();
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -202,15 +186,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster, apDetail);
                     break;
                 case "btnSave":
-                    //Recheck transaction status
-//                    if (pnEditMode == EditMode.UPDATE) {
-//                        poJSON = poController.checkUpdateTransaction(true);
-//                        if (!"success".equals((String) poJSON.get("result"))) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                            return;
-//                        }
-//                    }
-
                     if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
                         return;
                     }
@@ -262,19 +237,29 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     pnEditMode = EditMode.UNKNOWN;
                     break;
                 case "btnDisapprove":
-                    poJSON = poController.DisapproveTransaction("");
-                    if (!JFXUtil.isJSONSuccess(poJSON)) {
-                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to disapprove this record?") == true) {
+                        poJSON = poController.DisapproveTransaction("");
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            return;
+                        } else {
+                            ShowMessageFX.Information("Record disapproved successfully", pxeModuleName, null);
+                        }
+                    } else {
                         return;
                     }
                     break;
                 case "btnDeactivate":
-                    poJSON = poController.DeactiveTransaction("");
-                    if (!JFXUtil.isJSONSuccess(poJSON)) {
-                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        return;
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this record?") == true) {
+                        poJSON = poController.DeactiveTransaction("");
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            return;
+                        } else {
+                            ShowMessageFX.Information("Record deactivated successfully", pxeModuleName, null);
+                        }
                     } else {
-                        ShowMessageFX.Information("Record deactivated successfully", pxeModuleName, null);
+                        return;
                     }
                     break;
                 case "btnHistory":
