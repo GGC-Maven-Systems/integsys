@@ -250,7 +250,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     }
                     break;
                 case "btnDeactivate":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this record?") == true) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to deactivate this record?") == true) {
                         poJSON = poController.DeactiveTransaction("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
