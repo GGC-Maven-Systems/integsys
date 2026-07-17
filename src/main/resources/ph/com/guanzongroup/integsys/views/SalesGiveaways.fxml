@@ -60,7 +60,7 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="tfBrand1" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                    <TextField fx:id="tfSearchGiveaway" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
                                  </children>
                               </GridPane>
                            </children>
