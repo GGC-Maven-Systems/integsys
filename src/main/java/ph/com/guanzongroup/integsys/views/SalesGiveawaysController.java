@@ -36,13 +36,11 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.cas.purchasing.status.POQuotationStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.t1.SalesGiveaways;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesGiveawaysStatus;
-import ph.com.guanzongroup.integsys.model.ModelListParameter;
 import ph.com.guanzongroup.integsys.model.ModelSales_Giveaways;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -753,7 +751,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     private void initTableOnClick() {
         tblViewTransDetails.setOnMouseClicked(event -> {
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
-                ModelListParameter selected = (ModelListParameter) tblViewTransDetails.getSelectionModel().getSelectedItem();
+                ModelSales_Giveaways selected = (ModelSales_Giveaways) tblViewTransDetails.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     int lnRow = Integer.parseInt(details_data.get(tblViewTransDetails.getSelectionModel().getSelectedIndex()).getIndex05());
                     pnDetail = lnRow;
