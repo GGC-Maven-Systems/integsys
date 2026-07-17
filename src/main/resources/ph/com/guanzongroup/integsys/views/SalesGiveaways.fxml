@@ -357,8 +357,8 @@
                                                             <columns>
                                                                 <TableColumn fx:id="tblRowNoDetail" editable="false" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="No." />
                                                                 <TableColumn fx:id="tblBarcodeDetail" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Barcode" />
-                                                                <TableColumn fx:id="tblDescriptionDetail" editable="false" maxWidth="344.0000305175781" minWidth="-1.0" prefWidth="344.0000305175781" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Description" />
-                                                            <TableColumn fx:id="tblQuantityDetail" editable="false" maxWidth="128.0" minWidth="55.0" prefWidth="89.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Quantity" />
+                                                                <TableColumn fx:id="tblDescriptionDetail" editable="false" maxWidth="405.0" minWidth="-1.0" prefWidth="405.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Description" />
+                                                            <TableColumn fx:id="tblQuantityDetail" editable="false" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Quantity" />
                                                             </columns>
                                              <columnResizePolicy>
                                              </columnResizePolicy>
