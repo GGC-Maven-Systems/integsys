@@ -370,6 +370,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             poJSON = poController.SearchInventory("", true, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfQuantity);
                             }
                             loadTableDetail.reload();
                             break;
@@ -377,6 +379,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             poJSON = poController.SearchInventory("", false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfQuantity);
                             }
                             loadTableDetail.reload();
                             break;
@@ -420,7 +424,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         }
     }
 
-    private void loadRecordMaster() {
+    private void loadRecordMaster() {f
         try {
             lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
             tfGiveawaycode.setText(poController.Master().getGiveawayCode());
@@ -438,6 +442,12 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
     private void loadRecordDetail() {
         try {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            boolean lbShow = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfBarcode, tfDescription);
+
             tfBarcode.setText(poController.Detail(pnDetail).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnDetail).Inventory().getDescription());
             tfQuantity.setText(String.valueOf(poController.Detail(pnDetail).getQuantity()));
