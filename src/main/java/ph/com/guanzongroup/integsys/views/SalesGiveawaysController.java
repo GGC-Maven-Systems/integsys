@@ -43,6 +43,7 @@ import ph.com.guanzongroup.cas.sales.t1.SalesGiveaways;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesGiveawaysStatus;
 import ph.com.guanzongroup.integsys.model.ModelListParameter;
+import ph.com.guanzongroup.integsys.model.ModelSales_Giveaways;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -61,7 +62,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     private int pnDetail = 0;
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private ObservableList<ModelListParameter> details_data = FXCollections.observableArrayList();
+    private ObservableList<ModelSales_Giveaways> details_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableDetail;
     private String psIndustryId = "";
     private String psCompanyId = "";
@@ -520,7 +521,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
                                 lnRowCount += 1;
                                 details_data.add(
-                                        new ModelListParameter(String.valueOf(lnRowCount),
+                                        new ModelSales_Giveaways(String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Inventory().getBarCode(),
                                                 poController.Detail(lnCtr).Inventory().getDescription(),
                                                 String.valueOf(poController.Detail(lnCtr).getQuantity()),
@@ -661,10 +662,9 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew);
-        JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnActivate);
-        JFXUtil.setButtonsVisibility(lbShow3, btnClose);
+        JFXUtil.setButtonsVisibility(!lbShow, btnBrowse,btnNew, btnClose);
+        JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel, btnSearch);
+        JFXUtil.setButtonsVisibility(lbShow2,  btnHistory, btnUpdate, btnActivate);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
         JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
