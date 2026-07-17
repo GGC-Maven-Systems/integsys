@@ -156,7 +156,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 case "btnBrowse":
 //                    poController.setTransactionStatus(POQuotationStatus.OPEN);
                     poController.setTransactionStatus("0134");
-                    poJSON = poController.searchTransaction("", false);
+                    poJSON = poController.searchRecord();
                     if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                         tfGiveawaycode.requestFocus();
@@ -166,7 +166,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     break;
                 case "btnNew":
                     clearTextFields();
-                    poController.initFields();
                     poJSON = poController.NewTransaction();
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -225,7 +224,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     poJSON = poController.OpenTransaction(poController.Master().getGiveawayCode());
                     if ("success".equals(poJSON.get("result"))) {
                         pnEditMode = poController.getEditMode();
-                        initButton(pnEditMode);
                     }
                     if (pnEditMode == EditMode.READY) {
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate this transaction?")) { //requires to review journal entry
@@ -302,13 +300,13 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     return;
             }
 
-            if (JFXUtil.isObjectEqualTo(lsButton, (Object[]) JFXUtil.buttonPackArray1)) {
+            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnActivate", "btnDeactivate", "btnDisapprove")) {
                 poController.InitTransaction();
                 clearTextFields();
                 pnEditMode = EditMode.UNKNOWN;
             }
 
-            if (JFXUtil.isObjectEqualTo(lsButton, (Object[]) JFXUtil.buttonPackArray2)) {
+            if (JFXUtil.isObjectEqualTo(lsButton, "btnSearch", "btnHistory")) {
             } else {
                 loadRecordMaster();
                 loadTableDetail.reload();
@@ -339,7 +337,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         //apBrowse
                         case "tfSearchGiveaway":
                             poController.setTransactionStatus("0134");
-                            poJSON = poController.searchTransaction(lsValue, false);
+                            poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -398,6 +396,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(SalesGiveawaysController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
