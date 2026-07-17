@@ -734,18 +734,20 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         }
         switch (poController.Master().getTransactionStatus()) {
             case SalesGiveawaysStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnDeactivate);
+
                 break;
             case SalesGiveawaysStatus.ACTIVE:
-                JFXUtil.setButtonsVisibility(true, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DISAPPROVE:
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnDeactivate, btnDisapprove);
                 break;
         }
     }
