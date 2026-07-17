@@ -223,7 +223,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
                     break;
                 case "btnActivate":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this record?") == true) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate this record?") == true) {
                         poJSON = poController.ActivateTransaction("");
                         if ("error".equals((String) poJSON.get("result"))) {
                             System.err.println((String) poJSON.get("message"));
