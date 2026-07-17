@@ -2,6 +2,7 @@ package ph.com.guanzongroup.integsys.views;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -215,8 +216,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         initButton(pnEditMode);
                     }
                     if (pnEditMode == EditMode.READY) {
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) { //requires to review journal entry
-                            poJSON = poController.ConfirmTransaction("");
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate this transaction?")) { //requires to review journal entry
+                            poJSON = poController.ActivateTransaction("");
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 break;
@@ -237,7 +238,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     break;
                 case "btnActivate":
                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this record?") == true) {
-                        poJSON = poController.ConfirmTransaction("");
+                        poJSON = poController.ActivateTransaction("");
                         if ("error".equals((String) poJSON.get("result"))) {
                             System.err.println((String) poJSON.get("message"));
                             ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
@@ -332,7 +333,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             break;
                         //apMaster
                         case "tfCategory":
-                            poJSON = poController.searchTransaction("", false);
+                            poJSON = poController.SearchCategory("", false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -498,7 +499,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                                 poController.ReloadDetail();
                             }
                             int lnRowCount = 0;
-                            String lsParticular = "", lsOrNo = "";
                             for (int lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReversed()) {
                                     continue;
@@ -595,6 +595,12 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 //                                    JFXUtil.setJSONError(poJSON, "Check date cannot be later than the transaction date.");
 //                                    pbSuccess = false;
 //                                }
+                            LocalDate toDate = dpThruDate.getValue();
+                            if (toDate != null && ldSelectedDate.isAfter(toDate)) {
+                                JFXUtil.setJSONError(poJSON, "Invalid Date, The 'From' date cannot be after the 'To' date.");
+//                                    ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
+                            }
+
                             if (pbSuccess) {
                                 poController.Master().setFromDate(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
                             } else {
@@ -609,17 +615,24 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         }
                         break;
                     case "dpThruDate":
-                        if (pbSuccess) {
-                            poController.Master().setThruDate(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
-                        } else {
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            LocalDate fromDate = dbFromDate.getValue();
+                            if (fromDate != null && ldSelectedDate.isBefore(fromDate)) {
+                                JFXUtil.setJSONError(poJSON, "Invalid Date, The 'To' date cannot be before the 'From' date.");
+//                                    ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
                             }
+                            if (pbSuccess) {
+                                poController.Master().setThruDate(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
+                            } else {
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                }
+                            }
+                            pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
+                            loadRecordMaster();
+                            pbSuccess = true; //Set to original value
                         }
 
-                        pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadRecordMaster();
-                        pbSuccess = true; //Set to original value
                         break;
                     default:
                         break;
