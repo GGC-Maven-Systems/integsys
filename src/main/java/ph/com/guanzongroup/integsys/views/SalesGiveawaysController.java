@@ -662,9 +662,9 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(!lbShow, btnBrowse,btnNew, btnClose);
+        JFXUtil.setButtonsVisibility(!lbShow, btnBrowse, btnNew, btnClose);
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel, btnSearch);
-        JFXUtil.setButtonsVisibility(lbShow2,  btnHistory, btnUpdate, btnActivate);
+        JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnUpdate, btnActivate);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
         JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
@@ -692,8 +692,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     private void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtBrowse_Focus, apBrowse);
-        JFXUtil.setFocusListener(txtMaster_Focus, apMaster);
-        JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfMasterDescription, tfCategory);
+        JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfQuantity);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail);
         CustomCommonUtil.inputIntegersOnly(tfQuantity);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewTransDetails);
