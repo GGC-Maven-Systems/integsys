@@ -727,7 +727,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnUpdate, btnActivate);
 
-        JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setDisabled(!lbShow, apMaster, apDetail);
         JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
         if (fnValue != EditMode.READY) {
             return;
