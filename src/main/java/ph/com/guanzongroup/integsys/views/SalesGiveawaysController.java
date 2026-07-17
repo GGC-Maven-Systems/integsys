@@ -324,6 +324,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
         }
     }
+    boolean lbProceed = true;
+    boolean pbKeyPressed = false;
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
@@ -348,7 +350,20 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                             break;
                         //apMaster
                         case "tfCategory":
-                            poJSON = poController.SearchCategory("", false);
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (poController.getDetailCount() > 1) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the category?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        btnNew.fire();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
+                            lbProceed = false;
+                            poJSON = poController.SearchCategory(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -392,8 +407,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 apDetail.requestFocus();
                 boolean lbContinue = true;
                 while (lbContinue) {
-                    pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewTransDetails)).getIndex08())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewTransDetails)).getIndex08());
+                    pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewTransDetails)).getIndex05())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewTransDetails)).getIndex05());
                     if (poController.Detail(pnDetail).isReversed()) {
                         lbContinue = false;
                     }
@@ -482,7 +497,28 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         break;
                     case "tfCategory":
                         if (lsValue.isEmpty()) {
-                            poController.Master().setCategoryCode("");
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "") && lbProceed) {
+                                    if (poController.getDetailCount() > 1) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                btnNew.fire();
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        } else {
+                                            loadRecordMaster();
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                            if (lbProceed) { // uniquely inserted due to retrieval delay
+                                poController.Master().setCategoryCode("");
+                                loadRecordMaster();
+                            }
                         }
                         break;
                 }
