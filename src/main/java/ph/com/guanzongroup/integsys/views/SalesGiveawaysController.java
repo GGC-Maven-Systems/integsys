@@ -114,7 +114,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 poController.Master().setIndustryId(psIndustryId);
 //            poController.Master().setCompanyId(psCompanyId);
                 poController.setIndustryId(psIndustryId);
-                poController.setCompanyId(psCompanyId);
+//                poController.setCompanyId(psCompanyId);
                 lblSource.setText(poController.Master().Industry().getDescription());
 //                poController.setCategoryID(psCategoryId);
 //            poController.Master().setBranchCode(oApp.getBranchCode());
