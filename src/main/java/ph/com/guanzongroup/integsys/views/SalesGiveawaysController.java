@@ -222,7 +222,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
                     ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
 
-                    poJSON = poController.OpenTransaction(poController.Master().getCategoryCode());
+                    poJSON = poController.OpenTransaction(poController.Master().getGiveawayCode());
                     if ("success".equals(poJSON.get("result"))) {
                         pnEditMode = poController.getEditMode();
                         initButton(pnEditMode);
@@ -303,7 +303,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             }
 
             if (JFXUtil.isObjectEqualTo(lsButton, (Object[]) JFXUtil.buttonPackArray1)) {
-                poController.initFields();
+                poController.InitTransaction();
                 clearTextFields();
                 pnEditMode = EditMode.UNKNOWN;
             }
@@ -322,7 +322,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
         }
     }
-    boolean lbProceed = true;
     boolean pbKeyPressed = false;
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -340,7 +339,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         //apBrowse
                         case "tfSearchGiveaway":
                             poController.setTransactionStatus("0134");
-                            poJSON = poController.searchTransaction("", false);
+                            poJSON = poController.searchTransaction(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -360,7 +359,6 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                                     pbKeyPressed = false;
                                 }
                             }
-                            lbProceed = false;
                             poJSON = poController.SearchCategory(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -496,7 +494,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     case "tfCategory":
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "") && lbProceed) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
@@ -513,10 +511,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                                     }
                                 }
                             }
-                            if (lbProceed) { // uniquely inserted due to retrieval delay
-                                poController.Master().setCategoryCode("");
-                                loadRecordMaster();
-                            }
+                            poController.Master().setCategoryCode("");
+                            loadRecordMaster();
                         }
                         break;
                 }
