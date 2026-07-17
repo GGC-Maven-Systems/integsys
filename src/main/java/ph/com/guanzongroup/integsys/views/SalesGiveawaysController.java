@@ -199,7 +199,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     pnEditMode = poController.getEditMode();
                     break;
                 case "btnSearch":
-                    JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse);
+                    JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster, apDetail);
                     break;
                 case "btnSave":
                     //Recheck transaction status
@@ -352,11 +352,12 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         //apMaster
                         case "tfCategory":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (poController.getDetailCount() > 1) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the category?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                        btnNew.fire();
+                                        poController.Detail().clear();
+                                        loadTableDetail.reload();
                                     } else {
                                         return;
                                     }
@@ -432,6 +433,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
 
     private void loadRecordMaster() {
         try {
+            boolean lbShow = pnEditMode == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfCategory);
             lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
             tfGiveawaycode.setText(poController.Master().getGiveawayCode());
             tfMasterDescription.setText(poController.Master().getDescription());
@@ -521,19 +524,18 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-                                    if (poController.getDetailCount() > 1) {
-                                        if (!pbKeyPressed) {
-                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the category?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                                btnNew.fire();
-                                            } else {
-                                                loadRecordMaster();
-                                                return;
-                                            }
+                                    if (!pbKeyPressed) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                "Are you sure you want to change the category?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                            poController.Detail().clear();
+                                            loadTableDetail.reload();
                                         } else {
                                             loadRecordMaster();
                                             return;
                                         }
+                                    } else {
+                                        loadRecordMaster();
+                                        return;
                                     }
                                 }
                             }
@@ -740,10 +742,10 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 break;
             case SalesGiveawaysStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DISAPPROVE:
-                JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnDeactivate, btnDisapprove);
                 break;
         }
     }
