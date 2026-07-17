@@ -65,6 +65,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
+    private boolean pbEntered = false;
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail;
     @FXML
@@ -257,7 +258,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     } else {
                         return;
                     }
-                    ShowMessageFX.Information("Record updated successfully", pxeModuleName, null);
+                    ShowMessageFX.Information("Record activated successfully", pxeModuleName, null);
                     pnEditMode = EditMode.UNKNOWN;
                     break;
                 case "btnDisapprove":
@@ -270,6 +271,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     poJSON = poController.DeactiveTransaction("");
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    } else {
+                        ShowMessageFX.Information("Record deactivated successfully", pxeModuleName, null);
                     }
                     break;
                 case "btnHistory":
@@ -330,6 +333,9 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
+                    if (tfQuantity.isFocused()) {
+                        pbEntered = true;
+                    }
                     CommonUtils.SetNextFocus(textField);
                     break;
                 case F3:
@@ -485,6 +491,16 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNext(false, true);
+                                });
+                                pbEntered = false;
+                            });
+                        }
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
@@ -547,6 +563,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 tblViewTransDetails,
                 details_data,
                 () -> {
+                    pbEntered = false;
                     Platform.runLater(() -> {
                         try {
                             details_data.clear();
