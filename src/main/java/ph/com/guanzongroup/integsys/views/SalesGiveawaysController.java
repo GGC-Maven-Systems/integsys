@@ -424,7 +424,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
         }
     }
 
-    private void loadRecordMaster() {f
+    private void loadRecordMaster() {
         try {
             lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()));
             tfGiveawaycode.setText(poController.Master().getGiveawayCode());
