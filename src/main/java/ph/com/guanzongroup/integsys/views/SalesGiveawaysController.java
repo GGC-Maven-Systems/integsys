@@ -500,7 +500,7 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                                     if (poController.getDetailCount() > 1) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the inventory?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                                    "Are you sure you want to change the category?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
                                                 btnNew.fire();
                                             } else {
                                                 loadRecordMaster();
