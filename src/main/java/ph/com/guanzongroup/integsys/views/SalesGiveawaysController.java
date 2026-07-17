@@ -747,8 +747,8 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DEACTIVATE:
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(true, btnActivate);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnDeactivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DISAPPROVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnDeactivate, btnDisapprove);
