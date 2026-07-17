@@ -265,12 +265,14 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
                     poJSON = poController.DisapproveTransaction("");
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        return;
                     }
                     break;
                 case "btnDeactivate":
                     poJSON = poController.DeactiveTransaction("");
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        return;
                     } else {
                         ShowMessageFX.Information("Record deactivated successfully", pxeModuleName, null);
                     }
@@ -739,15 +741,14 @@ public class SalesGiveawaysController implements Initializable, ScreenInterface 
             case SalesGiveawaysStatus.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
-
                 break;
             case SalesGiveawaysStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnActivate, btnDisapprove);
                 break;
             case SalesGiveawaysStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate);
                 break;
             case SalesGiveawaysStatus.DISAPPROVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnDeactivate, btnDisapprove);
