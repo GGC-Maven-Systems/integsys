@@ -13,26 +13,26 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+
 import static javafx.scene.input.KeyCode.DOWN;
 import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import org.guanzon.appdriver.agent.ShowMessageFX;
-import org.guanzon.appdriver.base.CommonUtils;
-import org.guanzon.appdriver.base.GRiderCAS;
-import org.guanzon.appdriver.base.GuanzonException;
-import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.UserRight;
 import org.json.simple.JSONObject;
+import ph.com.guanzongroup.cas.sales.t1.SalesAgent;
+import ph.com.guanzongroup.cas.sales.t1.Salesman;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelListParameter;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -48,35 +48,45 @@ public class SalesmanController implements Initializable, ScreenInterface {
     private JSONObject poJSON;
     private int pnEditMode;
     private int pnListRow;
+    private  String searchdept = "";
+    private  String searchbranch = "";
 
     private ObservableList<ModelListParameter> ListData = FXCollections.observableArrayList();
 
     @FXML
-    private AnchorPane ChildAnchorPane, apMaster, apSearchMaster;
+    private AnchorPane ChildAnchorPane, apMaster, apSearchMaster,AnchorInputs;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnClose;
+    private Button btnBrowse,btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnClose,btnDeactivate;
     @FXML
     private FontAwesomeIconView faActivate;
     @FXML
-    private TextField tfEmployee, tfBranch, tfLastname, tfFirstname, tfMiddlename, tfSearchSalesman;
+    private TextField tfSearchSalesman,tfEmployee,tfEmployeeID,tfDepartment, tfBranch, tfPosition;
     @FXML
     private CheckBox cbActive;
     @FXML
-    private TableView tblList;
-    @FXML
     private TableColumn tblEmployeeId, tblSalesman;
+    @FXML
+    private Label lblOptional;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        oTrans = new SalesControllers(oApp, null);
-        pnEditMode = EditMode.UNKNOWN;
+        clearFields();
+        initializeObject();
+        pnEditMode = oTrans.Salesman().getEditMode();
         initButton(pnEditMode);
         initTextFields();
-        clearFields();
-        loadTableDetail();
+        ClickButton();
+        btnNew.fire();
+        System.out.println("isMainOffice || iswarehouse " + oApp.isMainOffice() + " = " + oApp.isWarehouse());
+
+    }
+    private void initializeObject() {
+        LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+        oTrans = new SalesControllers(oApp, logwrapr);
+        oTrans.Salesman().setRecordStatus("01");
     }
 
     @Override
@@ -96,141 +106,242 @@ public class SalesmanController implements Initializable, ScreenInterface {
     public void setCategoryID(String fsValue) {
     }
 
-    @FXML
-    void cmdButton_Click(ActionEvent event) {
-        try {
-            String lsButton = ((Button) event.getSource()).getId();
-            switch (lsButton) {
-                case "btnNew":
-                    poJSON = oTrans.Salesman().newRecord();
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        System.err.println((String) poJSON.get("message"));
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                        pnEditMode = EditMode.UNKNOWN;
-                        return;
-                    }
-                    pnEditMode = oTrans.Salesman().getEditMode();
-                    break;
-                case "btnUpdate":
-                    poJSON = oTrans.Salesman().updateRecord();
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        System.err.println((String) poJSON.get("message"));
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                        return;
-                    }
+    private void ClickButton() {
+        btnBrowse.setOnAction(this::handleButtonAction);
+        btnNew.setOnAction(this::handleButtonAction);
+        btnSave.setOnAction(this::handleButtonAction);
+        btnUpdate.setOnAction(this::handleButtonAction);
+        btnCancel.setOnAction(this::handleButtonAction);
+        btnDeactivate.setOnAction(this::handleButtonAction);
+        btnActivate.setOnAction(this::handleButtonAction);
+        btnClose.setOnAction(this::handleButtonAction);
+    }
+    private void handleButtonAction(ActionEvent event) {
+        Object source = event.getSource();
 
-                    pnEditMode = oTrans.Salesman().getEditMode();
-                    break;
-                case "btnSave":
-                    if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the record?") == true) {
-                        poJSON = oTrans.Salesman().saveRecord();
+        if (source instanceof Button) {
+            try {
+                Button clickedButton = (Button) source;
+                unloadForm appUnload = new unloadForm();
+                switch (clickedButton.getId()) {
+                    case "btnClose":
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                            appUnload.unloadForm(ChildAnchorPane, oApp, pxeModuleName);
+                        } else {
+                            return;
+                        }
+                        break;
+                    case "btnNew":
+                        clearFields();
+                        tfEmployee.requestFocus();
+                        JSONObject poJSON;
+                        try {
+                            poJSON = oTrans.Salesman().newRecord();
+
+                            pnEditMode = EditMode.READY;
+                            if ("success".equals((String) poJSON.get("result"))) {
+                                pnEditMode = EditMode.ADDNEW;
+                                initButton(pnEditMode);
+                                initTabAnchor();
+                                loadRecord();
+                            } else {
+                                ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                                initTabAnchor();
+                            }
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(UnitConversionController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        break;
+
+                    case "btnBrowse":
+                        String lsValue = (tfSearchSalesman.getText() == null) ? "" : tfSearchSalesman.getText();
+
+                        try {
+                            poJSON = oTrans.Salesman().searchRecord(lsValue, false);
+
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                                tfSearchSalesman.clear();
+                                break;
+                            }
+                            clearFields();
+                            pnEditMode = EditMode.READY;
+                            loadRecord();
+                            initTabAnchor();
+                            initButton(pnEditMode);
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(UnitConversionController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        break;
+
+                    case "btnSave":
+                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the record?") == true) {
+                            poJSON = oTrans.Salesman().saveRecord();
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                System.err.println((String) poJSON.get("message"));
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                return;
+                            }
+                            ShowMessageFX.Information("Record saved successfully", pxeModuleName, null);
+                            pnEditMode = EditMode.UNKNOWN;
+                            initButton(pnEditMode);
+                            clearFields();
+                        } else {
+                            return;
+                        }
+
+                        break;
+                    case "btnCancel":
+                        if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
+                            clearFields();
+                            initializeObject();
+                            pnEditMode = EditMode.UNKNOWN;
+                            initButton(pnEditMode);
+                            initTabAnchor();
+                        }
+                        break;
+                    case "btnDeactivate" :
+                        if(!ShowMessageFX.YesNo("Are you sure you want to deactivate this record?",pxeModuleName,null)){
+                            return;
+                        }
+                        if (oApp.getUserLevel() < UserRight.BRANCH_MANAGER) {
+                            ShowMessageFX.Warning("User is not authorized to deactivate this record", pxeModuleName, null);
+                            return;
+                        }
+                        poJSON = oTrans.Salesman().deactivateRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                            ShowMessageFX.Warning((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                             return;
                         }
-                        ShowMessageFX.Information("Record saved successfully", pxeModuleName, null);
+                        ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                         pnEditMode = EditMode.UNKNOWN;
-                    } else {
-                        return;
-                    }
-                    break;
+                        initButton(pnEditMode);
+                        clearFields();
+                        break;
+                    case "btnActivate" :
 
-                case "btnCancel":
-                    if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
+                        if(!ShowMessageFX.YesNo("Are you sure you want to activate this record?",pxeModuleName,null)){
+                            return;
+                        }
+                        if (oApp.getUserLevel() < UserRight.BRANCH_MANAGER) {
+                            ShowMessageFX.Warning("User is not authorized to activate this record", pxeModuleName, null);
+                            return;
+                        }
+                        poJSON = oTrans.Salesman().activateRecord();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                         pnEditMode = EditMode.UNKNOWN;
-                    } else {
-                        return;
+                        initButton(pnEditMode);
+                        clearFields();
+                        break;
+                }
+            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                Logger.getLogger(Salesman.class.getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+                try {
+                    if (oApp != null) {
+                        oApp.rollbackTrans(); // 🔥 force rollback
                     }
-
-                    break;
-                case "btnActivate":
-                    if (btnActivate.getText().equals("Activate")) {
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-                            poJSON = oTrans.Salesman().activateRecord();
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                System.err.println((String) poJSON.get("message"));
-                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                                return;
-                            }
-                        } else {
-                            return;
-                        }
-                    } else {
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                            poJSON = oTrans.Salesman().deactivateRecord();
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                System.err.println((String) poJSON.get("message"));
-                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                                return;
-                            }
-                        } else {
-                            return;
-                        }
-                    }
-
-                    ShowMessageFX.Information("Record updated successfully", pxeModuleName, null);
-                    pnEditMode = EditMode.UNKNOWN;
-                    break;
-                case "btnClose":
-                    unloadForm appUnload = new unloadForm();
-                    if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                        appUnload.unloadForm(ChildAnchorPane, oApp, pxeModuleName);
-                    } else {
-                        return;
-                    }
-
-                    break;
-//                case "btnBrowse":
-//                    poJSON = oTrans.Salesman().searchRecord(tfSearchSalesman.getText(), false);
-//                    pnEditMode = EditMode.READY;
-//                    if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
-//                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-//                        tfSearchSalesman.requestFocus();
-//                        return;
-//                    } else {
-//                        loadRecord();
-//                    }
-//                    break;
-                default:
-                    ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                    return;
+                } catch (SQLException ex1) {
+                    Logger.getLogger(ProjectController.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-
-            if (lsButton.equals("btnSave") || lsButton.equals("btnCancel") || lsButton.equals("btnActivate")) {
-                oTrans.Salesman().resetModel();
-                clearFields();
-            }
-
-            initButton(pnEditMode);
-            loadRecord();
-            loadTableDetail();
-
-        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
         }
     }
 
-    private void initButton(int fnValue) {
+    private void initButtonx(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew);
+        JFXUtil.setButtonsVisibility(!lbShow, btnBrowse,btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnActivate);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnActivate,btnDeactivate);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
         JFXUtil.setDisabled(!lbShow, apMaster);
     }
 
+    private void initButton(int fnValue) {
+
+        CustomCommonUtil.setVisible(false, btnBrowse,
+                btnNew, btnSave,btnUpdate,btnCancel,btnDeactivate,btnActivate,btnClose);
+        CustomCommonUtil.setManaged(false, btnBrowse,
+                btnNew, btnSave,btnUpdate,btnCancel,btnDeactivate,btnActivate,btnClose);
+
+        switch (fnValue){
+            case EditMode.ADDNEW :
+            case EditMode.UPDATE :
+                CustomCommonUtil.setVisible(true,
+                        btnSave,btnCancel,btnClose);
+                CustomCommonUtil.setManaged(true,
+                        btnSave,btnCancel,btnClose);
+                break;
+            case EditMode.READY:
+                String recordStatus = oTrans.Salesman().getModel().getRecordStatus()
+                        ? RecordStatus.ACTIVE
+                        : RecordStatus.INACTIVE;
+
+                switch (recordStatus) {
+                    case RecordStatus.ACTIVE:
+                        CustomCommonUtil.setVisible(true,
+                                btnBrowse, btnNew, btnDeactivate, btnClose);
+                        CustomCommonUtil.setManaged(true,
+                                btnBrowse, btnNew, btnDeactivate, btnClose);
+                        break;
+
+                    case RecordStatus.INACTIVE:
+                        CustomCommonUtil.setVisible(true,
+                                btnBrowse, btnNew, btnActivate, btnClose);
+                        CustomCommonUtil.setManaged(true,
+                                btnBrowse, btnNew, btnActivate, btnClose);
+                        break;
+                }
+                break;
+            case EditMode.UNKNOWN:
+                CustomCommonUtil.setVisible(true,
+                        btnBrowse,
+                        btnNew,
+                        btnClose);
+                CustomCommonUtil.setManaged(true,
+                        btnBrowse,
+                        btnNew,
+                        btnClose);
+        }
+    }
+
     private void initTextFields() {
         /*textFields FOCUSED PROPERTY*/
-        JFXUtil.setFocusListener(txtField_Focus, tfEmployee, tfBranch, tfLastname, tfFirstname, tfMiddlename);
+        JFXUtil.setFocusListener(txtField_Focus,  tfEmployee,tfEmployeeID,tfDepartment, tfBranch, tfPosition);
         /*textFields KeyPressed PROPERTY*/
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apSearchMaster);
-        
-        JFXUtil.disableArrowNavigation(tblList);
+        if (oApp.isMainOffice() ||oApp.isWarehouse() ) {
+            tfBranch.setDisable(false);
+            tfDepartment.setDisable(false);
+            lblOptional.setVisible(true);
+            lblOptional.setManaged(true);
+            tfBranch.setPromptText("Press F3: Search");
+            tfDepartment.setPromptText("Press F3: Search");
+
+        }else{
+            tfBranch.setDisable(true);
+            tfDepartment.setDisable(false);
+            lblOptional.setVisible(false);
+            lblOptional.setManaged(false);
+            tfBranch.setPromptText("");
+            tfDepartment.setPromptText("");
+
+        }
+
+
+//        JFXUtil.disableArrowNavigation(tblList);
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -242,18 +353,28 @@ public class SalesmanController implements Initializable, ScreenInterface {
                 case F3:
                     switch (lsTextField) {
                         case "tfSearchSalesman":
-                            /*Browse Primary*/
-                            poJSON = oTrans.Salesman().searchRecord(lsValue, false);
-                            if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                                tfSearchSalesman.requestFocus();
-                            } else {
+//                            String lsValue = (tfSearchSalesman.getText() == null) ? "" : tfSearchSalesman.getText();
+
+                            try {
+                                poJSON = oTrans.Salesman().searchRecord(lsValue, false);
+
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                                    tfSearchSalesman.clear();
+                                    break;
+                                }
+                                clearFields();
+                                pnEditMode = EditMode.READY;
                                 loadRecord();
+                                initTabAnchor();
+                                initButton(pnEditMode);
+                            } catch (SQLException | GuanzonException ex) {
+                                Logger.getLogger(UnitConversionController.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             break;
                         case "tfEmployee":
                             /*search employee*/
-                            poJSON = oTrans.Salesman().searchEmployee(lsValue, false);
+                            poJSON = oTrans.Salesman().searchEmployee(lsValue,  searchbranch,searchdept, false);
                             if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                                 tfEmployee.requestFocus();
@@ -262,14 +383,24 @@ public class SalesmanController implements Initializable, ScreenInterface {
                             }
                             break;
                         case "tfBranch":
-                            /*search employee*/
+                            /*search branch*/
                             poJSON = oTrans.Salesman().SearchBranch(lsValue, false);
                             if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                                 tfEmployee.requestFocus();
-                            } else {
-                                loadRecord();
                             }
+                            tfBranch.setText(oTrans.Salesman().getModel().Branch().getBranchName());
+                            searchbranch = oTrans.Salesman().getModel().getBranchCode();
+                            break;
+                        case "tfDepartment":
+                            /*search dept*/
+                            poJSON = oTrans.Salesman().SearchDepartment(lsValue, false);
+                            if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                tfDepartment.requestFocus();
+                            }
+                            tfDepartment.setText((String) poJSON.get("department"));
+                            searchdept = (String) poJSON.get("deptID");
                             break;
                     }
             }
@@ -300,13 +431,8 @@ public class SalesmanController implements Initializable, ScreenInterface {
             /*Lost Focus*/
             switch (lsTextField) {
                 case "tfBranch":
-                    if (lsValue.isEmpty()) {
-                        poJSON = oTrans.Salesman().getModel().setBranchCode("");
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                            return;
-                        }
+                    if(lsValue == null || lsValue.isEmpty()){
+                        searchbranch = "";
                     }
                     break;
                 case "tfEmployee":
@@ -319,35 +445,12 @@ public class SalesmanController implements Initializable, ScreenInterface {
                         }
                     }
                     break;
-//                case "tfFirstname":
-//                    if(lsValue.isEmpty()){
-//                        poJSON = oTrans.Salesman().getModel().setFirstName("");
-//                        if ("error".equals((String) poJSON.get("result"))) {
-//                            System.err.println((String) poJSON.get("message"));
-//                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-//                            return;
-//                        }
-//                    }
-//                    break;
-//                case 4:
-//                    poJSON = oTrans.Salesman().getModel().setFristName(lsValue);
-//                    if ("error".equals((String) poJSON.get("result"))) {
-//                        System.err.println((String) poJSON.get("message"));
-//                        ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                case "tfDepartment":
+                    if(lsValue == null || lsValue.isEmpty()){
+                        searchdept = "";
+                    }
+                    break;
 //
-//                        return;
-//                    }
-//                    break;
-//
-//                case 5:
-//                    poJSON = oTrans.Salesman().getModel().setMiddleName(lsValue);
-//                    if ("error".equals((String) poJSON.get("result"))) {
-//                        System.err.println((String) poJSON.get("message"));
-//                        ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
-//
-//                        return;
-//                    }
-//                    break;
             }
         } else {
             txtField.selectAll();
@@ -361,19 +464,21 @@ public class SalesmanController implements Initializable, ScreenInterface {
 
             boolean lbActive = oTrans.Salesman().getModel().getRecordStatus();
             cbActive.setSelected(lbActive);
-            if (lbActive) {
-                btnActivate.setText("Deactivate");
-                faActivate.setGlyphName("CLOSE");
-            } else {
-                btnActivate.setText("Activate");
-                faActivate.setGlyphName("CHECK");
-            }
+
+            tfEmployeeID.setText(oTrans.Salesman().getModel().getEmployeeId());
             tfEmployee.setText(oTrans.Salesman().getModel().getFullName());
-            tfBranch.setText(oTrans.Salesman().getModel().Branch().getBranchName());
-            tfLastname.setText(oTrans.Salesman().getModel().getLastName());
-            tfFirstname.setText(oTrans.Salesman().getModel().getFirstName());
-            tfMiddlename.setText(oTrans.Salesman().getModel().getMiddleName());
-        } catch (SQLException | GuanzonException ex) {
+
+            poJSON = oTrans.Salesman().getOtherInfos(oTrans.Salesman().getModel().getEmployeeId());
+            if ("error".equals((String) poJSON.get("result"))) {
+                System.err.println((String) poJSON.get("message"));
+                //                ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
+                return;
+            }
+            tfBranch.setText(poJSON.get("branch").toString());
+            tfPosition.setText(poJSON.get("position").toString());
+            tfDepartment.setText(poJSON.get("department").toString());
+//
+        } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
         }
 
@@ -385,71 +490,14 @@ public class SalesmanController implements Initializable, ScreenInterface {
 
         JFXUtil.clearTextFields(apMaster);
     }
-
-    private void loadTableDetail() {
-        int lnCtr;
-        ListData.clear();
-
-        poJSON = oTrans.Salesman().loadModelList();
-        if ("error".equals((String) poJSON.get("result"))) {
-            System.err.println((String) poJSON.get("message"));
-            ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
-
+    private void initTabAnchor() {
+        if (AnchorInputs == null) {
+            System.err.println("Error: AnchorInput is not initialized.");
             return;
         }
 
-        int lnItem = oTrans.Salesman().getModelCount();
-        if (lnItem <= 0) {
-            return;
-        }
-
-        for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
-            ListData.add(new ModelListParameter(
-                    (String) oTrans.Salesman().ModelList(lnCtr).getEmployeeId(),
-                    (String) oTrans.Salesman().ModelList(lnCtr).getFullName(),
-                    "",
-                    ""));
-
-        }
-        if (pnListRow < 0 || pnListRow
-                >= ListData.size()) {
-            if (!ListData.isEmpty()) {
-                /* FOCUS ON FIRST ROW */
-                JFXUtil.selectAndFocusRow(tblList, 0);
-                pnListRow = tblList.getSelectionModel().getSelectedIndex();
-                loadRecord();
-            }
-        } else {
-            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-            JFXUtil.selectAndFocusRow(tblList, pnListRow);
-            loadRecord();
-        }
-
-        initListGrid();
-    }
-
-    public void initListGrid() {
-        JFXUtil.setColumnLeft(tblEmployeeId, tblSalesman);
-        JFXUtil.setColumnsIndexAndDisableReordering(tblList);
-
-        tblList.setItems(ListData);
-        tblList.autosize();
-    }
-
-
-    @FXML
-    void tblList_Clicked(MouseEvent event) {
-        try {
-            pnListRow = tblList.getSelectionModel().getSelectedIndex();
-            if (pnListRow >= 0) {
-                oTrans.Salesman().openRecord(ListData.get(pnListRow).getIndex01());
-                loadRecord();
-                pnEditMode = oTrans.Salesman().getEditMode();
-                initButton(pnEditMode);
-            }
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-        }
+        boolean isEditable = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
+        AnchorInputs.setDisable(!isEditable);
     }
 
 }
