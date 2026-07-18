@@ -1720,6 +1720,8 @@ public class SIPosting_VerificationCarController implements Initializable, Scree
             Platform.runLater(() -> {
                 loadTableAttachment();
             });
+            pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
+            initButton(pnEditMode);
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -2142,8 +2144,6 @@ public class SIPosting_VerificationCarController implements Initializable, Scree
                 if (event.getClickCount() == 2) {
                     tfOrderNo.setText("");
                     loadTableDetailFromMain();
-                    pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
-                    initButton(pnEditMode);
                 }
             }
         });

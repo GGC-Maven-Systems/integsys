@@ -805,7 +805,6 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
             // require to review, either of two, if one have value then require it to check tab
             // if two have value require to check it both
             // if neither have value message that any of JE or JEP or both must have value
-            // question is how to define valid entry for both
             if (!poController.existJournal().equals("")) {
                 titles.add("Journal Entry");
             }
