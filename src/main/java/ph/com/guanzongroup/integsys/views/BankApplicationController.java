@@ -45,6 +45,9 @@ import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.parser.ParseException;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -68,7 +71,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
     private JSONObject poJSON;
     int pnDetail = 0, pnMain = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
-    static SalesControllers poSalesInquiryController;
+    static SalesControllers poController;
     public int pnEditMode;
     boolean pbKeyPressed = false;
     boolean pbPurchaseTypeChanged = false;
@@ -89,7 +92,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
-
+    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail;
     @FXML
@@ -115,9 +118,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        poSalesInquiryController = new SalesControllers(oApp, null);
+        poController = new SalesControllers(oApp, null);
         poJSON = new JSONObject();
-        poJSON = poSalesInquiryController.SalesInquiry().InitTransaction(); // Initialize transaction
+        poJSON = poController.SalesInquiry().InitTransaction(); // Initialize transaction
         if (!"success".equals((String) poJSON.get("result"))) {
             System.err.println((String) poJSON.get("message"));
             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -129,17 +132,17 @@ public class BankApplicationController implements Initializable, ScreenInterface
         initDetailsGrid();
         initTableOnClick();
         clearTextFields();
-        pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
+        pnEditMode = poController.SalesInquiry().getEditMode();
         initButton(pnEditMode);
 
         Platform.runLater(() -> {
-            poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
-            poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
-            poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
-            poSalesInquiryController.SalesInquiry().setIndustryId(psIndustryId);
-            poSalesInquiryController.SalesInquiry().setCompanyId(psCompanyId);
-            poSalesInquiryController.SalesInquiry().setCategoryId(psCategoryId);
-            poSalesInquiryController.SalesInquiry().setWithUI(true);
+            poController.SalesInquiry().Master().setIndustryId(psIndustryId);
+            poController.SalesInquiry().Master().setCompanyId(psCompanyId);
+            poController.SalesInquiry().Master().setCategoryCode(psCategoryId);
+            poController.SalesInquiry().setIndustryId(psIndustryId);
+            poController.SalesInquiry().setCompanyId(psCompanyId);
+            poController.SalesInquiry().setCategoryId(psCategoryId);
+            poController.SalesInquiry().setWithUI(true);
             loadRecordSearch();
 
         });
@@ -186,15 +189,15 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         }
                         break;
                     case "btnUpdate":
-                        poJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
-                        poJSON = poSalesInquiryController.SalesInquiry().UpdateTransaction();
+                        poJSON = poController.SalesInquiry().OpenTransaction(poController.SalesInquiry().Master().getTransactionNo());
+                        poJSON = poController.SalesInquiry().UpdateTransaction();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        poSalesInquiryController.SalesInquiry().loadRequirements();
-                        poSalesInquiryController.SalesInquiry().loadBankApplications();
-                        pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
+                        poController.SalesInquiry().loadRequirements();
+                        poController.SalesInquiry().loadBankApplications();
+                        pnEditMode = poController.SalesInquiry().getEditMode();
                         break;
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail, apDetail);
@@ -202,15 +205,15 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
                             //Clear data
-                            poSalesInquiryController.SalesInquiry().resetMaster();
-                            poSalesInquiryController.SalesInquiry().Detail().clear();
-                            poSalesInquiryController.SalesInquiry().resetOthers();
+                            poController.SalesInquiry().resetMaster();
+                            poController.SalesInquiry().Detail().clear();
+                            poController.SalesInquiry().resetOthers();
                             clearTextFields();
 
-                            poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
-                            poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
-                            poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
-//                            poSalesInquiryController.SalesInquiry().initFields();
+                            poController.SalesInquiry().Master().setIndustryId(psIndustryId);
+                            poController.SalesInquiry().Master().setCompanyId(psCompanyId);
+                            poController.SalesInquiry().Master().setCategoryCode(psCategoryId);
+//                            poController.SalesInquiry().initFields();
                             pnEditMode = EditMode.UNKNOWN;
 
                             break;
@@ -223,20 +226,20 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         //Validator
                         poJSON = new JSONObject();
                         if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
-                            poJSON = poSalesInquiryController.SalesInquiry().SaveTransaction();
+                            poJSON = poController.SalesInquiry().SaveTransaction();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                poSalesInquiryController.SalesInquiry().AddDetail();
+                                poController.SalesInquiry().AddDetail();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
 
                                 // Confirmation Prompt
-                                JSONObject loJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
+                                JSONObject loJSON = poController.SalesInquiry().OpenTransaction(poController.SalesInquiry().Master().getTransactionNo());
                                 if ("success".equals(loJSON.get("result"))) {
-                                    if (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
+                                    if (poController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-                                            loJSON = poSalesInquiryController.SalesInquiry().ConfirmTransaction("");
+                                            loJSON = poController.SalesInquiry().ConfirmTransaction("");
                                             if ("success".equals((String) loJSON.get("result"))) {
                                                 ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
                                             } else {
@@ -256,24 +259,24 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             ShowMessageFX.Warning("No selected row to approve", pxeModuleName, null);
                             return;
                         }
-//                        poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.APPROVED);
-                        poSalesInquiryController.SalesInquiry().ApproveBankApplication("", pnDetail);
+//                        poController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.APPROVED);
+                        poController.SalesInquiry().ApproveBankApplication("", pnDetail);
                         break;
                     case "btnDispprove":
                         if (JFXUtil.isObjectEqualTo(tblViewDetailList.getSelectionModel().getSelectedItem(), null, -1)) {
                             ShowMessageFX.Warning("No selected row to disapprove", pxeModuleName, null);
                             return;
                         }
-//                        poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.DISAPPROVED);
-                        poSalesInquiryController.SalesInquiry().DisApproveBankApplication("", pnDetail);
+//                        poController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.DISAPPROVED);
+                        poController.SalesInquiry().DisApproveBankApplication("", pnDetail);
                         break;
                     case "btnCancelBankApplication":
                         if (JFXUtil.isObjectEqualTo(tblViewDetailList.getSelectionModel().getSelectedItem(), null, -1)) {
                             ShowMessageFX.Warning("No selected row to cancel", pxeModuleName, null);
                             return;
                         }
-//                        poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.CANCELLED);
-                        poSalesInquiryController.SalesInquiry().CancelBankApplication("", pnDetail);
+//                        poController.SalesInquiry().BankApplicationsList(pnDetail).setTransactionStatus(BankApplicationStatus.CANCELLED);
+                        poController.SalesInquiry().CancelBankApplication("", pnDetail);
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -304,32 +307,32 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
         try {
             JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class,
-                    pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus());
+                    pnEditMode == EditMode.UNKNOWN ? "-1" : poController.SalesInquiry().Master().getTransactionStatus());
 
             // Transaction Date
-            tfTransactionNo.setText(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
-            String lsTransactionDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().Master().getTransactionDate());
+            tfTransactionNo.setText(poController.SalesInquiry().Master().getTransactionNo());
+            String lsTransactionDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().Master().getTransactionDate());
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
-            String lsTargetDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().Master().getTargetDate());
+            String lsTargetDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().Master().getTargetDate());
             dpTargetDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsTargetDate, "yyyy-MM-dd"));
 
-            tfBranch.setText(poSalesInquiryController.SalesInquiry().Master().Branch().getBranchName());
-            tfSalesPerson.setText(poSalesInquiryController.SalesInquiry().Master().SalesPerson().getFullName());
-//            tfReferralAgent.setText(poSalesInquiryController.SalesInquiry().Master().ReferralAgent().getCompanyName());
-//            tfClient.setText(poSalesInquiryController.SalesInquiry().Master().Client().getCompanyName());
-//            tfAddress.setText(poSalesInquiryController.SalesInquiry().Master().ClientAddress().getAddress());
-//            tfContactNo.setText(poSalesInquiryController.SalesInquiry().Master().ClientMobile().getMobileNo());
-            tfInquiryType.setText(poSalesInquiryController.SalesInquiry().Master().Source().getDescription());
+            tfBranch.setText(poController.SalesInquiry().Master().Branch().getBranchName());
+            tfSalesPerson.setText(poController.SalesInquiry().Master().SalesPerson().getFullName());
+//            tfReferralAgent.setText(poController.SalesInquiry().Master().ReferralAgent().getCompanyName());
+//            tfClient.setText(poController.SalesInquiry().Master().Client().getCompanyName());
+//            tfAddress.setText(poController.SalesInquiry().Master().ClientAddress().getAddress());
+//            tfContactNo.setText(poController.SalesInquiry().Master().ClientMobile().getMobileNo());
+            tfInquiryType.setText(poController.SalesInquiry().Master().Source().getDescription());
 
-            taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
+            taRemarks.setText(poController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
 
-                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
-                if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
-//                    tfClientType.setText(String.valueOf(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType())));
+                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poController.SalesInquiry().Master().getPurchaseType()));
+                if (poController.SalesInquiry().Master().getClientId() != null && !"".equals(poController.SalesInquiry().Master().getClientId())) {
+//                    tfClientType.setText(String.valueOf(Integer.parseInt(poController.SalesInquiry().Master().Client().getClientType())));
                 } else {
-                    tfClientType.setText(String.valueOf(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType())));
+                    tfClientType.setText(String.valueOf(Integer.parseInt(poController.SalesInquiry().Master().getClientType())));
                 }
             } else {
                 cmbPurchaseType.getSelectionModel().select(0);
@@ -344,37 +347,37 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     public void loadRecordDetail() {
         try {
-            boolean lbShow1 = poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0;
+            boolean lbShow1 = poController.SalesInquiry().getBankApplicationsCount() > 0;
             JFXUtil.setDisabled(!lbShow1, apDetail);
-            if (pnDetail < 0 || pnDetail > poSalesInquiryController.SalesInquiry().getBankApplicationsCount() - 1) {
+            if (pnDetail < 0 || pnDetail > poController.SalesInquiry().getBankApplicationsCount() - 1) {
                 return;
 
             }
             JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
-                    pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getTransactionStatus());
+                    pnEditMode == EditMode.UNKNOWN ? "-1" : poController.SalesInquiry().BankApplicationsList(pnDetail).getTransactionStatus());
 
-            JFXUtil.setDisabled(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getEditMode() == EditMode.ADDNEW, apDetail, dpApprovedDate);
+            JFXUtil.setDisabled(poController.SalesInquiry().BankApplicationsList(pnDetail).getEditMode() == EditMode.ADDNEW, apDetail, dpApprovedDate);
 
-            boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getTransactionStatus(),
+            boolean lbShow = JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(pnDetail).getTransactionStatus(),
                     BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
-            boolean lbShow2 = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getEditMode(), EditMode.UPDATE);
+            boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(pnDetail).getEditMode(), EditMode.UPDATE);
             JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
 
             String lsPaymentMode = "";
-            if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getPaymentMode(), null, "")) {
-                lsPaymentMode = PurchaseType.get(Integer.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getPaymentMode()));
+            if (!JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(pnDetail).getPaymentMode(), null, "")) {
+                lsPaymentMode = PurchaseType.get(Integer.valueOf(poController.SalesInquiry().BankApplicationsList(pnDetail).getPaymentMode()));
             } else {
                 lsPaymentMode = "";
             }
             tfPaymentMode.setText(lsPaymentMode);
-            tfApplicationNo.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getApplicationNo());
-            tfBank.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).Bank().getBankName());
-            taBankAppRemarks.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getRemarks());
+            tfApplicationNo.setText(poController.SalesInquiry().BankApplicationsList(pnDetail).getApplicationNo());
+            tfBank.setText(poController.SalesInquiry().BankApplicationsList(pnDetail).Bank().getBankName());
+            taBankAppRemarks.setText(poController.SalesInquiry().BankApplicationsList(pnDetail).getRemarks());
 
-            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getAppliedDate());
+            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(pnDetail).getAppliedDate());
             dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
 
-            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getApprovedDate());
+            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(pnDetail).getApprovedDate());
             dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
@@ -396,7 +399,56 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
     };
 
+    public void loadTableDetailFromMain() {
+//        try {
+//            poJSON = new JSONObject();
+//
+//            ModelBankApplications_Detail selected = (ModelBankApplications_Detail) tblViewMainList.getSelectionModel().getSelectedItem();
+//            if (selected != null) {
+//                String lsTransactionNo = selected.getIndex06();
+//                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.PurchaseOrderReceiving().Master().getTransactionNo(), lsTransactionNo)) {
+//                    return;
+//                }
+//                int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
+//                pnMain = pnRowMain;
+//                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+//                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
+//
+//                poJSON = poController.PurchaseOrderReceiving().OpenTransaction(lsTransactionNo);
+//                if ("error".equals((String) poJSON.get("result"))) {
+//                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                    return;
+//                }
+//            }
+////            if (poPurchaseReceivingController.PurchaseOrderReceiving().getTransactionAttachmentCount() > 1) {
+////                if (!openedAttachment.equals(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(pnMain).getTransactionNo())) {
+////                    stageAttachment.closeDialog();
+////                }
+////            } else {
+////                stageAttachment.closeDialog();
+////            }
+//
+//            Platform.runLater(() -> {
+//                loadTableDetail.reload();
+//            });
+//
+//            pnEditMode = poController.PurchaseOrderReceiving().getEditMode();
+//            initButton(pnEditMode);
+//        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//        }
+    }
+
     public void initTableOnClick() {
+        tblViewMainList.setOnMouseClicked(event -> {
+            pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+            if (pnMain >= 0) {
+                if (event.getClickCount() == 2) {
+                    loadTableDetailFromMain();
+                }
+            }
+        });
         tblViewDetailList.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
@@ -414,13 +466,14 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
-                            poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).isRequired(lbisTrue);
+                            poController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).isRequired(lbisTrue);
                             pnDetail = rowIndex;
                             loadTableDetail.reload();
                             break;
                     }
                 },
                 0);
+        JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelBankApplications_Detail) item).getIndex02(), highlightedRowsMain);
     }
 
     public void initLoadTable() {
@@ -433,23 +486,23 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         details_data.clear();
                         try {
                             if (pnEditMode != EditMode.UNKNOWN) {
-                                poSalesInquiryController.SalesInquiry().loadBankApplicationList();
+                                poController.SalesInquiry().loadBankApplicationList();
                             }
-                            for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
-                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
-                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
+                            for (lnCtr = 0; lnCtr < poController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
+                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
+                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
 
                                 String lsStat = ""; //default
                                 lsStat
                                         = JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
-                                                pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
+                                                pnEditMode == EditMode.UNKNOWN ? "-1" : poController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
 
-                                String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
-                                        ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
+                                String lsBank = JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
+                                        ? "" : poController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
 
                                 details_data.add(
                                         new ModelBankApplications_Detail(String.valueOf(lnCtr + 1),
-                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
+                                                String.valueOf(poController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
                                                 String.valueOf(lsBank),
                                                 String.valueOf(lsAppliedDate),
                                                 String.valueOf(lsApprovedDate),
@@ -484,23 +537,23 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         details_data.clear();
                         try {
                             if (pnEditMode != EditMode.UNKNOWN) {
-                                poSalesInquiryController.SalesInquiry().loadBankApplicationList();
+                                poController.SalesInquiry().loadBankApplicationList();
                             }
-                            for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
-                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
-                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
+                            for (lnCtr = 0; lnCtr < poController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
+                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
+                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
 
                                 String lsStat = ""; //default
                                 lsStat
                                         = JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
-                                                pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
+                                                pnEditMode == EditMode.UNKNOWN ? "-1" : poController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
 
-                                String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
-                                        ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
+                                String lsBank = JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
+                                        ? "" : poController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
 
                                 details_data.add(
                                         new ModelBankApplications_Detail(String.valueOf(lnCtr + 1),
-                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
+                                                String.valueOf(poController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
                                                 String.valueOf(lsBank),
                                                 String.valueOf(lsAppliedDate),
                                                 String.valueOf(lsApprovedDate),
@@ -535,7 +588,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 lsValue = lsValue.trim();
                 switch (lsID) {
 //                    case "taRemarks"://Remarks
-//                        poJSON = poSalesInquiryController.SalesInquiry().Master().setRemarks(lsValue);
+//                        poJSON = poController.SalesInquiry().Master().setRemarks(lsValue);
 //                        if ("error".equals((String) poJSON.get("result"))) {
 //                            System.err.println((String) poJSON.get("message"));
 //                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -544,7 +597,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                        loadRecordMaster();
 //                        break;
                     case "taBankAppRemarks"://Remarks
-                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setRemarks(lsValue);
+                        poJSON = poController.SalesInquiry().BankApplicationsList(pnDetail).setRemarks(lsValue);
                         if ("error".equals((String) poJSON.get("result"))) {
                             System.err.println((String) poJSON.get("message"));
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -562,32 +615,32 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                switch (lsID) {
 //                    case "tfSalesPerson":
 //                        if (lsValue.isEmpty()) {
-//                            poJSON = poSalesInquiryController.SalesInquiry().Master().setSalesMan("");
+//                            poJSON = poController.SalesInquiry().Master().setSalesMan("");
 //                        }
 //                        break;
 //                    case "tfReferralAgent":
 //                        if (lsValue.isEmpty()) {
-//                            poJSON = poSalesInquiryController.SalesInquiry().Master().setAgentId("");
+//                            poJSON = poController.SalesInquiry().Master().setAgentId("");
 //                        }
 //                        break;
 //                    case "tfInquiryType":
 //                        if (lsValue.isEmpty()) {
-//                            poJSON = poSalesInquiryController.SalesInquiry().Master().setSourceCode("");
+//                            poJSON = poController.SalesInquiry().Master().setSourceCode("");
 //                        }
 //                        break;
 //                    case "tfClient":
 //                        if (lsValue.isEmpty()) {
 //                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
-//                                    if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
-//                                        if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
+//                                if (poController.SalesInquiry().Master().getClientId() != null && !"".equals(poController.SalesInquiry().Master().getClientId())) {
+//                                    if (poController.SalesInquiry().getDetailCount() > 0) {
+//                                        if (!JFXUtil.isObjectEqualTo(poController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
 //                                            if (!pbKeyPressed) {
 //                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
 //                                                        "Are you sure you want to change the supplier name?\nPlease note that doing so will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-//                                                    poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
-//                                                    poJSON = poSalesInquiryController.SalesInquiry().Master().setAddressId("");
-//                                                    poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
-//                                                    poSalesInquiryController.SalesInquiry().removeDetails();
+//                                                    poJSON = poController.SalesInquiry().Master().setClientId("");
+//                                                    poJSON = poController.SalesInquiry().Master().setAddressId("");
+//                                                    poJSON = poController.SalesInquiry().Master().setContactId("");
+//                                                    poController.SalesInquiry().removeDetails();
 //                                                    loadTableDetail.reload();
 //                                                } else {
 //                                                    loadRecordMaster();
@@ -602,7 +655,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                                }
 //                            }
 //
-//                            poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
+//                            poJSON = poController.SalesInquiry().Master().setClientId("");
 //                        }
 //                        break;
 //
@@ -615,7 +668,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 /*Lost Focus*/
                 switch (lsID) {
                     case "tfApplicationNo":
-                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setApplicationNo(lsValue);
+                        poJSON = poController.SalesInquiry().BankApplicationsList(pnDetail).setApplicationNo(lsValue);
                         if ("error".equals((String) poJSON.get("result"))) {
                             System.err.println((String) poJSON.get("message"));
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -625,7 +678,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         break;
                     case "tfBank":
                         if (lsValue.isEmpty()) {
-                            poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setBankId(lsValue);
+                            poJSON = poController.SalesInquiry().BankApplicationsList(pnDetail).setBankId(lsValue);
                             JFXUtil.runWithDelay(0.70, () -> loadTableDetail.reload());
                         }
                         break;
@@ -640,9 +693,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
             pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetailList) : JFXUtil.moveToNextRow(tblViewDetailList);
         }
         loadRecordDetail();
-        if (JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getApplicationNo(), null, "")) {
+        if (JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(pnDetail).getApplicationNo(), null, "")) {
             tfApplicationNo.requestFocus();
-        } else if (JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).getBankId(), null, "")) {
+        } else if (JFXUtil.isObjectEqualTo(poController.SalesInquiry().BankApplicationsList(pnDetail).getBankId(), null, "")) {
             tfBank.requestFocus();
         } else {
             tfApplicationNo.requestFocus();
@@ -685,7 +738,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 case F3:
                     switch (lsID) {
                         case "tfBank":
-                            poJSON = poSalesInquiryController.SalesInquiry().SearchBank(lsValue, false, pnDetail);
+                            poJSON = poController.SalesInquiry().SearchBank(lsValue, false, pnDetail);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfBank.setText("");
@@ -706,7 +759,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
     boolean pbSuccess = true;
     EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
-                String lsTransDate = sdfFormat.format(poSalesInquiryController.SalesInquiry().Master().getTransactionDate());
+                String lsTransDate = sdfFormat.format(poController.SalesInquiry().Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                 poJSON = new JSONObject();
 //                try {
@@ -716,7 +769,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                            JFXUtil.setJSONError(poJSON, "Target date cannot be before the transaction date.");
 //                            pbSuccess = false;
 //                        } else {
-//                            poSalesInquiryController.SalesInquiry().Master().setTargetDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
+//                            poController.SalesInquiry().Master().setTargetDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
 //                        }
 //                        if (pbSuccess) {
 //                        } else {
@@ -733,7 +786,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             JFXUtil.setJSONError(poJSON, "Applied date cannot be before the transaction date.");
                             pbSuccess = false;
                         } else {
-                            poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setAppliedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
+                            poController.SalesInquiry().BankApplicationsList(pnDetail).setAppliedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                         }
                         if (pbSuccess) {
                         } else {
@@ -750,7 +803,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             JFXUtil.setJSONError(poJSON, "Approved date cannot be before the transaction date.");
                             pbSuccess = false;
                         } else {
-                            poSalesInquiryController.SalesInquiry().BankApplicationsList(pnDetail).setApprovedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
+                            poController.SalesInquiry().BankApplicationsList(pnDetail).setApprovedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                         }
                         if (pbSuccess) {
                         } else {
@@ -781,9 +834,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 int selectedIndex = cb.getSelectionModel().getSelectedIndex();
                 switch (cbId) {
                     case "cmbPurchaseType":
-                        if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 || poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0) {
-                            if (!poSalesInquiryController.SalesInquiry().Master().getPurchaseType().equals(String.valueOf(cmbPurchaseType.getSelectionModel().getSelectedIndex()))) {
-                                poJSON = poSalesInquiryController.SalesInquiry().checkPendingBankApplication();
+                        if (poController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 || poController.SalesInquiry().getBankApplicationsCount() > 0) {
+                            if (!poController.SalesInquiry().Master().getPurchaseType().equals(String.valueOf(cmbPurchaseType.getSelectionModel().getSelectedIndex()))) {
+                                poJSON = poController.SalesInquiry().checkPendingBankApplication();
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     break;
@@ -791,9 +844,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the Purchase Type?\nPlease note that doing so will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
-                                    poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
-                                    poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
-                                    poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
+                                    poController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
+                                    poJSON = poController.SalesInquiry().removeRequirements();
+                                    poJSON = poController.SalesInquiry().removeBankApplications();
                                     if ("error".equals((String) poJSON.get("result"))) {
                                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                         break;
@@ -802,11 +855,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 }
                             }
                         } else {
-                            poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
+                            poController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
                         }
                         break;
 //                    case "cmbCategoryType":
-//                        poSalesInquiryController.SalesInquiry().Master().setCategoryType(String.valueOf(selectedIndex));
+//                        poController.SalesInquiry().Master().setCategoryType(String.valueOf(selectedIndex));
 //                        break;
 
                     default:
@@ -857,7 +910,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
         JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apDetail);
 
-        switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
+        switch (poController.SalesInquiry().Master().getTransactionStatus()) {
             case SalesInquiryStatic.QUOTED:
             case SalesInquiryStatic.SALE:
             case SalesInquiryStatic.LOST:
@@ -884,7 +937,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     public void loadRecordSearch() {
         try {
-            lblSource.setText(poSalesInquiryController.SalesInquiry().Master().Company().getCompanyName() + " - " + poSalesInquiryController.SalesInquiry().Master().Industry().getDescription());
+            lblSource.setText(poController.SalesInquiry().Master().Company().getCompanyName() + " - " + poController.SalesInquiry().Master().Industry().getDescription());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
         }
