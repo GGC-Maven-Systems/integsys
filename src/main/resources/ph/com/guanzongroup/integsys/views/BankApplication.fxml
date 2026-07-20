@@ -319,7 +319,7 @@
                                                 <Insets top="1.0" />
                                              </GridPane.margin>
                                           </TextArea>
-                                                                  <TextField fx:id="tfClient1" maxHeight="25.0" minWidth="-Infinity" prefHeight="25.0" prefWidth="289.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                                                  <TextField fx:id="tfClientType" maxHeight="25.0" minWidth="-Infinity" prefHeight="25.0" prefWidth="289.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                                                                   <TextField fx:id="tfCategoryType" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                                                           </children>
                                                       </GridPane>
@@ -387,7 +387,7 @@
                                                       <RowConstraints />
                                         </rowConstraints>
                                                    <children>
-                                                      <TableView fx:id="tblViewBankApplications" minWidth="772.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                                      <TableView fx:id="tblViewDetailList" minWidth="772.0" prefWidth="200.0" GridPane.rowIndex="1">
                                                          <columns>
                                                             <TableColumn fx:id="tblBankAppRowCb" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false">
                                                                <graphic>
@@ -436,11 +436,11 @@
                                           </AnchorPane>
                                           <TableView fx:id="tblViewMainList" prefWidth="551.0" GridPane.rowIndex="1">
                                              <columns>
-                                                <TableColumn fx:id="tblRowNo" editable="false" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="No." />
+                                                <TableColumn fx:id="tblRowNo" editable="false" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="No." />
                                                 <TableColumn fx:id="tblDate" editable="false" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Inquiry Date" />
-                                                <TableColumn fx:id="tblDate1" editable="false" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Transaction No" />
-                                                <TableColumn fx:id="tblSupplier" editable="false" maxWidth="300.0" minWidth="-1.0" prefWidth="262.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Client" />
-                                                <TableColumn fx:id="tblReferenceNo" editable="false" maxWidth="233.0" minWidth="14.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Status" />
+                                                <TableColumn fx:id="tblTransactionNo" editable="false" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Transaction No" />
+                                                <TableColumn fx:id="tblClient" editable="false" maxWidth="300.0" minWidth="-1.0" prefWidth="262.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Client" />
+                                                <TableColumn fx:id="tblMainStatus" editable="false" maxWidth="233.0" minWidth="14.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Status" />
                                              </columns>
                                              <GridPane.margin>
                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
