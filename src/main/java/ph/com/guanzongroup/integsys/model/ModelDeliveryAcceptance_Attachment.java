@@ -35,7 +35,7 @@ public class ModelDeliveryAcceptance_Attachment {
     public StringProperty index18;
     public StringProperty index19;
     public StringProperty index20;
-    public static ObservableList<String> documentType = FXCollections.observableArrayList("Other", "Delivery Receipt", "Sales Invoice", "Official Receipt");
+    public static ObservableList<String> documentType = FXCollections.observableArrayList("Other", "Delivery Receipt", "Sales Invoice", "Official Receipt", "Quotation");
 
     public ModelDeliveryAcceptance_Attachment(String index01,
             String index02,
