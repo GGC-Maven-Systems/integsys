@@ -124,7 +124,7 @@
                                     <FontAwesomeIconView glyphName="THUMBS_UP" size="20" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnDispprove" contentDisplay="TOP" ellipsisString="" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../../css/StyleSheet.css" text="Disapprove">
+                              <Button fx:id="btnDisapprove" contentDisplay="TOP" ellipsisString="" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../../css/StyleSheet.css" text="Disapprove">
                                  <effect>
                                     <Blend />
                                  </effect>
@@ -402,7 +402,7 @@
                                                          <columns>
                                                             <TableColumn fx:id="tblBankAppRowCb" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false">
                                                                <graphic>
-                                                                  <CheckBox mnemonicParsing="false" />
+                                                                  <CheckBox fx:id="chckSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
                                                                </graphic>
                                                             </TableColumn>
                                                             <TableColumn fx:id="tblBankAppRowNo" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" text="No." />

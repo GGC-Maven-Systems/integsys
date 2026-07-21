@@ -46,6 +46,7 @@ import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.parser.ParseException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Pagination;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -62,6 +64,7 @@ import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
 import ph.com.guanzongroup.cas.sales.t1.SalesBankApplication;
+import ph.com.guanzongroup.cas.sales.t1.model.Model_Bank_Application;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 
 /**
@@ -87,16 +90,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
-    private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
-    BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
-
     ObservableList<String> ClientType = ModelSalesInquiry_Detail.ClientType;
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
+    BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private static final int ROWS_PER_PAGE = 50;
+    ArrayList<String> checkedItem = new ArrayList<>();
+    ArrayList<Model_Bank_Application> checkedItems = new ArrayList<>();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail;
     @FXML
@@ -104,7 +107,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnDispprove, btnCancelBankApplication, btnHistory, btnClose;
+    private Button btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnDisapprove, btnCancelBankApplication, btnHistory, btnRetrieve, btnClose;
     @FXML
     private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryStatus, tfInquiryType, tfClient, tfAddress, tfContactNo, tfClientType, tfCategoryType, tfPaymentMode, tfApplicationNo, tfBank;
     @FXML
@@ -117,6 +120,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
     private TableView tblViewDetailList, tblViewMainList;
     @FXML
     private TableColumn tblBankAppRowCb, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus, tblRowNo, tblDate, tblTransactionNo, tblClient, tblMainStatus;
+    @FXML
+    private CheckBox chckSelectAll;
     @FXML
     private Pagination pgPagination;
 
@@ -137,6 +142,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         initTableOnClick();
         clearTextFields();
         initMainGrid();
+        initCheckboxes();
         pnEditMode = poController.getEditMode();
         initButton(pnEditMode);
         pgPagination.setPageCount(1);
@@ -204,6 +210,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             return;
                         }
                         pnEditMode = poController.getEditMode();
+                        resetCheckboxSelection();
                         break;
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail, apDetail);
@@ -211,6 +218,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
                             //Clear data
+                            JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             poController.Detail().clear();
                             clearTextFields();
 
@@ -252,53 +260,151 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                                        }
                                     }
                                 }
-
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             }
                         } else {
                             return;
                         }
                         break;
                     case "btnApprove":
-                        if (JFXUtil.isObjectEqualTo(tblViewDetailList.getSelectionModel().getSelectedItem(), null, -1)) {
-                            ShowMessageFX.Warning("No selected row to approve", pxeModuleName, null);
-                            return;
-                        }
-//                        poController.ApproveBankApplication("", pnDetail);
-                        break;
                     case "btnDispprove":
-                        if (JFXUtil.isObjectEqualTo(tblViewDetailList.getSelectionModel().getSelectedItem(), null, -1)) {
-                            ShowMessageFX.Warning("No selected row to disapprove", pxeModuleName, null);
-                            return;
-                        }
-//                        poController.DisApproveBankApplication("", pnDetail);
-                        break;
                     case "btnCancelBankApplication":
-                        if (JFXUtil.isObjectEqualTo(tblViewDetailList.getSelectionModel().getSelectedItem(), null, -1)) {
-                            ShowMessageFX.Warning("No selected row to cancel", pxeModuleName, null);
-                            return;
-                        }
-//                        poController.CancelBankApplication("", pnDetail);
+                        processAction(lsButton);
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
 
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisApprove", "btnCancelApplication")) {
-                    loadTableDetail.reload();
-                    return;
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVerify", "btnApprove", "btnDisapprove", "btnCancelBankApplication")) {
+                    poController.Detail().clear();
+                    pnEditMode = EditMode.UNKNOWN;
+                    clearTextFields();
                 }
 
-                if (lsButton.equals("btnPrint")) { //|| lsButton.equals("btnCancel")
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnArrowRight", "btnArrowLeft", "btnRetrieve", "btnHistory")) {
                 } else {
-                    loadRecordMaster();
                     loadTableDetail.reload();
                 }
-
+                initButton(pnEditMode);
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+        }
+    }
+
+    private void processAction(String action) {
+        try {
+            String lsMessage = action.startsWith("btn") ? Character.toLowerCase(action.charAt(3)) + action.substring(4) : "";
+
+            if (checkedItem.stream().anyMatch("1"::equals)) {
+            } else {
+                ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + lsMessage + ".");
+                return;
+            }
+            if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
+                return;
+            }
+            checkedItems.clear();
+            List<String> list = new ArrayList<>();
+            for (Object item : tblViewMainList.getItems()) {
+                ModelBankApplications_Detail item1 = (ModelBankApplications_Detail) item;
+                String lschecked = item1.getIndex01();
+                int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
+                if (lschecked.equals("1")) {
+                    list.add(item1.getIndex07());
+                    checkedItems.add(poController.Detail(lnReference));
+                }
+            }
+
+            boolean lbCondition1 = true;
+            //able to activate: open(0) & deactivated(3)
+            for (String value : list) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("3"))) {
+                    continue;
+                }
+                lbCondition1 = false;
+                break;
+            }
+            boolean lbCondition2 = true;
+            //able to deactivate: open(0) & active(1)
+            for (String value : list) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"))) {
+                    continue;
+                }
+                lbCondition2 = false;
+                break;
+            }
+            boolean lbCondition3 = true;
+            //able to disapprove:  open(0) & active(1) & deactivated(3)
+            for (String value : list) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"), poController.getStatus("3"))) {
+                    continue;
+                }
+                lbCondition3 = false;
+                break;
+            }
+
+            if (checkedItems.isEmpty()) {
+                return;
+            }
+            boolean lbAllSame = true;
+
+            if (!list.isEmpty()) {
+                String first = list.get(0);
+
+                for (String value : list) {
+                    if (!first.equals(value)) {
+                        lbAllSame = false;
+                        break;
+                    }
+                }
+            }
+
+            boolean lbMoreThanOne = checkedItems.size() > 1;
+            switch (action) {
+                case "btnApprove":
+                    if (!lbCondition1 && lbMoreThanOne && !lbAllSame) {
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " record due to status.");
+                        return;
+                    }
+                    poJSON = poController.ApproveBankApplication("", checkedItems);
+                    break;
+                case "btnDispprove":
+                    if (!lbCondition2 && lbMoreThanOne && !lbAllSame) {
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " record due to status.");
+                        return;
+                    }
+                    poJSON = poController.DisapproveBankApplication("", checkedItems);
+                    break;
+                case "btnCancelBankApplication":
+                    if (!lbCondition3 && lbMoreThanOne && !lbAllSame) {
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " record due to status.");
+                        return;
+                    }
+                    poJSON = poController.CancelBankApplication("", checkedItems);
+                    break;
+                default:
+                    break;
+            }
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+            } else {
+                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                resetCheckboxSelection();
+            }
+//            poController.populateDetail();
+            pnEditMode = poController.getEditMode();
+        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void resetCheckboxSelection() {
+        chckSelectAll.setSelected(false);
+        if (!checkedItem.isEmpty()) {
+            checkedItem.clear();
         }
     }
 
@@ -442,6 +548,63 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
     }
 
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        poJSON = new JSONObject();
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "chckSelectAll": // this is the id
+                    //set to 1 all of column 2 row data value to enable checked
+                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
+                        if (checkedBox.isSelected()) {
+                            checkedItem.set(lnCtr, "1");
+                        } else {
+                            checkedItem.set(lnCtr, "0");
+                        }
+                    }
+                    loadTableMain.reload();
+                    break;
+            }
+        }
+    }
+
+    private void initCheckboxes() {
+        JFXUtil.addCheckboxColumns(ModelBankApplications_Detail.class, tblViewDetailList, disableRowCheckbox,
+                (row, rowIndex, colIndex, newVal) -> {
+                    boolean lbisTrue = newVal;
+                    switch (colIndex) {
+                        case 0:
+                            checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            boolean allOnes = checkedItem.stream().allMatch("1"::equals);
+                            chckSelectAll.setSelected(allOnes);
+                            //set external temporary data of index to save as reference
+                            // if detected unchecked then must update
+                            pnMain = rowIndex;
+                            Platform.runLater(() -> {
+                                loadTableMain.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    if (lbisTrue) {
+                                        JFXUtil.selectAndFocusRow(tblViewMainList, rowIndex);
+                                    }
+                                });
+                            });
+                            break;
+                    }
+                },
+                (row, rowIndex, colIndex) -> {
+                    switch (colIndex) {
+                        case 0:
+                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
+                            break;
+                        default:
+                            break;
+                    }
+                },
+                0);//starts 0,1,2 
+    }
+
     public void initTableOnClick() {
         tblViewMainList.setOnMouseClicked(event -> {
             pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
@@ -462,18 +625,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList);
         JFXUtil.adjustColumnForScrollbar(tblViewDetailList); // need to use computed-size in min-width of the column to work
 
-        JFXUtil.addCheckboxColumns(ModelRequirements_Detail.class,
-                tblViewDetailList, disableRowCheckbox,
-                (row, rowIndex, colIndex, newVal) -> {
-                    boolean lbisTrue = newVal;
-                    switch (colIndex) {
-                        case 0:
-                            pnDetail = rowIndex;
-                            loadTableDetail.reload();
-                            break;
-                    }
-                },
-                0);
         JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelBankApplications_Detail) item).getIndex02(), highlightedRowsMain);
     }
 
@@ -807,15 +958,35 @@ public class BankApplicationController implements Initializable, ScreenInterface
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-        dragLock.isEnabled = lbShow;
         disableRowCheckbox.set(!lbShow); // set enable/disable in checkboxes in requirements
         // Manage visibility and managed state of other buttons
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apDetail);
+        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail);
 
+        JFXUtil.setButtonsVisibility(false, btnApprove, btnDisapprove, btnCancelBankApplication);
+        if (fnValue != EditMode.READY) {
+            return;
+        }
+        switch (poController.Master().getTransactionStatus()) {
+            case BankApplicationStatus.OPEN:
+                JFXUtil.setButtonsVisibility(true, btnApprove, btnCancelBankApplication);
+                JFXUtil.setButtonsVisibility(false, btnDisapprove);
+                break;
+            case BankApplicationStatus.APPROVED:
+                JFXUtil.setButtonsVisibility(true, btnDisapprove);
+                JFXUtil.setButtonsVisibility(false, btnApprove, btnCancelBankApplication);
+                break;
+            case BankApplicationStatus.DISAPPROVED:
+                JFXUtil.setButtonsVisibility(true, btnApprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnDisapprove, btnCancelBankApplication);
+                break;
+            case BankApplicationStatus.CANCELLED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnDisapprove, btnCancelBankApplication);
+                break;
+        }
         switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.QUOTED:
             case SalesInquiryStatic.SALE:
@@ -851,6 +1022,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
     }
 
     public void clearTextFields() {
+        resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail, apBrowse, apDetail);
     }
