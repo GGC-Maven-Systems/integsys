@@ -684,8 +684,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                                 String.valueOf(lsDate),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).getTransactionNo()),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).Company().getCompanyName()),
-                                                String.valueOf(poController.SalesInquiryList(lnCtr).getTransactionStatus())
+                                                String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
                                         ));
+
                                     } catch (SQLException | GuanzonException ex) {
                                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                         ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
