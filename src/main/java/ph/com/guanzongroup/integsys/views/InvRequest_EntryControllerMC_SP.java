@@ -564,6 +564,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

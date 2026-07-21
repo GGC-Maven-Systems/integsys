@@ -389,11 +389,15 @@ public class InventoryStockIssuanceNeoController_ApprovalMonarch_Food implements
 
                 case "btnBrowse":
                     if (lastFocusedControl == null) {
-                        ShowMessageFX.Information(null, psFormName,
-                                "Search unavailable. Please ensure a searchable field is selected or focused before proceeding..");
-                        return;
-                    }
+                        if (!isJSONSuccess(poAppController.searchTransaction(tfSearchTransNo.getText(), true, true),
+                                "Initialize Browse Transaction")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        break;
 
+                    }
                     switch (lastFocusedControl.getId()) {
                         case "tfSearchSourceno":
                             if (!tfTransNo.getText().isEmpty()) {
@@ -422,6 +426,15 @@ public class InventoryStockIssuanceNeoController_ApprovalMonarch_Food implements
                             }
 
 //                                tfSearchTransNo.setText(poAppController.getMaster().getTransactionNo());
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        default:
+                            //Search record
+                            if (!isJSONSuccess(poAppController.searchTransaction("", true, true),
+                                    "Initialize Browse Transaction")) {
+                                return;
+                            }
                             getLoadedTransaction();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
@@ -538,9 +551,17 @@ public class InventoryStockIssuanceNeoController_ApprovalMonarch_Food implements
 
                 case "btnCancel":
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") == true) {
+                        if (poAppController.getEditMode() != EditMode.ADDNEW) {
+                            if (!isJSONSuccess(poAppController.OpenTransaction(tfTransNo.getText()),
+                                    "Initialize Open Transaction")) {
+
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        }
                         poAppController = new DeliveryIssuanceControllers(poApp, poLogWrapper).InventoryStockIssuanceNeo();
                         poAppController.setTransactionStatus("10");
-
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
                             appUnload.unloadForm(apMainAnchor, poApp, psFormName);
@@ -557,7 +578,7 @@ public class InventoryStockIssuanceNeoController_ApprovalMonarch_Food implements
                             clearAllInputs();
                         });
                         pnEditMode = poAppController.getEditMode();
-                        break;
+                        return;
                     }
                     break;
 
@@ -687,7 +708,7 @@ public class InventoryStockIssuanceNeoController_ApprovalMonarch_Food implements
                                     poAppController.getMaster().setDiscount(0.0);
                                     return;
                                 }
-                                if (discountRate > 99) {
+                                if (Double.parseDouble(tfDiscountAmount.getText()) > 99.9) {
                                     ShowMessageFX.Information(
                                             "Invalid discount amount",
                                             psFormName, null

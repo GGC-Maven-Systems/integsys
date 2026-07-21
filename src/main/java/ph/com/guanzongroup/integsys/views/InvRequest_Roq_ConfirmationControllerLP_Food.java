@@ -511,6 +511,7 @@ public class InvRequest_Roq_ConfirmationControllerLP_Food implements Initializab
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

@@ -114,7 +114,7 @@ public class InventoryStockIssuance_PostingControllerMP implements Initializable
     @FXML
     private Label lblSource, lblStatus;
     @FXML
-    private Button btnHistory, btnRetrieve, btnPost, btnClose;
+    private Button btnHistory, btnRetrieve, btnPost, btnClose, btnBrowse;
     @FXML
     private TextArea taRemarks, taNote;
     @FXML
@@ -228,6 +228,56 @@ public class InventoryStockIssuance_PostingControllerMP implements Initializable
         String lsButton = ((Button) event.getSource()).getId();
         try {
             switch (lsButton) {
+                case "btnBrowse":
+                    if (lastFocusedControl == null) {
+
+                        if (!isJSONSuccess(poAppController.searchTransactionPosting("", true, true),
+                                "Initialize Search Source! ")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        return;
+
+                    }
+                    switch (lastFocusedControl.getId()) {
+
+                        case "tfSearchSource":
+                            if (!tfTransactionNo.getText().isEmpty()) {
+                                if (ShowMessageFX.OkayCancel(null, "Search Transaction! by Transaction ", "Are you sure you want to replace loaded Transaction?") == false) {
+                                    return;
+                                }
+                            }
+                            if (!isJSONSuccess(poAppController.searchTransactionPosting(tfSearchSource.getText(), false, true),
+                                    "Initialize Search Source! ")) {
+                                return;
+                            }
+
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+
+                            return;
+
+                        case "tfSearchTransaction":
+                            if (!isJSONSuccess(poAppController.searchTransactionPosting(tfSearchTransaction.getText(), true, true),
+                                    "Initialize Search Source! ")) {
+                                return;
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            return;
+
+                        default:
+                            //Search record
+                            if (!isJSONSuccess(poAppController.searchTransactionPosting("", true, true),
+                                    "Initialize Browse Transaction")) {
+                                return;
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                    }
+                    break;
 
                 case "btnPost":
                     if (tfTransactionNo.getText().isEmpty()) {

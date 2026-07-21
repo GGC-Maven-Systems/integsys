@@ -285,11 +285,15 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
             switch (btnID) {
                 case "btnSearch":
                     if (lastFocusedControl == null) {
-                        ShowMessageFX.Information(null, psFormName,
-                                "Search unavailable. Please ensure a searchable field is selected or focused before proceeding..");
-                        return;
-                    }
+                        if (!isJSONSuccess(poAppController.searchTransaction(tfSearchTransNo.getText(), true, true),
+                                "Initialize Browse Transaction")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        break;
 
+                    }
                     switch (lastFocusedControl.getId()) {
 
                         case "tfSearchSourceno":
@@ -319,6 +323,15 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
                             }
 
 //                                tfSearchTransNo.setText(poAppController.getMaster().getTransactionNo());
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        default:
+                            //Search record
+                            if (!isJSONSuccess(poAppController.searchTransaction("", true, true),
+                                    "Initialize Browse Transaction")) {
+                                return;
+                            }
                             getLoadedTransaction();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
