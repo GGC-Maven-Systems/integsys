@@ -143,7 +143,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         clearTextFields();
         initMainGrid();
         initCheckboxes();
-        pnEditMode = poController.getEditMode();
+        pnEditMode = EditMode.UNKNOWN;
         initButton(pnEditMode);
         pgPagination.setPageCount(1);
         Platform.runLater(() -> {
@@ -421,7 +421,14 @@ public class BankApplicationController implements Initializable, ScreenInterface
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
-
+        
+        if (pnEditMode == EditMode.READY) {
+            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+            JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
+        } else {
+            disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+            JFXUtil.setDisabled(true, chckSelectAll);
+        }
         try {
             JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
@@ -633,13 +640,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 tblViewMainList,
                 main_data,
                 () -> {
+                    main_data.clear();
                     Platform.runLater(() -> {
-                        main_data.clear();
-                        JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
                         JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
                         if (poController.getSalesInquiryCount() > 0) {
-                            //pending
-                            //retreiving using column index
                             for (int lnCtr = 0; lnCtr <= poController.getSalesInquiryCount() - 1; lnCtr++) {
                                 try {
                                     String lsDate = CustomCommonUtil.formatDateToShortString(poController.SalesInquiryList(lnCtr).getTransactionDate());
@@ -971,19 +975,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
             return;
         }
         switch (poController.Master().getTransactionStatus()) {
-            case BankApplicationStatus.OPEN:
+            case SalesInquiryStatic.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnApprove, btnCancelBankApplication);
                 JFXUtil.setButtonsVisibility(false, btnDisapprove);
                 break;
-            case BankApplicationStatus.APPROVED:
+            case SalesInquiryStatic.CONFIRMED:
                 JFXUtil.setButtonsVisibility(true, btnDisapprove);
                 JFXUtil.setButtonsVisibility(false, btnApprove, btnCancelBankApplication);
                 break;
-            case BankApplicationStatus.DISAPPROVED:
-                JFXUtil.setButtonsVisibility(true, btnApprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnDisapprove, btnCancelBankApplication);
-                break;
-            case BankApplicationStatus.CANCELLED:
+            case SalesInquiryStatic.VOID:
+            case SalesInquiryStatic.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnDisapprove, btnCancelBankApplication);
                 break;
         }
