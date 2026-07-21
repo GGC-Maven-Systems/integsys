@@ -509,6 +509,7 @@ public class InvRequest_Roq_ConfirmationControllerMonarch_Food implements Initia
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

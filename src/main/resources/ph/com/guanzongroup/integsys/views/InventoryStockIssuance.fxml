@@ -360,11 +360,6 @@
                                                                                                     </rowConstraints>
                                                                                                     <children>
                                                                                     <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="6" />
-                                                                                                          <Label fx:id="lblDeliveryStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="6">
-                                                                                                              <font>
-                                                                                                                  <Font name="System Bold" size="14.0" />
-                                                                                                              </font>
-                                                                                                          </Label>
                                                                                                         <Label text="Delivery No.">
                                                                                                             <font>
                                                                                                                 <Font name="System Bold" size="14.0" />
@@ -457,6 +452,11 @@
                                                                                                                </font>
                                                                                                             </Label>
                                                                                                             <TextField fx:id="tfProjectCode" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="4" />
+                                                                                                          <Label fx:id="lblDeliveryStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="6">
+                                                                                                              <font>
+                                                                                                                  <Font name="System Bold" size="14.0" />
+                                                                                                              </font>
+                                                                                                          </Label>
                                                                                                     </children>
                                                                                                 </GridPane>
                                                                                             </children>

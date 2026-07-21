@@ -509,6 +509,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
@@ -791,7 +792,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
         }
     }
 
-   private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
+    private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
         String result = (String) loJSON.get("result");
         if ("error".equals(result)) {
             String message = (String) loJSON.get("message");

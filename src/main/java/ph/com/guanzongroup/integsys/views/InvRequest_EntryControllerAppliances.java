@@ -566,6 +566,7 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
@@ -1525,7 +1526,6 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
         btnTransHistory.setManaged(fnEditMode != EditMode.ADDNEW && fnEditMode != EditMode.UNKNOWN);
         CustomCommonUtil.setVisible(false, btnUpdate, btnVoid);
         CustomCommonUtil.setManaged(false, btnUpdate, btnVoid);
-
         if (fnEditMode == EditMode.READY) {
             switch (invRequestController.Master().getTransactionStatus()) {
                 case StockRequestStatus.OPEN:

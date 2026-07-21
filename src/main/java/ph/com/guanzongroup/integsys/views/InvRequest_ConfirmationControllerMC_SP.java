@@ -522,6 +522,7 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
@@ -1321,7 +1322,6 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
         btnTransHistory.setManaged(fnEditMode != EditMode.ADDNEW && fnEditMode != EditMode.UNKNOWN);
         CustomCommonUtil.setVisible(false, btnConfirm, btnVoid, btnUpdate);
         CustomCommonUtil.setManaged(false, btnConfirm, btnVoid, btnUpdate);
-
         if (fnEditMode == EditMode.READY) {
 
             switch (invRequestController.Master().getTransactionStatus()) {

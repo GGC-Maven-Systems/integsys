@@ -570,6 +570,7 @@ public class InvRequest_Roq_EntryController implements Initializable, ScreenInte
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

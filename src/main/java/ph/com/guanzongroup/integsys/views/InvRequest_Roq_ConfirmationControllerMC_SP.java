@@ -523,6 +523,7 @@ public class InvRequest_Roq_ConfirmationControllerMC_SP implements Initializable
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

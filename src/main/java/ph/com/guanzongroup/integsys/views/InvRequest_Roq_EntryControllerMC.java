@@ -546,6 +546,7 @@ public class InvRequest_Roq_EntryControllerMC implements Initializable, ScreenIn
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

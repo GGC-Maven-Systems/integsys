@@ -508,6 +508,7 @@ public class InvRequest_ConfirmationControllerLP_Food implements Initializable, 
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
