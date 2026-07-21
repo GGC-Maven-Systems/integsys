@@ -301,7 +301,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     loadTableDetail.reload();
                 }
                 initButton(pnEditMode);
-                initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -324,25 +323,25 @@ public class BankApplicationController implements Initializable, ScreenInterface
             List<String> list = new ArrayList<>();
             for (Object item : tblViewMainList.getItems()) {
                 ModelBankApplications_Detail item1 = (ModelBankApplications_Detail) item;
-                String lschecked = item1.getIndex02();
+                String lschecked = item1.getIndex01();
                 int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
                 if (lschecked.equals("1")) {
-                    list.add(item1.getIndex07());
+                    list.add(item1.getIndex06());
                     checkedItems.add(poController.Detail(lnReference));
                 }
             }
 
             boolean lbCondition1 = true;
-            //able to activate: open(0) & deactivated(3)
+            //able to approve: open(0) & disapproved(3)
             for (String value : list) {
-                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("3"))) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("2"))) {
                     continue;
                 }
                 lbCondition1 = false;
                 break;
             }
             boolean lbCondition2 = true;
-            //able to deactivate: open(0) & active(1)
+            //able to disapprove: open(0) & approved(1)
             for (String value : list) {
                 if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"))) {
                     continue;
@@ -351,9 +350,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 break;
             }
             boolean lbCondition3 = true;
-            //able to disapprove:  open(0) & active(1) & deactivated(3)
+            //able to cancel:  open(0) & approved(1) & disapproved(3)
             for (String value : list) {
-                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"), poController.getStatus("3"))) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"), poController.getStatus("2"))) {
                     continue;
                 }
                 lbCondition3 = false;
@@ -478,12 +477,21 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     public void loadRecordDetail() {
         try {
+            if (pnEditMode != EditMode.READY) {
+                disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
+                JFXUtil.setDisabled(true, chckSelectAll);
+                return;
+            } else {
+                disableRowCheckbox.set(false); // set true to disable the checkboxes in multiple rows
+                JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
+            }
+
             boolean lbShow1 = poController.getDetailCount() > 0;
             JFXUtil.setDisabled(!lbShow1, apDetail);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
-
             }
+
             JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
 
@@ -596,10 +604,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             // if detected unchecked then must update
                             pnMain = rowIndex;
                             Platform.runLater(() -> {
-                                loadTableMain.reload();
+                                loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
                                     if (lbisTrue) {
-                                        JFXUtil.selectAndFocusRow(tblViewMainList, rowIndex);
+                                        JFXUtil.selectAndFocusRow(tblViewDetailList, rowIndex);
                                     }
                                 });
                             });
@@ -639,6 +647,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.adjustColumnForScrollbar(tblViewDetailList); // need to use computed-size in min-width of the column to work
 
         JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelBankApplications_Main) item).getIndex01(), highlightedRowsMain);
+    }
+
+    private void checkedItems(int lnCtr) {
+        try {
+            if (checkedItem.get(lnCtr) == null) {
+                checkedItem.add("0");
+            }
+        } catch (Exception e) {
+            checkedItem.add("0");
+        }
     }
 
     public void initLoadTable() {
@@ -704,8 +722,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
                                 String lsBank = JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).Bank().getBankName(), null, "")
                                         ? "" : poController.Detail(lnCtr).Bank().getBankName();
+                                checkedItems(lnCtr);
                                 details_data.add(
-                                        new ModelBankApplications_Detail(String.valueOf(lnCtr + 1),
+                                        new ModelBankApplications_Detail(checkedItem.get(lnCtr), String.valueOf(lnCtr + 1),
                                                 String.valueOf(poController.Detail(lnCtr).getApplicationNo()),
                                                 String.valueOf(lsBank),
                                                 String.valueOf(lsAppliedDate),
@@ -983,14 +1002,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
         JFXUtil.setButtonsVisibility(false, btnApprove, btnDisapprove, btnCancelBankApplication);
         if (fnValue != EditMode.READY) {
-            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
-            JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
             return;
-        } else {
-            disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
-            JFXUtil.setDisabled(true, chckSelectAll);
         }
-
         switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnApprove, btnCancelBankApplication);
