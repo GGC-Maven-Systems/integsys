@@ -482,7 +482,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 JFXUtil.setDisabled(true, chckSelectAll);
                 return;
             } else {
-                disableRowCheckbox.set(false); // set true to disable the checkboxes in multiple rows
+                disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
                 JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
             }
 
@@ -624,6 +624,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     }
                 },
                 0);//starts 0,1,2 
+        JFXUtil.handleDisabledNodeClick(apTableDetail, pnEditMode, nodeID -> {
+            if (nodeID.equals("chckSelectAll")) {
+                if (!main_data.isEmpty()) {
+                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
+                }
+            }
+        });
     }
 
     public void initTableOnClick() {
