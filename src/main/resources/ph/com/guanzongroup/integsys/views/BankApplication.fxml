@@ -157,6 +157,17 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
+                              <Button fx:id="btnRetrieve" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="LIST_ALT" size="20" />
+                                 </graphic>
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
                               <Button fx:id="btnClose" contentDisplay="TOP" ellipsisString="" layoutX="465.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../../css/StyleSheet.css" text="Close">
                                  <effect>
                                     <Blend />
