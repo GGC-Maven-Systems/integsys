@@ -683,7 +683,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                         main_data.add(new ModelBankApplications_Main(String.valueOf(lnCtr + 1),
                                                 String.valueOf(lsDate),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).getTransactionNo()),
-                                                String.valueOf(poController.SalesInquiryList(lnCtr).Company().getCompanyName()),
+                                                String.valueOf(poController.SalesInquiryList(lnCtr).Client().getCompanyName()),
                                                 String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
                                         ));
 
