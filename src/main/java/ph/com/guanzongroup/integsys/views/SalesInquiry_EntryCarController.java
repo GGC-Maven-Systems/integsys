@@ -669,8 +669,8 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             break;
                         case 2:
                             poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).isSubmitted(lbisTrue);
+                            poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedBy(lbisTrue ? oApp.getUserID() : "");
                             try {
-                                poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedBy(lbisTrue ? poSalesInquiryController.SalesInquiry().getSysUser(oApp.getUserID(), true) : "");
                                 SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
                                 String lsDummyDate = sdfFormat.format(SQLUtil.toDate(JFXUtil.convertToIsoFormat("01/01/1900"), SQLUtil.FORMAT_SHORT_DATE));
                                 LocalDate localDate = LocalDate.parse(lsDummyDate);
@@ -678,7 +678,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 poJSON = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedDate(lbisTrue ? oApp.getServerDate() : timestamp);
                                 pnRequirements = rowIndex;
                                 loadTableRequirements.reload();
-                            } catch (SQLException | GuanzonException ex) {
+                            } catch (SQLException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                             break;
