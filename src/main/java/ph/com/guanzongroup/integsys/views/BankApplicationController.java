@@ -481,9 +481,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     public void loadRecordDetail() {
         try {
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-                return;
-            }
             if (pnEditMode != EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
                 JFXUtil.setDisabled(true, chckSelectAll);
@@ -491,6 +488,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
                 JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
+            }
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
             }
 
             boolean lbShow1 = poController.getDetailCount() > 0;
