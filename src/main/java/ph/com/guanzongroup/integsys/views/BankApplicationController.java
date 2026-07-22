@@ -502,7 +502,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
             if (pnEditMode != EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
                 JFXUtil.setDisabled(true, chckSelectAll);
-                return;
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
                 JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
@@ -520,8 +519,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
             JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
 
-            JFXUtil.setDisabled(poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW, apDetail, dpApprovedDate);
-
             boolean lbShow = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),
                     BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
             boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
@@ -538,11 +535,12 @@ public class BankApplicationController implements Initializable, ScreenInterface
             tfBank.setText(poController.Detail(pnDetail).Bank().getBankName());
             taBankAppRemarks.setText(poController.Detail(pnDetail).getRemarks());
 
-            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poController.Detail(pnDetail).getAppliedDate());
-            dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
+            String lsdpAppliedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getAppliedDate());
 
-            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poController.Detail(pnDetail).getApprovedDate());
-            dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
+            dpAppliedDate.setValue(!lsdpAppliedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd") : null);
+
+            String lsdpApprovedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getApprovedDate());
+            dpApprovedDate.setValue(!lsdpApprovedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd") : null);
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -573,6 +571,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getTransactionNo(), lsTransactionNo)) {
                     return;
                 }
+                JFXUtil.clearTextFields(apDetail);
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
@@ -740,8 +739,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 poController.ReloadDetail();
                             }
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poController.Detail(lnCtr).getAppliedDate());
-                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poController.Detail(lnCtr).getApprovedDate());
+                                String lsAppliedDate = JFXUtil.formatDateToString(poController.Detail(lnCtr).getAppliedDate());
+                                String lsApprovedDate = JFXUtil.formatDateToString(poController.Detail(lnCtr).getApprovedDate());
                                 String lsStat = ""; //default
                                 lsStat = JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
                                         pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(lnCtr).getTransactionStatus());
