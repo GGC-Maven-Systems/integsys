@@ -431,6 +431,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
     }
 
+    private String getClientType(int index) {
+        if (index >= 0 && index < ModelSalesInquiry_Detail.ClientType.size()) {
+            return ModelSalesInquiry_Detail.ClientType.get(index);
+        }
+        return "";
+    }
+
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
@@ -451,16 +458,15 @@ public class BankApplicationController implements Initializable, ScreenInterface
             tfAddress.setText(poController.Master().ClientAddress().getAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfInquiryType.setText(poController.Master().Source().getDescription());
-
             taRemarks.setText(poController.Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
 
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poController.Master().getPurchaseType()));
                 if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-//                    tfClientType.setText(String.valueOf(Integer.parseInt(poController.Master().Client().getClientType())));
+                    tfClientType.setText(getClientType(Integer.parseInt(poController.Master().Client().getClientType())));
                 } else {
-                    tfClientType.setText(String.valueOf(Integer.parseInt(poController.Master().getClientType())));
+                    tfClientType.setText(getClientType(Integer.parseInt(poController.Master().getClientType())));
                 }
             } else {
                 cmbPurchaseType.getSelectionModel().select(0);
@@ -951,6 +957,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 //                                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
 //                                        break;
 //                                    }
+                                loadTableDetail.reload();
                                 pbPurchaseTypeChanged = true;
                             }
                         }
@@ -1013,8 +1020,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail);
+        JFXUtil.setDisabled(!lbShow, taRemarks, apDetail);
 
+        JFXUtil.setDisabledExcept(true, apMaster, cmbPurchaseType);
+        JFXUtil.setDisabled(!lbShow, cmbPurchaseType);
         JFXUtil.setButtonsVisibility(false, btnApprove, btnDisapprove, btnCancelBankApplication);
         if (fnValue != EditMode.READY) {
             return;
