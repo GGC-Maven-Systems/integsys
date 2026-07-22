@@ -321,7 +321,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
             }
             checkedItems.clear();
             List<String> list = new ArrayList<>();
-            for (Object item : tblViewMainList.getItems()) {
+            for (Object item : tblViewDetailList.getItems()) {
                 ModelBankApplications_Detail item1 = (ModelBankApplications_Detail) item;
                 String lschecked = item1.getIndex01();
                 int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
@@ -438,12 +438,26 @@ public class BankApplicationController implements Initializable, ScreenInterface
         return "";
     }
 
+    private String getCategoryType(int index) {
+        if (index >= 0 && index < ModelSalesInquiry_Detail.CategoryType.size()) {
+            return ModelSalesInquiry_Detail.CategoryType.get(index);
+        }
+        return "";
+    }
+
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-
+            switch (poController.Master().getInquiryStatus()) {
+                case "0":
+                    tfInquiryStatus.setText("OPEN");
+                    break;
+                default:
+                    tfInquiryStatus.setText("");
+                    break;
+            }
             // Transaction Date
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = CustomCommonUtil.formatDateToShortString(poController.Master().getTransactionDate());
@@ -468,8 +482,12 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 } else {
                     tfClientType.setText(getClientType(Integer.parseInt(poController.Master().getClientType())));
                 }
+                if (poController.Master().getCategoryType() != null && !"".equals(poController.Master().getCategoryType())) {
+                    tfCategoryType.setText(getCategoryType(Integer.parseInt(poController.Master().getCategoryType())));
+                }
             } else {
                 cmbPurchaseType.getSelectionModel().select(0);
+                tfCategoryType.setText(getCategoryType(0));
             }
 
             JFXUtil.updateCaretPositions(apMaster);
@@ -631,13 +649,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     }
                 },
                 0);//starts 0,1,2 
-        JFXUtil.handleDisabledNodeClick(apTableDetail, pnEditMode, nodeID -> {
-            if (nodeID.equals("chckSelectAll")) {
-                if (!main_data.isEmpty()) {
-                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                }
-            }
-        });
     }
 
     public void initTableOnClick() {
@@ -998,6 +1009,22 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail);
         JFXUtil.setDisabled(oApp.getUserLevel() <= UserRight.ENCODER, tfSalesPerson);
+
+        JFXUtil.handleDisabledNodeClick(apTableDetail, pnEditMode, nodeID -> {
+            if (nodeID.equals("chckSelectAll")) {
+                if (!main_data.isEmpty()) {
+                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
+                }
+            }
+        });
+        JFXUtil.handleDisabledNodeClick(apMaster, pnEditMode, nodeID -> {
+            if (JFXUtil.isObjectEqualTo(nodeID, "cmbPurchaseType", "lblStatus")) {
+            } else {
+                if (pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                    ShowMessageFX.Information(null, pxeModuleName, "Only Purchase Type can be changed.");
+                }
+            }
+        });
     }
 
     private boolean hasValidDetail() {
