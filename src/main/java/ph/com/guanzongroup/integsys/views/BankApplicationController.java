@@ -225,7 +225,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             poController.Master().setIndustryId(psIndustryId);
                             poController.Master().setCompanyId(psCompanyId);
                             poController.Master().setCategoryCode(psCategoryId);
-//                            poController.initFields();
+                            poController.initFields();
                             pnEditMode = EditMode.UNKNOWN;
 
                             break;
@@ -332,27 +332,27 @@ public class BankApplicationController implements Initializable, ScreenInterface
             }
 
             boolean lbCondition1 = true;
-            //able to approve: open(0) & disapproved(3)
+            //able to approve: open(0) & void(3)
             for (String value : list) {
-                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("2"))) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("3"))) {
                     continue;
                 }
                 lbCondition1 = false;
                 break;
             }
             boolean lbCondition2 = true;
-            //able to disapprove: open(0) & approved(1)
+            //able to disapprove: open(0)
             for (String value : list) {
-                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"))) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"))) {
                     continue;
                 }
                 lbCondition2 = false;
                 break;
             }
             boolean lbCondition3 = true;
-            //able to cancel:  open(0) & approved(1) & disapproved(3)
+            //able to cancel:   approved(1) 
             for (String value : list) {
-                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("0"), poController.getStatus("1"), poController.getStatus("2"))) {
+                if (JFXUtil.isObjectEqualTo(value, poController.getStatus("1"))) {
                     continue;
                 }
                 lbCondition3 = false;
@@ -955,10 +955,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         poController.Master().setPurchaseType(String.valueOf(selectedIndex));
                     }
                     break;
-//                    case "cmbCategoryType":
-//                        poController.Master().setCategoryType(String.valueOf(selectedIndex));
-//                        break;
-
                 default:
                     System.out.println("Unrecognized ComboBox ID: " + cbId);
                     break;
