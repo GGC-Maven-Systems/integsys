@@ -475,6 +475,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     public void loadRecordDetail() {
         try {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
             if (pnEditMode != EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
                 JFXUtil.setDisabled(true, chckSelectAll);
@@ -990,6 +993,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setDisabled(oApp.getUserLevel() <= UserRight.ENCODER, tfSalesPerson);
     }
 
+    private boolean hasValidDetail() {
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return false;
+        }
+        if (JFXUtil.isObjectEqualTo(poController.Detail(0).getBankId(), null, "")) {
+            return false;
+        }
+        return true;
+    }
+
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
@@ -1008,11 +1021,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
         switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.OPEN:
-                JFXUtil.setButtonsVisibility(!details_data.isEmpty(), btnApprove, btnCancelBankApplication);
+                JFXUtil.setButtonsVisibility(hasValidDetail(), btnApprove, btnCancelBankApplication);
                 JFXUtil.setButtonsVisibility(false, btnDisapprove);
                 break;
             case SalesInquiryStatic.CONFIRMED:
-                JFXUtil.setButtonsVisibility(!details_data.isEmpty(), btnDisapprove);
+                JFXUtil.setButtonsVisibility(hasValidDetail(), btnDisapprove);
                 JFXUtil.setButtonsVisibility(false, btnApprove, btnCancelBankApplication);
                 break;
             case SalesInquiryStatic.VOID:
