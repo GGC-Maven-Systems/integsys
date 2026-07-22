@@ -90,23 +90,23 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
     private boolean pbEntered = false;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements, apBankApplications, apBankApplicationsButtons;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements;//, apBankApplications, apBankApplicationsButtons;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryStatus, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy, tfPaymentMode, tfApplicationNo, tfBank;
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryStatus, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy;//, tfPaymentMode, tfApplicationNo, tfBank;
     @FXML
-    private Label lblSource, lblStatus, lblBankApplicationStatus;
+    private Label lblSource, lblStatus;//, lblBankApplicationStatus;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnHistory, btnClose, btnApprove, btnDisApprove, btnCancelApplication;
+    private Button btnBrowse, btnHistory, btnClose;//, btnApprove, btnDisApprove, btnCancelApplication;
     @FXML
     private TabPane tabpane;
     @FXML
-    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate, dpAppliedDate, dpApprovedDate;
+    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;//, dpAppliedDate, dpApprovedDate;
     @FXML
     private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup;
     @FXML
-    private TextArea taRemarks, taBankAppRemarks;
+    private TextArea taRemarks;//, taBankAppRemarks;
     @FXML
     private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications;
     @FXML
@@ -245,7 +245,7 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
                         loadTableRequirements.reload();
                         break;
                     case "Bank Applications":
-                        JFXUtil.clearTextFields(apBankApplications);
+//                        JFXUtil.clearTextFields(apBankApplications);
                         loadTableBankApplications.reload();
                         break;
                 }
@@ -370,49 +370,49 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
         }
     }
 
-    public void loadRecordBankApplications() {
-        try {
-            boolean lbShow1 = poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0;
-            if (pnBankApplications < 0 || pnBankApplications > poSalesInquiryController.SalesInquiry().getBankApplicationsCount() - 1) {
-                return;
-            }
-            Platform.runLater(() -> {
-                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblBankApplicationStatus.setText(lsStat);
-            });
-
-            boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus(),
-                    BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
-            boolean lbShow2 = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getEditMode(), EditMode.UPDATE);
-            JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
-
-            String lsPaymentMode = "";
-            if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode(), null, "")) {
-                lsPaymentMode = PurchaseType.get(Integer.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode()));
-            } else {
-                lsPaymentMode = "";
-            }
-            tfPaymentMode.setText(lsPaymentMode);
-            tfApplicationNo.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApplicationNo());
-            tfBank.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).Bank().getBankName());
-            taBankAppRemarks.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getRemarks());
-
-            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getAppliedDate());
-            dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
-
-            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApprovedDate());
-            dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
-            JFXUtil.updateCaretPositions(apBankApplications);
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-        }
-    }
+//    public void loadRecordBankApplications() {
+//        try {
+//            boolean lbShow1 = poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0;
+//            if (pnBankApplications < 0 || pnBankApplications > poSalesInquiryController.SalesInquiry().getBankApplicationsCount() - 1) {
+//                return;
+//            }
+//            Platform.runLater(() -> {
+//                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus();
+//                Map<String, String> statusMap = new HashMap<>();
+//                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
+//                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
+//                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
+//                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
+//                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
+//                lblBankApplicationStatus.setText(lsStat);
+//            });
+//
+//            boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus(),
+//                    BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
+//            boolean lbShow2 = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getEditMode(), EditMode.UPDATE);
+//            JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
+//
+//            String lsPaymentMode = "";
+//            if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode(), null, "")) {
+//                lsPaymentMode = PurchaseType.get(Integer.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode()));
+//            } else {
+//                lsPaymentMode = "";
+//            }
+//            tfPaymentMode.setText(lsPaymentMode);
+//            tfApplicationNo.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApplicationNo());
+//            tfBank.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).Bank().getBankName());
+//            taBankAppRemarks.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getRemarks());
+//
+//            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getAppliedDate());
+//            dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
+//
+//            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApprovedDate());
+//            dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
+//            JFXUtil.updateCaretPositions(apBankApplications);
+//        } catch (SQLException | GuanzonException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+//        }
+//    }
 
     private void tableKeyEvents(KeyEvent event) {
         if (details_data.size() > 0) {
@@ -442,7 +442,7 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
                         break;
                     case "tblViewBankApplications":
                         pnBankApplications = index;
-                        loadRecordBankApplications();
+//                        loadRecordBankApplications();
                         break;
                 }
                 event.consume();
@@ -467,14 +467,14 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
                 }
             }
         });
-        tblViewBankApplications.setOnMouseClicked(event -> {
-            if (bankapplications_data.size() > 0) {
-                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-                    loadRecordBankApplications();
-                }
-            }
-        });
+//        tblViewBankApplications.setOnMouseClicked(event -> {
+//            if (bankapplications_data.size() > 0) {
+//                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
+//                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
+//                    loadRecordBankApplications();
+//                }
+//            }
+//        });
         JFXUtil.setKeyEventFilter(this::tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications);
         JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications);  // need to use computed-size in min-width of the column to work
         JFXUtil.addCheckboxColumns(ModelRequirements_Detail.class, tblViewRequirements, disableRowCheckbox,
@@ -636,20 +636,20 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
                                         )
                                 );
                             }
-                            if (pnBankApplications < 0 || pnBankApplications
-                                    >= bankapplications_data.size()) {
-                                if (!bankapplications_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewBankApplications, 0);
-                                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-
-                                }
-                                loadRecordBankApplications();
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                JFXUtil.selectAndFocusRow(tblViewBankApplications, pnBankApplications);
-                                loadRecordBankApplications();
-                            }
+//                            if (pnBankApplications < 0 || pnBankApplications
+//                                    >= bankapplications_data.size()) {
+//                                if (!bankapplications_data.isEmpty()) {
+//                                    /* FOCUS ON FIRST ROW */
+//                                    JFXUtil.selectAndFocusRow(tblViewBankApplications, 0);
+//                                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
+//
+//                                }
+//                                loadRecordBankApplications();
+//                            } else {
+//                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+//                                JFXUtil.selectAndFocusRow(tblViewBankApplications, pnBankApplications);
+//                                loadRecordBankApplications();
+//                            }
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                         }
@@ -772,7 +772,7 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
         JFXUtil.setButtonsVisibility(lbShow2, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(true, taRemarks, apMaster, apDetail, apRequirements, apBankApplications, apBankApplicationsButtons);
+        JFXUtil.setDisabled(true, taRemarks, apMaster, apDetail, apRequirements);//, apBankApplications, apBankApplicationsButtons);
     }
 
     public void initDetailsGrid() {
