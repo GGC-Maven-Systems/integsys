@@ -695,8 +695,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 () -> {
                     try {
                         Thread.sleep(100);
-                        main_data.clear();
                         Platform.runLater(() -> {
+                            main_data.clear();
                             JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
                             if (poController.getSalesInquiryCount() > 0) {
                                 for (int lnCtr = 0; lnCtr <= poController.getSalesInquiryCount() - 1; lnCtr++) {
