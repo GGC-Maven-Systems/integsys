@@ -58,6 +58,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Pagination;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
@@ -418,9 +419,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
             }
 //            poController.populateDetail();
             pnEditMode = poController.getEditMode();
-        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
+        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }
 
     private void resetCheckboxSelection() {
