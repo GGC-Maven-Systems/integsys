@@ -393,7 +393,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     break;
                 case "btnCancelBankApplication":
                     if (!lbCondition3 && lbMoreThanOne && !lbAllSame) {
-                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + "cancel"+ " records due to statuses.");
                         return;
                     }
                     poJSON = poController.CancelBankApplication("", checkedItems);
