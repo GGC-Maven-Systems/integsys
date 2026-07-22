@@ -393,7 +393,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     break;
                 case "btnCancelBankApplication":
                     if (!lbCondition3 && lbMoreThanOne && !lbAllSame) {
-                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + "cancel"+ " records due to statuses.");
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + "cancel" + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.CancelBankApplication("", checkedItems);
@@ -567,6 +567,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     return;
                 }
                 JFXUtil.clearTextFields(apDetail);
+                resetCheckboxSelection();
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
@@ -605,7 +606,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             checkedItem.set(lnCtr, "0");
                         }
                     }
-                    loadTableMain.reload();
+                    loadTableDetail.reload();
                     break;
             }
         }
