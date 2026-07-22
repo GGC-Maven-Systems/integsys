@@ -155,7 +155,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
             poController.setCategoryId(psCategoryId);
             poController.setWithUI(true);
             loadRecordSearch();
-
+            poController.setTransactionStatus("0124");
         });
         JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
     }
