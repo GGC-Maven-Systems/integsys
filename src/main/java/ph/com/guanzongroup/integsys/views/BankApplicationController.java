@@ -290,7 +290,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         break;
                 }
 
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVerify", "btnApprove", "btnDisapprove", "btnCancelBankApplication")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVerify")) {
                     poController.Detail().clear();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
@@ -506,12 +506,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
                 JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
             }
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-                return;
-            }
 
-            boolean lbShow1 = poController.getDetailCount() > 0;
-            JFXUtil.setDisabled(!lbShow1, apDetail);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }

@@ -2211,12 +2211,12 @@ public class JFXUtil {
         ChangeListener<Number> styleUpdater = (obs, oldVal, newVal) -> {
             boolean isTransparent = backgroundOpacity.get() < 0.999;
             button.setStyle(baseStyle + String.format(Locale.US,
-                " -fx-background-color: rgba(%d,%d,%d,%.3f); -fx-text-fill: %s;",
-                red,
-                green,
-                blue,
-                backgroundOpacity.get(),
-                isTransparent ? String.format(Locale.US, "rgba(%d,%d,%d,1.000)", red, green, blue) : "rgba(255,255,255,1.000)"
+                    " -fx-background-color: rgba(%d,%d,%d,%.3f); -fx-text-fill: %s;",
+                    red,
+                    green,
+                    blue,
+                    backgroundOpacity.get(),
+                    isTransparent ? String.format(Locale.US, "rgba(%d,%d,%d,1.000)", red, green, blue) : "rgba(255,255,255,1.000)"
             ));
         };
         backgroundOpacity.addListener(styleUpdater);
@@ -2756,9 +2756,9 @@ public class JFXUtil {
             TriConsumer<T, Integer, Integer, Boolean> onChange,
             int... columnIndexes) {
         addCheckboxColumns(modelClass, table, disableAll, onChange, null, columnIndexes);
-        }
+    }
 
-        public static <T> void addCheckboxColumns(
+    public static <T> void addCheckboxColumns(
             Class<T> modelClass,
             TableView<T> table,
             BooleanProperty disableAll,
@@ -3772,7 +3772,7 @@ public class JFXUtil {
         });
     }
     /*Reserved values for cmdButton purposes*/
-    public static String[] buttonPackArray1 = {"btnSave", "btnCancel", "btnApprove", "btnDisapprove", "btnVoid", "btnConfirm", "btnPost"};
+    public static String[] buttonPackArray1 = {"btnSave", "btnCancel", "btnApprove", "btnDisapprove", "btnVoid", "btnConfirm", "btnPost", "btnActivate", "btnDeactivate"};
     public static String[] buttonPackArray2 = {"btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory", "btnPrint", "btnRemoveAttachment", "btnAddAttachment"};
 
     /*Detects if a string is pure number*/
@@ -3837,7 +3837,7 @@ public class JFXUtil {
         return calendar.getTime();
     }
 
-    //For combobox two basis value
+    //For combobox when basis value are two
     public static class Status {
 
         private final String code;
@@ -3860,5 +3860,14 @@ public class JFXUtil {
         public String toString() {
             return description; // what ComboBox displays
         }
+    }
+
+    public static String formatDateToString(Date foDateValue) {
+        if (foDateValue == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(foDateValue);
     }
 }
