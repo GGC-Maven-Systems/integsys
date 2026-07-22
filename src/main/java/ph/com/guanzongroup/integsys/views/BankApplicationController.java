@@ -304,6 +304,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 } else {
                     loadTableDetail.reload();
                 }
+                JFXUtil.runWithDelay(.5, () -> {
+                    if (lsButton.equals("btnUpdate")) {
+                        moveNextBankApplications(false, false);
+                    }
+                });
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
@@ -842,13 +847,14 @@ public class BankApplicationController implements Initializable, ScreenInterface
         try {
             Object source = event.getSource();
             TextField txtField = null;
+            TextArea txtArea = null;
             String lsID = "", lsValue = "";
             if (source instanceof TextField) {
                 txtField = (TextField) source;
                 lsID = (((TextField) event.getSource()).getId());
                 lsValue = (txtField.getText() == null ? "" : txtField.getText());
             } else if (source instanceof TextArea) {
-                TextArea txtArea = (TextArea) source;
+                txtArea = (TextArea) source;
                 lsID = (((TextArea) event.getSource()).getId());
             }
 
@@ -859,6 +865,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     pbEntered = true;
                     if (source instanceof TextField) {
                         CommonUtils.SetNextFocus(txtField);
+                    } else if (source instanceof TextArea) {
+                        CommonUtils.SetNextFocus(txtArea);
                     }
                     event.consume();
                     break;
