@@ -459,14 +459,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-            switch (poController.Master().getInquiryStatus()) {
-                case "0":
-                    tfInquiryStatus.setText("OPEN");
-                    break;
-                default:
-                    tfInquiryStatus.setText("");
-                    break;
-            }
+            tfInquiryStatus.setText(poController.getStatus(poController.Master().getInquiryStatus()));
+
             // Transaction Date
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = CustomCommonUtil.formatDateToShortString(poController.Master().getTransactionDate());
