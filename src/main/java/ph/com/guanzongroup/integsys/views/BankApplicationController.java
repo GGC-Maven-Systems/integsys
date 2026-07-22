@@ -281,9 +281,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         }
                         break;
                     case "btnApprove":
+                        processAction("approve");
+                        break;
                     case "btnDispprove":
+                        processAction("disapprove");
+                        break;
                     case "btnCancelBankApplication":
-                        processAction(lsButton);
+                        processAction("cancel");
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -309,7 +313,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     private void processAction(String action) {
         try {
-            String lsMessage = action.startsWith("btn") ? Character.toLowerCase(action.charAt(3)) + action.substring(4) : "";
+            String lsMessage = action;
 
             if (checkedItem.stream().anyMatch("1"::equals)) {
             } else {
@@ -377,23 +381,23 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
             boolean lbMoreThanOne = checkedItems.size() > 1;
             switch (action) {
-                case "btnApprove":
+                case "approve":
                     if (!lbCondition1 && lbMoreThanOne && !lbAllSame) {
                         ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.ApproveBankApplication("", checkedItems);
                     break;
-                case "btnDispprove":
+                case "dispprove":
                     if (!lbCondition2 && lbMoreThanOne && !lbAllSame) {
                         ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.DisapproveBankApplication("", checkedItems);
                     break;
-                case "btnCancelBankApplication":
+                case "cancel":
                     if (!lbCondition3 && lbMoreThanOne && !lbAllSame) {
-                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + "cancel" + " records due to statuses.");
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.CancelBankApplication("", checkedItems);
@@ -827,28 +831,42 @@ public class BankApplicationController implements Initializable, ScreenInterface
             tfApplicationNo.requestFocus();
         } else if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getBankId(), null, "")) {
             tfBank.requestFocus();
+        } else if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRemarks(), null, "")) {
+            taBankAppRemarks.requestFocus();
         } else {
-            tfApplicationNo.requestFocus();
+            taBankAppRemarks.requestFocus();
         }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
-            TextField txtField = (TextField) event.getSource();
-            String lsID = (((TextField) event.getSource()).getId());
-            String lsValue = (txtField.getText() == null ? "" : txtField.getText());
+            Object source = event.getSource();
+            TextField txtField = null;
+            String lsID = "", lsValue = "";
+            if (source instanceof TextField) {
+                txtField = (TextField) source;
+                lsID = (((TextField) event.getSource()).getId());
+                lsValue = (txtField.getText() == null ? "" : txtField.getText());
+            } else if (source instanceof TextArea) {
+                TextArea txtArea = (TextArea) source;
+                lsID = (((TextArea) event.getSource()).getId());
+            }
+
             poJSON = new JSONObject();
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
                     pbEntered = true;
-                    CommonUtils.SetNextFocus(txtField);
+                    if (source instanceof TextField) {
+                        CommonUtils.SetNextFocus(txtField);
+                    }
                     event.consume();
                     break;
                 case UP:
                     switch (lsID) {
                         case "tfApplicationNo":
                         case "tfBank":
+                        case "taBankAppRemarks":
                             moveNextBankApplications(true, true);
                             event.consume();
                             break;
@@ -858,6 +876,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     switch (lsID) {
                         case "tfApplicationNo":
                         case "tfBank":
+                        case "taBankAppRemarks":
                             moveNextBankApplications(false, true);
                             event.consume();
                             break;
@@ -873,6 +892,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfBank.setText("");
                                 break;
+                            } else {
+                                JFXUtil.textFieldMoveNext(taBankAppRemarks);
                             }
                             loadTableDetail.reload();
                             break;
@@ -1003,6 +1024,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setFocusListener(txtDetail_Focus, tfApplicationNo, tfBank);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail);
+        taBankAppRemarks.setOnKeyPressed(this::txtField_KeyPressed);
         JFXUtil.setDisabled(oApp.getUserLevel() <= UserRight.ENCODER, tfSalesPerson);
 
         JFXUtil.handleDisabledNodeClick(apTableDetail, pnEditMode, nodeID -> {
@@ -1052,25 +1074,15 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
         switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.OPEN:
-                JFXUtil.setButtonsVisibility(hasValidDetail(), btnApprove, btnCancelBankApplication);
-                JFXUtil.setButtonsVisibility(false, btnDisapprove);
-                break;
             case SalesInquiryStatic.CONFIRMED:
-                JFXUtil.setButtonsVisibility(hasValidDetail(), btnDisapprove);
-                JFXUtil.setButtonsVisibility(false, btnApprove, btnCancelBankApplication);
+                JFXUtil.setButtonsVisibility(hasValidDetail(), btnApprove, btnDisapprove, btnCancelBankApplication);
                 break;
             case SalesInquiryStatic.VOID:
-            case SalesInquiryStatic.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnDisapprove, btnCancelBankApplication);
-                break;
-        }
-        switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.QUOTED:
             case SalesInquiryStatic.SALE:
             case SalesInquiryStatic.LOST:
-            case SalesInquiryStatic.VOID:
             case SalesInquiryStatic.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnDisapprove, btnCancelBankApplication);
                 break;
         }
     }
