@@ -434,10 +434,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
-
         try {
-            JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class,
-                    pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
+            JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
 
             // Transaction Date
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -448,10 +446,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
             tfBranch.setText(poController.Master().Branch().getBranchName());
             tfSalesPerson.setText(poController.Master().SalesPerson().getFullName());
-//            tfReferralAgent.setText(poController.Master().ReferralAgent().getCompanyName());
-//            tfClient.setText(poController.Master().Client().getCompanyName());
-//            tfAddress.setText(poController.Master().ClientAddress().getAddress());
-//            tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
+            tfReferralAgent.setText(poController.Master().ReferralAgent().getCompanyName());
+            tfClient.setText(poController.Master().Client().getCompanyName());
+            tfAddress.setText(poController.Master().ClientAddress().getAddress());
+            tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfInquiryType.setText(poController.Master().Source().getDescription());
 
             taRemarks.setText(poController.Master().getRemarks());
@@ -1014,11 +1012,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
         }
         switch (poController.Master().getTransactionStatus()) {
             case SalesInquiryStatic.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnApprove, btnCancelBankApplication);
+                JFXUtil.setButtonsVisibility(!details_data.isEmpty(), btnApprove, btnCancelBankApplication);
                 JFXUtil.setButtonsVisibility(false, btnDisapprove);
                 break;
             case SalesInquiryStatic.CONFIRMED:
-                JFXUtil.setButtonsVisibility(true, btnDisapprove);
+                JFXUtil.setButtonsVisibility(!details_data.isEmpty(), btnDisapprove);
                 JFXUtil.setButtonsVisibility(false, btnApprove, btnCancelBankApplication);
                 break;
             case SalesInquiryStatic.VOID:
