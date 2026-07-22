@@ -459,7 +459,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, SalesInquiryStatic.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-            tfInquiryStatus.setText(poController.getStatus(poController.Master().getInquiryStatus()));
+            tfInquiryStatus.setText(poController.getInquiryStatus(poController.Master().getInquiryStatus()));
 
             // Transaction Date
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -700,7 +700,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                                 String.valueOf(lsDate),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).getTransactionNo()),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).Client().getCompanyName()),
-                                                String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
+                                                String.valueOf(poController.getInquiryStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
                                         ));
 
                                     } catch (SQLException | GuanzonException ex) {
