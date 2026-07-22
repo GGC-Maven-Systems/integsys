@@ -281,9 +281,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         }
                         break;
                     case "btnApprove":
+                        processAction("approve");
+                        break;
                     case "btnDispprove":
+                        processAction("disapprove");
+                        break;
                     case "btnCancelBankApplication":
-                        processAction(lsButton);
+                        processAction("cancel");
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -309,7 +313,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
     private void processAction(String action) {
         try {
-            String lsMessage = action.startsWith("btn") ? Character.toLowerCase(action.charAt(3)) + action.substring(4) : "";
+            String lsMessage = action;
 
             if (checkedItem.stream().anyMatch("1"::equals)) {
             } else {
@@ -377,23 +381,23 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
             boolean lbMoreThanOne = checkedItems.size() > 1;
             switch (action) {
-                case "btnApprove":
+                case "approve":
                     if (!lbCondition1 && lbMoreThanOne && !lbAllSame) {
                         ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.ApproveBankApplication("", checkedItems);
                     break;
-                case "btnDispprove":
+                case "dispprove":
                     if (!lbCondition2 && lbMoreThanOne && !lbAllSame) {
                         ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.DisapproveBankApplication("", checkedItems);
                     break;
-                case "btnCancelBankApplication":
+                case "cancel":
                     if (!lbCondition3 && lbMoreThanOne && !lbAllSame) {
-                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + "cancel" + " records due to statuses.");
+                        ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
                     }
                     poJSON = poController.CancelBankApplication("", checkedItems);
