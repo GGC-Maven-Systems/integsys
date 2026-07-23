@@ -235,12 +235,12 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         }
                     case "btnHistory":
                         if (poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE) {
-                            ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
 
                         try {
-//                            poController.ShowStatusHistory(pnMain);
+                            poController.ShowStatusHistory(pnDetail);
                         } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
                             ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
@@ -524,17 +524,23 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 return;
             }
             
-            JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
-                    pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
+            if(pnEditMode == EditMode.UPDATE){
+                JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
+                        pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
 
-            boolean lbShow = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),
-                    BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
-            boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
-            JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
-            JFXUtil.setDisabled(lbShow, tfApplicationNo,taBankAppRemarks, dpAppliedDate);
-
-            JFXUtil.setDisabled((!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),BankApplicationStatus.OPEN) && pnEditMode != EditMode.READY), dpApprovedDate);
-
+                boolean lbShow = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),
+                        BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
+                boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
+                JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
+                JFXUtil.setDisabled(lbShow, tfApplicationNo,taBankAppRemarks, dpAppliedDate);
+                JFXUtil.setDisabled(true, dpApprovedDate);
+            } else {
+                JFXUtil.setDisabled(true, tfApplicationNo,taBankAppRemarks, tfBank,dpAppliedDate, dpApprovedDate);
+                if(pnEditMode == EditMode.READY){
+                    JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),BankApplicationStatus.OPEN), dpApprovedDate);
+                }
+            }
+            
             String lsPaymentMode = "";
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentMode(), null, "")) {
                 lsPaymentMode = PurchaseType.get(Integer.valueOf(poController.Detail(pnDetail).getPaymentMode()));
@@ -1098,7 +1104,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow, taRemarks, apDetail);
+        JFXUtil.setDisabled(!lbShow, taRemarks); //apDetail
 
         JFXUtil.setDisabledExcept(true, apMaster, cmbPurchaseType);
         JFXUtil.setDisabled(!lbShow, cmbPurchaseType);
