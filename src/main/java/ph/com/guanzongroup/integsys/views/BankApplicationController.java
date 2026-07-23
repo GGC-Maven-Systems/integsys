@@ -220,7 +220,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
                             //Clear data
                             JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
-                            poController.Detail().clear();
+                            poController.InitTransaction();
                             clearTextFields();
 
                             poController.Master().setIndustryId(psIndustryId);
@@ -284,12 +284,12 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     case "btnApprove":
                         processAction("approve");
                         break;
-                    case "btnDispprove":
+                    case "btnDisapprove":
                         processAction("disapprove");
                         break;
                     case "btnCancelBankApplication":
                         processAction("cancel");
-                        break;
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -394,7 +394,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     }
                     poJSON = poController.ApproveBankApplication("", checkedItems);
                     break;
-                case "dispprove":
+                case "disapprove":
                     if (!lbCondition2 && lbMoreThanOne && !lbAllSame) {
                         ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously " + lsMessage + " records due to statuses.");
                         return;
@@ -417,8 +417,17 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                 resetCheckboxSelection();
             }
-//            poController.populateDetail();
+            poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+            if ("error".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                return;
+            }
+            
+            Platform.runLater(() -> {
+                loadTableDetail.reload();
+            });
             pnEditMode = poController.getEditMode();
+            initButton(pnEditMode);
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } 
@@ -505,16 +514,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
         try {
             if (pnEditMode != EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-                JFXUtil.setDisabled(true, chckSelectAll);
+                JFXUtil.setDisabled(true, chckSelectAll,dpApprovedDate);
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-                JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
+                JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);          
             }
 
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-
+            
             JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
 
@@ -522,6 +531,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
             boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
             JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
+            JFXUtil.setDisabled(lbShow, tfApplicationNo,taBankAppRemarks, dpAppliedDate);
+
+            JFXUtil.setDisabled((!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),BankApplicationStatus.OPEN) && pnEditMode != EditMode.READY), dpApprovedDate);
 
             String lsPaymentMode = "";
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentMode(), null, "")) {
@@ -978,18 +990,37 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 break;
                             }
-
-                            if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                    "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Bank Applications list.\n\nDo you wish to proceed?") == true) {
-                                poController.Master().setPurchaseType(String.valueOf(selectedIndex));
-                                poController.Detail().clear();
-//                                    if ("error".equals((String) poJSON.get("result"))) {
-//                                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                        break;
-//                                    }
-                                loadTableDetail.reload();
-                                pbPurchaseTypeChanged = true;
+                            
+                            boolean lbcheck = false;
+                            for(int lnRow = 0; lnRow <= poController.getDetailCount() - 1; lnRow++){
+                                if(poController.Detail(lnRow).getEditMode() == EditMode.ADDNEW){
+                                    lbcheck = poController.Detail(lnRow).getBankId() != null && !"".equals(poController.Detail(lnRow).getBankId());
+                                    if(lbcheck){
+                                        break;
+                                    }
+                                }
                             }
+                            
+                            if(lbcheck){
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the unsaved Bank Applications list.\n\nDo you wish to proceed?") == true) {
+                                    
+                                    int lnCtr = poController.getDetailCount() - 1;
+                                    while (lnCtr >= 0) {
+                                        if(poController.Detail(lnCtr).getEditMode() == EditMode.ADDNEW){
+                                            poController.Detail().remove(lnCtr);
+                                        }
+                                        lnCtr--;
+                                    }
+                                    
+                                    poController.Master().setPurchaseType(String.valueOf(selectedIndex));
+                                }
+                            } else {
+                                poController.Master().setPurchaseType(String.valueOf(selectedIndex));
+                            }
+                            
+                            loadTableDetail.reload();
+                            pbPurchaseTypeChanged = true;
                         }
                     } else {
                         poController.Master().setPurchaseType(String.valueOf(selectedIndex));
