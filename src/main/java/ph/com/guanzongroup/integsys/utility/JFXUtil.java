@@ -147,7 +147,7 @@ import static ph.com.guanzongroup.integsys.GUI.oApp;
 import ph.com.guanzongroup.integsys.views.ScreenInterface;
 
 /**
- * Date : 4/28/2025 Recent update: 06/03/2026
+ * Date : 4/28/2025 Recent update: 07/24/2026
  *
  * @author Aldrich
  */
@@ -3869,5 +3869,17 @@ public class JFXUtil {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(foDateValue);
+    }
+
+    public boolean areAllDisabled(Node... nodes) {
+        if (nodes == null || nodes.length == 0) {
+            return false;
+        }
+        for (Node node : nodes) {
+            if (node == null || !node.isDisable()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
