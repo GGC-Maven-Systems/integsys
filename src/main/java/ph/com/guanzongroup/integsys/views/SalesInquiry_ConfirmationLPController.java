@@ -297,7 +297,16 @@ public class SalesInquiry_ConfirmationLPController implements Initializable, Scr
                         break;
                     case "btnVoid":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to void transaction?") == true) {
+                        String lsStat = "";
+                        switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
+                            case SalesInquiryStatic.OPEN:
+                                lsStat = "void";
+                                break;
+                            case SalesInquiryStatic.CONFIRMED:
+                                lsStat = "cancel";
+                                break;
+                        }
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to "+lsStat+" transaction?") == true) {
                             if (SalesInquiryStatic.CONFIRMED.equals(poSalesInquiryController.SalesInquiry().Master().getTransactionStatus())) {
                                 poJSON = poSalesInquiryController.SalesInquiry().CancelTransaction("");
                             } else {
@@ -751,6 +760,15 @@ public class SalesInquiry_ConfirmationLPController implements Initializable, Scr
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
                 lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
+
+                switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
+                    case SalesInquiryStatic.OPEN:
+                        btnVoid.setText("Void");
+                        break;
+                    case SalesInquiryStatic.CONFIRMED:
+                        btnVoid.setText("Cancel");
+                        break;
+                }
 
             });
 
