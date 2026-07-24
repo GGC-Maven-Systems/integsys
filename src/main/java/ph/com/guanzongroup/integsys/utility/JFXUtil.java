@@ -3871,7 +3871,7 @@ public class JFXUtil {
         return sdf.format(foDateValue);
     }
 
-    public boolean areAllDisabled(Node... nodes) {
+    public static boolean areAllDisabled(Node... nodes) {
         if (nodes == null || nodes.length == 0) {
             return false;
         }
