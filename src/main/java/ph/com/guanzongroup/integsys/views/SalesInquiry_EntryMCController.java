@@ -411,7 +411,8 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
                                 if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 && !pbPurchaseTypeChanged) {
                                 } else {
                                     poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList().clear();
-                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(cmbCustomerGroup.getSelectionModel().getSelectedIndex()));
+                                    int lnSelected = cmbCustomerGroup.getSelectionModel().getSelectedIndex() > 0 ? cmbCustomerGroup.getSelectionModel().getSelectedIndex() : 0;
+                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(lnSelected));
                                     pbPurchaseTypeChanged = false;
                                 }
                             }
