@@ -943,10 +943,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         String lsAppliedDate = sdfFormat.format(poController.Detail(pnDetail).getAppliedDate());
                         LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         if (ldSelectedDate.isBefore(ldAppliedDate)) {
-                            JFXUtil.setJSONError(poJSON, "Approved date cannot be before the applied date.");
+                            JFXUtil.setJSONError(poJSON, "Approved date cannot be before the Applied date.");
                             pbSuccess = false;
                         } else if (ldSelectedDate.isAfter(ldAppliedDate)) {
-                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
+                            JFXUtil.setJSONError(poJSON, "Approved date cannot be later than Applied date");
                             pbSuccess = false;
                         } else {
                             poController.Detail(pnDetail).setApprovedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
