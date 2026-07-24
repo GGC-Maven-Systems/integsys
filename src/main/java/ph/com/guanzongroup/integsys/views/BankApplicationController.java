@@ -632,7 +632,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             boolean allOnes = checkedItem.stream().allMatch("1"::equals);
                             chckSelectAll.setSelected(allOnes);
                             // if detected unchecked then must update
-                            pnMain = rowIndex;
+                            pnDetail = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
