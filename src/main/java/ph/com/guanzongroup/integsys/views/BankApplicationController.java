@@ -511,17 +511,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-
+            JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
             if (pnEditMode == EditMode.UPDATE) {
-                JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
-                        pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
-
                 boolean lbShow = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),
                         BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
                 boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
                 JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
                 JFXUtil.setDisabled(lbShow, tfApplicationNo, taBankAppRemarks, dpAppliedDate);
-
             } else {
                 JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate);
                 if (pnEditMode == EditMode.READY) {
@@ -616,6 +612,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             checkedItem.set(lnCtr, "0");
                         }
                     }
+
                     loadTableDetail.reload();
                     break;
             }
@@ -926,6 +923,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
                             JFXUtil.setJSONError(poJSON, "Applied date cannot be before the transaction date.");
                             pbSuccess = false;
+                        } else if (ldSelectedDate.isAfter(ldTransactionDate)) {
+                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
+                            pbSuccess = false;
                         } else {
                             poController.Detail(pnDetail).setAppliedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                         }
@@ -946,7 +946,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             JFXUtil.setJSONError(poJSON, "Approved date cannot be before the Applied date.");
                             pbSuccess = false;
                         } else if (ldSelectedDate.isAfter(ldAppliedDate)) {
-                            JFXUtil.setJSONError(poJSON, "Approved date cannot be later than Applied date");
+                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
                             pbSuccess = false;
                         } else {
                             poController.Detail(pnDetail).setApprovedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
