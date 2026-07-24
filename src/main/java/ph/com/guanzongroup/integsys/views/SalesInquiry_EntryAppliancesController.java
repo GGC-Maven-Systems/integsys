@@ -696,7 +696,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                                         if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getStockId(), null, "")) {
                                             if (!pbKeyPressed) {
                                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                        "Are you sure you want to change the supplier name?\nPlease note that doing so will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -798,7 +798,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                                 if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().removeDetails();
                                         loadTableDetail.reload();
                                     } else {
@@ -1031,7 +1031,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
                                 if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getStockId(), null, "")) {
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                         poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                         poSalesInquiryController.SalesInquiry().Master().setContactId("");

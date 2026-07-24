@@ -1382,7 +1382,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                     if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
                                         if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                                    "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                                 poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                                 poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                                 poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -1410,7 +1410,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                     }
 
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the Purchase Type?\nPlease note that doing so will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
                                         poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
                                         poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
@@ -1434,7 +1434,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                     if (!poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(0).getCustomerGroup().equals(String.valueOf(selectedIndex))
                                         && !requirements_data.isEmpty()) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                "Are you sure you want to change the Customer group?\nPlease note that doing so will delete all requirements list.\n\nDo you wish to proceed?") == true) {
+                                                "Are you sure you want to change the Customer group?\nPlease note that this action will delete all requirements list.\n\nDo you wish to proceed?") == true) {
                                             poJSON = poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(selectedIndex));
                                             if ("error".equals((String) poJSON.get("result"))) {
                                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
