@@ -694,6 +694,15 @@ public class DeliveryAcceptance_HistorySPCarController implements Initializable,
                         lsStat = "CANCELLED";
                         lbPrintStat = false;
                         break;
+                    case PurchaseOrderReceivingStatus.VERIFIED:
+                        lsStat = "VERIFIED";
+                        break;
+                    case PurchaseOrderReceivingStatus.CONFIRMED_I:
+                        lsStat = "CONFIRMED+";
+                        break;
+                    case PurchaseOrderReceivingStatus.RETURNED_I:
+                        lsStat = "RETURNED+";
+                        break;
                     default:
                         lsStat = "UNKNOWN";
                         break;
