@@ -919,6 +919,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
                 String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
+
+                String lsAppliedDate = sdfFormat.format(poController.Master().getTransactionDate());
+                LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                 poJSON = new JSONObject();
                 switch (datePicker.getId()) {
                     case "dpAppliedDate":
@@ -939,10 +942,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpApprovedDate":
-                        if (ldSelectedDate.isBefore(ldTransactionDate)) {
-                            JFXUtil.setJSONError(poJSON, "Approved date cannot be before the transaction date.");
+                        if (ldSelectedDate.isBefore(ldAppliedDate)) {
+                            JFXUtil.setJSONError(poJSON, "Approved date cannot be before the applied date.");
                             pbSuccess = false;
-                        } else if (ldSelectedDate.isAfter(ldTransactionDate)) {
+                        } else if (ldSelectedDate.isAfter(ldAppliedDate)) {
                             JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
                             pbSuccess = false;
                         } else {
@@ -1048,7 +1051,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
 
         JFXUtil.handleDisabledNodeClick(apTableDetail, pnEditMode, nodeID -> {
             if (nodeID.equals("chckSelectAll")) {
-                if (!main_data.isEmpty()) {
+                if (!details_data.isEmpty()) {
                     ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
                 }
             }
@@ -1084,6 +1087,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
+        boolean lbShow4 = fnValue == EditMode.UNKNOWN;
         disableRowCheckbox.set(!lbShow); // set enable/disable in checkboxes in requirements
         // Manage visibility and managed state of other buttons
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
@@ -1091,6 +1095,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
         JFXUtil.setDisabled(!lbShow, taRemarks); //apDetail
+
+        JFXUtil.setDisabled(lbShow4, apDetail);
 
         JFXUtil.setDisabledExcept(true, apMaster, cmbPurchaseType);
         JFXUtil.setDisabled(!lbShow, cmbPurchaseType);
