@@ -80,7 +80,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static SalesBankApplication poController;
     public int pnEditMode;
-    boolean pbKeyPressed = false;
     boolean pbPurchaseTypeChanged = false;
     private String psIndustryId = "";
     private String psCompanyId = "";
@@ -260,20 +259,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
                                 // Confirmation Prompt
                                 JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
                                 if ("success".equals(loJSON.get("result"))) {
-                                    if (poController.Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-//                                            loJSON = poController.ApproveBankApplication("");
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-                                    }
                                 }
                                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             }
@@ -845,15 +833,13 @@ public class BankApplicationController implements Initializable, ScreenInterface
             pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetailList) : JFXUtil.moveToNextRow(tblViewDetailList);
         }
         loadRecordDetail();
-        if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getApplicationNo(), null, "")) {
-            tfApplicationNo.requestFocus();
-        } else if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getBankId(), null, "")) {
-            tfBank.requestFocus();
-        } else if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRemarks(), null, "")) {
-            taBankAppRemarks.requestFocus();
-        } else {
-            taBankAppRemarks.requestFocus();
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
         }
+        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+            {poController.Detail(pnDetail).getApplicationNo(), tfApplicationNo},
+            {poController.Detail(pnDetail).getBankId(), tfBank}, // if null or empty, then requesting focus to the txtfield
+            {poController.Detail(pnDetail).getRemarks(), taBankAppRemarks},}, taBankAppRemarks); // default
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -934,7 +920,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                 poJSON = new JSONObject();
-//                try {
                 switch (datePicker.getId()) {
                     case "dpAppliedDate":
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
@@ -976,14 +961,10 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     default:
                         break;
                 }
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                }
             });
 
     final EventHandler<ActionEvent> comboBoxActionListener = event -> {
         Platform.runLater(() -> {
-//            try {
             Object source = event.getSource();
             @SuppressWarnings("unchecked")
             ComboBox<?> cb = (ComboBox<?>) source;
@@ -1036,16 +1017,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                     }
                     break;
                 default:
-                    System.out.println("Unrecognized ComboBox ID: " + cbId);
                     break;
             }
-
             if (!cbId.equals("cmbCustomerGroup")) {
                 loadRecordMaster();
             }
-//            } catch (GuanzonException | SQLException ex) {
-//                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//            }
         });
     };
 
