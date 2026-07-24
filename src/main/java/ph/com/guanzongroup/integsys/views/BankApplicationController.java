@@ -336,7 +336,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 String lschecked = item1.getIndex01();
                 int lnReference = Integer.valueOf(item1.getIndex02()) - 1;
                 if (lschecked.equals("1")) {
-                    list.add(item1.getIndex06());
+                    list.add(item1.getIndex07());
                     checkedItems.add(poController.Detail(lnReference));
                 }
             }
@@ -422,7 +422,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                 return;
             }
-            
+
             Platform.runLater(() -> {
                 loadTableDetail.reload();
             });
@@ -430,7 +430,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
             initButton(pnEditMode);
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
 
     private void resetCheckboxSelection() {
@@ -514,17 +514,17 @@ public class BankApplicationController implements Initializable, ScreenInterface
         try {
             if (pnEditMode != EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-                JFXUtil.setDisabled(true, chckSelectAll,dpApprovedDate);
+                JFXUtil.setDisabled(true, chckSelectAll, dpApprovedDate);
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-                JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);          
+                JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
             }
 
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            
-            if(pnEditMode == EditMode.UPDATE){
+
+            if (pnEditMode == EditMode.UPDATE) {
                 JFXUtil.setStatusValue(lblBankApplicationStatus, BankApplicationStatus.class,
                         pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Detail(pnDetail).getTransactionStatus());
 
@@ -532,15 +532,15 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
                 boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
                 JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
-                JFXUtil.setDisabled(lbShow, tfApplicationNo,taBankAppRemarks, dpAppliedDate);
+                JFXUtil.setDisabled(lbShow, tfApplicationNo, taBankAppRemarks, dpAppliedDate);
                 JFXUtil.setDisabled(true, dpApprovedDate);
             } else {
-                JFXUtil.setDisabled(true, tfApplicationNo,taBankAppRemarks, tfBank,dpAppliedDate, dpApprovedDate);
-                if(pnEditMode == EditMode.READY){
-                    JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(),BankApplicationStatus.OPEN), dpApprovedDate);
+                JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate, dpApprovedDate);
+                if (pnEditMode == EditMode.READY) {
+                    JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(), BankApplicationStatus.OPEN), dpApprovedDate);
                 }
             }
-            
+
             String lsPaymentMode = "";
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentMode(), null, "")) {
                 lsPaymentMode = PurchaseType.get(Integer.valueOf(poController.Detail(pnDetail).getPaymentMode()));
@@ -957,6 +957,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
                             JFXUtil.setJSONError(poJSON, "Approved date cannot be before the transaction date.");
                             pbSuccess = false;
+                        } else if (ldSelectedDate.isAfter(ldTransactionDate)) {
+                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
+                            pbSuccess = false;
                         } else {
                             poController.Detail(pnDetail).setApprovedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                         }
@@ -996,35 +999,35 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 break;
                             }
-                            
+
                             boolean lbcheck = false;
-                            for(int lnRow = 0; lnRow <= poController.getDetailCount() - 1; lnRow++){
-                                if(poController.Detail(lnRow).getEditMode() == EditMode.ADDNEW){
+                            for (int lnRow = 0; lnRow <= poController.getDetailCount() - 1; lnRow++) {
+                                if (poController.Detail(lnRow).getEditMode() == EditMode.ADDNEW) {
                                     lbcheck = poController.Detail(lnRow).getBankId() != null && !"".equals(poController.Detail(lnRow).getBankId());
-                                    if(lbcheck){
+                                    if (lbcheck) {
                                         break;
                                     }
                                 }
                             }
-                            
-                            if(lbcheck){
+
+                            if (lbcheck) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the unsaved Bank Applications list.\n\nDo you wish to proceed?") == true) {
-                                    
+
                                     int lnCtr = poController.getDetailCount() - 1;
                                     while (lnCtr >= 0) {
-                                        if(poController.Detail(lnCtr).getEditMode() == EditMode.ADDNEW){
+                                        if (poController.Detail(lnCtr).getEditMode() == EditMode.ADDNEW) {
                                             poController.Detail().remove(lnCtr);
                                         }
                                         lnCtr--;
                                     }
-                                    
+
                                     poController.Master().setPurchaseType(String.valueOf(selectedIndex));
                                 }
                             } else {
                                 poController.Master().setPurchaseType(String.valueOf(selectedIndex));
                             }
-                            
+
                             loadTableDetail.reload();
                             pbPurchaseTypeChanged = true;
                         }
@@ -1080,6 +1083,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 if (pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
                     ShowMessageFX.Information(null, pxeModuleName, "Only Purchase Type can be changed.");
                 }
+            }
+        });
+        JFXUtil.handleDisabledNodeClick(apDetail, pnEditMode, nodeID -> {
+            if (JFXUtil.isObjectEqualTo(nodeID, "dpApprovedDate")) {
+                ShowMessageFX.Information(null, pxeModuleName, "Date Approved can only be modified when the record is not in Add or Update mode\nand the detail status is 'OPEN'.");
             }
         });
     }
