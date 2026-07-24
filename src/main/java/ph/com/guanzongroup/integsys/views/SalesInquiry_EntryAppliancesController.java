@@ -98,7 +98,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnHistory, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
     @FXML
     private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfCategory, tfDescription, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice;
     @FXML
@@ -285,6 +285,30 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
 
                                 btnNew.fire();
 
+                            }
+                        } else {
+                            return;
+                        }
+                        break;
+                    case "btnVoid":
+                        poJSON = new JSONObject();
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void transaction?") == true) {
+                            poJSON = poSalesInquiryController.SalesInquiry().VoidTransaction("");
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            } else {
+                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                //Clear data
+                                poSalesInquiryController.SalesInquiry().resetMaster();
+                                poSalesInquiryController.SalesInquiry().Detail().clear();
+                                clearTextFields();
+
+                                poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
+                                poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
+                                poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
+    //                            poSalesInquiryController.SalesInquiry().initFields();
+                                pnEditMode = EditMode.UNKNOWN;
                             }
                         } else {
                             return;
@@ -1072,7 +1096,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
         // Manage visibility and managed state of other buttons
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory,btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail);
@@ -1083,7 +1107,8 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             case SalesInquiryStatic.LOST:
             case SalesInquiryStatic.VOID:
             case SalesInquiryStatic.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+            case SalesInquiryStatic.CONFIRMED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate,btnVoid);
                 break;
         }
     }
