@@ -130,7 +130,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         initBankApplicationsGrid();
         initTableOnClick();
         clearTextFields();
-        pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
+        pnEditMode = EditMode.UNKNOWN;
         initButton(pnEditMode);
 
         Platform.runLater(() -> {
