@@ -55,6 +55,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Pagination;
@@ -822,10 +823,16 @@ public class BankApplicationController implements Initializable, ScreenInterface
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
-        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.Detail(pnDetail).getApplicationNo(), tfApplicationNo},
-            {poController.Detail(pnDetail).getBankId(), tfBank}, // if null or empty, then requesting focus to the txtfield
-            {poController.Detail(pnDetail).getRemarks(), taBankAppRemarks},}, taBankAppRemarks); // default
+        //detect if all three is disabled then trigger the click in tableview
+        if (JFXUtil.areAllDisabled(tfApplicationNo, tfBank, taBankAppRemarks)) {
+            tblViewDetailList.requestFocus();
+            JFXUtil.selectAndFocusRow(tblViewDetailList, pnDetail);
+        } else {
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Detail(pnDetail).getApplicationNo(), tfApplicationNo},
+                {poController.Detail(pnDetail).getBankId(), tfBank}, // if null or empty, then requesting focus to the txtfield
+                {poController.Detail(pnDetail).getRemarks(), taBankAppRemarks},}, taBankAppRemarks); // default
+        }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
