@@ -357,8 +357,8 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
             }
             tfRequirement.setText(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).RequirementSource().getDescription());
             tfReceivedBy.setText(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).SalesPerson().getFullName());
-            String lsdpReceivedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).getReceivedDate());
-            dpReceivedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpReceivedDate, "yyyy-MM-dd"));
+            String lsdpReceivedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).getReceivedDate());
+            dpReceivedDate.setValue(!lsdpReceivedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpReceivedDate, "yyyy-MM-dd") : null);
 
             boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).SalesPerson().getFullName(), null, "");
             JFXUtil.setDisabled(lbShow, dpReceivedDate);
@@ -575,7 +575,7 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
                                                 String.valueOf(lnIsSubmitted),
                                                 String.valueOf(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).RequirementSource().getDescription()),
                                                 String.valueOf(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).SalesPerson().getFullName()),
-                                                String.valueOf(CustomCommonUtil.parseDateStringToLocalDate(lsReceivedDate, "yyyy-MM-dd"))
+                                                String.valueOf(lsReceivedDate)
                                         ));
                             }
                             if (pnRequirements < 0 || pnRequirements
