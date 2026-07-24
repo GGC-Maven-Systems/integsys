@@ -497,7 +497,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
                 JFXUtil.setDisabled(details_data.isEmpty(), chckSelectAll);
             }
-
+            JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate, dpApprovedDate);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
@@ -509,7 +509,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
                 JFXUtil.setDisabled(lbShow, tfApplicationNo, taBankAppRemarks, dpAppliedDate);
             } else {
-                JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate);
+
                 if (pnEditMode == EditMode.READY) {
                     JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(), BankApplicationStatus.OPEN) && !details_data.isEmpty(), dpApprovedDate);
                 }
