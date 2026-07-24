@@ -234,7 +234,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                             return;
                         }
                     case "btnHistory":
-                        if (poController.Detail(pnMain).getEditMode() != EditMode.READY && poController.Detail(pnMain).getEditMode() != EditMode.UPDATE) {
+                        if (poController.getDetailCount() <= 0) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+                        if (poController.Detail(pnDetail).getEditMode() != EditMode.READY && poController.Detail(pnDetail).getEditMode() != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
