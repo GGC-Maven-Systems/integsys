@@ -533,11 +533,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 boolean lbShow2 = JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getEditMode(), EditMode.UPDATE);
                 JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
                 JFXUtil.setDisabled(lbShow, tfApplicationNo, taBankAppRemarks, dpAppliedDate);
-                JFXUtil.setDisabled(true, dpApprovedDate);
+
             } else {
-                JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate, dpApprovedDate);
+                JFXUtil.setDisabled(true, tfApplicationNo, taBankAppRemarks, tfBank, dpAppliedDate);
                 if (pnEditMode == EditMode.READY) {
-                    JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(), BankApplicationStatus.OPEN), dpApprovedDate);
+                    JFXUtil.setDisabled(!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getTransactionStatus(), BankApplicationStatus.OPEN) && !details_data.isEmpty(), dpApprovedDate);
                 }
             }
 
@@ -1087,7 +1087,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
         });
         JFXUtil.handleDisabledNodeClick(apDetail, pnEditMode, nodeID -> {
             if (JFXUtil.isObjectEqualTo(nodeID, "dpApprovedDate")) {
-                ShowMessageFX.Information(null, pxeModuleName, "Date Approved can only be modified when the record is not in Add or Update mode\nand the detail status is 'OPEN'.");
+                if (!details_data.isEmpty()) {
+                    ShowMessageFX.Information(null, pxeModuleName, "Date Approved can only be modified when the record is not in Add or Update mode\nand the detail status is 'OPEN'.");
+                }
             }
         });
     }
