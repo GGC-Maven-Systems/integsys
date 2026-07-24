@@ -920,8 +920,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                 String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
 
-                String lsAppliedDate = sdfFormat.format(poController.Master().getTransactionDate());
-                LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                 poJSON = new JSONObject();
                 switch (datePicker.getId()) {
                     case "dpAppliedDate":
@@ -942,6 +940,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpApprovedDate":
+                        String lsAppliedDate = sdfFormat.format(poController.Detail(pnDetail).getAppliedDate());
+                        LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         if (ldSelectedDate.isBefore(ldAppliedDate)) {
                             JFXUtil.setJSONError(poJSON, "Approved date cannot be before the applied date.");
                             pbSuccess = false;
