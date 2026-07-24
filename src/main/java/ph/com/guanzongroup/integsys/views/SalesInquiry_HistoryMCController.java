@@ -92,7 +92,7 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements;//, apBankApplications, apBankApplicationsButtons;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryStatus, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy;//, tfPaymentMode, tfApplicationNo, tfBank;
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy;//, tfPaymentMode, tfApplicationNo, tfBank;
     @FXML
     private Label lblSource, lblStatus;//, lblBankApplicationStatus;
     @FXML
@@ -275,25 +275,8 @@ public class SalesInquiry_HistoryMCController implements Initializable, ScreenIn
         try {
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(SalesInquiryStatic.QUOTED, "QUOTED");
-                statusMap.put(SalesInquiryStatic.SALE, "SALE");
-                statusMap.put(SalesInquiryStatic.CONFIRMED, "CONFIRMED");
-                statusMap.put(SalesInquiryStatic.OPEN, "OPEN");
-                statusMap.put(SalesInquiryStatic.VOID, "VOIDED");
-                statusMap.put(SalesInquiryStatic.CANCELLED, "CANCELLED");
-                statusMap.put(SalesInquiryStatic.LOST, "LOST");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblStatus.setText(lsStat);
+                lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
 
-                switch (poSalesInquiryController.SalesInquiry().Master().getInquiryStatus()) {
-                    case "0":
-                        tfInquiryStatus.setText("OPEN");
-                        break;
-                    default:
-                        tfInquiryStatus.setText("");
-                        break;
-                }
             });
 
             // Transaction Date

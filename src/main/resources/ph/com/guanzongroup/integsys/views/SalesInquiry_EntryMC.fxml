@@ -237,10 +237,6 @@
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font></Label>
-                                                                          <Label text="Inquiry Status" GridPane.columnIndex="5" GridPane.rowIndex="2">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
                                                       <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="7">
                                                                                  <font>
                                                                                     <Font size="12.0" />
@@ -294,7 +290,6 @@
                                                                           <TextField fx:id="tfBranch" disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                   <TextField fx:id="tfSalesPerson" layoutX="100.0" layoutY="135.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                                                   <TextField fx:id="tfReferralAgent" layoutX="100.0" layoutY="105.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                                          <TextField fx:id="tfInquiryStatus" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                                                                   <TextField fx:id="tfInquiryType" promptText="Press F3: Search" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                                                   <ComboBox fx:id="cmbPurchaseType" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                                                                   <ComboBox fx:id="cmbCategoryType" layoutX="580.0" layoutY="105.0" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="5" />
