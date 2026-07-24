@@ -259,10 +259,6 @@ public class BankApplicationController implements Initializable, ScreenInterface
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                // Confirmation Prompt
-                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                                if ("success".equals(loJSON.get("result"))) {
-                                }
                                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             }
                         } else {
@@ -283,8 +279,8 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         break;
                 }
 
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnVerify")) {
-                    poController.Detail().clear();
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel")) {
+                    poController.InitTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
                 }
@@ -463,8 +459,9 @@ public class BankApplicationController implements Initializable, ScreenInterface
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = CustomCommonUtil.formatDateToShortString(poController.Master().getTransactionDate());
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
-            String lsTargetDate = CustomCommonUtil.formatDateToShortString(poController.Master().getTargetDate());
-            dpTargetDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsTargetDate, "yyyy-MM-dd"));
+
+            String lsTargetDate = JFXUtil.formatDateToString(poController.Master().getTargetDate());
+            JFXUtil.setDateValue(dpTargetDate, !lsTargetDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsTargetDate, "yyyy-MM-dd") : null);
 
             tfBranch.setText(poController.Master().Branch().getBranchName());
             tfSalesPerson.setText(poController.Master().SalesPerson().getFullName());
@@ -475,22 +472,14 @@ public class BankApplicationController implements Initializable, ScreenInterface
             tfInquiryType.setText(poController.Master().Source().getDescription());
             taRemarks.setText(poController.Master().getRemarks());
 
-            if (pnEditMode != EditMode.UNKNOWN) {
+            JFXUtil.setCmbValue(cmbPurchaseType, !JFXUtil.isObjectEqualTo(poController.Master().getClientId(), null, "") ? Integer.parseInt(poController.Master().getPurchaseType()) : "");
 
-                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poController.Master().getPurchaseType()));
-                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-                    tfClientType.setText(getClientType(Integer.parseInt(poController.Master().Client().getClientType())));
-                } else {
-                    tfClientType.setText(getClientType(Integer.parseInt(poController.Master().getClientType())));
-                }
-                if (poController.Master().getCategoryType() != null && !"".equals(poController.Master().getCategoryType())) {
-                    tfCategoryType.setText(getCategoryType(Integer.parseInt(poController.Master().getCategoryType())));
-                }
-            } else {
-                cmbPurchaseType.getSelectionModel().select(0);
-                tfCategoryType.setText(getCategoryType(0));
+            if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
+                tfClientType.setText(pnEditMode == EditMode.UNKNOWN ? "" : getClientType(Integer.parseInt(poController.Master().getClientType())));
             }
-
+            if (poController.Master().getCategoryType() != null && !"".equals(poController.Master().getCategoryType())) {
+                tfCategoryType.setText(getCategoryType(Integer.parseInt(poController.Master().getCategoryType())));
+            }
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -537,11 +526,11 @@ public class BankApplicationController implements Initializable, ScreenInterface
             taBankAppRemarks.setText(poController.Detail(pnDetail).getRemarks());
 
             String lsdpAppliedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getAppliedDate());
-
-            dpAppliedDate.setValue(!lsdpAppliedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd") : null);
+            JFXUtil.setDateValue(dpAppliedDate, !lsdpAppliedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd") : null);
 
             String lsdpApprovedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getApprovedDate());
-            dpApprovedDate.setValue(!lsdpApprovedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd") : null);
+            JFXUtil.setDateValue(dpApprovedDate, !lsdpApprovedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd") : null);
+
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
