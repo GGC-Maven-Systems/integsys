@@ -320,7 +320,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                 lsStat = "cancel";
                                 break;
                         }
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to "+lsStat+" transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to " + lsStat + " transaction?") == true) {
                             if (SalesInquiryStatic.CONFIRMED.equals(poSalesInquiryController.SalesInquiry().Master().getTransactionStatus())) {
                                 poJSON = poSalesInquiryController.SalesInquiry().CancelTransaction("");
                             } else {
@@ -596,7 +596,6 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
 //            tfApplicationNo.requestFocus();
 //        }
 //    }
-
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -911,9 +910,9 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                             if (pnEditMode == EditMode.UPDATE) {
                                 if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 && !pbPurchaseTypeChanged) {
                                 } else {
-
-                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(cmbCustomerGroup.getSelectionModel().getSelectedIndex()));
-                                    pbPurchaseTypeChanged = false;
+                                    poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList().clear();
+                                    int lnSelected = cmbCustomerGroup.getSelectionModel().getSelectedIndex() > 0 ? cmbCustomerGroup.getSelectionModel().getSelectedIndex() : 0;
+                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(lnSelected));
                                 }
                             }
                             loadTableRequirements.reload();
@@ -954,7 +953,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
                 lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
-                
+
                 switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
                     case SalesInquiryStatic.OPEN:
                         btnVoid.setText("Void");
@@ -991,8 +990,8 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                 } else {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType()));
                 }
-                
-                if(poSalesInquiryController.SalesInquiry().Master().getCategoryType() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getCategoryType())){
+
+                if (poSalesInquiryController.SalesInquiry().Master().getCategoryType() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getCategoryType())) {
                     cmbCategoryType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getCategoryType()));
                 }
             } else {
@@ -1102,7 +1101,6 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
 //        }
 //    }
-
     public void loadTableDetailFromMain() {
         try {
             poJSON = new JSONObject();
@@ -1382,7 +1380,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                     if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
                                         if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                    "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                                    "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                                 poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                                 poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                                 poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -1410,7 +1408,7 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                                     }
 
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the Purchase Type?\nPlease note that doing so will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
                                         poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
                                         poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
@@ -1432,9 +1430,9 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
                             if (pnEditMode == EditMode.UPDATE) {
                                 if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 && requirements_data != null) {
                                     if (!poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(0).getCustomerGroup().equals(String.valueOf(selectedIndex))
-                                        && !requirements_data.isEmpty()) {
+                                            && !requirements_data.isEmpty()) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                "Are you sure you want to change the Customer group?\nPlease note that doing so will delete all requirements list.\n\nDo you wish to proceed?") == true) {
+                                                "Are you sure you want to change the Customer group?\nPlease note that this action will delete all requirements list.\n\nDo you wish to proceed?") == true) {
                                             poJSON = poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(selectedIndex));
                                             if ("error".equals((String) poJSON.get("result"))) {
                                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
