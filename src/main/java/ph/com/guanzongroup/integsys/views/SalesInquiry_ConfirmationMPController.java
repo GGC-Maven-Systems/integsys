@@ -126,7 +126,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         poSalesInquiryController = new SalesControllers(oApp, null);
         poJSON = new JSONObject();
         poJSON = poSalesInquiryController.SalesInquiry().InitTransaction(); // Initialize transaction
@@ -270,7 +269,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                                         }
                                     }
                                 }
-
                             }
                         } else {
                             return;
@@ -305,7 +303,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                                 lsStat = "cancel";
                                 break;
                         }
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to "+lsStat+" transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to " + lsStat + " transaction?") == true) {
                             if (SalesInquiryStatic.CONFIRMED.equals(poSalesInquiryController.SalesInquiry().Master().getTransactionStatus())) {
                                 poJSON = poSalesInquiryController.SalesInquiry().CancelTransaction("");
                             } else {
@@ -355,6 +353,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -367,7 +366,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
         } else {
             loadTableMain.reload();
         }
-
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -547,10 +545,9 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             } else {
                 tfCategory.requestFocus();
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -751,6 +748,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -806,7 +804,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                             pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
                             loadRecordMaster();
                             pbSuccess = true; //Set to original value
-
                         }
                         break;
                     default:
@@ -815,6 +812,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -826,6 +824,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             tfSearchReferenceNo.setText("");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -849,11 +848,11 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     public void loadRecordMaster() {
-
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient, cmbClientType);
 
@@ -870,7 +869,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                         btnVoid.setText("Cancel");
                         break;
                 }
-
             });
 
             // Transaction Date
@@ -892,7 +890,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
@@ -907,8 +904,8 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadTableDetailFromMain() {
@@ -931,14 +928,13 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
             Platform.runLater(() -> {
                 loadTableDetail.reload();
             });
-
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     public void initLoadTable() {
-
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewTransDetails,
                 details_data,
@@ -948,7 +944,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -1011,6 +1006,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 }
@@ -1035,6 +1031,7 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                                     ));
                                 } catch (GuanzonException | SQLException ex) {
                                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                                 }
 
                                 if (poSalesInquiryController.SalesInquiry().SalesInquiryList(lnCtr).getTransactionStatus().equals(SalesInquiryStatic.CONFIRMED)) {
@@ -1049,7 +1046,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
                                 /* FOCUS ON FIRST ROW */
                                 JFXUtil.selectAndFocusRow(tblViewMainList, 0);
                                 pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-
                             }
                         } else {
                             /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
@@ -1094,19 +1090,16 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
     };
 
     private void initComboBoxes() {
-
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType)
         );
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbClientType, cmbPurchaseType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType);
-
     }
 
     public void initDatePickers() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpTargetDate);
         JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpTargetDate);
-
     }
 
     public void initTextFields() {
@@ -1120,7 +1113,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
     }
 
     public void initTableOnClick() {
-
         tblViewTransDetails.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {
@@ -1149,7 +1141,6 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -1254,5 +1245,4 @@ public class SalesInquiry_ConfirmationMPController implements Initializable, Scr
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail, apBrowse);
     }
-
 }

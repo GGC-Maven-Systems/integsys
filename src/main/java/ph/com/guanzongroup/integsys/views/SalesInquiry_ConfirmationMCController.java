@@ -135,7 +135,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         poSalesInquiryController = new SalesControllers(oApp, null);
         poJSON = new JSONObject();
         poJSON = poSalesInquiryController.SalesInquiry().InitTransaction(); // Initialize transaction
@@ -285,7 +284,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                         }
                                     }
                                 }
-
                             }
                         } else {
                             return;
@@ -387,6 +385,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -777,6 +776,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -890,10 +890,10 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                             break;
                     }
                 }
-
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -932,6 +932,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                 }
             } catch (SQLException | GuanzonException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         });
     }
@@ -944,6 +945,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             tfSearchReferenceNo.setText("");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -963,7 +965,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                         btnVoid.setText("Cancel");
                         break;
                 }
-
             });
 
             // Transaction Date
@@ -985,7 +986,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
@@ -1005,8 +1005,8 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -1022,6 +1022,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1054,6 +1055,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
             JFXUtil.updateCaretPositions(apRequirements);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1136,9 +1138,9 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                         break;
                 }
             });
-
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1162,6 +1164,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                     ));
                                 } catch (GuanzonException | SQLException ex) {
                                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                                 }
 
                                 if (poSalesInquiryController.SalesInquiry().SalesInquiryList(lnCtr).getTransactionStatus().equals(SalesInquiryStatic.CONFIRMED)) {
@@ -1176,7 +1179,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                 /* FOCUS ON FIRST ROW */
                                 JFXUtil.selectAndFocusRow(tblViewMainList, 0);
                                 pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-
                             }
                         } else {
                             /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
@@ -1195,7 +1197,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -1262,8 +1263,8 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
 
@@ -1295,7 +1296,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewRequirements, 0);
                                     pnRequirements = tblViewRequirements.getSelectionModel().getSelectedIndex();
-
                                 }
                                 loadRecordRequirements();
                             } else {
@@ -1305,6 +1305,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                             }
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -1361,6 +1362,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
 //                            }
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -1463,6 +1465,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                 }
             } catch (GuanzonException | SQLException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         });
     };
@@ -1533,7 +1536,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -1550,6 +1552,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                 }
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
                             try {
                                 poSalesInquiryController.SalesInquiry().Detail(i).setPriority(Integer.parseInt(priorityStr));
@@ -1576,7 +1579,7 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                             poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).isSubmitted(lbisTrue);
                             poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedBy(lbisTrue ? oApp.getUserID() : "");
                             try {
-                                if(lbisTrue){
+                                if (lbisTrue) {
                                     SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
                                     String lsDummyDate = sdfFormat.format(SQLUtil.toDate(JFXUtil.convertToIsoFormat("01/01/1900"), SQLUtil.FORMAT_SHORT_DATE));
                                     LocalDate localDate = LocalDate.parse(lsDummyDate);
@@ -1589,15 +1592,14 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
                                 loadTableRequirements.reload();
                             } catch (SQLException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
                             break;
-
                     }
                 }, 1, 2);
     }
 
     private void initButton(int fnValue) {
-
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
@@ -1647,7 +1649,6 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
 
         filteredData = new FilteredList<>(main_data, b -> true);
         tblViewMainList.setItems(filteredData);
-
     }
 
     public void initRequirementsGrid() {
@@ -1705,5 +1706,4 @@ public class SalesInquiry_ConfirmationMCController implements Initializable, Scr
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail, apBrowse, apRequirements); //, apBankApplications);
     }
-
 }

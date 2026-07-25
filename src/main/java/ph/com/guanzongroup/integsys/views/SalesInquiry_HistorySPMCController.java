@@ -9,8 +9,6 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,13 +47,13 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
 
 /**
  *
  * @author Team 2
  */
 public class SalesInquiry_HistorySPMCController implements Initializable, ScreenInterface {
+
     private GRiderCAS oApp;
     private JSONObject poJSON;
     int pnDetail = 0;
@@ -206,8 +204,8 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
                 initButton(pnEditMode);
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-
         }
     }
 
@@ -216,7 +214,6 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
                 lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
-
             });
 
             // Transaction Date
@@ -244,8 +241,8 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -266,6 +263,7 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -320,7 +318,6 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -358,8 +355,8 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
     }
@@ -381,7 +378,6 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
                         psSearchClientId = "";
                     }
                     break;
-
             }
             if (lsTxtFieldID.equals("tfSearchClient") || lsTxtFieldID.equals("tfSearchReferenceNo")) {
                 loadRecordSearch();
@@ -423,7 +419,6 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
                             }
                             loadRecordSearch();
                             return;
-
                     }
                     break;
                 default:
@@ -441,11 +436,11 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
             }
         } catch (GuanzonException | SQLException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     private void initComboBoxes() {
-        
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType));
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType);
@@ -469,7 +464,6 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(true, taRemarks, apMaster, apDetail);
-
     }
 
     public void initDetailsGrid() {
@@ -492,6 +486,7 @@ public class SalesInquiry_HistorySPMCController implements Initializable, Screen
             tfSearchReferenceNo.setText("");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 

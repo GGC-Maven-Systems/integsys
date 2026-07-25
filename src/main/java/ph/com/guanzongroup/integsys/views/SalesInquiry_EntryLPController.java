@@ -10,8 +10,6 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,7 +96,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel,btnVoid, btnHistory, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
     @FXML
     private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfDescription, tfBrand, tfMeasure, tfSellingPrice;
     @FXML
@@ -284,7 +282,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                                 }
 
                                 btnNew.fire();
-
                             }
                         } else {
                             return;
@@ -307,7 +304,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                                 poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
                                 poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
                                 poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
-    //                            poSalesInquiryController.SalesInquiry().initFields();
+                                //                            poSalesInquiryController.SalesInquiry().initFields();
                                 pnEditMode = EditMode.UNKNOWN;
                             }
                         } else {
@@ -331,10 +328,10 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                         tfBarcode.requestFocus();
                     }
                 }
-
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -345,7 +342,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
                 lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
-
             });
 
             // Transaction Date
@@ -367,7 +363,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
@@ -375,7 +370,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType()));
                 }
             } else {
-
                 cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
             }
@@ -383,8 +377,8 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -406,6 +400,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -447,7 +442,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -481,7 +475,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -522,8 +515,8 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
     }
@@ -605,7 +598,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                             poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
                         }
                         break;
-
                 }
                 loadRecordMaster();
             });
@@ -624,10 +616,9 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             } else {
                 tfBrand.requestFocus();
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -770,6 +761,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -825,7 +817,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                             pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
                             loadRecordMaster();
                             pbSuccess = true; //Set to original value
-
                         }
                         break;
                     default:
@@ -834,6 +825,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
     final EventHandler<ActionEvent> comboBoxActionListener = event -> {
@@ -869,7 +861,6 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
     };
 
     private void initComboBoxes() {
-
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType)
         );
@@ -899,7 +890,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
         // Manage visibility and managed state of other buttons
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory,btnVoid);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail);
@@ -911,7 +902,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             case SalesInquiryStatic.VOID:
             case SalesInquiryStatic.CANCELLED:
             case SalesInquiryStatic.CONFIRMED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
         }
     }
@@ -930,6 +921,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
             lblSource.setText(poSalesInquiryController.SalesInquiry().Master().Company().getCompanyName() + " - " + poSalesInquiryController.SalesInquiry().Master().Industry().getDescription());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
