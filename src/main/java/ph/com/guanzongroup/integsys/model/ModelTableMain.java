@@ -48,6 +48,21 @@ public class ModelTableMain {
         this.index10 = new SimpleStringProperty(index10);
 
     }
+    public ModelTableMain(String index01,
+                          String index02,
+                          String index03,
+                          String index04,
+                          String index05,
+                          String index06) {
+
+        this.index01 = new SimpleStringProperty(index01);
+        this.index02 = new SimpleStringProperty(index02);
+        this.index03 = new SimpleStringProperty(index03);
+        this.index04 = new SimpleStringProperty(index04);
+        this.index05 = new SimpleStringProperty(index05);
+        this.index06 = new SimpleStringProperty(index06);
+
+    }
 
     public String getIndex01() {
         return index01.get();
