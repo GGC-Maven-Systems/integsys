@@ -316,9 +316,14 @@ public class InventoryStockIssuanceNeoControllerMC implements Initializable, Scr
 
                 case "btnBrowse":
                     if (lastFocusedControl == null) {
-                        ShowMessageFX.Information(null, psFormName,
-                                "Search unavailable. Please ensure a searchable field is selected or focused before proceeding..");
-                        return;
+                        if (!isJSONSuccess(poAppController.searchTransaction(tfSearchTransNo.getText(), true, true),
+                                "Initialize Browse Transaction")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        break;
+
                     }
 
                     switch (lastFocusedControl.getId()) {
@@ -349,6 +354,15 @@ public class InventoryStockIssuanceNeoControllerMC implements Initializable, Scr
                             }
 
 //                                tfSearchTransNo.setText(poAppController.getMaster().getTransactionNo());
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        default:
+                            //Search record
+                            if (!isJSONSuccess(poAppController.searchTransaction("", true, true),
+                                    "Initialize Browse Transaction")) {
+                                return;
+                            }
                             getLoadedTransaction();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
@@ -408,15 +422,24 @@ public class InventoryStockIssuanceNeoControllerMC implements Initializable, Scr
 
                 case "btnCancel":
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") == true) {
+                        if (poAppController.getEditMode() != EditMode.ADDNEW) {
+                            if (!isJSONSuccess(poAppController.OpenTransaction(tfTransNo.getText()),
+                                    "Initialize Open Transaction")) {
+
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        }
                         poAppController = new DeliveryIssuanceControllers(poApp, poLogWrapper).InventoryStockIssuanceNeo();
                         poAppController.setTransactionStatus("10");
-
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
                             appUnload.unloadForm(apMainAnchor, poApp, psFormName);
                         }
 
                         Platform.runLater(() -> {
+
                             poAppController.setTransactionStatus("10");
                             poAppController.getMaster().setIndustryId(psIndustryID);
                             poAppController.setIndustryID(psIndustryID);
@@ -426,10 +449,9 @@ public class InventoryStockIssuanceNeoControllerMC implements Initializable, Scr
                             clearAllInputs();
                         });
                         pnEditMode = poAppController.getEditMode();
-                        break;
+                        return;
                     }
                     break;
-
                 case "btnHistory":
                     if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                         ShowMessageFX.Warning("No transaction status history to load!", psFormName, null);
@@ -578,7 +600,7 @@ public class InventoryStockIssuanceNeoControllerMC implements Initializable, Scr
                                     poAppController.getMaster().setDiscount(0.0);
                                     return;
                                 }
-                                if (discountRate > 99) {
+                                if (Double.parseDouble(tfDiscountAmount.getText()) > 99.9) {
                                     ShowMessageFX.Information(
                                             "Invalid discount amount",
                                             psFormName, null

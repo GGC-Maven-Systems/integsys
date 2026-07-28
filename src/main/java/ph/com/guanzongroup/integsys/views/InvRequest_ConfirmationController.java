@@ -530,6 +530,7 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

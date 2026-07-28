@@ -560,6 +560,7 @@ public class InvRequest_Roq_EntryControllerMC_SP implements Initializable, Scree
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();

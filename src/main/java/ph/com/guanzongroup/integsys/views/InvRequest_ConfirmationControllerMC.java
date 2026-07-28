@@ -505,6 +505,7 @@ public class InvRequest_ConfirmationControllerMC implements Initializable, Scree
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
@@ -787,7 +788,7 @@ public class InvRequest_ConfirmationControllerMC implements Initializable, Scree
         }
     }
 
-   private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
+    private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
         String result = (String) loJSON.get("result");
         if ("error".equals(result)) {
             String message = (String) loJSON.get("message");

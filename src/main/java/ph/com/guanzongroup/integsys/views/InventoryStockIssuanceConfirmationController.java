@@ -323,9 +323,14 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
             switch (btnID) {
                 case "btnBrowse":
                     if (lastFocusedControl == null) {
-                        ShowMessageFX.Information(null, psFormName,
-                                "Search unavailable. Please ensure a searchable field is selected or focused before proceeding..");
-                        return;
+                        if (!isJSONSuccess(poAppController.searchTransaction(tfSearchTransNo.getText(), true, true),
+                                "Initialize Browse Transaction")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        break;
+
                     }
                     switch (lastFocusedControl.getId()) {
                         case "tfSearchTransNo":
@@ -543,9 +548,17 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
 
                 case "btnCancel":
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") == true) {
-                        poAppController = new DeliveryIssuanceControllers(poApp, poLogWrapper).InventoryStockIssuance();
-                        poAppController.setTransactionStatus("01");
+                        if (poAppController.getEditMode() != EditMode.ADDNEW) {
+                            if (!isJSONSuccess(poAppController.OpenTransaction(tfTransNo.getText()),
+                                    "Initialize Open Transaction")) {
 
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        }
+                        poAppController = new DeliveryIssuanceControllers(poApp, poLogWrapper).InventoryStockIssuance();
+                        poAppController.setTransactionStatus("10");
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
                             appUnload.unloadForm(apMainAnchor, poApp, psFormName);
@@ -553,7 +566,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
 
                         Platform.runLater(() -> {
 
-                            poAppController.setTransactionStatus("01");
+                            poAppController.setTransactionStatus("10");
                             poAppController.getMaster().setIndustryId(psIndustryID);
                             poAppController.setIndustryID(psIndustryID);
                             poAppController.setCompanyID(psCompanyID);
@@ -562,7 +575,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                             clearAllInputs();
                         });
                         pnEditMode = poAppController.getEditMode();
-                        break;
+                        return;
                     }
                     break;
 
@@ -661,7 +674,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                         return;
                     }
 
-                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecord(), "Initialize Print Delivery Transaction")) {
+                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(), "Initialize Print Delivery Transaction")) {
                         return;
                     }
                     reloadTableDetail();
@@ -792,12 +805,12 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                             break;
                         }
 
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
                         poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
@@ -1161,13 +1174,16 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
     }
 
     private void initButtonDisplayDetail(int fnEditMode) {
+        boolean lbisConfirmed = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(1)) || lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(2)));
+        boolean lbisCancelled = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(3)));
 
         boolean lbShow = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
         // Show-only based on mode
         initButtonControls(lbShow, "btnSaveDelivery");
         initButtonControls(!lbShow, "btnUpdateDelivery", "btnPrintDelivery", "btnCancelDelivery");
-
-        apDetailDelivery.setDisable(!lbShow);
+        initButtonControls(!lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
+        initButtonControls(!lbisCancelled, "btnPrintDelivery");
+        apDetailDelivery.setDisable(fnEditMode != EditMode.READY || !lbShow);
     }
 
     private void initButtonDisplay(int fnEditMode) {

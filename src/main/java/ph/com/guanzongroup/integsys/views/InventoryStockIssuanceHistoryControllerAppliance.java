@@ -282,10 +282,15 @@ public class InventoryStockIssuanceHistoryControllerAppliance implements Initial
             String btnID = ((Button) event.getSource()).getId();
             switch (btnID) {
                 case "btnBrowse":
-                    if (lastFocusedControl == null) {
-                        ShowMessageFX.Information(null, psFormName,
-                                "Search unavailable. Please ensure a searchable field is selected or focused before proceeding..");
-                        return;
+                   if (lastFocusedControl == null) {
+                        if (!isJSONSuccess(poAppController.searchTransaction(tfSearchTransNo.getText(), true, true),
+                                "Initialize Browse Transaction")) {
+                            return;
+                        }
+                        getLoadedTransaction();
+                        initButtonDisplay(poAppController.getEditMode());
+                        break;
+
                     }
                     switch (lastFocusedControl.getId()) {
                         case "tfSearchTransNo":
@@ -362,7 +367,7 @@ public class InventoryStockIssuanceHistoryControllerAppliance implements Initial
                         return;
                     }
 
-                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecord(), "Initialize Print Delivery Transaction")) {
+                   if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(), "Initialize Print Delivery Transaction")) {
                         return;
                     }
                     reloadTableDetail();

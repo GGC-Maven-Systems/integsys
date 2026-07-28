@@ -572,6 +572,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
@@ -1504,11 +1505,12 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                     CustomCommonUtil.setManaged(true, btnUpdate, btnVoid);
                     break;
                 case StockRequestStatus.PROCESSED:
-                    CustomCommonUtil.setVisible(true, btnVoid);
-                    CustomCommonUtil.setManaged(true, btnVoid);
+                    CustomCommonUtil.setVisible(false, btnVoid);
+                    CustomCommonUtil.setManaged(false, btnVoid);
                     break;
             }
         }
+
     }
 
     private void initDetailFocus() {

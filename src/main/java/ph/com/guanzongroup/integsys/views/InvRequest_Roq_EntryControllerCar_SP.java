@@ -559,6 +559,7 @@ public class InvRequest_Roq_EntryControllerCar_SP implements Initializable, Scre
 
                     if ("error".equals((String) poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
                     }
 
                     clearDetailFields();
