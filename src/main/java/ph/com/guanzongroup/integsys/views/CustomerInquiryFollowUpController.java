@@ -1,6 +1,7 @@
 package ph.com.guanzongroup.integsys.views;
 
 import com.jfoenix.controls.JFXTimePicker;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -11,31 +12,38 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.*;
+import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.CustomerInquiryFollowUpStatic;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.integsys.model.ModelPRFAttachment;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.model.ModelTableMain;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
@@ -65,7 +73,10 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     private volatile boolean isLoadingMaster = false;
     private volatile boolean isLoadingDetail = false;
     private Boolean isSearching = false;
-
+    private int pnAttachment;
+    private int currentIndex = 0;
+    double ldstackPaneWidth = 0;
+    double ldstackPaneHeight = 0;
     // =========================================================================
     // Search Filters
     // =========================================================================
@@ -88,6 +99,9 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
+
+    private ObservableList<ModelPRFAttachment> attachment_data = FXCollections.observableArrayList();
+    ObservableList<String> documentType = ModelPRFAttachment.documentType;
     // =========================================================================
     // Root Containers
     // =========================================================================
@@ -248,6 +262,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         ClickButton();
         initComboBoxField();
         initDatePickers();
+//        JFXUtil.setKeyEventFilter( tblAttachments);
         pbLoaded = true;
         btnNew.fire();
     }
@@ -256,6 +271,110 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
         oSales = new SalesControllers(oApp, logwrapr);
         oSales.CustomerInquiryFollowUp().setRecordStatus(CustomerInquiryFollowUpStatic.FOLLOWED_UP + CustomerInquiryFollowUpStatic.PENDING);
+    }
+
+    JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
+        @Override
+        protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
+            int newIndex = 0;
+            switch (currentTableID) {
+                case "tblAttachments":
+                    if (!attachment_data.isEmpty()) {
+                        newIndex = isMovedDown
+                                ? Integer.parseInt(attachment_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex03()) : Integer.parseInt(attachment_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex03());
+                        pnAttachment = newIndex;
+                        loadRecordAttachment(true);
+                    }
+                    break;
+            }
+        }
+    };
+
+    public void loadRecordAttachment(boolean lbloadImage) {
+        try {
+            boolean lbShow2 = pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW;
+            JFXUtil.setDisabled(!lbShow2, cmbAttachmentType, btnAddAttachment, btnRemoveAttachment);
+            if (attachment_data.size() > 0) {
+                tfAttachmentNo.setText(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+                String lsAttachmentType = oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                if (lsAttachmentType.equals("")) {
+                    oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().setDocumentType(DocumentType.OTHER);
+                    lsAttachmentType = oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                }
+                int lnAttachmentType = 0;
+                lnAttachmentType = Integer.parseInt(lsAttachmentType);
+                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
+                if (lbloadImage) {
+                    try {
+                        String filePath = (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        String filePath2 = "";
+
+                        // in server
+                        if (oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().getImagePath() != null && !"".equals(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().getImagePath())) {
+                            filePath2 = oSales.CustomerInquiryFollowUp().TransactionAttachmentList(pnAttachment).getModel().getImagePath() + "/" + (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        } else {
+                            filePath2 = System.getProperty("sys.default.path.temp.attachments") + "/" + (String) attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        }
+
+                        if (filePath != null && !filePath.isEmpty()) {
+                            Path imgPath = Paths.get(filePath2);
+                            String convertedPath = imgPath.toUri().toString();
+                            boolean isPdf = filePath.toLowerCase().endsWith(".pdf");
+
+                            // Clear previous content
+                            stackPane1.getChildren().clear();
+                            if (!isPdf) {
+                                // ----- IMAGE VIEW -----
+                                Image loimage = new Image(convertedPath);
+                                imageView.setImage(loimage);
+                                JFXUtil.adjustImageSize(loimage, imageView, ldstackPaneWidth, ldstackPaneHeight);
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(2)); // 2-second delay
+                                delay.setOnFinished(event -> {
+                                    Platform.runLater(() -> {
+                                        JFXUtil.stackPaneClip(stackPane1);
+                                    });
+                                });
+                                delay.play();
+
+                                // Add ImageView directly to stackPane
+                                stackPane1.getChildren().add(imageView);
+                                stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+
+                                // Align buttons on top
+                                StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                                StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+
+                                // Optional: add some margin
+                                StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                                StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+
+                            } else {
+                                // ----- PDF VIEW -----
+                                JFXUtil.PDFViewConfig(filePath2, stackPane1, btnArrowLeft, btnArrowRight, ldstackPaneWidth, ldstackPaneHeight);
+                            }
+                        } else {
+                            imageView.setImage(null);
+                        }
+
+                    } catch (Exception e) {
+                        imageView.setImage(null);
+                    }
+                }
+            } else {
+                if (!lbloadImage) {
+                    imageView.setImage(null);
+                    // Clear previous content
+                    stackPane1.getChildren().clear();
+                    // Add ImageView directly to stackPane
+                    stackPane1.getChildren().add(imageView);
+                    stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                    Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1));
+                    pnAttachment = 0;
+                }
+            }
+        } catch (Exception ex) {
+        }
     }
 
     // =========================================================================
