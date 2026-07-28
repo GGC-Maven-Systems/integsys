@@ -6,41 +6,13 @@ package ph.com.guanzongroup.integsys.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  *
- * @author User
+ * @author Team 1
  */
 public class ModelSalesCommitment_Detail {
 
-    public static ObservableList<String> ClientType = FXCollections.observableArrayList(
-            "Individual",
-            "Corporate"
-    );
-    public static ObservableList<String> PurchaseType = FXCollections.observableArrayList(
-            "Cash",
-            "Cash Balance",
-            "Installment",
-            "PO",
-            "Financing",
-            "Insurance",
-            "Term"
-    );
-    public static ObservableList<String> CategoryType = FXCollections.observableArrayList(
-            "New",
-            "Sold/Repo",
-            "BNOS",
-            "Demo"
-    );
-    public static ObservableList<String> CustomerGroup = FXCollections.observableArrayList(
-            "Any",
-            "Employee",
-            "OFW",
-            "SEAMAN",
-            "Business"
-    );
     public SimpleStringProperty index01;
     public SimpleStringProperty index02;
     public SimpleStringProperty index03;
@@ -90,18 +62,6 @@ public class ModelSalesCommitment_Detail {
         this.index04 = new SimpleStringProperty(index04);
         this.index05 = new SimpleStringProperty(index05);
         this.index06 = new SimpleStringProperty(index06);
-    }
-
-    public ModelSalesCommitment_Detail(
-            String index01,
-            String index02,
-            String index03
-    ) {
-
-        this.index01 = new SimpleStringProperty(index01);
-        this.index02 = new SimpleStringProperty(index02);
-        this.index03 = new SimpleStringProperty(index03);
-
     }
 
     public StringProperty index01Property() { // for Drag Drop purpose Sales Inquiry
