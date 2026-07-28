@@ -367,7 +367,7 @@ public class InventoryStockIssuanceHistoryControllerMonarch_Food implements Init
                         return;
                     }
 
-                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(), "Initialize Print Delivery Transaction")) {
+                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(poAppController.getMaster().getTransactionNo()), "Initialize Print Delivery Transaction")) {
                         return;
                     }
                     reloadTableDetail();
@@ -519,6 +519,8 @@ public class InventoryStockIssuanceHistoryControllerMonarch_Food implements Init
         tfOrderQuantity.setText(tblColDetailOrderQty.getCellData(tblIndex));
         tfApprovedQty.setText(tblColDetailApprovedQty.getCellData(tblIndex));
         tfIssuedQty.setText(tblColDetailIssuedQty.getCellData(tblIndex));
+
+        tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
         tfReceiveQuantity.setText(tblColDetailReceivedQty.getCellData(tblIndex));
         tfReceiverNote.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer()
                 .getDetail(fnRow).getNote());
