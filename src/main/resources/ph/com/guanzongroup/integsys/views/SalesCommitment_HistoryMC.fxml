@@ -60,13 +60,13 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="tfSearchClient" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                    <TextField maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2"  fx:id="tfSearchClient"/>
                                     <Label text="Transaction No." GridPane.columnIndex="4">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="tfSearchTransactionNo" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="6" />
+                                    <TextField maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="6"  fx:id="tfSearchTransactionNo"/>
                                  </children>
                               </GridPane>
                            </children>
@@ -231,14 +231,14 @@
                                                                         <Font size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                                        <TextField fx:id="tfTransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                                        <DatePicker fx:id="dpInquiryDate" disable="true" editable="false" GridPane.columnIndex="7" GridPane.rowIndex="6" />
-                                                                                        <TextField fx:id="tfBranch" disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
-                                                                                        <TextField fx:id="tfSalesPerson" disable="true" editable="false" layoutX="100.0" layoutY="135.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
-                                                                                        <TextField fx:id="tfReferralAgent" disable="true" editable="false" layoutX="100.0" layoutY="105.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9" />
-                                                                                        <TextField fx:id="tfClientType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                                                        <TextField fx:id="tfClient" layoutX="85.0" layoutY="78.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                                                        <TextField fx:id="tfAddress" disable="true" editable="false" layoutX="85.0" layoutY="203.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                                                        <TextField disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2"  fx:id="tfTransNo"/>
+                                                                                        <DatePicker disable="true" editable="false" GridPane.columnIndex="7" GridPane.rowIndex="6"  fx:id="dpInquiryDate"/>
+                                                                                        <TextField disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7"  fx:id="tfBranch"/>
+                                                                                        <TextField disable="true" editable="false" layoutX="100.0" layoutY="135.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8"  fx:id="tfSalesPerson"/>
+                                                                                        <TextField disable="true" editable="false" layoutX="100.0" layoutY="105.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9"  fx:id="tfReferralAgent"/>
+                                                                                        <TextField disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="4"  fx:id="tfClientType"/>
+                                                                                        <TextField layoutX="85.0" layoutY="78.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5"  fx:id="tfClient"/>
+                                                                                        <TextField disable="true" editable="false" layoutX="85.0" layoutY="203.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6"  fx:id="tfAddress"/>
                                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" visible="false" GridPane.columnIndex="7">
                                                                      <children>
                                                                                               <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -247,18 +247,18 @@
                                                                           </font>
                                                                       </Label>
                                                                      </children></AnchorPane>
-                                                                                        <TextField fx:id="tfInquiryType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="8" />
-                                                                                        <TextField fx:id="tfCategoryType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="9" />
-                                                                                        <DatePicker fx:id="dpTargetDate" disable="true" editable="false" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
-                                                                  <TextField fx:id="tfPaymentMode" disable="true" editable="false" layoutX="633.0" layoutY="106.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                                                                                        <TextField disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="8"  fx:id="tfInquiryType"/>
+                                                                                        <TextField disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="9"  fx:id="tfUnitType"/>
+                                                                                        <DatePicker disable="true" editable="false" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7"  fx:id="dpTargetDate"/>
+                                                                  <TextField disable="true" editable="false" layoutX="633.0" layoutY="106.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="13"  fx:id="tfPaymentMode"/>
                                                                   <Label layoutX="550.0" layoutY="54.0" text="Inquiry No" GridPane.columnIndex="5" GridPane.rowIndex="5">
                                                                      <font>
                                                                         <Font size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <TextField fx:id="tfInquiryNo" disable="true" editable="false" layoutX="633.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="5" />
+                                                                  <TextField disable="true" editable="false" layoutX="633.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="5"  fx:id="tfInquiryNo"/>
                                                                                         <Label text="Transaction Date" GridPane.rowIndex="2" />
-                                                                                        <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                        <DatePicker GridPane.columnIndex="2" GridPane.rowIndex="2"  fx:id="dpTransactionDate"/>
                                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="7">
                                                                      <children>
                                                                         <Label fx:id="lblBankApplicationStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
@@ -291,7 +291,7 @@
                                                                   <TextField fx:id="tfWTaxRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="7" GridPane.rowIndex="15" />
                                                                   <TextField fx:id="tfVatAmount" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="14" />
                                                                   <TextField fx:id="tfVatSales" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="13" />
-                                                                  <TextField fx:id="tfVatRate" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="12" />
+                                                                  <TextField alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="12"  fx:id="tfVATRate"/>
                                                                   <Label layoutX="525.0" layoutY="260.0" text="Sales Amount" GridPane.columnIndex="5" GridPane.rowIndex="17">
                                                                      <font>
                                                                         <Font name="System Bold" size="12.0" />
@@ -299,13 +299,13 @@
                                                                   </Label>
                                                                   <TextField fx:id="tfSalesAmount" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="340.0" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="17" />
                                                                                         <Label text="Remarks" GridPane.rowIndex="16" />
-                                                                                        <TextArea fx:id="taRemarks" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="16" GridPane.rowSpan="2" />
+                                                                                        <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="16" GridPane.rowSpan="2"  fx:id="taRemarks"/>
                                                                   <Label layoutX="10.0" layoutY="54.0" text="Applied Date" GridPane.rowIndex="3" />
                                                                   <Label layoutX="553.0" layoutY="54.0" text="Approve Date" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                                                                   <Label layoutX="549.0" layoutY="82.0" text="Due Date" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-                                                                  <DatePicker fx:id="dpAppliedDate" layoutX="110.0" layoutY="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                  <DatePicker fx:id="dpApproveDate" layoutX="633.0" layoutY="50.0" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                                                                  <DatePicker fx:id="dpDueDate" layoutX="633.0" layoutY="78.0" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                                                                  <DatePicker layoutX="110.0" layoutY="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3"  fx:id="dpAppliedDate"/>
+                                                                  <DatePicker layoutX="633.0" layoutY="50.0" GridPane.columnIndex="7" GridPane.rowIndex="2"  fx:id="dpApproveDate"/>
+                                                                  <DatePicker layoutX="633.0" layoutY="78.0" GridPane.columnIndex="7" GridPane.rowIndex="3"  fx:id="dpDueDate"/>
                                                                   <Separator prefWidth="200.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="8" GridPane.rowIndex="10" />
                                                                                     </children>
                                                       </GridPane>
@@ -333,10 +333,10 @@
                                                                   <Label text="Description" GridPane.rowIndex="1" />
                                                                   <Label layoutX="410.0" layoutY="97.0" text="Unit Price" GridPane.columnIndex="5" />
                                                                   <Label layoutX="56.0" layoutY="87.0" text="Quantity" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                                                                  <TextField fx:id="tfBarcode" GridPane.columnIndex="2" />
-                                                                  <TextField fx:id="tfDescription" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                                                                  <TextField fx:id="tfSalesAmount1" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" />
-                                                                  <TextField fx:id="tfSalesAmount11" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="12.0" promptText="0" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+                                                                  <TextField GridPane.columnIndex="2"  fx:id="tfBarcode"/>
+                                                                  <TextField GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1"  fx:id="tfDescription"/>
+                                                                  <TextField alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7"  fx:id="tfUnitPrice"/>
+                                                                  <TextField alignment="CENTER_RIGHT" layoutX="633.0" layoutY="12.0" promptText="0" GridPane.columnIndex="7" GridPane.rowIndex="1"  fx:id="tfQuantity"/>
                                                                </children>
                                                             </GridPane>
                                                          </children>
@@ -354,11 +354,11 @@
                                                                <children>
                                                                   <TableView fx:id="tblViewDetailList" minWidth="772.0" prefWidth="200.0" GridPane.rowIndex="1">
                                                                      <columns>
-                                                                        <TableColumn fx:id="tblBankAppRowNo" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" text="No." />
-                                                                        <TableColumn fx:id="tblBank" maxWidth="400.0" minWidth="-1.0" prefWidth="377.0" resizable="false" text="Description" />
-                                                                        <TableColumn fx:id="tblAppliedDate" maxWidth="205.0" minWidth="88.0" prefWidth="111.0" resizable="false" text="Unit Price" />
-                                                                        <TableColumn fx:id="tblApprovedDate" maxWidth="187.0" minWidth="58.0" prefWidth="88.0" resizable="false" text="Quantity" />
-                                                                        <TableColumn fx:id="tblStatus" maxWidth="180.0" minWidth="93.0" prefWidth="104.0" resizable="false" text="Total" />
+                                                                        <TableColumn prefWidth="40.0" resizable="false" text="No."  minWidth="40.0" maxWidth="40.0" fx:id="tblNo"/>
+                                                                        <TableColumn prefWidth="377.0" resizable="false" text="Description"  minWidth="377.0" maxWidth="377.0" fx:id="tblDescription"/>
+                                                                        <TableColumn prefWidth="111.0" resizable="false" text="Unit Price"  minWidth="111.0" maxWidth="111.0" fx:id="tblUnitPrice"/>
+                                                                        <TableColumn prefWidth="88.0" resizable="false" text="Quantity"  minWidth="88.0" maxWidth="88.0" fx:id="tblQuantity"/>
+                                                                        <TableColumn prefWidth="104.0" resizable="false" text="Total"  minWidth="104.0" maxWidth="104.0" fx:id="tblTotal"/>
                                                                      </columns>
                                                                   </TableView>
                                                                </children>
