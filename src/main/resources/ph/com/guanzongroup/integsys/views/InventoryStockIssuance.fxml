@@ -648,7 +648,7 @@
                                                                         </AnchorPane>
                                                                         <AnchorPane fx:id="apDetailOther" style="-fx-border-color: FF8201;" VBox.vgrow="ALWAYS">
                                                                            <children>
-                                                                              <TableView fx:id="tblViewDetails" layoutX="8.0" layoutY="8.0" onMouseClicked="#ontblDetailClicked" prefHeight="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                              <TableView fx:id="tblViewDetails" layoutX="8.0" layoutY="8.0" minWidth="-Infinity" onMouseClicked="#ontblDetailClicked" prefHeight="210.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                                 <columns>
                                                                             <TableColumn fx:id="tblColDetailNo" editable="false" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="No." />
                                                                             <TableColumn fx:id="tblColDetailOrderNo" editable="false" maxWidth="120.0" minWidth="120.0" prefWidth="-1.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Order No." />

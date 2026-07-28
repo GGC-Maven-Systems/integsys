@@ -629,7 +629,7 @@ public class InventoryStockIssuanceControllerMC_SP implements Initializable, Scr
                         return;
                     }
 
-                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(), "Initialize Print Delivery Transaction")) {
+                    if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(poAppController.getMaster().getTransactionNo()), "Initialize Print Delivery Transaction")) {
                         return;
                     }
                     reloadTableDetail();
@@ -727,6 +727,41 @@ public class InventoryStockIssuanceControllerMC_SP implements Initializable, Scr
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
 //                    
+                    case "tfClusterName":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setClusterID("");
+                        }
+                        return;
+                    case "tfTownName":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setTownId("");
+                        }
+                        return;
+                    case "tfPlateNo":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setSerialId("");
+                        }
+                        return;
+                    case "tfDriver":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setDriverID("");
+                        }
+                        return;
+                    case "tfAssistant1":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setEmploy01("");
+                        }
+                        return;
+                    case "tfAssistant2":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getMaster().setEmploy02("");
+                        }
+                        return;
+                    case "tfProjectCode":
+                        if (lsValue.isEmpty()) {
+                            poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().setProjectCode("");
+                        }
+                        return;
                     case "tfIssuedQty":
                         if (poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).getStockId() == null
                                 || poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).getStockId().isEmpty()) {
@@ -748,6 +783,7 @@ public class InventoryStockIssuanceControllerMC_SP implements Initializable, Scr
                             loTextField.requestFocus();
                         }
                         if (lnIssuedQty < 0.00) {
+                            tfIssuedQty.setText("0.00");
                             return;
                         }
                         // check if serialized
@@ -1153,13 +1189,24 @@ public class InventoryStockIssuanceControllerMC_SP implements Initializable, Scr
     }
 
     private void initButtonDisplayDetail(int fnEditMode) {
+        boolean lbisConfirmed = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(1)) || lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(2)));
+        boolean lbisCancelled = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(3)));
+        boolean lbisPosted = lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(2));
 
         boolean lbShow = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
         // Show-only based on mode
         initButtonControls(lbShow, "btnSaveDelivery");
         initButtonControls(!lbShow, "btnUpdateDelivery", "btnPrintDelivery", "btnCancelDelivery");
+        initButtonControls(!lbShow && !lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
+        initButtonControls(!lbShow && !lbisCancelled, "btnUpdateDelivery", "btnPrintDelivery", "btnCancelDelivery");
+        if (!lbisCancelled) {
+            initButtonControls(!lbisPosted & !lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
+        }
 
-        apDetailDelivery.setDisable(!lbShow);
+        dpDeliveryDate.setDisable(!lbShow);
+        tfProjectCode.setDisable(!lbShow);
+        taDeliveryRemarks.setDisable(!lbShow);
+        apDetailDelivery.setDisable(fnEditMode != EditMode.READY && !lbShow);
     }
 
     private void initButtonDisplay(int fnEditMode) {
@@ -1179,11 +1226,11 @@ public class InventoryStockIssuanceControllerMC_SP implements Initializable, Scr
 
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnHistory", "btnPrint");
-        initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate", "btnVoid");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
-        apMasterDelivery.setDisable(!lbEditing);
+        apMasterDelivery.setDisable(!lbEditing && !lbHasTransaction);
 
     }
 
