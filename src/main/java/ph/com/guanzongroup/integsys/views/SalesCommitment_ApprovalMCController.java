@@ -25,7 +25,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -59,9 +58,7 @@ import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.SalesCommitment;
-import ph.com.guanzongroup.cas.sales.t1.SalesInquiry;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
@@ -70,7 +67,7 @@ import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
  *
  * @author Team 2
  */
-public class SalesCommitment_EntryMCController implements Initializable, ScreenInterface {
+public class SalesCommitment_ApprovalMCController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
     private JSONObject poJSON;
@@ -85,12 +82,9 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
     private String psCategoryId = "";
     private ObservableList<ModelSalesCommitment_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelSalesCommitment_Main> main_data = FXCollections.observableArrayList();
-    List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
-    List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
-    private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
 
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
@@ -197,7 +191,6 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                             return;
                         }
                         pnEditMode = poController.getEditMode();
-                        JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
                         break;
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
@@ -230,15 +223,13 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                             return;
                         }
                         pnEditMode = poController.getEditMode();
-                        JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
                         break;
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
-                            JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
-
+                            JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             //Clear data
                             poController.resetMaster();
                             poController.Detail().clear();
@@ -282,7 +273,6 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                JFXUtil.showRetainedHighlight(true, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
 
                                 // Confirmation Prompt
                                 JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
@@ -313,29 +303,64 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                         }
                         break;
                     case "btnRetrieve":
-                        retrieveSalesInquiry();
+                        retrieveSalesCommitment();
                         break;
-
+                    case "btnApprove":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?")) {
+                            pnEditMode = poController.getEditMode();
+                            if (pnEditMode == EditMode.READY) {
+                                poJSON = poController.ApproveTransaction("");
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                    return;
+                                } else {
+                                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                    JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                    JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
+                                }
+                            }
+                        } else {
+                            return;
+                        }
+                        break;
+                    case "btnDisapprove":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to disapprove the transaction?")) {
+                            pnEditMode = poController.getEditMode();
+                            if (pnEditMode == EditMode.READY) {
+                                poJSON = poController.CancelTransaction();
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                    return;
+                                } else {
+                                    ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                    pnEditMode = poController.getEditMode();
+                                    JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                    JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#FAA0A0", highlightedRowsMain);
+                                }
+                            }
+                        } else {
+                            return;
+                        }
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel", "btnCancelBankApplication")) {
-                    poController.InitTransaction();
-                    pnEditMode = EditMode.UNKNOWN;
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnReturn")) {
+//                    poController.resetTransaction();
                     clearTextFields();
+                    pnEditMode = EditMode.UNKNOWN;
                 }
 
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnArrowRight", "btnArrowLeft", "btnRetrieve", "btnHistory")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
                 } else {
+                    loadRecordMaster();
                     loadTableDetail.reload();
                 }
-                JFXUtil.runWithDelay(.5, () -> {
-                    if (lsButton.equals("btnUpdate")) {
-                        moveNext(false, false);
-                    }
-                });
                 initButton(pnEditMode);
+                if (lsButton.equals("btnUpdate")) {
+                    moveNext(false, false);
+                }
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -343,29 +368,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
         }
     }
 
-    public void loadHighlightFromDetail() {
-        for (int lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-            String lsTransNo = !JFXUtil.isObjectEqualTo(poController.Master().getSourceNo(), null, "")
-                    ? poController.Master().getSourceNo() : "";
-            String lsHighlightbasis;
-            lsHighlightbasis = lsTransNo;
-            if (!JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getQuantity(), null, "")) {
-                if (poController.Detail(lnCtr).getQuantity() != 0.0000) {
-                    plOrderNoPartial.add(new Pair<>(lsHighlightbasis, "1"));
-                } else {
-                    plOrderNoPartial.add(new Pair<>(lsHighlightbasis, "0"));
-                }
-            }
-        }
-        for (Pair<String, String> pair : plOrderNoPartial) {
-            if (!"".equals(pair.getKey()) && pair.getKey() != null) {
-                JFXUtil.highlightByKey(tblViewMainList, pair.getKey(), "#A7C7E7", highlightedRowsMain);
-            }
-        }
-        JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, false);
-    }
-
-    public void retrieveSalesInquiry() {
+    public void retrieveSalesCommitment() {
         try {
             poJSON = new JSONObject();
             poJSON = poController.loadTransactionList("", "", "");
@@ -480,40 +483,35 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
 
     private void loadTableDetailFromMain() {
         poJSON = new JSONObject();
-        if (pnEditMode == EditMode.ADDNEW) {  //Do not allow to link when edit mode is not equal to add new
-            pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-            ModelSalesCommitment_Main selected = (ModelSalesCommitment_Main) tblViewMainList.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                try {
-                    int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
-                    String lsTransactionNo = selected.getIndex02();
 
-                    if (!JFXUtil.loadValidation2(pnEditMode, pxeModuleName, poController.Master().getSourceNo(), lsTransactionNo, poController.Master().getTransactionTotal())) {
-                        return;
-                    }
-                    pnMain = pnRowMain;
-                    JFXUtil.clearTextFields(apMaster, apDetail);
-                    poJSON = poController.populateDetail(lsTransactionNo);
-                    if ("error".equals(poJSON.get("result"))) {
-                        loadTableDetail.reload();
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
-                    pnEditMode = poController.getEditMode();
-                    loadTableDetail.reload();
-                    moveNext(false, false);
-
-                    JFXUtil.runWithDelay(0.50, () -> {
-                        loadTableMain.reload();
-                    });
-                } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+        ModelSalesCommitment_Main selected = (ModelSalesCommitment_Main) tblViewMainList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            try {
+                int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
+                String lsTransactionNo = selected.getIndex06();
+                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getTransactionNo(), lsTransactionNo)) {
+                    return;
                 }
+                pnMain = pnRowMain;
+                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
+                JFXUtil.clearTextFields(apMaster, apDetail);
+                poJSON = poController.OpenTransaction(lsTransactionNo);
+                if ("error".equals(poJSON.get("result"))) {
+                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                    poController.resetTransaction();
+                    return;
+                }
+                pnEditMode = poController.getEditMode();
+                loadTableDetail.reload();
+                moveNext(false, false);
+            } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-        } else {
-            ShowMessageFX.Warning(null, pxeModuleName, "Data can only be inserted when in ADD mode.");
         }
+
     }
 
     public void initLoadTable() {
@@ -565,8 +563,6 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                 lsModelVariant = "";
                                 lsColor = "";
                             }
-                            JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
-                            loadHighlightFromDetail();
                             int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 6); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
@@ -600,6 +596,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                         Thread.sleep(100);
                         Platform.runLater(() -> {
                             main_data.clear();
+                            JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
                             if (poController.getSalesInquiryCount() > 0) {
                                 for (int lnCtr = 0; lnCtr <= poController.getSalesInquiryCount() - 1; lnCtr++) {
                                     try {
@@ -610,7 +607,12 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).Client().getCompanyName()),
                                                 String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
                                         ));
-
+//                                        if (JFXUtil.isObjectEqualTo(poController.TransactionList(lnCtr).getTransactionStatus(), BankApplicationStatus.CANCELLED)) {
+//                                            JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+//                                        }
+//                                        if (poController.TransactionList(lnCtr).getTransactionStatus().equals(BankApplicationStatus.APPROVED)) {
+//                                            JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
+//                                        }
                                     } catch (SQLException | GuanzonException ex) {
                                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                         ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
