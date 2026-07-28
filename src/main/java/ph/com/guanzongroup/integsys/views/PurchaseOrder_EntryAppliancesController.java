@@ -835,7 +835,7 @@ public class PurchaseOrder_EntryAppliancesController implements Initializable, S
                             try (PDDocument document = PDDocument.load(selectedFile)) {
                                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                                 int pageCount = document.getNumberOfPages();
-                                if (pageCount > 5) {
+                                if (pageCount > 20) {
                                     ShowMessageFX.Warning(null, psFormName, "PDF exceeds maximum allowed pages.");
                                     return;
                                 }

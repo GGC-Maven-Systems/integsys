@@ -503,7 +503,7 @@ public class DeliveryAcceptance_EntryMonarchFoodController implements Initializa
                             if (lsFileName.toLowerCase().endsWith(".pdf")) {
                                 try (PDDocument document = PDDocument.load(selectedFile)) {
                                     int pageCount = document.getNumberOfPages();
-                                    if (pageCount > 5) {
+                                    if (pageCount > 20) {
                                         ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
                                         return;
                                     }
