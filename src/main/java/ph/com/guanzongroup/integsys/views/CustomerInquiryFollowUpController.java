@@ -2,6 +2,7 @@ package ph.com.guanzongroup.integsys.views;
 
 import com.jfoenix.controls.JFXTimePicker;
 import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,6 +13,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -20,21 +22,27 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.UserRight;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.CustomerInquiryFollowUpStatic;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.integsys.model.ModelCustomerInquiryFollowUpAttachment;
 import ph.com.guanzongroup.integsys.model.ModelPRFAttachment;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.model.ModelTableMain;
@@ -42,10 +50,12 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,6 +69,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     private SalesControllers oSales;
     private JSONObject poJSON;
     private int pnMain = 0;
+    private boolean isFistFormLoad = true;
     // =========================================================================
     // Controller Information
     // =========================================================================
@@ -86,6 +97,12 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     private String fbSourceNo = "";
     private String fbSourceCode = "";
 
+    private FileChooser fileChooser;
+
+    private double scaleFactor = 1.0;
+
+    private double mouseAnchorX;
+    private double mouseAnchorY;
     // =========================================================================
     // Table Data
     // =========================================================================
@@ -99,14 +116,13 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-
-    private ObservableList<ModelPRFAttachment> attachment_data = FXCollections.observableArrayList();
-    ObservableList<String> documentType = ModelPRFAttachment.documentType;
+    private ObservableList<ModelCustomerInquiryFollowUpAttachment> attachment_data = FXCollections.observableArrayList();
+    ObservableList<String> documentType = ModelCustomerInquiryFollowUpAttachment.documentType;
     // =========================================================================
     // Root Containers
     // =========================================================================
     @FXML private AnchorPane ChildAnchorPane;
-    @FXML private AnchorPane AnchorInputs;
+    @FXML private AnchorPane AnchorInputs,anchorEntries;
     @FXML private AnchorPane apDetail;
     @FXML private AnchorPane apAttachments;
     @FXML private AnchorPane apAttachmentButtons;
@@ -207,6 +223,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     @FXML private TextField tfFilterCustName;
     @FXML private TextField tfFilterSalesperson;
     @FXML private TextField tfModel1221;
+    @FXML private Label lblFilterSalesPerson;
 
     @FXML private DatePicker dpFilterDateFrom;
     @FXML private DatePicker dpFilterDateThru;
@@ -262,7 +279,10 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         ClickButton();
         initComboBoxField();
         initDatePickers();
-//        JFXUtil.setKeyEventFilter( tblAttachments);
+        initAttachmentsGrid();
+        initAttachmentPreviewPane();
+        initStackPaneListener();
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblAttachments);
         pbLoaded = true;
         btnNew.fire();
     }
@@ -271,6 +291,65 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
         oSales = new SalesControllers(oApp, logwrapr);
         oSales.CustomerInquiryFollowUp().setRecordStatus(CustomerInquiryFollowUpStatic.FOLLOWED_UP + CustomerInquiryFollowUpStatic.PENDING);
+    }
+    private void initStackPaneListener() {
+        stackPane1.widthProperty().addListener((observable, oldValue, newWidth) -> {
+            double computedWidth = newWidth.doubleValue();
+            ldstackPaneWidth = computedWidth;
+
+        });
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            ldstackPaneHeight = computedHeight;
+            loadTableAttachment();
+            loadRecordAttachment(true);
+            initAttachmentsGrid();
+        });
+    }
+
+
+    private void initAttachmentPreviewPane() {
+        stackPane1.layoutBoundsProperty().addListener((observable, oldBounds, newBounds) -> {
+            stackPane1.setClip(new javafx.scene.shape.Rectangle(
+                    newBounds.getMinX(),
+                    newBounds.getMinY(),
+                    newBounds.getWidth(),
+                    newBounds.getHeight()
+            ));
+        });
+        imageView.setOnScroll((ScrollEvent event) -> {
+            double delta = event.getDeltaY();
+            scaleFactor = Math.max(0.5, Math.min(scaleFactor * (delta > 0 ? 1.1 : 0.9), 5.0));
+            imageView.setScaleX(scaleFactor);
+            imageView.setScaleY(scaleFactor);
+        });
+
+        imageView.setOnMousePressed((MouseEvent event) -> {
+            mouseAnchorX = event.getSceneX() - imageView.getTranslateX();
+            mouseAnchorY = event.getSceneY() - imageView.getTranslateY();
+        });
+
+        imageView.setOnMouseDragged((MouseEvent event) -> {
+            double translateX = event.getSceneX() - mouseAnchorX;
+            double translateY = event.getSceneY() - mouseAnchorY;
+            imageView.setTranslateX(translateX);
+            imageView.setTranslateY(translateY);
+        });
+
+        stackPane1.widthProperty().addListener((observable, oldValue, newWidth) -> {
+            double computedWidth = newWidth.doubleValue();
+            ldstackPaneWidth = computedWidth;
+
+        });
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            ldstackPaneHeight = computedHeight;
+
+            //Placed to get height and width of stack pane in computed size before loading the image
+            initStackPaneListener();
+            initAttachmentsGrid();
+        });
+
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
@@ -386,19 +465,19 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                     btnBrowse, btnNew, btnClose,btnRetrieve);
             CustomCommonUtil.setManaged(false, btnSave,btnCancel,
                     btnBrowse, btnNew, btnClose,btnRetrieve);
-
+                anchorEntries.setDisable(true);
             switch (fnValue) {
                 case EditMode.ADDNEW:
                     // When adding or updating, only show Save and Cancel
                     CustomCommonUtil.setVisible(true, btnSave,btnRetrieve, btnCancel);
                     CustomCommonUtil.setManaged(true, btnSave,btnRetrieve, btnCancel);
-                    AnchorInputs.setDisable(false);
+                    anchorEntries.setDisable(false);
                     break;
                 case EditMode.UNKNOWN:
                 default:
                     // Default fallback: show only Browse and Close
-                    CustomCommonUtil.setVisible(true, btnBrowse,btnNew,btnRetrieve, btnClose);
-                    CustomCommonUtil.setManaged(true, btnBrowse,btnNew,btnRetrieve, btnClose);
+                    CustomCommonUtil.setVisible(true, btnNew,btnRetrieve, btnClose);
+                    CustomCommonUtil.setManaged(true, btnNew,btnRetrieve, btnClose);
                     break;
             }
         } catch (Exception ex) {
@@ -410,6 +489,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         registerFocusListener(AnchorInputs);
         registerFocusListener(apDetail);
         registerKeyEvents();
+
     }
 
     private void initComboBoxField() {
@@ -436,7 +516,12 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
 
                 if (newValue != null && newValue.intValue() >= 0) {
                     fbInquiryType = CustomerInquiryFollowUpStatic.INQUIRY_FILTER_CODE[newValue.intValue()];
-                    loadTableMaster();
+                    if (isFistFormLoad) {
+                        isFistFormLoad = false;
+                    } else {
+                        loadTableMaster();
+                    }
+
                 }
             }
         });
@@ -505,9 +590,46 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                                 Number newValue) {
 
                 if (newValue != null && newValue.intValue() >= 0) {
+
+                    String status = CustomerInquiryFollowUpStatic.INQUIRY_STATUS_CODE[newValue.intValue()];
+
+                    // Validate existing follow-up date
+                    if (dpSchedFollowUp.getValue() != null) {
+
+                        LocalDate today = LocalDate.now();
+                        LocalDate selectedDate = dpSchedFollowUp.getValue();
+                        long days = ChronoUnit.DAYS.between(today, selectedDate);
+
+                        if (CustomerInquiryFollowUpStatic.FOLLOWED_UP.equals(status)
+                                && (days < 0 || days > 30)) {
+
+                            ShowMessageFX.Warning(
+                                    "For Followed Up status, the follow-up date must be between today and 30 days from today.",
+                                    pxeModuleName,
+                                    null);
+
+                            // Revert to previous status
+                            cmbStatus.getSelectionModel().select(oldValue.intValue());
+                            return;
+                        }
+
+                        if (CustomerInquiryFollowUpStatic.PENDING.equals(status)
+                                && (days < 0 || days > 270)) {
+
+                            ShowMessageFX.Warning(
+                                    "For Pending status, the follow-up date must be between today and 270 days from today.",
+                                    pxeModuleName,
+                                    null);
+
+                            // Revert to previous status
+                            cmbStatus.getSelectionModel().select(oldValue.intValue());
+                            return;
+                        }
+                    }
+
                     oSales.CustomerInquiryFollowUp()
                             .getModel()
-                            .setRecordStatus(CustomerInquiryFollowUpStatic.INQUIRY_STATUS_CODE[newValue.intValue()]);
+                            .setRecordStatus(status);
                 }
             }
         });
@@ -524,6 +646,28 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                 }
             }
         });
+
+        boolean isEncoder = UserRight.ENCODER == oApp.getUserLevel();
+
+        if (isEncoder) {
+            gridRow3.setMinHeight(0);
+            gridRow3.setPrefHeight(0);
+            gridRow3.setMaxHeight(0);
+            tfFilterSalesperson.setVisible(false);
+            lblFilterSalesPerson.setVisible(false);
+            tfFollowedUpBy.setDisable(true);
+            tfFollowedUpBy.setPromptText("");
+        } else {
+            gridRow3.setMinHeight(Region.USE_COMPUTED_SIZE);
+            gridRow3.setPrefHeight(Region.USE_COMPUTED_SIZE);
+            gridRow3.setMaxHeight(Region.USE_COMPUTED_SIZE);
+            lblFilterSalesPerson.setVisible(true);
+            tfFilterSalesperson.setVisible(true);
+            tfFollowedUpBy.setDisable(false);
+            tfFollowedUpBy.setPromptText("PRESS F3: Search");
+        }
+
+
     }
     // =========================================================================
     // Load ReCord
@@ -661,9 +805,44 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         switch (source.getId()) {
             case "dpSchedFollowUp":
                 if (dpSchedFollowUp.getValue() != null) {
+
+                    LocalDate selectedDate = dpSchedFollowUp.getValue();
+                    LocalDate today = LocalDate.now();
+
+                    long days = ChronoUnit.DAYS.between(today, selectedDate);
+
+                    String recordStatus = oSales.CustomerInquiryFollowUp()
+                            .getModel()
+                            .getRecordStatus();
+
+                    if (CustomerInquiryFollowUpStatic.FOLLOWED_UP.equals(recordStatus)) {
+
+                        if (days < 0 || days > 30) {
+                            ShowMessageFX.Warning(
+                                    "Follow-up date must be between today and 30 days from today.",
+                                    pxeModuleName,
+                                    null);
+
+                            dpSchedFollowUp.setValue(today);
+                            return;
+                        }
+
+                    } else if (CustomerInquiryFollowUpStatic.PENDING.equals(recordStatus)) {
+
+                        if (days < 0 || days > 270) {
+                            ShowMessageFX.Warning(
+                                    "Follow-up date must be between today and 270 days from today.",
+                                    pxeModuleName,
+                                    null);
+
+                            dpSchedFollowUp.setValue(today);
+                            return;
+                        }
+                    }
+
                     oSales.CustomerInquiryFollowUp()
                             .getModel()
-                            .setFollowUpDate(java.sql.Date.valueOf(dpSchedFollowUp.getValue()));
+                            .setFollowUpDate(java.sql.Date.valueOf(selectedDate));
                 }
                 break;
             default:
@@ -778,11 +957,13 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                 if (main_data.isEmpty()) {
                     tblMaster.setPlaceholder(
                             new Label("NO RECORD TO LOAD"));
-
-                    ShowMessageFX.Warning(
-                            "NO RECORD TO LOAD.",
-                            pxeModuleName,
-                            null);
+                    if(isFistFormLoad == false){
+                        ShowMessageFX.Warning(
+                                "NO RECORD TO LOAD.",
+                                pxeModuleName,
+                                null);
+                    }
+                    isFistFormLoad = false;
                 }
                 setupPagination();
                 showRetainedHighlight(true);
@@ -911,6 +1092,10 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
         btnCancel.setOnAction(this::handleButtonAction);
         btnClose.setOnAction(this::handleButtonAction);
         btnRetrieve.setOnAction(this::handleButtonAction);
+        btnAddAttachment.setOnAction(this::handleButtonAction);
+        btnRemoveAttachment.setOnAction(this::handleButtonAction);
+        btnArrowLeft.setOnAction(this::handleButtonAction);
+        btnArrowRight.setOnAction(this::handleButtonAction);
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -928,6 +1113,8 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                         break;
                     case "btnNew":
                         ClearAllFields();
+                        attachment_data.clear();
+                        oSales.CustomerInquiryFollowUp().resetattachment();
                         poJSON = oSales.CustomerInquiryFollowUp().newRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
@@ -941,6 +1128,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                         if (dpSchedFollowUp.getValue() == null) {
                             setDefaultFollowUpSchedule();
                         }
+
                         break;
 
                     case "btnCancel":
@@ -949,6 +1137,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                             initializeObject();
                             pnEditMode =  EditMode.READY;
                             initButton(pnEditMode);
+//                            cmbFilterInquiryType.getSelectionModel().selectFirst();
                         }
                         break;
                     case "btnSave":
@@ -963,7 +1152,90 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                         btnNew.fire();
                         break;
                     case "btnRetrieve":
+                        isFistFormLoad = false;
                         loadTableMaster();
+                        break;
+                    case "btnAddAttachment":
+                        fileChooser = new FileChooser();
+                        fileChooser.setTitle("Choose Image");
+                        fileChooser.getExtensionFilters().addAll(
+                                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.pdf")
+                        );
+                        java.io.File selectedFile = fileChooser.showOpenDialog((Stage) btnAddAttachment.getScene().getWindow());
+
+                        if (selectedFile != null) {
+                            // Read image from the selected file
+                            Path imgPath = selectedFile.toPath();
+                            Image loimage = new Image(Files.newInputStream(imgPath));
+                            imageView.setImage(loimage);
+
+                            //Validate attachment
+                            String imgPath2 = selectedFile.getName().toString();
+                            for (int lnCtr = 0; lnCtr <= oSales.CustomerInquiryFollowUp().getTransactionAttachmentCount() - 1; lnCtr++) {
+                                if (imgPath2.equals(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(lnCtr).getModel().getFileName())
+                                        && RecordStatus.ACTIVE.equals(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, "File name already exists.");
+                                    pnAttachment = lnCtr;
+                                    loadRecordAttachment(true);
+                                    return;
+                                }
+                            }
+
+                            //Limit maximum pages of pdf to add
+                            if (imgPath2.toLowerCase().endsWith(".pdf")) {
+                                try ( PDDocument document = PDDocument.load(selectedFile)) {
+                                    PDFRenderer pdfRenderer = new PDFRenderer(document);
+                                    int pageCount = document.getNumberOfPages();
+                                    if (pageCount > 5) {
+                                        ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
+                                        return;
+                                    }
+                                }
+                            }
+
+//                            int lnTempRow = JFXUtil.getDetailTempRow(attachment_data,  poGLControllers.PaymentRequest().addAttachment(imgPath2), 3);
+//                            pnAttachment = lnTempRow;
+                            pnAttachment = oSales.CustomerInquiryFollowUp().addAttachment(imgPath2);
+                            //Copy file to Attachment path
+                            oSales.CustomerInquiryFollowUp().copyFile(selectedFile.toString());
+                            loadTableAttachment();
+                            tblAttachments.getFocusModel().focus(pnAttachment);
+                            tblAttachments.getSelectionModel().select(pnAttachment);
+                        }
+                        break;
+                    case "btnRemoveAttachment":
+                        if (oSales.CustomerInquiryFollowUp().getTransactionAttachmentCount() <= 0) {
+                            return;
+                        } else {
+                            for (int lnCtr = 0; lnCtr < oSales.CustomerInquiryFollowUp().getTransactionAttachmentCount(); lnCtr++) {
+                                if (RecordStatus.INACTIVE.equals(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    if (pnAttachment == lnCtr) {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        poJSON = oSales.CustomerInquiryFollowUp().removeAttachment(pnAttachment);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            return;
+                        }
+                        attachment_data.remove(tblAttachments.getSelectionModel().getSelectedIndex());
+                        if (pnAttachment != 0) {
+                            pnAttachment -= 1;
+                        }
+                        loadRecordAttachment(false);
+                        loadTableAttachment();
+                        if (attachment_data.size() <= 0) {
+                            JFXUtil.clearTextFields(apAttachments);
+                        }
+                        initAttachmentsGrid();
+                        break;
+                    case "btnArrowLeft":
+                        slideImage(-1);
+                        break;
+                    case "btnArrowRight":
+                        slideImage(1);
                         break;
                 }
             } catch (SQLException | GuanzonException | CloneNotSupportedException  ex) {
@@ -984,52 +1256,235 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
             }
         }
     }
+    private void initAttachmentsGrid() {
+        /*FOCUS ON FIRST ROW*/
+        JFXUtil.setColumnCenter(tblRowNoAttachment);
+        JFXUtil.setColumnLeft(tblFileNameAttachment);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblAttachments);
+        tblAttachments.setItems(attachment_data);
+
+        if (pnAttachment < 0 || pnAttachment >= attachment_data.size()) {
+            if (!attachment_data.isEmpty()) {
+                /* FOCUS ON FIRST ROW */
+                tblAttachments.getSelectionModel().select(0);
+                tblAttachments.getFocusModel().focus(0);
+                pnAttachment = tblAttachments.getSelectionModel().getSelectedIndex();
+            }
+        } else {
+            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+            tblAttachments.getSelectionModel().select(pnAttachment);
+            tblAttachments.getFocusModel().focus(pnAttachment);
+        }
+
+    }
+    private void loadTableAttachment() {
+        // Setting data to table detail
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.setMaxHeight(50);
+        progressIndicator.setStyle("-fx-progress-color: #FF8201;");
+        StackPane loadingPane = new StackPane(progressIndicator);
+        loadingPane.setAlignment(Pos.CENTER);
+        tblAttachments.setPlaceholder(loadingPane);
+        progressIndicator.setVisible(true);
+
+        Label placeholderLabel = new Label("NO RECORD TO LOAD");
+        placeholderLabel.setStyle("-fx-font-size: 10px;"); // Adjust the size as needed
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                scaleFactor = 1.0;
+                JFXUtil.resetImageBounds(imageView, stackPane1);
+                Platform.runLater(() -> {
+                    try {
+                        attachment_data.clear();
+                        int lnCtr;
+                        int lnCount = 0;
+                        for (lnCtr = 0; lnCtr < oSales.CustomerInquiryFollowUp().getTransactionAttachmentCount(); lnCtr++) {
+                            if (RecordStatus.INACTIVE.equals(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                continue;
+                            }
+                            lnCount += 1;
+                            attachment_data.add(
+                                    new ModelCustomerInquiryFollowUpAttachment(String.valueOf(lnCount),
+                                            String.valueOf(oSales.CustomerInquiryFollowUp().TransactionAttachmentList(lnCtr).getModel().getFileName()),
+                                            String.valueOf(lnCtr)
+                                    ));
+                        }
+                        int lnTempRow = JFXUtil.getDetailRow(attachment_data, pnAttachment, 3); //this method is used only when Reverse is applied
+                        if (lnTempRow < 0 || lnTempRow
+                                >= attachment_data.size()) {
+                            if (!attachment_data.isEmpty()) {
+                                /* FOCUS ON FIRST ROW */
+                                JFXUtil.selectAndFocusRow(tblAttachments, 0);
+                                int lnRow = Integer.parseInt(attachment_data.get(0).getIndex03());
+                                pnAttachment = lnRow;
+                                loadRecordAttachment(true);
+                            }
+                        } else {
+                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                            JFXUtil.selectAndFocusRow(tblAttachments, lnTempRow);
+                            int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                            pnAttachment = lnRow;
+                            loadRecordAttachment(true);
+                        }
+                        if (attachment_data.size() <= 0) {
+                            loadRecordAttachment(false);
+                        }
+                    } catch (Exception e) {
+                    }
+                });
+
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                if (attachment_data == null || attachment_data.isEmpty()) {
+                    tblAttachments.setPlaceholder(placeholderLabel);
+                } else {
+                    tblAttachments.toFront();
+                }
+                progressIndicator.setVisible(false);
+
+            }
+
+            @Override
+            protected void failed() {
+                if (attachment_data == null || attachment_data.isEmpty()) {
+                    tblAttachments.setPlaceholder(placeholderLabel);
+                }
+                progressIndicator.setVisible(false);
+            }
+
+        };
+        new Thread(task).start(); // Run task in background
+
+    }
+    private void slideImage(int direction) {
+        if (attachment_data.size() <= 0) {
+            return;
+        }
+
+        currentIndex = pnAttachment;
+        int newIndex = currentIndex + direction;
+
+        if (newIndex != -1 && (newIndex <= attachment_data.size() - 1)) {
+            TranslateTransition slideOut = new TranslateTransition(Duration.millis(300), imageView);
+            slideOut.setByX(direction * -400); // Move left or right
+
+            tblAttachments.getFocusModel().focus(newIndex);
+            tblAttachments.getSelectionModel().select(newIndex);
+            pnAttachment = newIndex;
+            loadRecordAttachment(false);
+
+            // Create a transition animation
+            slideOut.setOnFinished(event -> {
+                imageView.setTranslateX(direction * 400);
+                TranslateTransition slideIn = new TranslateTransition(Duration.millis(300), imageView);
+                slideIn.setToX(0);
+                slideIn.play();
+
+                loadRecordAttachment(true);
+            });
+
+            slideOut.play();
+        }
+        if (isImageViewOutOfBounds(imageView, stackPane1)) {
+            resetImageBounds();
+        }
+    }
+
+    private boolean isImageViewOutOfBounds(ImageView imageView, StackPane stackPane) {
+        Bounds clipBounds = stackPane.getClip().getBoundsInParent();
+        Bounds imageBounds = imageView.getBoundsInParent();
+
+        return imageBounds.getMaxX() < clipBounds.getMinX()
+                || imageBounds.getMinX() > clipBounds.getMaxX()
+                || imageBounds.getMaxY() < clipBounds.getMinY()
+                || imageBounds.getMinY() > clipBounds.getMaxY();
+    }
+
+    private void resetImageBounds() {
+        imageView.setScaleX(1.0);
+        imageView.setScaleY(1.0);
+        imageView.setTranslateX(0);
+        imageView.setTranslateY(0);
+        stackPane1.setAlignment(imageView, javafx.geometry.Pos.CENTER);
+    }
+
+    private void stackPaneClip() {
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(
+                stackPane1.getWidth() - 8, // Subtract 10 for padding (5 on each side)
+                stackPane1.getHeight() - 8 // Subtract 10 for padding (5 on each side)
+        );
+        clip.setArcWidth(8); // Optional: Rounded corners for aesthetics
+        clip.setArcHeight(8);
+        clip.setLayoutX(4); // Set padding offset for X
+        clip.setLayoutY(4); // Set padding offset for Y
+        stackPane1.setClip(clip);
+
+    }
 
 
     private void initTableOnClick() {
-        tblMaster.setOnMouseClicked(event -> {
-            pnMain = tblMaster.getSelectionModel().getSelectedIndex();
-            if (pnMain >= 0) {
-                if (event.getClickCount() == 2) {
-                    if (pnEditMode == EditMode.UPDATE) {
-                        boolean lbProceed = ShowMessageFX.YesNo(
-                                "Loading another transaction will invalidate all current updates on the loaded transaction.\n\nDo you want to proceed?",
-                                pxeModuleName,
-                                "Confirm Action"
-                        );
 
-                        if (!lbProceed) {
-                            return; // Stop loading another transaction
+            tblMaster.setOnMouseClicked(event -> {
+                pnMain = tblMaster.getSelectionModel().getSelectedIndex();
+                if (pnMain >= 0) {
+                    if (event.getClickCount() == 2) {
+                        if (pnEditMode == EditMode.UPDATE ) {
+                            boolean lbProceed = ShowMessageFX.YesNo(
+                                    "Loading another transaction will invalidate all current entry on the loaded transaction.\n\nDo you want to proceed?",
+                                    pxeModuleName,
+                                    "Confirm Action"
+                            );
+
+                            if (!lbProceed) {
+                                return; // Stop loading another transaction
+                            }
+
+                        }
+                        if(pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW){
+                            loadTableRecordFromMain();
                         }
 
-                    }
-                    loadTableRecordFromMain();
-                }
-            }
-        });
 
-        tblMaster.setRowFactory(tv -> new TableRow<ModelTableMain>() {
-                    @Override
-                    protected void updateItem(ModelTableMain item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null || empty) {
-                            setStyle("");
-                        } else {
-                            String key = item.getIndex01();
-                            if (highlightedRowsMain.containsKey(key)) {
-                                List<String> colors = highlightedRowsMain.get(key);
-                                if (!colors.isEmpty()) {
-                                    setStyle("-fx-background-color: " + colors.get(colors.size() - 1) + ";"); // Apply latest color
-                                }
+                    }
+                }
+            });
+
+            tblMaster.setRowFactory(tv -> new TableRow<ModelTableMain>() {
+                        @Override
+                        protected void updateItem(ModelTableMain item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (item == null || empty) {
+                                setStyle("");
                             } else {
-                                setStyle(""); // Default style
+                                String key = item.getIndex01();
+                                if (highlightedRowsMain.containsKey(key)) {
+                                    List<String> colors = highlightedRowsMain.get(key);
+                                    if (!colors.isEmpty()) {
+                                        setStyle("-fx-background-color: " + colors.get(colors.size() - 1) + ";"); // Apply latest color
+                                    }
+                                } else {
+                                    setStyle(""); // Default style
+                                }
                             }
                         }
                     }
-                }
-        );
+            );
 
-        JFXUtil.adjustColumnForScrollbar(tblMaster);
+            JFXUtil.adjustColumnForScrollbar(tblMaster);
+            tblAttachments.setOnMouseClicked(event -> {
+                pnAttachment = tblAttachments.getSelectionModel().getSelectedIndex();
+                if (pnAttachment >= 0) {
+                    scaleFactor = 1.0;
+                    loadRecordAttachment(true);
+                    resetImageBounds();
+                }
+            });
+
     }
     private void loadTableRecordFromMain() {
         poJSON = new JSONObject();
@@ -1157,6 +1612,7 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                                 }
                                 tfFilterCustName.setText((String) poJSON.get("customerNme"));
                                 fbCustomerID = (String) poJSON.get("clientID");
+                                isFistFormLoad = false;
                                 loadTableMaster();
                                 break;
                             case "tfFilterSalesperson":
@@ -1167,7 +1623,16 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                                 }
                                 tfFilterSalesperson.setText((String) poJSON.get("salesman"));
                                 fbSalesPersonID = (String) poJSON.get("salesmanID");
+                                isFistFormLoad = false;
                                 loadTableMaster();
+                                break;
+                            case "tfFollowedUpBy":
+                                poJSON = oSales.CustomerInquiryFollowUp().SearchSalesPerson(lsValue, false);
+                                if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
+                                    ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                                    return;
+                                }
+                                tfFollowedUpBy.setText(oSales.CustomerInquiryFollowUp().getModel().Salesman().Client().getCompanyName());
                                 break;
                         }
                         break;
@@ -1194,7 +1659,8 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
     private void ClearAllFields() {
         clearControls(AnchorInputs);
         clearControls(apDetail);
-
+        imageView.setImage(null);
+        tfAttachmentNo.clear();
         detail_data.clear();
         tblDetail.getItems().clear();
         if (data_details != null) {
@@ -1213,14 +1679,18 @@ public class CustomerInquiryFollowUpController implements Initializable, ScreenI
                 ((DatePicker) node).setValue(null);
             } else if (node instanceof ComboBox) {
                 ComboBox<?> combo = (ComboBox<?>) node;
+                if ("cmbFilterInquiryType".equals(combo.getId())) {
+                    continue;
+                }
                 combo.getSelectionModel().clearSelection();
                 combo.setValue(null);
             } else if (node instanceof JFXTimePicker) {
                 ((JFXTimePicker) node).setValue(null);
             } else if (node instanceof Parent) {
-                clearControls((Parent) node); // Recursively clear nested containers
+                clearControls((Parent) node);
             }
         }
+
     }
     
     private void setupPagination() {
