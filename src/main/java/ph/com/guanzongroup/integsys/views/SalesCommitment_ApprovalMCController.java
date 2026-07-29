@@ -99,7 +99,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnCancelBankApplication, btnHistory, btnRetrieve, btnClose;
     @FXML
-    private TextField tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
+    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
     @FXML
     private DatePicker dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate;
     @FXML
@@ -275,19 +275,19 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
 
                                 // Confirmation Prompt
-                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                                if ("success".equals(loJSON.get("result"))) {
-                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
-                                            loJSON = poController.ApproveTransaction("");
-                                            if ("success".equals((String) loJSON.get("result"))) {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            } else {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            }
-                                        }
-                                    }
-                                }
+//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+//                                if ("success".equals(loJSON.get("result"))) {
+//                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
+//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+//                                            loJSON = poController.ApproveTransaction();
+//                                            if ("success".equals((String) loJSON.get("result"))) {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            } else {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            }
+//                                        }
+//                                    }
+//                                }
 
                                 btnNew.fire();
                             }
@@ -309,7 +309,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?")) {
                             pnEditMode = poController.getEditMode();
                             if (pnEditMode == EditMode.READY) {
-                                poJSON = poController.ApproveTransaction("");
+                                poJSON = poController.ApproveTransaction();
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
@@ -371,14 +371,15 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     public void retrieveSalesCommitment() {
         try {
             poJSON = new JSONObject();
-            poJSON = poController.loadTransactionList("", "", "");
+            poJSON = poController.loadTransactionList(tfSearchClient.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
                 loadTableMain.reload();
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -696,36 +697,36 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             (lsID, lsValue) -> {
                 /*Lost Focus*/
                 switch (lsID) {
-                    case "tfClient":
-                        if (lsValue.isEmpty()) {
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-                                    if (poController.getDetailCount() > 0) {
-                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-                                            if (!pbKeyPressed) {
-                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-                                                    poJSON = poController.Master().setClientId("");
-                                                    poJSON = poController.Master().setAddressId("");
-                                                    poJSON = poController.Master().setContactId("");
-//                                                    poController.removeDetails();
-                                                    loadTableDetail.reload();
-                                                } else {
-                                                    loadRecordMaster();
-                                                    return;
-                                                }
-                                            } else {
-                                                loadRecordMaster();
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            poJSON = poController.Master().setClientId("");
-                        }
-                        break;
+//                    case "tfClient":
+//                        if (lsValue.isEmpty()) {
+//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+//                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
+//                                    if (poController.getDetailCount() > 0) {
+//                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
+//                                            if (!pbKeyPressed) {
+//                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+//                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+//                                                    poJSON = poController.Master().setClientId("");
+//                                                    poJSON = poController.Master().setAddressId("");
+//                                                    poJSON = poController.Master().setContactId("");
+////                                                    poController.removeDetails();
+//                                                    loadTableDetail.reload();
+//                                                } else {
+//                                                    loadRecordMaster();
+//                                                    return;
+//                                                }
+//                                            } else {
+//                                                loadRecordMaster();
+//                                                return;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//
+//                            poJSON = poController.Master().setClientId("");
+//                        }
+//                        break;
                     case "tfApplicationNo": //po no
                         poJSON = poController.Master().setPONumber(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -734,7 +735,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         break;
                     case "tfBank":
                         if (lsValue.isEmpty()) {
-                            poController.Master().setBank("");
+                            poController.Master().setBankId("");
                         }
                         break;
                     case "tfTerm":
@@ -869,7 +870,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                     pbKeyPressed = false;
                                 }
                             }
-                            poJSON = poController.SearchClient(lsValue, false);
+                            poJSON = poController.SearchClient(lsValue, false,false);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfClient.setText("");
@@ -878,6 +879,17 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 JFXUtil.focusFirstTextField(apDetail);
                             }
                             loadRecordMaster();
+                            return;
+                        case "tfSearchClient":
+                            poJSON = poController.SearchClient(lsValue, false,true);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                tfSearchClient.setText("");
+                                break;
+                            } else {
+                                JFXUtil.focusFirstTextField(apDetail);
+                            }
+                            retrieveSalesCommitment();
                             return;
                         case "tfBank":
                             poJSON = poController.SearchBank(lsValue, false);

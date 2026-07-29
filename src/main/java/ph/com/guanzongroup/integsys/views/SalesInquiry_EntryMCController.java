@@ -862,7 +862,7 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
 
                                 bankapplications_data.add(
                                         new ModelBankApplications_Detail(String.valueOf(lnCtr + 1),
-                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
+                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getPONumber()),
                                                 String.valueOf(lsBank),
                                                 String.valueOf(lsAppliedDate),
                                                 String.valueOf(lsApprovedDate),
@@ -1035,23 +1035,23 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
     ChangeListener<Boolean> txtBankApplications_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 /*Lost Focus*/
-                switch (lsID) {
-                    case "tfApplicationNo":
-                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setApplicationNo(lsValue);
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
-                        break;
-                    case "tfBank":
-                        if (lsValue.isEmpty()) {
-                            poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setBankId(lsValue);
-                            JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
-                        }
-                        break;
-                }
+//                switch (lsID) {
+//                    case "tfApplicationNo":
+//                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setApplicationNo(lsValue);
+//                        if ("error".equals((String) poJSON.get("result"))) {
+//                            System.err.println((String) poJSON.get("message"));
+//                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                            return;
+//                        }
+//                        JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
+//                        break;
+//                    case "tfBank":
+//                        if (lsValue.isEmpty()) {
+//                            poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setBankId(lsValue);
+//                            JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
+//                        }
+//                        break;
+//                }
 //                loadRecordBankApplications();
             });
 

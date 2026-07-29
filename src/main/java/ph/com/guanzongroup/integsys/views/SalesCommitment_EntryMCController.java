@@ -285,19 +285,20 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                 JFXUtil.showRetainedHighlight(true, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
 
                                 // Confirmation Prompt
-                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                                if ("success".equals(loJSON.get("result"))) {
-                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
-                                            loJSON = poController.ApproveTransaction("");
-                                            if ("success".equals((String) loJSON.get("result"))) {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            } else {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            }
-                                        }
-                                    }
-                                }
+//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+//                                if ("success".equals(loJSON.get("result"))) {
+//                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
+//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+//                                            poController.Master().setApprovedDate(oApp.getServerDate());
+//                                            loJSON = poController.ApproveTransaction();
+//                                            if ("success".equals((String) loJSON.get("result"))) {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            } else {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            }
+//                                        }
+//                                    }
+//                                }
 
                                 btnNew.fire();
                             }
@@ -368,7 +369,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
     public void retrieveSalesInquiry() {
         try {
             poJSON = new JSONObject();
-            poJSON = poController.loadTransactionList("", "", "");
+            poJSON = poController.loadSalesInquiryList(tfClient.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
@@ -696,30 +697,28 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                 switch (lsID) {
                     case "tfClient":
                         if (lsValue.isEmpty()) {
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-                                    if (poController.getDetailCount() > 0) {
-                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-                                            if (!pbKeyPressed) {
-                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-                                                    poJSON = poController.Master().setClientId("");
-                                                    poJSON = poController.Master().setAddressId("");
-                                                    poJSON = poController.Master().setContactId("");
-//                                                    poController.removeDetails();
-                                                    loadTableDetail.reload();
-                                                } else {
-                                                    loadRecordMaster();
-                                                    return;
-                                                }
-                                            } else {
-                                                loadRecordMaster();
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+//                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
+//                                    if (poController.getDetailCount() > 0) {
+//                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
+//                                            if (!pbKeyPressed) {
+//                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+//                                                        "Are you sure you want to change the client name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+//                                                    poJSON = poController.Master().setClientId("");
+////                                                    poController.removeDetails();
+//                                                    loadTableDetail.reload();
+//                                                } else {
+//                                                    loadRecordMaster();
+//                                                    return;
+//                                                }
+//                                            } else {
+//                                                loadRecordMaster();
+//                                                return;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
 
                             poJSON = poController.Master().setClientId("");
                         }
@@ -732,7 +731,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                         break;
                     case "tfBank":
                         if (lsValue.isEmpty()) {
-                            poController.Master().setBank("");
+                            poController.Master().setBankId("");
                         }
                         break;
                     case "tfTerm":
@@ -867,7 +866,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                     pbKeyPressed = false;
                                 }
                             }
-                            poJSON = poController.SearchClient(lsValue, false);
+                            poJSON = poController.SearchClient(lsValue, false, false);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfClient.setText("");
