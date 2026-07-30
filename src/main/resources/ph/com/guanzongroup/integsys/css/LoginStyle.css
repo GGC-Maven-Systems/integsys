@@ -1,3 +1,23 @@
+
+
+.text-input {
+    -fx-highlight-fill: #FF8201;
+    -fx-highlight-text-fill: white;
+}
+
+
+.text-area .content {
+    -fx-highlight-fill: #4F5051;
+    -fx-highlight-text-fill: white;
+}
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.text-input:focused {
+    -fx-text-inner-color: #555555;
+}
+
 .text-field-custom {
     -fx-font-size: 15px;
     -fx-background-color:transparent;
