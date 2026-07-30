@@ -368,6 +368,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
+            poController.computeFields(false);
 
             lblBankApplicationStatus.setText(poController.getStatus(pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus()).toUpperCase());
             tfTransNo.setText(poController.Master().getTransactionNo());
@@ -408,7 +409,6 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
 
             JFXUtil.updateCaretPositions(apMaster);
 
-            poController.computeFields(false);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1063,7 +1063,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
-        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice);
+        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice, tfVatSales);
         CustomCommonUtil.inputIntegersOnly(tfQuantity);
 
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList, tblViewMainList);

@@ -272,6 +272,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
+            poController.computeFields(false);
 
             lblBankApplicationStatus.setText(poController.getStatus(pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus()).toUpperCase());
 
@@ -313,7 +314,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
 
             JFXUtil.updateCaretPositions(apMaster);
 
-            poController.computeFields(false);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

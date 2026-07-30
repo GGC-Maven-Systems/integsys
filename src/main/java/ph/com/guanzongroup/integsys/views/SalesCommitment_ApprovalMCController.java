@@ -272,21 +272,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
-                                // Confirmation Prompt
-//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-//                                if ("success".equals(loJSON.get("result"))) {
-//                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
-//                                            loJSON = poController.ApproveTransaction();
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                             }
                         } else {
                             return;
@@ -326,7 +312,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to disapprove the transaction?")) {
                             pnEditMode = poController.getEditMode();
                             if (pnEditMode == EditMode.READY) {
-                                poJSON = poController.CancelTransaction();
+                                poJSON = poController.DisapproveTransaction();
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                     return;
@@ -346,7 +332,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         break;
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnReturn")) {
-//                    poController.resetTransaction();
+                    poController.resetMaster();
                     clearTextFields();
                     pnEditMode = EditMode.UNKNOWN;
                 }
@@ -387,6 +373,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
+            poController.computeFields(false);
 
             lblBankApplicationStatus.setText(poController.getStatus(pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus()).toUpperCase());
             tfTransNo.setText(poController.Master().getTransactionNo());
@@ -428,7 +415,6 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
 
             JFXUtil.updateCaretPositions(apMaster);
 
-            poController.computeFields(false);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -536,7 +522,8 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                 poJSON = poController.OpenTransaction(lsTransactionNo);
                 if ("error".equals(poJSON.get("result"))) {
                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                    poController.resetTransaction();
+                    poController.resetMaster();
+                    poController.Detail().clear();
                     return;
                 }
                 pnEditMode = poController.getEditMode();
@@ -1080,7 +1067,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         loadTableDetail.reload();
                         pbSuccess = true; //Set to original value
                         break;
-                    case "dpApprovedDate":
+                    case "dpApproveDate":
                         String lsAppliedDate = sdfFormat.format(poController.Master().getAppliedDate());
                         LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         if (ldSelectedDate.isBefore(ldAppliedDate)) {
@@ -1109,8 +1096,8 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
 
     public void initDatePickers() {
         // DatePicker setup
-        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
-        JFXUtil.setActionListener(datepicker_Action, dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
+        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpApproveDate, dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
+        JFXUtil.setActionListener(datepicker_Action, dpApproveDate, dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
     }
 
     public void initTextFields() {
@@ -1120,7 +1107,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
-        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice);
+        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice, tfVatSales);
         CustomCommonUtil.inputIntegersOnly(tfQuantity);
 
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList, tblViewMainList);
