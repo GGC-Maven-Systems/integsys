@@ -567,7 +567,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                         break;
                     case "tfSalesAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.setVatableSales(lsValue);
+                        poJSON = poController.Master().setSalesAmount(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }

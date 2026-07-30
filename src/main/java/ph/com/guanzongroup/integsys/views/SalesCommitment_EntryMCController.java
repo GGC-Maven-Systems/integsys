@@ -780,7 +780,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                   case "tfVatAmount":
+                    case "tfVatAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.setVatableAmount(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -803,7 +803,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                         break;
                     case "tfSalesAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.setVatableSales(lsValue);
+                        poJSON = poController.Master().setSalesAmount(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
