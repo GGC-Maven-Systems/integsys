@@ -1136,7 +1136,17 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnApprove, btnDisapprove, btnCancelBankApplication);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
+        JFXUtil.setDisabled(!lbShow1, apDetail);
+        
+        JFXUtil.setDisabled(false, dpApproveDate);
+        if (pnEditMode == EditMode.READY) {
+            JFXUtil.setDisabled(false, apMaster);
+            JFXUtil.setDisabledExcept(true, apMaster, dpApproveDate);
+        } else {
+            JFXUtil.setDisabled(!lbShow1, apMaster);
+            JFXUtil.setDisabled(lbShow1, dpApproveDate);
+        }
+
         JFXUtil.setButtonsVisibility(true, btnRetrieve);
 
         if (fnValue != EditMode.READY) {
