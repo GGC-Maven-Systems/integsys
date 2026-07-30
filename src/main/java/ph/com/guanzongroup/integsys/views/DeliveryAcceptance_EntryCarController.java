@@ -534,7 +534,7 @@ public class DeliveryAcceptance_EntryCarController implements Initializable, Scr
                             if (imgPath2.toLowerCase().endsWith(".pdf")) {
                                 try (PDDocument document = PDDocument.load(selectedFile)) {
                                     int pageCount = document.getNumberOfPages();
-                                    if (pageCount > 5) {
+                                    if (pageCount > 20) {
                                         ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
                                         return;
                                     }

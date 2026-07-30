@@ -30,9 +30,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.guanzon.appdriver.agent.ShowMessageFX;
@@ -71,6 +73,8 @@ public class LoginController implements Initializable, ScreenInterface {
     @FXML
     private Button btnSignIn;
     @FXML
+    private BorderPane bpBorderMain;
+    @FXML
     Label lblCopyright;
     @FXML
     private TextField tfPassword;
@@ -81,7 +85,9 @@ public class LoginController implements Initializable, ScreenInterface {
     @FXML
     private ComboBox cmbIndustry, cmbCompany;
     @FXML
-    private AnchorPane rootPane, loadingPane, spinnerPane, apRoot1, apRoot2, apRoot3, apSign;
+    private ImageView ivLoginLogo;
+    @FXML
+    private AnchorPane apRoot3, rootPane, loginPane, apRootPane2, apSign, apRoot2, apRoot1, spinnerPane, loadingPane;
     @FXML
     private VBox vboxmain;
 
@@ -108,6 +114,7 @@ public class LoginController implements Initializable, ScreenInterface {
     public void initialize(URL url, ResourceBundle rb) {
         JFXUtil.fadeIn(1, vboxmain);
         JFXUtil.fadeIn(2, apRoot3);
+        JFXUtil.applyButtonHoverFade(btnSignIn, "#FF8201");
 
 //        JFXUtil.fadeInFromBottom(1.5, rootPane, apRoot1, apRoot2,vboxmain);
         btnSignIn.setVisible(false);
@@ -129,6 +136,9 @@ public class LoginController implements Initializable, ScreenInterface {
 
         lblCopyright.setStyle("-fx-font-size: 13px;");
         lblCopyright.setText("© " + year + " Guanzon Group of Companies. All Rights Reserved.");
+
+        cmbIndustry.managedProperty().bind(cmbIndustry.visibleProperty());
+        cmbCompany.managedProperty().bind(cmbCompany.visibleProperty());
 
         initComboBox();
         initTextFields();
@@ -205,6 +215,8 @@ public class LoginController implements Initializable, ScreenInterface {
     public void setMainController(DashboardController controller) {
         this.dashboardController = controller;
     }
+    double lnTop = 0.0;
+    double lnBottom = 0.0;
 
     private void handleLoadingScreen(AnchorPane pane, JSONObject poJSON) {
         enterProceed = false;
@@ -219,8 +231,8 @@ public class LoginController implements Initializable, ScreenInterface {
         spinner.setPrefSize(25, 25);
         spinner.setMinSize(25, 25);
         spinner.setMaxSize(25, 25);
-        AnchorPane.setTopAnchor(spinner, 120.0);
-        AnchorPane.setBottomAnchor(spinner, 120.0);
+        AnchorPane.setTopAnchor(spinner, lnTop);
+        AnchorPane.setBottomAnchor(spinner, lnBottom);
         AnchorPane.setLeftAnchor(spinner, 120.0);
         AnchorPane.setRightAnchor(spinner, 120.0);
 
@@ -245,7 +257,7 @@ public class LoginController implements Initializable, ScreenInterface {
             double lnDuration = 0.8;
             if ("success".equals((String) poJSON.get("result"))) {
                 lnDuration = 1.5;
-                JFXUtil.playUpwardFadeOut(0.6, .70, apRoot1, apRoot2, vboxmain, rootPane);
+                JFXUtil.playUpwardFadeOut(0.6, .70, bpBorderMain,apRoot1, apRoot2, vboxmain, rootPane);
             }
             PauseTransition wait = new PauseTransition(Duration.seconds(lnDuration));
             wait.setOnFinished(done -> {
@@ -401,7 +413,7 @@ public class LoginController implements Initializable, ScreenInterface {
                 if (!cmbCompany.getItems().isEmpty()) {
                     //select that contains GMC as auto selected company only if the industry is 09
                     int index = findIndex(companyOptions, "Merchandising");
-                    if ((index != 0) && hasWord( String.valueOf(cmbIndustry.getSelectionModel().getSelectedItem()), "General")) {
+                    if ((index != 0) && hasWord(String.valueOf(cmbIndustry.getSelectionModel().getSelectedItem()), "General")) {
                         cmbCompany.getSelectionModel().select(index);
                         psCompanyID = companyOptions.get(index).getCompanyId();
                     } else {
@@ -416,6 +428,9 @@ public class LoginController implements Initializable, ScreenInterface {
 
             cmbIndustry.setVisible(lbShow);
             cmbCompany.setVisible(lbShow);
+
+            lnTop = lbShow ? 120.0 : 50.0;
+            lnBottom = lbShow ? 120.0 : 185.0;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
