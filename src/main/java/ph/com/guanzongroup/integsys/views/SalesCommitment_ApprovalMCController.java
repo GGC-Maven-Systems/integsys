@@ -790,28 +790,28 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         break;
                     case "tfVatAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATAmount(Double.valueOf(lsValue));
+                        poJSON = poController.setVatableAmount(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfVatSales":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATSale(Double.valueOf(lsValue));
+                        poJSON = poController.setVatableSales(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfVATRate":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATRates(Double.valueOf(lsValue));
+                        poJSON = poController.setVatRate(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfSalesAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setSalesAmount(Double.valueOf(lsValue));
+                        poJSON = poController.setVatableSales(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -1175,9 +1175,9 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     }
 
     public void initMainGrid() {
-        JFXUtil.setColumnCenter(tblNoViewMainList, tblTransactionDate, tblTransactionNo);
-        JFXUtil.setColumnLeft(tblClient, tblStatus);
-        JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
+        JFXUtil.setColumnCenter(tblNoViewDetailList);
+        JFXUtil.setColumnLeft(tblDescription);
+        JFXUtil.setColumnRight(tblUnitPrice, tblQuantity, tblTotal);
         tblViewMainList.setItems(main_data);
         filteredData = new FilteredList<>(main_data, b -> true);
         tblViewMainList.setItems(filteredData);
