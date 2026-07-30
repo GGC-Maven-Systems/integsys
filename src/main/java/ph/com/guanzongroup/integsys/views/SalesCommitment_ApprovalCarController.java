@@ -348,7 +348,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory")) {
                 } else {
                     loadRecordMaster();
-                    loadTableDetail.reload();
                 }
                 initButton(pnEditMode);
             }
@@ -481,7 +480,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                     return;
                 }
                 pnEditMode = poController.getEditMode();
-                loadTableDetail.reload();
             } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -736,7 +734,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             }
                         }
                         pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpAppliedDate":
@@ -756,7 +753,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             }
                         }
                         pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpDueDate":
@@ -780,7 +776,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             }
                         }
                         pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
+                        loadRecordMaster();
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpApprovedDate":
@@ -802,7 +798,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             }
                         }
                         pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
+                        loadRecordMaster();
                         pbSuccess = true; //Set to original value
                         break;
                     default:
