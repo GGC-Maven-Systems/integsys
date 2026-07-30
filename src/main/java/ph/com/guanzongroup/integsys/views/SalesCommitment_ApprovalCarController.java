@@ -500,9 +500,9 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
 //                                        if (JFXUtil.isObjectEqualTo(poController.TransactionList(lnCtr).getTransactionStatus(), BankApplicationStatus.CANCELLED)) {
 //                                            JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
 //                                        }
-//                                        if (poController.TransactionList(lnCtr).getTransactionStatus().equals(BankApplicationStatus.APPROVED)) {
-//                                            JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
-//                                        }
+                                        if (poController.TransactionList(lnCtr).getTransactionStatus().equals(BankApplicationStatus.APPROVED)) {
+                                            JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
+                                        }
                                     } catch (SQLException | GuanzonException ex) {
                                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                         ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -832,12 +832,17 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnApprove, btnDisapprove, btnCancelBankApplication);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-        
+
         JFXUtil.setDisabled(false, dpApproveDate);
         if (pnEditMode == EditMode.READY) {
             JFXUtil.setDisabled(false, apMaster);
-            JFXUtil.setDisabledExcept(true, apMaster, dpApproveDate);
+            if (JFXUtil.isObjectEqualTo(poController.Master().getTransactionStatus(), BankApplicationStatus.OPEN)) {
+                JFXUtil.setDisabledExcept(true, apMaster, dpApproveDate);
+            } else {
+                JFXUtil.setDisabled(!lbShow1, apMaster);
+            }
         } else {
+            JFXUtil.setDisabledExcept(false, apMaster);
             JFXUtil.setDisabled(!lbShow1, apMaster);
             JFXUtil.setDisabled(lbShow1, dpApproveDate);
         }
