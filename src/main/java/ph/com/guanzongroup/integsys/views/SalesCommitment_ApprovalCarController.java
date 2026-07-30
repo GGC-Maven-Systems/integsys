@@ -480,6 +480,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                     return;
                 }
                 pnEditMode = poController.getEditMode();
+                loadRecordMaster();
             } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -753,6 +754,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             }
                         }
                         pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
+                        loadRecordMaster();
                         pbSuccess = true; //Set to original value
                         break;
                     case "dpDueDate":
