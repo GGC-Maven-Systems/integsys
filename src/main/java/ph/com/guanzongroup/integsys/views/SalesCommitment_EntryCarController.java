@@ -98,7 +98,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
     private static final int ROWS_PER_PAGE = 50;
     private FilteredList<ModelSalesCommitment_Main> filteredData;
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster;
     @FXML
     private Label lblSource, lblStatus, lblBankApplicationStatus;
     @FXML
@@ -233,7 +233,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                         JFXUtil.showRetainedHighlight(false, tblViewMainList, "#A7C7E7", plOrderNoPartial, plOrderNoFinal, highlightedRowsMain, true);
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster);
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -334,8 +334,10 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                     poController.InitTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
+                } else {
+                    loadRecordMaster();
                 }
-
+                
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
@@ -487,7 +489,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                         return;
                     }
                     pnMain = pnRowMain;
-                    JFXUtil.clearTextFields(apMaster, apDetail);
+                    JFXUtil.clearTextFields(apMaster);
                     poJSON = poController.populateDetail(lsTransactionNo);
                     if ("error".equals(poJSON.get("result"))) {
                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -526,7 +528,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                                                 String.valueOf(lsDate),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).getTransactionNo()),
                                                 String.valueOf(poController.SalesInquiryList(lnCtr).Client().getCompanyName()),
-                                                String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()))
+                                                String.valueOf(poController.getStatus(poController.SalesInquiryList(lnCtr).getTransactionStatus()).toUpperCase())
                                         ));
 
                                     } catch (SQLException | GuanzonException ex) {
@@ -699,8 +701,6 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfClient.setText("");
                                 break;
-                            } else {
-                                JFXUtil.focusFirstTextField(apDetail);
                             }
                             loadRecordMaster();
                             retrieveSalesInquiry();
@@ -844,7 +844,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnCancelBankApplication);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
+        JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(true, btnRetrieve);
 
         if (fnValue != EditMode.READY) {
@@ -877,6 +877,6 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
 
     public void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apDetail, apBrowse);
+        JFXUtil.clearTextFields(apMaster, apBrowse);
     }
 }
