@@ -8,14 +8,12 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,8 +22,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import static javafx.scene.input.KeyCode.DOWN;
@@ -36,21 +32,16 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.util.Duration;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.json.simple.parser.ParseException;
-import javafx.animation.PauseTransition;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventHandler;
 import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -189,32 +180,6 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                             return;
                         }
                         break;
-                    case "btnNew":
-                        //Clear data
-                        clearTextFields();
-                        poJSON = poController.InitTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-
-                        poJSON = poController.NewTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-
-                        pnEditMode = poController.getEditMode();
-                        break;
-                    case "btnUpdate":
-                        poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                        poJSON = poController.UpdateTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        pnEditMode = poController.getEditMode();
-                        break;
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster);
                         break;
@@ -253,53 +218,6 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
-                    case "btnSave":
-                        //Validator
-                        poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
-                            poJSON = poController.SaveTransaction();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                poController.AddDetail();
-                                return;
-                            } else {
-                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
-                                // Confirmation Prompt
-//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-//                                if ("success".equals(loJSON.get("result"))) {
-//                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
-//                                            poController.Master().setApprovedDate(oApp.getServerDate());
-//                                            loJSON = poController.ApproveTransaction();
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
-                            }
-                        } else {
-                            return;
-                        }
-                        break;
-                    case "btnCancelBankApplication":
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to cancel the transaction?") == true) {
-                            poJSON = poController.CancelTransaction();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                return;
-                            }
-
-                            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                        }
-                        return;
-                    case "btnRetrieve":
-                        retrieveSalesInquiry();
-                        break;
-
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -316,7 +234,7 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                 }
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -417,34 +335,47 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
-        TextField txtField = (TextField) event.getSource();
-        String lsID = (((TextField) event.getSource()).getId());
-        String lsValue = (txtField.getText() == null ? "" : txtField.getText());
-        poJSON = new JSONObject();
-        switch (event.getCode()) {
-            case TAB:
-            case ENTER:
-                pbEntered = true;
-                CommonUtils.SetNextFocus(txtField);
-                event.consume();
-                break;
-            case UP:
-                break;
-            case DOWN:
-                break;
-            case F3:
-                switch (lsID) {
-                    //apBrowse
-                    case "tfSearchClient":
-                        retrieveSalesCommitment();
-                        return;
-                    case "tfSearchTransactionNo":
-                        retrieveSalesCommitment();
-                        return;
-                }
-                break;
-            default:
-                break;
+        try {
+            TextField txtField = (TextField) event.getSource();
+            String lsID = (((TextField) event.getSource()).getId());
+            String lsValue = (txtField.getText() == null ? "" : txtField.getText());
+            poJSON = new JSONObject();
+            switch (event.getCode()) {
+                case TAB:
+                case ENTER:
+                    pbEntered = true;
+                    CommonUtils.SetNextFocus(txtField);
+                    event.consume();
+                    break;
+                case UP:
+                    break;
+                case DOWN:
+                    break;
+                case F3:
+                    switch (lsID) {
+                        //apBrowse
+                        case "tfSearchClient":
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            if (!"success".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            }
+                            loadRecordMaster();
+                            return;
+                        case "tfSearchTransactionNo":
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            if (!"success".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            }
+                            loadRecordMaster();
+                            return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (GuanzonException | SQLException | CloneNotSupportedException | ScriptException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
