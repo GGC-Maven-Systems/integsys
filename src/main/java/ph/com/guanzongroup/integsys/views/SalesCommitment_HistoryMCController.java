@@ -8,14 +8,12 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,21 +34,16 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.util.Duration;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.json.simple.parser.ParseException;
-import javafx.animation.PauseTransition;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventHandler;
 import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -97,19 +90,19 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
     @FXML
     private Label lblSource, lblStatus, lblBankApplicationStatus;
     @FXML
+    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfTransactionTotal, tfVATRate, tfVatSales, tfVatAmount, tfWTaxRate, tfWTax, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
+    @FXML
     private HBox hbButtons;
     @FXML
     private Button btnBrowse, btnHistory, btnClose;
     @FXML
-    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
-    @FXML
-    private DatePicker dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate;
+    private DatePicker dpTransactionDate, dpAppliedDate, dpApproveDate, dpDueDate, dpInquiryDate, dpTargetDate;
     @FXML
     private TextArea taRemarks;
     @FXML
     private TableView tblViewDetailList;
     @FXML
-    private TableColumn tblDescription, tblUnitPrice, tblQuantity, tblTotal;
+    private TableColumn tblNo, tblDescription, tblUnitPrice, tblQuantity, tblTotal;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -138,7 +131,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                 poController.setCompanyId(psCompanyId);
                 poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-                poController.setTransactionStatus(BankApplicationStatus.OPEN+BankApplicationStatus.APPROVED+BankApplicationStatus.CANCELLED+BankApplicationStatus.DISAPPROVED);
+                poController.setTransactionStatus(BankApplicationStatus.OPEN + BankApplicationStatus.APPROVED + BankApplicationStatus.CANCELLED + BankApplicationStatus.DISAPPROVED);
                 loadRecordSearch();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
@@ -194,35 +187,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                             return;
                         }
                         break;
-                    case "btnNew":
-                        //Clear data
-                        clearTextFields();
-                        poJSON = poController.InitTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-
-                        poJSON = poController.NewTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-
-                        pnEditMode = poController.getEditMode();
-                        break;
-                    case "btnUpdate":
-                        poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-                        poJSON = poController.UpdateTransaction();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        pnEditMode = poController.getEditMode();
-                        break;
-                    case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
-                        break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
 
@@ -258,50 +222,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
-                    case "btnSave":
-                        //Validator
-                        poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
-                            poJSON = poController.SaveTransaction();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                poController.AddDetail();
-                                return;
-                            } else {
-                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-
-                                // Confirmation Prompt
-//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-//                                if ("success".equals(loJSON.get("result"))) {
-//                                    if (poController.Master().getTransactionStatus().equals(BankApplicationStatus.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
-//                                            poController.Master().setApprovedDate(oApp.getServerDate());
-//                                            loJSON = poController.ApproveTransaction();
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
-
-                            }
-                        } else {
-                            return;
-                        }
-                        break;
-                    case "btnCancelBankApplication":
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to cancel the transaction?") == true) {
-                            poJSON = poController.CancelTransaction();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                return;
-                            }
-                            
-                            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                        }
-                        return;
                     case "btnRetrieve":
                         retrieveSalesInquiry();
                         break;
@@ -327,7 +247,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                 });
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -352,9 +272,9 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-            
+
             lblBankApplicationStatus.setText(poController.getStatus(pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus()).toUpperCase());
-            
+
             tfTransNo.setText(poController.Master().getTransactionNo());
             tfClient.setText(poController.Master().Client().getCompanyName());
             tfAddress.setText(poController.Master().ClientAddress().getAddress());
@@ -374,34 +294,25 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-            
-            
+
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
                 tfReferralAgent.setText(poController.Master().Inquiry().ReferralAgent().getCompanyName());
-                tfClientType.setText(poController.Master().Inquiry().getClientType());
                 tfInquiryType.setText(poController.Master().Inquiry().Source().getDescription());
                 tfClientType.setText(getClientType(Integer.parseInt(poController.Master().Inquiry().getClientType())));
                 tfUnitType.setText(getCategoryType(Integer.parseInt(poController.Master().Inquiry().getCategoryType())));
                 tfPaymentMode.setText(getPaymentmode(Integer.parseInt(poController.Master().getPaymentMode())));
                 dpInquiryDate.setValue(poController.Master().Inquiry().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
                 dpTargetDate.setValue(poController.Master().Inquiry().getTargetDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-                
+
             } else {
-                dpInquiryDate.setValue(null);
-                dpTargetDate.setValue(null);
-                tfInquiryType.setText("");
-                tfClientType.setText("");
-                tfUnitType.setText("");
-                tfPaymentMode.setText("");
-                tfBranch.setText("");
-                tfSalesPerson.setText("");
-                tfReferralAgent.setText("");
+                JFXUtil.clearNodes(dpInquiryDate, dpTargetDate, tfInquiryType, tfClientType, tfUnitType, tfPaymentMode,
+                        tfBranch, tfSalesPerson, tfReferralAgent);
             }
-            
+
             JFXUtil.updateCaretPositions(apMaster);
-            
+
             poController.computeFields(false);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -425,20 +336,21 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     private String getClientType(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.ClientType.size()) {
             return ModelSalesInquiry_Detail.ClientType.get(index);
         }
         return "";
     }
-    
+
     private String getCategoryType(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.CategoryType.size()) {
             return ModelSalesInquiry_Detail.CategoryType.get(index);
         }
         return "";
     }
+
     private String getPaymentmode(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.PurchaseType.size()) {
             return ModelSalesInquiry_Detail.PurchaseType.get(index);
@@ -507,7 +419,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                                     lsModel = poController.Detail(lnCtr).Inventory().Model().getDescription();
                                     lsModelVariant = poController.Detail(lnCtr).Inventory().Variant().getDescription();
                                     lsColor = poController.Detail(lnCtr).Inventory().Color().getDescription();
-                                } 
+                                }
                                 lsDescription = (lsBrand == null ? "" : lsBrand)
                                         + (lsModel == null ? "" : " " + lsModel)
                                         + (lsModelVariant == null ? "" : " " + lsModelVariant)
@@ -557,161 +469,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
 
     }
 
-    ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
-            (lsID, lsValue) -> {
-                /*Lost Focus*/
-                lsValue = lsValue.trim();
-                switch (lsID) {
-                    case "taRemarks"://Remarks
-                        poJSON = poController.Master().setRemarks(lsValue);
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        loadRecordMaster();
-                        break;
-                }
-            });
-    ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                /*Lost Focus*/
-                switch (lsID) {
-                    case "tfBarcode":
-                        if (lsValue.equals("")) {
-                            poController.Detail(pnDetail).setStockId("");
-                        }
-                        break;
-                    case "tfDescription":
-                        if (lsValue.equals("")) {
-                            poController.Detail(pnDetail).setStockId("");
-                        }
-                        break;
-                    case "tfUnitPrice":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setUnitPrice(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfQuantity":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setQuantity(Integer.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                }
-                Platform.runLater(() -> {
-                    PauseTransition delay = new PauseTransition(Duration.seconds(0.50));
-                    delay.setOnFinished(event -> {
-                        loadTableDetail.reload();
-                    });
-                    delay.play();
-                });
-            });
-
-    ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                /*Lost Focus*/
-                switch (lsID) {
-                    case "tfClient":
-                        if (lsValue.isEmpty()) {
-//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-//                                    if (poController.getDetailCount() > 0) {
-//                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-//                                            if (!pbKeyPressed) {
-//                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-//                                                        "Are you sure you want to change the client name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-//                                                    poJSON = poController.Master().setClientId("");
-////                                                    poController.removeDetails();
-//                                                    loadTableDetail.reload();
-//                                                } else {
-//                                                    loadRecordMaster();
-//                                                    return;
-//                                                }
-//                                            } else {
-//                                                loadRecordMaster();
-//                                                return;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-
-                            poJSON = poController.Master().setClientId("");
-                        }
-                        break;
-                    case "tfApplicationNo": //po no
-                        poJSON = poController.Master().setPONumber(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfBank":
-                        if (lsValue.isEmpty()) {
-                            poController.Master().setBankId("");
-                        }
-                        break;
-                    case "tfTerm":
-                        if (lsValue.isEmpty()) {
-                            poController.Master().setTermCode("");
-                        }
-                        break;
-                    case "tfATDNumber":
-                        poJSON = poController.Master().setATDNumber(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfWTax":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWithholdingTax(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfWTaxRate":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWTaxRate(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfVatAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATAmount(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfVatSales":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATSale(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfVATRate":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATRates(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfSalesAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setSalesAmount(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-
-                }
-                loadRecordMaster();
-            });
-
     public void moveNext(boolean isUp, boolean continueNext) {
         try {
             apDetail.requestFocus();
@@ -746,121 +503,26 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                     event.consume();
                     break;
                 case UP:
-                    switch (lsID) {
-                        case "tfBarcode":
-                        case "tfDescription":
-                        case "tfUnitPrice":
-                        case "tfQuantity":
-                            moveNext(true, true);
-                            event.consume();
-                            break;
-                    }
                     break;
                 case DOWN:
-                    switch (lsID) {
-                        case "tfBarcode":
-                        case "tfDescription":
-                        case "tfUnitPrice":
-                        case "tfQuantity":
-                            moveNext(false, true);
-                            event.consume();
-                            break;
-                        default:
-                            break;
-                    }
                     break;
                 case F3:
                     switch (lsID) {
-                        //apMaster
-                        case "tfClient":
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                if (poController.getDetailCount() > 1) {
-                                    pbKeyPressed = true;
-                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
-//                                        poController.removeDetails();
-                                        loadTableDetail.reload();
-                                    } else {
-                                        return;
-                                    }
-                                    pbKeyPressed = false;
-                                }
-                            }
-                            poJSON = poController.SearchClient(lsValue, false, false);
-                            if ("error".equals(poJSON.get("result"))) {
+                        //apBrowse
+                        case "tfSearchClient":
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfClient.setText("");
-                                break;
-                            } else {
-                                JFXUtil.focusFirstTextField(apDetail);
                             }
                             loadRecordMaster();
-                            retrieveSalesInquiry();
-                            return;
-                        case "tfSearchClient":
-                            poJSON = poController.SearchClient(lsValue, false, true);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSearchClient.setText("");
-                                break;
-                            }
-                            tfSearchClient.setText(poController.getClient());
                             return;
                         case "tfSearchTransactionNo":
                             poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
-                            if ("error".equals(poJSON.get("result"))) {
+                            if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfClient.setText("");
-                                break;
-                            } else {
-                                JFXUtil.focusFirstTextField(apDetail);
-                            }
-                            pnEditMode = poController.getEditMode();
-                            loadRecordMaster();
-                            loadTableDetail.reload();
-                            initButton(pnEditMode);
-                            return;
-                        case "tfBank":
-                            poJSON = poController.SearchBank(lsValue, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
                             }
                             loadRecordMaster();
                             return;
-                        case "tfTerm":
-                            poJSON = poController.SearchTerm(lsValue, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
-                            }
-                            loadRecordMaster();
-                            break;
-                        //apDetail
-                        case "tfBarcode":
-                            poJSON = poController.SearchInventory(lsValue, true, pnDetail);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
-                            }
-                            loadTableDetail.reload();
-                            break;
-                        case "tfDescription":
-                            poJSON = poController.SearchInventory(lsValue, false, pnDetail);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
-                            }
-                            loadTableDetail.reload();
-                            break;
                     }
                     break;
                 default:
@@ -872,100 +534,13 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
         }
     }
 
-    boolean pbSuccess = true;
-    EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
-            (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
-                String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
-                LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
-
-                poJSON = new JSONObject();
-                switch (datePicker.getId()) {
-                    case "dpInquiryDate":
-                        break;
-                    case "dpTargetDate":
-                        break;
-                    case "dpTransactionDate":
-                        if (ldSelectedDate.isAfter(ldTransactionDate)) {
-                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
-                            pbSuccess = false;
-                        } else {
-                            poController.Master().setAppliedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
-                        }
-                        if (pbSuccess) {
-                        } else {
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            }
-                        }
-                        pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
-                        pbSuccess = true; //Set to original value
-                        break;
-                    case "dpAppliedDate":
-                        if (ldSelectedDate.isBefore(ldTransactionDate)) {
-                            JFXUtil.setJSONError(poJSON, "Applied date cannot be before the transaction date.");
-                            pbSuccess = false;
-                        } else if (ldSelectedDate.isAfter(ldTransactionDate)) {
-                            JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
-                            pbSuccess = false;
-                        } else {
-                            poController.Master().setAppliedDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
-                        }
-                        if (pbSuccess) {
-                        } else {
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            }
-                        }
-                        pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
-                        pbSuccess = true; //Set to original value
-                        break;
-                    case "dpDueDate":
-                        if (ldSelectedDate.isBefore(ldTransactionDate)) {
-                            JFXUtil.setJSONError(poJSON, "Due date cannot be before the transaction date.");
-                            pbSuccess = false;
-                        } else if (poController.Master().getAppliedDate() != null) {
-                            String lsAppliedDate = sdfFormat.format(poController.Master().getAppliedDate());
-                            LocalDate ldAppliedDate = LocalDate.parse(lsAppliedDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
-                            if (ldSelectedDate.isBefore(ldAppliedDate)) {
-                                JFXUtil.setJSONError(poJSON, "Due date cannot be before the applied date.");
-                                pbSuccess = false;
-                            } else {
-                                poController.Master().setDueDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
-                            }
-                        } 
-                        if (pbSuccess) {
-                        } else {
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            }
-                        }
-                        pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-                        loadTableDetail.reload();
-                        pbSuccess = true; //Set to original value
-                        break;
-                    default:
-                        break;
-                }
-            });
-
     public void initDatePickers() {
         // DatePicker setup
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
-        JFXUtil.setActionListener(datepicker_Action, dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate);
     }
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
-        JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
-        JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfUnitPrice, tfQuantity);
-
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse,apDetail);
-        JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
-        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice);
-        CustomCommonUtil.inputIntegersOnly(tfQuantity);
-
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetailList);
@@ -990,7 +565,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetailList);
         tblViewDetailList.setItems(details_data);
     }
-    
+
     public void loadRecordSearch() {
         try {
             lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());

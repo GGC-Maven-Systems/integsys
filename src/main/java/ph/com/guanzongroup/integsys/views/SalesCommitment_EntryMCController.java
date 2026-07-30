@@ -394,7 +394,6 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
                 tfReferralAgent.setText(poController.Master().Inquiry().ReferralAgent().getCompanyName());
-                tfClientType.setText(poController.Master().Inquiry().getClientType());
                 tfInquiryType.setText(poController.Master().Inquiry().Source().getDescription());
                 tfClientType.setText(getClientType(Integer.parseInt(poController.Master().Inquiry().getClientType())));
                 tfUnitType.setText(getCategoryType(Integer.parseInt(poController.Master().Inquiry().getCategoryType())));
@@ -403,15 +402,8 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                 dpTargetDate.setValue(poController.Master().Inquiry().getTargetDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
 
             } else {
-                dpInquiryDate.setValue(null);
-                dpTargetDate.setValue(null);
-                tfInquiryType.setText("");
-                tfClientType.setText("");
-                tfUnitType.setText("");
-                tfPaymentMode.setText("");
-                tfBranch.setText("");
-                tfSalesPerson.setText("");
-                tfReferralAgent.setText("");
+                JFXUtil.clearNodes(dpInquiryDate, dpTargetDate, tfInquiryType, tfClientType, tfUnitType, tfPaymentMode,
+                        tfBranch, tfSalesPerson, tfReferralAgent);
             }
 
             JFXUtil.updateCaretPositions(apMaster);
