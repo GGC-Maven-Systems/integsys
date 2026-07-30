@@ -316,7 +316,7 @@
                     btnNew, btnSave,btnUpdate,btnConfirm,btnVoid,btnCancel,btnDeactivate,btnHistory,btnClose);
             CustomCommonUtil.setManaged(false, btnBrowse,
                     btnNew, btnSave,btnUpdate,btnConfirm,btnVoid,btnCancel,btnDeactivate,btnHistory,btnClose);
-
+            apMaster.setDisable(true);
             switch (fnValue){
                 case EditMode.ADDNEW :
                 case EditMode.UPDATE :
@@ -324,6 +324,7 @@
                             btnSave,btnCancel,btnClose);
                     CustomCommonUtil.setManaged(true,
                             btnSave,btnCancel,btnClose);
+                    apMaster.setDisable(false);
                     break;
                 case EditMode.READY:
                     switch (oTrans.SalesAgent().getModel().getRecordStatus()) {

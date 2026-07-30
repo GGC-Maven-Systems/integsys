@@ -247,7 +247,7 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
      */
     private void initializeObject() {
         try {
-            LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+            LogWrapper logWrapper = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
             poTBJControllers = new TBJControllers(poApp, logWrapper);
             poJSON = poTBJControllers.TBJParameter().InitTransaction();
             poTBJControllers.TBJParameter().setTransactionStatus("130");
@@ -539,7 +539,7 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
      * fields.</li>
      * <li>Applies {@code txtArea_Focus} and {@code txtField_Focus} listeners
      * via {@link JFXUtil}.</li>
-     * <li>Assigns the {@link #comboBoxActionListener} and configures the
+     * <li>Assigns the {@link #'comboBoxActionListener'} and configures the
      * ComboBox cell styling.</li>
      * <li>Sets the mouse click handler for the {@code tblDetails}
      * {@link TableView}.</li>
@@ -873,8 +873,6 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
                                 if ("error".equals(poJSON.get("result"))) {
                                     ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
                                 }
-                                tfAccountTitle.setText(poTBJControllers.TBJParameter().Detail(pnSelectedDetail).AccountChart().getDescription());
-                                
                                 poJSON = poTBJControllers.TBJParameter().checkDuplicateDetail();
                                  if("error".equals(poJSON.get("result"))){
                                       ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
@@ -882,6 +880,7 @@ public class TBJ_ParameterController implements Initializable, ScreenInterface {
                                       tfAccountTitle.selectAll();
                                       return;
                                  }
+                                 tfAccountTitle.setText(poTBJControllers.TBJParameter().Detail(pnSelectedDetail).AccountChart().getDescription());
                                  loadTableDetail();
                                 return;
 
