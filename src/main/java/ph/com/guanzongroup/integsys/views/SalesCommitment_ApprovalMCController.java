@@ -125,6 +125,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                 System.err.println((String) poJSON.get("message"));
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             }
+            pgPagination.setPageCount(1);
             initLoadTable();
             initTextFields();
             initDatePickers();
@@ -382,13 +383,13 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-            
+
             lblBankApplicationStatus.setText(poController.getStatus(pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus()).toUpperCase());
             tfTransNo.setText(poController.Master().getTransactionNo());
             tfClient.setText(poController.Master().Client().getCompanyName());
@@ -409,8 +410,8 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-            dpApproveDate.setValue(poController.Master().getApprovedDate()!= null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-            
+            dpApproveDate.setValue(poController.Master().getApprovedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
@@ -422,7 +423,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                 tfPaymentMode.setText(getPaymentmode(Integer.parseInt(poController.Master().getPaymentMode())));
                 dpInquiryDate.setValue(poController.Master().Inquiry().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
                 dpTargetDate.setValue(poController.Master().Inquiry().getTargetDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-                
+
             } else {
                 dpInquiryDate.setValue(null);
                 dpTargetDate.setValue(null);
@@ -434,9 +435,9 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                 tfSalesPerson.setText("");
                 tfReferralAgent.setText("");
             }
-            
+
             JFXUtil.updateCaretPositions(apMaster);
-            
+
             poController.computeFields(false);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -461,29 +462,27 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     private String getClientType(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.ClientType.size()) {
             return ModelSalesInquiry_Detail.ClientType.get(index);
         }
         return "";
     }
-    
+
     private String getCategoryType(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.CategoryType.size()) {
             return ModelSalesInquiry_Detail.CategoryType.get(index);
         }
         return "";
     }
-    
+
     private String getPaymentmode(int index) {
         if (index >= 0 && index < ModelSalesInquiry_Detail.PurchaseType.size()) {
             return ModelSalesInquiry_Detail.PurchaseType.get(index);
         }
         return "";
     }
-
-
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
@@ -587,7 +586,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                     lsModel = poController.Detail(lnCtr).Inventory().Model().getDescription();
                                     lsModelVariant = poController.Detail(lnCtr).Inventory().Variant().getDescription();
                                     lsColor = poController.Detail(lnCtr).Inventory().Color().getDescription();
-                                } 
+                                }
                                 lsDescription = (lsBrand == null ? "" : lsBrand)
                                         + (lsModel == null ? "" : " " + lsModel)
                                         + (lsModelVariant == null ? "" : " " + lsModelVariant)
@@ -644,7 +643,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         Platform.runLater(() -> {
                             main_data.clear();
                             JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
-                            if (poController.getTransactionListCount()> 0) {
+                            if (poController.getTransactionListCount() > 0) {
                                 for (int lnCtr = 0; lnCtr <= poController.getTransactionListCount() - 1; lnCtr++) {
                                     try {
                                         String lsDate = CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getTransactionDate());
@@ -743,36 +742,34 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             (lsID, lsValue) -> {
                 /*Lost Focus*/
                 switch (lsID) {
-//                    case "tfClient":
-//                        if (lsValue.isEmpty()) {
-//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-//                                    if (poController.getDetailCount() > 0) {
-//                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-//                                            if (!pbKeyPressed) {
-//                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-//                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-//                                                    poJSON = poController.Master().setClientId("");
-//                                                    poJSON = poController.Master().setAddressId("");
-//                                                    poJSON = poController.Master().setContactId("");
-////                                                    poController.removeDetails();
-//                                                    loadTableDetail.reload();
-//                                                } else {
-//                                                    loadRecordMaster();
-//                                                    return;
-//                                                }
-//                                            } else {
-//                                                loadRecordMaster();
-//                                                return;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//
-//                            poJSON = poController.Master().setClientId("");
-//                        }
-//                        break;
+                    case "tfClient":
+                        if (lsValue.isEmpty()) {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
+                                    if (poController.getDetailCount() > 0) {
+                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
+                                            if (!pbKeyPressed) {
+                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+                                                    poJSON = poController.Master().setClientId("");
+//                                                    poController.removeDetails();
+                                                    loadTableDetail.reload();
+                                                } else {
+                                                    loadRecordMaster();
+                                                    return;
+                                                }
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            poJSON = poController.Master().setClientId("");
+                        }
+                        break;
                     case "tfApplicationNo": //po no
                         poJSON = poController.Master().setPONumber(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -916,18 +913,18 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                     pbKeyPressed = false;
                                 }
                             }
-                            poJSON = poController.SearchClient(lsValue, false,false);
+                            poJSON = poController.SearchClient(lsValue, false, false);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfClient.setText("");
                                 break;
                             } else {
-                                JFXUtil.focusFirstTextField(apDetail);
+                                JFXUtil.textFieldMoveNext(tfApplicationNo);
                             }
                             loadRecordMaster();
                             return;
                         case "tfSearchClient":
-                            poJSON = poController.SearchClient(lsValue, false,true);
+                            poJSON = poController.SearchClient(lsValue, false, true);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 tfSearchClient.setText("");
@@ -941,16 +938,6 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         case "tfSearchTransactionNo":
                             retrieveSalesCommitment();
                             return;
-                        case "tfBank":
-                            poJSON = poController.SearchBank(lsValue, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
-                            }
-                            loadRecordMaster();
-                            return;
                         case "tfTerm":
                             poJSON = poController.SearchTerm(lsValue, false);
                             if ("error".equals(poJSON.get("result"))) {
@@ -958,9 +945,21 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 tfSalesPerson.setText("");
                                 break;
                             } else {
+                                JFXUtil.textFieldMoveNext(tfBank);
                             }
                             loadRecordMaster();
                             break;
+                        case "tfBank":
+                            poJSON = poController.SearchBank(lsValue, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                tfSalesPerson.setText("");
+                                break;
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfVATRate);
+                            }
+                            loadRecordMaster();
+                            return;
                         //apDetail
                         case "tfBarcode":
                             poJSON = poController.SearchInventory(lsValue, true, pnDetail);
@@ -969,6 +968,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 tfSalesPerson.setText("");
                                 break;
                             } else {
+                                JFXUtil.textFieldMoveNext(tfUnitPrice);
                             }
                             loadTableDetail.reload();
                             break;
@@ -979,6 +979,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                                 tfSalesPerson.setText("");
                                 break;
                             } else {
+                                JFXUtil.textFieldMoveNext(tfUnitPrice);
                             }
                             loadTableDetail.reload();
                             break;
@@ -1078,7 +1079,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                             } else {
                                 poController.Master().setDueDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                             }
-                        } 
+                        }
                         if (pbSuccess) {
                         } else {
                             if ("error".equals((String) poJSON.get("result"))) {
@@ -1127,7 +1128,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
         JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfUnitPrice, tfQuantity);
 
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse,apDetail);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
         JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice);
         CustomCommonUtil.inputIntegersOnly(tfQuantity);
@@ -1159,7 +1160,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             case BankApplicationStatus.APPROVED:
             case BankApplicationStatus.DISAPPROVED:
             case BankApplicationStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnApprove, btnDisapprove, btnCancelBankApplication);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnDisapprove, btnCancelBankApplication);
                 break;
         }
     }
