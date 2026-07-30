@@ -245,6 +245,7 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+            dpApproveDate.setValue(poController.Master().getApprovedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
 
             tfPriorityUnit.setText(poController.getPriorityUnit());
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
