@@ -238,31 +238,13 @@
                                                                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                           </rowConstraints>
                                                           <children>
-                                                          <Label text="Trans No.">
+                                                                                    <Label text="Trans No.">
                                                                   <font>
                                                                       <Font name="System Bold" size="14.0" />
                                                                   </font>
                                                               </Label>
-                                                                                        <Label text="Inquiry Date" GridPane.columnIndex="5" GridPane.rowIndex="6">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label text="Branch" GridPane.rowIndex="7">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label layoutX="13.0" layoutY="139.0" text="Sales Person" GridPane.rowIndex="8">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                                        <Label layoutX="23.0" layoutY="110.0" text="Referral Agent" GridPane.rowIndex="9">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
+                                                                                        <Label text="Transaction Date" GridPane.rowIndex="2" />
+                                                                                        <Label layoutX="10.0" layoutY="54.0" text="Applied Date" GridPane.rowIndex="3" />
                                                                                         <Label layoutX="44.0" layoutY="207.0" text="Client Type" GridPane.rowIndex="4">
                                                          <font>
                                                             <Font size="12.0" />
@@ -278,6 +260,48 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
+                                                                                        <Label text="Branch" GridPane.rowIndex="7">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                                        <Label layoutX="13.0" layoutY="139.0" text="Sales Person" GridPane.rowIndex="8">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                                        <Label layoutX="23.0" layoutY="110.0" text="Referral Agent" GridPane.rowIndex="9">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                                        <Label layoutX="37.0" layoutY="326.0" text="Priority Unit" GridPane.rowIndex="11" />
+                                                                                        <Label text="PO Number" GridPane.rowIndex="12" />
+                                                                                        <Label layoutX="37.0" layoutY="326.0" text="ATD Number" GridPane.rowIndex="13" />
+                                                                                        <Label text="Payment Mode" GridPane.rowIndex="14">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                                        <Label layoutX="37.0" layoutY="326.0" text="Term" GridPane.rowIndex="15" />
+                                                                                        <Label text="Bank" GridPane.rowIndex="16" />
+                                                                                        <Label text="Remarks" GridPane.rowIndex="17" />
+                                                                                        <Label layoutX="549.0" layoutY="82.0" text="Due Date" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                                                                                        <Label layoutX="550.0" layoutY="54.0" text="Inquiry No" GridPane.columnIndex="5" GridPane.rowIndex="5">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                                        <Label text="Inquiry Date" GridPane.columnIndex="5" GridPane.rowIndex="6">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                                        <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="7">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
                                                                                         <Label layoutX="493.0" layoutY="110.0" text="Inquiry Type" GridPane.columnIndex="5" GridPane.rowIndex="8">
                                                          <font>
                                                             <Font size="12.0" />
@@ -288,24 +312,35 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                                        <Label text="Payment Mode" GridPane.rowIndex="14">
+                                                                                        <Label layoutX="525.0" layoutY="260.0" text="Sales Amount" GridPane.columnIndex="5" GridPane.rowIndex="11">
                                                                      <font>
-                                                                        <Font size="12.0" />
+                                                                        <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                                        <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="7">
+                                                                                        <Label text="VAT Rate (%)" GridPane.columnIndex="5" GridPane.rowIndex="15" />
+                                                                                        <Label text="VAT able Sales" GridPane.columnIndex="5" GridPane.rowIndex="16" />
+                                                                                        <Label text="VAT Amount" GridPane.columnIndex="5" GridPane.rowIndex="17" />
+                                                                                        <Label layoutX="36.0" layoutY="14.0" text="Transaction Total" GridPane.columnIndex="5" GridPane.rowIndex="18">
                                                                      <font>
-                                                                        <Font size="12.0" />
+                                                                        <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
+                                                                                        <Separator prefWidth="200.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="8" GridPane.rowIndex="10" />
                                                                                         <TextField fx:id="tfTransNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                                        <DatePicker fx:id="dpInquiryDate" disable="true" editable="false" GridPane.columnIndex="7" GridPane.rowIndex="6" />
-                                                                                        <TextField fx:id="tfBranch" disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
-                                                                                        <TextField fx:id="tfSalesPerson" disable="true" editable="false" layoutX="100.0" layoutY="135.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
-                                                                                        <TextField fx:id="tfReferralAgent" disable="true" editable="false" layoutX="100.0" layoutY="105.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9" />
+                                                                                        <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                        <DatePicker fx:id="dpAppliedDate" layoutX="110.0" layoutY="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                                                         <TextField fx:id="tfClientType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                                                                         <TextField fx:id="tfClient" layoutX="85.0" layoutY="78.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
                                                                                         <TextField fx:id="tfAddress" disable="true" editable="false" layoutX="85.0" layoutY="203.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                                                        <TextField fx:id="tfBranch" disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+                                                                                        <TextField fx:id="tfSalesPerson" disable="true" editable="false" layoutX="100.0" layoutY="135.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
+                                                                                        <TextField fx:id="tfReferralAgent" disable="true" editable="false" layoutX="100.0" layoutY="105.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9" />
+                                                                                        <TextField fx:id="tfPriorityUnit" disable="true" editable="false" layoutX="110.0" layoutY="245.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="11" />
+                                                                                        <TextField fx:id="tfApplicationNo" GridPane.columnIndex="2" GridPane.rowIndex="12" />
+                                                                                        <TextField fx:id="tfATDNumber" layoutX="110.0" layoutY="322.0" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                                                                                        <TextField fx:id="tfPaymentMode" disable="true" editable="false" layoutX="633.0" layoutY="106.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="14" />
+                                                                                        <TextField fx:id="tfTerm" layoutX="110.0" layoutY="350.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="15" />
+                                                                                        <TextField fx:id="tfBank" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="16" />
                                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" visible="false" GridPane.columnIndex="7">
                                                                      <children>
                                                                                               <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -313,19 +348,8 @@
                                                                               <Font name="System Bold" size="14.0" />
                                                                           </font>
                                                                       </Label>
-                                                                     </children></AnchorPane>
-                                                                                        <TextField fx:id="tfInquiryType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="8" />
-                                                                                        <TextField fx:id="tfUnitType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="9" />
-                                                                                        <DatePicker fx:id="dpTargetDate" disable="true" editable="false" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
-                                                                  <TextField fx:id="tfPaymentMode" disable="true" editable="false" layoutX="633.0" layoutY="106.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="14" />
-                                                                  <Label layoutX="550.0" layoutY="54.0" text="Inquiry No" GridPane.columnIndex="5" GridPane.rowIndex="5">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <TextField fx:id="tfInquiryNo" disable="true" editable="false" layoutX="633.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="5" />
-                                                                                        <Label text="Transaction Date" GridPane.rowIndex="2" />
-                                                                                        <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                     </children>
+                                                                                        </AnchorPane>
                                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="7">
                                                                      <children>
                                                                         <Label fx:id="lblBankApplicationStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
@@ -335,41 +359,18 @@
                                                                         </Label>
                                                                      </children>
                                                                   </AnchorPane>
-                                                                                        <Label text="PO Number" GridPane.rowIndex="12" />
-                                                                                        <TextField fx:id="tfApplicationNo" GridPane.columnIndex="2" GridPane.rowIndex="12" />
-                                                                                        <Label text="Bank" GridPane.rowIndex="16" />
-                                                                                        <TextField fx:id="tfBank" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="16" />
-                                                                  <Label layoutX="37.0" layoutY="326.0" text="Term" GridPane.rowIndex="15" />
-                                                                  <TextField fx:id="tfTerm" layoutX="110.0" layoutY="350.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="15" />
-                                                                  <Label layoutX="37.0" layoutY="326.0" text="ATD Number" GridPane.rowIndex="13" />
-                                                                  <TextField fx:id="tfATDNumber" layoutX="110.0" layoutY="322.0" GridPane.columnIndex="2" GridPane.rowIndex="13" />
-                                                                  <Label layoutX="36.0" layoutY="14.0" text="Transaction Total" GridPane.columnIndex="5" GridPane.rowIndex="18">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <TextField fx:id="tfTransactionTotal" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="633.0" layoutY="218.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="18" />
-                                                                  <Label text="VAT Rate (%)" GridPane.columnIndex="5" GridPane.rowIndex="15" />
-                                                                  <Label text="VAT able Sales" GridPane.columnIndex="5" GridPane.rowIndex="16" />
-                                                                  <Label text="VAT Amount" GridPane.columnIndex="5" GridPane.rowIndex="17" />
-                                                                  <TextField fx:id="tfVatAmount" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="17" />
-                                                                  <TextField fx:id="tfVatSales" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="16" />
-                                                                  <TextField fx:id="tfVATRate" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="15" />
-                                                                  <Label layoutX="525.0" layoutY="260.0" text="Sales Amount" GridPane.columnIndex="5" GridPane.rowIndex="11">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <TextField fx:id="tfSalesAmount" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="340.0" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="11" />
-                                                                                        <Label text="Remarks" GridPane.rowIndex="17" />
+                                                                                        <DatePicker fx:id="dpDueDate" layoutX="633.0" layoutY="78.0" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                                                                                        <TextField fx:id="tfInquiryNo" disable="true" editable="false" layoutX="633.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="5" />
+                                                                                        <DatePicker fx:id="dpInquiryDate" disable="true" editable="false" GridPane.columnIndex="7" GridPane.rowIndex="6" />
+                                                                                        <DatePicker fx:id="dpTargetDate" disable="true" editable="false" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
+                                                                                        <TextField fx:id="tfInquiryType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="8" />
+                                                                                        <TextField fx:id="tfUnitType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="9" />
+                                                                                        <TextField fx:id="tfSalesAmount" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="340.0" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="11" />
+                                                                                        <TextField fx:id="tfVATRate" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="15" />
+                                                                                        <TextField fx:id="tfVatSales" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="16" />
+                                                                                        <TextField fx:id="tfVatAmount" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="17" />
+                                                                                        <TextField fx:id="tfTransactionTotal" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="633.0" layoutY="218.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="18" />
                                                                                         <TextArea fx:id="taRemarks" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="17" GridPane.rowSpan="2" />
-                                                                  <Label layoutX="10.0" layoutY="54.0" text="Applied Date" GridPane.rowIndex="3" />
-                                                                  <Label layoutX="549.0" layoutY="82.0" text="Due Date" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                                  <DatePicker fx:id="dpAppliedDate" layoutX="110.0" layoutY="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                  <DatePicker fx:id="dpDueDate" layoutX="633.0" layoutY="78.0" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                                                                  <Separator prefWidth="200.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="8" GridPane.rowIndex="10" />
-                                                                  <Label layoutX="37.0" layoutY="326.0" text="Priority Unit" GridPane.rowIndex="11" />
-                                                                  <TextField fx:id="tfReferralAgent1" disable="true" editable="false" layoutX="110.0" layoutY="245.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="11" />
                                                                                     </children>
                                                       </GridPane>
                                                   </children>

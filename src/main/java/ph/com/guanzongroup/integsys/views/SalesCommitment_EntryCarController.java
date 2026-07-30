@@ -96,9 +96,9 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnCancelBankApplication, btnHistory, btnRetrieve, btnClose;
     @FXML
-    private TextField tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount;
+    private TextField tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfPriorityUnit, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfSalesAmount, tfVATRate, tfVatSales, tfVatAmount, tfTransactionTotal;
     @FXML
-    private DatePicker dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate;
+    private DatePicker dpTransactionDate, dpAppliedDate, dpDueDate, dpInquiryDate, dpTargetDate;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -362,8 +362,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
             tfTerm.setText(poController.Master().Term().getDescription());
             tfATDNumber.setText(poController.Master().getATDNumber());
             tfTransactionTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getTransactionTotal(), true));
-            tfWTax.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWithholdingTax(), true));
-            tfWTaxRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWTaxRate(), true));
+
             tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATAmount(), true));
             tfVatSales.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATSale(), true));
             tfVATRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATRates(), true));
@@ -590,20 +589,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfWTax":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWithholdingTax(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfWTaxRate":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWTaxRate(Double.valueOf(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
+
                     case "tfVatAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Master().setVATAmount(Double.valueOf(lsValue));
@@ -788,11 +774,11 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
-        JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfATDNumber, tfTerm, tfBank, tfSalesAmount, tfVATRate, tfVatSales, tfVatAmount);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
-        JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
-        JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount);
+        JFXUtil.inputDecimalOnly(tfVATRate);
+        JFXUtil.setCommaFormatter(tfSalesAmount, tfVatAmount);
 
         JFXUtil.adjustColumnForScrollbar(tblViewMainList);
     }
