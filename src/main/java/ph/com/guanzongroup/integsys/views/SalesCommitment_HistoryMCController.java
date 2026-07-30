@@ -51,8 +51,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Pagination;
 import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -66,7 +64,7 @@ import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
  *
- * @author Team 2
+ * @author Team 1
  */
 public class SalesCommitment_HistoryMCController implements Initializable, ScreenInterface {
 

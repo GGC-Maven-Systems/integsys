@@ -25,7 +25,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -52,7 +51,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Pagination;
 import javafx.util.Pair;
@@ -60,9 +58,7 @@ import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.SalesCommitment;
-import ph.com.guanzongroup.cas.sales.t1.SalesInquiry;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
@@ -70,7 +66,7 @@ import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
  *
- * @author Team 2
+ * @author Team 1
  */
 public class SalesCommitment_EntryMCController implements Initializable, ScreenInterface {
 

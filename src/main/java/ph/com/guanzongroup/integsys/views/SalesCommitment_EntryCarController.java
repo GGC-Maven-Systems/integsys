@@ -9,8 +9,6 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -37,7 +34,6 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.util.Duration;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
@@ -45,23 +41,19 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.parser.ParseException;
-import javafx.animation.PauseTransition;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Pagination;
 import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.SalesCommitment;
-import ph.com.guanzongroup.cas.sales.t1.SalesInquiry;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
@@ -69,7 +61,7 @@ import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
  *
- * @author Team 2
+ * @author Team 1
  */
 public class SalesCommitment_EntryCarController implements Initializable, ScreenInterface {
 

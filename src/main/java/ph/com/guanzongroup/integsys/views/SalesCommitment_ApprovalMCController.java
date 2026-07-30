@@ -46,14 +46,12 @@ import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.parser.ParseException;
 import javafx.animation.PauseTransition;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Pagination;
-import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
@@ -66,7 +64,7 @@ import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
  *
- * @author Team 2
+ * @author Team 1
  */
 public class SalesCommitment_ApprovalMCController implements Initializable, ScreenInterface {
 
