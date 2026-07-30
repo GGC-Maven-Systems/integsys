@@ -84,7 +84,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
-
+    private boolean tooltipShown = false;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private static final int ROWS_PER_PAGE = 50;
@@ -704,14 +704,19 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNext(false, true);
+                                });
+                                pbEntered = false;
+                            });
+                        }
                         break;
                 }
-                Platform.runLater(() -> {
-                    PauseTransition delay = new PauseTransition(Duration.seconds(0.50));
-                    delay.setOnFinished(event -> {
-                        loadTableDetail.reload();
-                    });
-                    delay.play();
+                JFXUtil.runWithDelay(0.50, () -> {
+                    loadTableDetail.reload();
                 });
             });
 
@@ -913,6 +918,10 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                             retrieveSalesCommitment();
                             return;
                         case "tfSearchTransactionNo":
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", tfSearchTransactionNo);
+                                tooltipShown = true;
+                            }
                             retrieveSalesCommitment();
                             return;
                         case "tfTerm":

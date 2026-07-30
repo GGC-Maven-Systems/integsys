@@ -696,14 +696,19 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNext(false, true);
+                                });
+                                pbEntered = false;
+                            });
+                        }
                         break;
                 }
-                Platform.runLater(() -> {
-                    PauseTransition delay = new PauseTransition(Duration.seconds(0.50));
-                    delay.setOnFinished(event -> {
-                        loadTableDetail.reload();
-                    });
-                    delay.play();
+                JFXUtil.runWithDelay(0.50, () -> {
+                    loadTableDetail.reload();
                 });
             });
 

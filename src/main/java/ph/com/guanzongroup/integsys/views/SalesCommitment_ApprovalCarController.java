@@ -81,7 +81,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
-
+    private boolean tooltipShown = false;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private static final int ROWS_PER_PAGE = 50;
@@ -528,17 +528,12 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-//                try {
                 switch (lsID) {
                     case "tfSearchClient":
                         break;
                     case "tfSearchTransactionNo":
                         break;
                 }
-//                } catch (GuanzonException | SQLException | CloneNotSupportedException | ScriptException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                }
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -655,6 +650,10 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                             retrieveSalesCommitment();
                             return;
                         case "tfSearchTransactionNo":
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", tfSearchTransactionNo);
+                                tooltipShown = true;
+                            }
                             retrieveSalesCommitment();
                             return;
 
