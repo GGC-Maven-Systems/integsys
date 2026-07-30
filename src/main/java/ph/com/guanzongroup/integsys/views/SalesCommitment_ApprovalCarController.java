@@ -657,6 +657,14 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchClient":
+                            poJSON = poController.SearchClient(lsValue, false, true);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                tfSearchClient.setText("");
+                                break;
+                            } else {
+                                tfSearchClient.setText(poController.getClient());
+                            }
                             retrieveSalesCommitment();
                             return;
                         case "tfSearchTransactionNo":
