@@ -327,7 +327,7 @@
                                                                   </Label>
                                                                                         <Separator prefWidth="200.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="8" GridPane.rowIndex="10" />
                                                                                         <TextField fx:id="tfTransNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                                        <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                        <DatePicker fx:id="dpTransactionDate" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                                         <DatePicker fx:id="dpAppliedDate" layoutX="110.0" layoutY="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                                                         <TextField fx:id="tfClientType" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                                                                         <TextField fx:id="tfClient" layoutX="85.0" layoutY="78.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />

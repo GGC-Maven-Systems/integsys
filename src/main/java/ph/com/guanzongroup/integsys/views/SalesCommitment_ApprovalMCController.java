@@ -1148,6 +1148,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             }
         } else {
             JFXUtil.setDisabledExcept(false, apMaster);
+            JFXUtil.setDisabled(true, dpInquiryDate, dpTargetDate);
             JFXUtil.setDisabled(!lbShow1, apMaster);
             JFXUtil.setDisabled(lbShow1, dpApproveDate);
         }
