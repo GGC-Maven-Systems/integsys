@@ -510,14 +510,14 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchClient":
-                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(),true);
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             }
                             loadRecordMaster();
                             return;
                         case "tfSearchTransactionNo":
-                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(), false);
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             }

@@ -8,14 +8,10 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -38,19 +34,13 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import javafx.collections.transformation.FilteredList;
-import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.SalesCommitment;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
-import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Detail;
-import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
@@ -61,28 +51,18 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
 
     private GRiderCAS oApp;
     private JSONObject poJSON;
-    int pnDetail = 0, pnMain = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static SalesCommitment poController;
     public int pnEditMode;
     boolean pbKeyPressed = false;
-    boolean pbPurchaseTypeChanged = false;
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-    private ObservableList<ModelSalesCommitment_Detail> details_data = FXCollections.observableArrayList();
-    private ObservableList<ModelSalesCommitment_Main> main_data = FXCollections.observableArrayList();
-    List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
-    List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
     private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
 
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
-    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    private static final int ROWS_PER_PAGE = 50;
-    private FilteredList<ModelSalesCommitment_Main> filteredData;
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster;
     @FXML
@@ -226,31 +206,15 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                     poController.InitTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
+                } else {
+                    loadRecordMaster();
                 }
 
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnArrowRight", "btnArrowLeft", "btnRetrieve", "btnHistory")) {
-                } else {
-                    loadTableDetail.reload();
-                }
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    public void retrieveSalesInquiry() {
-        try {
-            poJSON = new JSONObject();
-            poJSON = poController.loadSalesInquiryList(tfClient.getText());
-            if (!"success".equals((String) poJSON.get("result"))) {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            } else {
-                loadTableMain.reload();
-            }
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -283,6 +247,7 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
 
             tfPriorityUnit.setText(poController.getPriorityUnit());
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
+                tfPriorityUnit.setText(poController.getPriorityUnit());
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
                 tfReferralAgent.setText(poController.Master().Inquiry().ReferralAgent().getCompanyName());
@@ -292,7 +257,7 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                 tfPaymentMode.setText(getPaymentmode(Integer.parseInt(poController.Master().getPaymentMode())));
                 dpInquiryDate.setValue(poController.Master().Inquiry().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
                 dpTargetDate.setValue(poController.Master().Inquiry().getTargetDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-
+                
             } else {
                 JFXUtil.clearNodes(dpInquiryDate, dpTargetDate, tfInquiryType, tfClientType, tfUnitType, tfPaymentMode,
                         tfBranch, tfSalesPerson, tfReferralAgent);
@@ -355,14 +320,14 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchClient":
-                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(),true);
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             }
                             loadRecordMaster();
                             return;
                         case "tfSearchTransactionNo":
-                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText());
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(), false);
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             }
