@@ -534,29 +534,6 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                 switch (lsID) {
                     case "tfClient":
                         if (lsValue.isEmpty()) {
-//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getClientId() != null && !"".equals(poController.Master().getClientId())) {
-//                                    if (poController.getDetailCount() > 0) {
-//                                        if (!JFXUtil.isObjectEqualTo(poController.Detail(0).getStockId(), null, "")) {
-//                                            if (!pbKeyPressed) {
-//                                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-//                                                        "Are you sure you want to change the client name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
-//                                                    poJSON = poController.Master().setClientId("");
-////                                                    poController.removeDetails();
-//                                                    loadTableDetail.reload();
-//                                                } else {
-//                                                    loadRecordMaster();
-//                                                    return;
-//                                                }
-//                                            } else {
-//                                                loadRecordMaster();
-//                                                return;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-
                             poJSON = poController.Master().setClientId("");
                         }
                         break;
