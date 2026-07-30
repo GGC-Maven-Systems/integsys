@@ -861,8 +861,8 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
     }
 
     public void initMainGrid() {
-        JFXUtil.setColumnCenter(tblNo, tblTransactionDate, tblTransactionNo);
-        JFXUtil.setColumnLeft(tblClient, tblStatus);
+        JFXUtil.setColumnCenter(tblNo, tblTransactionDate, tblTransactionNo, tblStatus);
+        JFXUtil.setColumnLeft(tblClient);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
         filteredData = new FilteredList<>(main_data, b -> true);

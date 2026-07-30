@@ -1110,8 +1110,8 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
     }
 
     public void initMainGrid() {
-        JFXUtil.setColumnCenter(tblNoViewMainList, tblInquiryDate, tblTransactionNo);
-        JFXUtil.setColumnLeft(tblClient, tblStatus);
+        JFXUtil.setColumnCenter(tblNoViewMainList, tblInquiryDate, tblTransactionNo, tblStatus);
+        JFXUtil.setColumnLeft(tblClient);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
         filteredData = new FilteredList<>(main_data, b -> true);
