@@ -91,6 +91,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
@@ -964,6 +965,34 @@ public class JFXUtil {
                 combo.setOnAction(savedHandler);
             } else if (node instanceof Parent) {
                 clearTextInputsRecursive((Parent) node);
+            }
+        }
+    }
+
+    public static void clearNodes(Node... nodes) {
+        for (Node node : nodes) {
+            if (node == null) {
+                continue;
+            }
+
+            if (node instanceof TextInputControl) {
+                ((TextInputControl) node).clear();
+
+            } else if (node instanceof ComboBox) {
+                ((ComboBox<?>) node).getSelectionModel().clearSelection();
+                ((ComboBox<?>) node).setValue(null);
+
+            } else if (node instanceof DatePicker) {
+                ((DatePicker) node).setValue(null);
+
+            } else if (node instanceof CheckBox) {
+                ((CheckBox) node).setSelected(false);
+
+            } else if (node instanceof RadioButton) {
+                ((RadioButton) node).setSelected(false);
+
+            } else if (node instanceof Label) {
+                ((Label) node).setText("");
             }
         }
     }
