@@ -843,7 +843,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
             }
         } else {
             JFXUtil.setDisabledExcept(false, apMaster);
-            JFXUtil.setDisabled(true, dpInquiryDate, dpTargetDate);
+            JFXUtil.setDisabled(true, dpInquiryDate, dpTargetDate, dpTransactionDate);
             JFXUtil.setDisabled(!lbShow1, apMaster);
             JFXUtil.setDisabled(lbShow1, dpApproveDate);
         }
