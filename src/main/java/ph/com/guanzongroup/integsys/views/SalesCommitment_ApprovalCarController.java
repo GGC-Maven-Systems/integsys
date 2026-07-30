@@ -380,7 +380,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
 
             tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATAmount(), true));
             tfVatSales.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATSale(), true));
-            tfVATRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATRates(), true));
+            tfVATRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATRates(), false));
             tfSalesAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getSalesAmount(), true));
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
