@@ -677,17 +677,6 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                             loadRecordMaster();
                             retrieveSalesInquiry();
                             return;
-                        case "tfBank":
-                            poJSON = poController.SearchBank(lsValue, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfSalesPerson.setText("");
-                                break;
-                            } else {
-                                JFXUtil.textFieldMoveNext(tfTerm);
-                            }
-                            loadRecordMaster();
-                            return;
                         case "tfTerm":
                             poJSON = poController.SearchTerm(lsValue, false);
                             if ("error".equals(poJSON.get("result"))) {
@@ -695,9 +684,21 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                                 tfSalesPerson.setText("");
                                 break;
                             } else {
+                                JFXUtil.textFieldMoveNext(tfBank);
                             }
                             loadRecordMaster();
                             break;
+                        case "tfBank":
+                            poJSON = poController.SearchBank(lsValue, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                tfSalesPerson.setText("");
+                                break;
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfVATRate);
+                            }
+                            loadRecordMaster();
+
                     }
                     break;
                 default:
