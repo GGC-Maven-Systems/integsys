@@ -917,6 +917,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
                 String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
+                LocalDate ldServerDate = LocalDate.parse(lsServerDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                 
                 poJSON = new JSONObject();
                 switch (datePicker.getId()) {
@@ -924,7 +925,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
                             JFXUtil.setJSONError(poJSON, "Applied date cannot be before the transaction date.");
                             pbSuccess = false;
-                        } else if (ldSelectedDate.isAfter(ldTransactionDate)) {
+                        } else if (ldSelectedDate.isAfter(ldServerDate)) {
                             JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
                             pbSuccess = false;
                         } else {
@@ -946,7 +947,7 @@ public class BankApplicationController implements Initializable, ScreenInterface
                         if (ldSelectedDate.isBefore(ldAppliedDate)) {
                             JFXUtil.setJSONError(poJSON, "Approved date cannot be before the Applied date.");
                             pbSuccess = false;
-                        } else if (ldSelectedDate.isAfter(ldAppliedDate)) {
+                        } else if (ldSelectedDate.isAfter(ldServerDate)) {
                             JFXUtil.setJSONError(poJSON, "Future date is not allowed.");
                             pbSuccess = false;
                         } else {

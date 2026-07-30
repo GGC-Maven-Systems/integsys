@@ -417,7 +417,7 @@ public class CashLiquidation_ApprovalController implements Initializable, Screen
                                 try (PDDocument document = PDDocument.load(selectedFile)) {
                                     PDFRenderer pdfRenderer = new PDFRenderer(document);
                                     int pageCount = document.getNumberOfPages();
-                                    if (pageCount > 5) {
+                                    if (pageCount > 20) {
                                         ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
                                         return;
                                     }
