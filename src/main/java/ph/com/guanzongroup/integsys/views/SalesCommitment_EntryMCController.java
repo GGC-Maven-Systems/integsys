@@ -379,7 +379,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
             tfTerm.setText(poController.Master().Term().getDescription());
             tfATDNumber.setText(poController.Master().getATDNumber());
             tfTransactionTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getTransactionTotal(), true));
-            tfWTax.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWithholdingTax(), false));
+            tfWTax.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWithholdingTax(), true));
             tfWTaxRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWTaxRate(), true));
             tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATAmount(), true));
             tfVatSales.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATSale(), true));
