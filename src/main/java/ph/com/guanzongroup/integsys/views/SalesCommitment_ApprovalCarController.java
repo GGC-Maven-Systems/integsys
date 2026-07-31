@@ -385,21 +385,17 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
             dpApproveDate.setValue(poController.Master().getApprovedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
 
             tfPriorityUnit.setText(poController.getPriorityUnit());
-            if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
-                tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
-                tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
-                tfReferralAgent.setText(poController.Master().Inquiry().ReferralAgent().getCompanyName());
-                tfInquiryType.setText(poController.Master().Inquiry().Source().getDescription());
-                tfClientType.setText(getClientType(Integer.parseInt(poController.Master().Inquiry().getClientType())));
-                tfUnitType.setText(getCategoryType(Integer.parseInt(poController.Master().Inquiry().getCategoryType())));
-                tfPaymentMode.setText(getPaymentmode(Integer.parseInt(poController.Master().getPaymentMode())));
-                dpInquiryDate.setValue(poController.Master().Inquiry().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-                dpTargetDate.setValue(poController.Master().Inquiry().getTargetDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+            boolean lbIsNotNull = !JFXUtil.isObjectEqualTo(poController.Master().getSourceNo(), null, "");
 
-            } else {
-                JFXUtil.clearNodes(dpInquiryDate, dpTargetDate, tfInquiryType, tfClientType, tfUnitType, tfPaymentMode,
-                        tfBranch, tfSalesPerson, tfReferralAgent);
-            }
+            tfBranch.setText(lbIsNotNull ? poController.Master().Inquiry().Branch().getBranchName() : "");
+            tfSalesPerson.setText(lbIsNotNull ? poController.Master().Inquiry().SalesPerson().getFullName() : "");
+            tfReferralAgent.setText(lbIsNotNull ? poController.Master().Inquiry().ReferralAgent().getCompanyName() : "");
+            tfInquiryType.setText(lbIsNotNull ? poController.Master().Inquiry().Source().getDescription() : "");
+            tfClientType.setText(lbIsNotNull ? getClientType(Integer.parseInt(poController.Master().Inquiry().getClientType())) : "");
+            tfUnitType.setText(lbIsNotNull ? getCategoryType(Integer.parseInt(poController.Master().Inquiry().getCategoryType())) : "");
+            tfPaymentMode.setText(lbIsNotNull ? getPaymentmode(Integer.parseInt(poController.Master().getPaymentMode())) : "");
+            dpInquiryDate.setValue((poController.Master().Inquiry().getTransactionDate() != null && lbIsNotNull) ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+            dpTargetDate.setValue((poController.Master().Inquiry().getTargetDate() != null && lbIsNotNull) ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().Inquiry().getTargetDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
 
             JFXUtil.updateCaretPositions(apMaster);
 
