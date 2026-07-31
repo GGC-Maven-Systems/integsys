@@ -773,14 +773,14 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         break;
                     case "tfWTax":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWithholdingTax(Double.valueOf(lsValue));
+                        poJSON = poController.setWithholdingTax(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfWTaxRate":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setWTaxRate(Double.valueOf(lsValue));
+                        poJSON = poController.setWTaxRate(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -815,7 +815,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                         break;
                     case "tfVATExempt":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Master().setVATExmpt(Double.valueOf(lsValue));
+                        poJSON = poController.setVatExempt(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
