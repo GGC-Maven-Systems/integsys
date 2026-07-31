@@ -507,6 +507,8 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                     case "tfClient":
                         if (lsValue.isEmpty()) {
                             poJSON = poController.Master().setClientId("");
+                            poJSON = poController.Master().setSourceNo("");
+                            poJSON = poController.Master().setSourceCode("");
                         }
                         break;
                     case "tfApplicationNo": //po no

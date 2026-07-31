@@ -721,8 +721,13 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                         "Are you sure you want to change the client name?\nPlease note that this action will delete all sales commitment details.\n\nDo you wish to proceed?") == true) {
                                                     poJSON = poController.Master().setClientId("");
+                                                    poJSON = poController.Master().setSourceNo("");
+                                                    poJSON = poController.Master().setSourceCode("");
 //                                                    poController.removeDetails();
+                                                    poController.Detail().clear();
+                                                    loadRecordMaster();
                                                     loadTableDetail.reload();
+                                                    return;
                                                 } else {
                                                     loadRecordMaster();
                                                     return;
@@ -737,6 +742,11 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                             }
 
                             poJSON = poController.Master().setClientId("");
+                            poJSON = poController.Master().setSourceNo("");
+                            poJSON = poController.Master().setSourceCode("");
+                            poController.Detail().clear();
+                            loadRecordMaster();
+                            loadTableDetail.reload();
                         }
                         break;
                     case "tfApplicationNo": //po no
