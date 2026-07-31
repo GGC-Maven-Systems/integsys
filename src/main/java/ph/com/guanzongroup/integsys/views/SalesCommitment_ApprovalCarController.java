@@ -276,6 +276,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             }
+                            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                         }
                         break;
                     case "btnRetrieve":
@@ -322,7 +323,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnReturn")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnSave", "btnCancel", "btnDisapprove", "btnCancelBankApplication")) {
                     poController.resetMaster();
                     poController.Detail().clear();
                     clearTextFields();
