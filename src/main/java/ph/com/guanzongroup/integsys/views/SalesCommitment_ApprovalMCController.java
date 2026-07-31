@@ -384,7 +384,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             tfATDNumber.setText(poController.Master().getATDNumber());
             tfTransactionTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getTransactionTotal(), true));
             tfWTax.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWithholdingTax(), true));
-            tfWTaxRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWTaxRate(), true));
+            tfWTaxRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getWTaxRate(), false));
             tfVatAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATAmount(), true));
             tfVatSales.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATSale(), true));
             tfVATRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATRates(), false));
@@ -393,7 +393,8 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpApproveDate.setValue(poController.Master().getApprovedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-            tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poJSON));
+
+            tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATExmpt(),true));
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
