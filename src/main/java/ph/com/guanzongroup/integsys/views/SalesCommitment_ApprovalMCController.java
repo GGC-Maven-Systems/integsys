@@ -1173,9 +1173,9 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     }
 
     public void initMainGrid() {
-        JFXUtil.setColumnCenter(tblNoViewDetailList);
-        JFXUtil.setColumnLeft(tblDescription);
-        JFXUtil.setColumnRight(tblUnitPrice, tblQuantity, tblTotal);
+        JFXUtil.setColumnCenter(tblNoViewMainList, tblTransactionDate, tblTransactionNo);
+        JFXUtil.setColumnLeft(tblClient, tblStatus);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
         tblViewMainList.setItems(main_data);
         filteredData = new FilteredList<>(main_data, b -> true);
         tblViewMainList.setItems(filteredData);
