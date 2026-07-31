@@ -356,9 +356,9 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             poJSON = poController.loadTransactionList(tfSearchClient.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
 //                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            } else {
-                loadTableMain.reload();
-            }
+            } 
+            
+            loadTableMain.reload();
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

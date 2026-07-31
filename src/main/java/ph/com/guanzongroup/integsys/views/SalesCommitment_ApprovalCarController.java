@@ -347,7 +347,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
             poJSON = poController.loadTransactionList(tfSearchClient.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
 //                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            } else {
             }
             loadTableMain.reload();
         } catch (SQLException | GuanzonException ex) {
