@@ -305,12 +305,12 @@
                                                                                         <TextField fx:id="tfVATRate" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="12" />
                                                                                         <TextField fx:id="tfVatSales" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="13" />
                                                                                         <TextField fx:id="tfVatAmount" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="14" />
+                                                                  <TextField fx:id="tfVATExempt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="15" />
                                                                                         <TextField fx:id="tfWTaxRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="7" GridPane.rowIndex="16" />
                                                                                         <TextField fx:id="tfWTax" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="256.0" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="17" />
                                                                                         <TextField fx:id="tfSalesAmount" alignment="CENTER_RIGHT" layoutX="633.0" layoutY="340.0" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="18" />
                                                                                         <TextArea fx:id="taRemarks" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="16" GridPane.rowSpan="3" />
                                                                   <Label text="VAT Exempt" GridPane.columnIndex="5" GridPane.rowIndex="15" />
-                                                                  <TextField fx:id="tfVATExempt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="7" GridPane.rowIndex="15" />
                                                                                     </children>
                                                       </GridPane>
                                                   </children>
