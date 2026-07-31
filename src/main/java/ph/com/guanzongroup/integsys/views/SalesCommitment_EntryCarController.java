@@ -563,6 +563,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                        
 
                 }
                 loadRecordMaster();

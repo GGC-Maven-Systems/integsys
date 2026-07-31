@@ -101,9 +101,9 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnCancelBankApplication, btnHistory, btnRetrieve, btnClose;
     @FXML
-    private TextField tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
+    private TextField tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfTransactionTotal, tfVATRate, tfVatSales, tfVatAmount, tfWTaxRate, tfWTax, tfSalesAmount, tfVATExempt, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
     @FXML
-    private DatePicker dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate;
+    private DatePicker dpTransactionDate, dpAppliedDate, dpDueDate, dpInquiryDate, dpTargetDate;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -388,7 +388,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-
+            tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poJSON));
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
@@ -806,6 +806,13 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "tfVATExempt":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Master().setVATExmpt(Double.valueOf(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
 
                 }
                 loadRecordMaster();
@@ -1061,13 +1068,13 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
-        JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfVATExempt, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
         JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfUnitPrice, tfQuantity);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
         JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice, tfVatSales);
-        JFXUtil.inputIntegersOnly(tfQuantity,tfApplicationNo, tfATDNumber);
+        JFXUtil.inputIntegersOnly(tfQuantity, tfApplicationNo, tfATDNumber);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList, tblViewMainList);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetailList, tblViewMainList);

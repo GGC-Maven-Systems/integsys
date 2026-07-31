@@ -91,13 +91,13 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     @FXML
     private Label lblSource, lblStatus, lblBankApplicationStatus;
     @FXML
+    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfTransactionTotal, tfVATRate, tfVatSales, tfVatAmount, tfWTaxRate, tfWTax, tfSalesAmount, tfVATExempt, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
+    @FXML
     private HBox hbButtons;
     @FXML
     private Button btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnDisapprove, btnCancelBankApplication, btnHistory, btnRetrieve, btnClose;
     @FXML
-    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfBranch, tfSalesPerson, tfReferralAgent, tfClientType, tfClient, tfAddress, tfInquiryType, tfUnitType, tfPaymentMode, tfInquiryNo, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfTransactionTotal, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
-    @FXML
-    private DatePicker dpInquiryDate, dpTargetDate, dpTransactionDate, dpAppliedDate, dpDueDate, dpApproveDate;
+    private DatePicker dpTransactionDate, dpAppliedDate, dpApproveDate, dpDueDate, dpInquiryDate, dpTargetDate;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -393,7 +393,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpApproveDate.setValue(poController.Master().getApprovedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getApprovedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-
+            tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poJSON));
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
@@ -813,6 +813,13 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "tfVATExempt":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Master().setVATExmpt(Double.valueOf(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
 
                 }
                 loadRecordMaster();
@@ -1108,7 +1115,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
-        JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfVATExempt, tfClient, tfApplicationNo, tfBank, tfTerm, tfATDNumber, tfWTax, tfWTaxRate, tfVatAmount, tfVatSales, tfVATRate, tfSalesAmount);
         JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfUnitPrice, tfQuantity);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse, apDetail);

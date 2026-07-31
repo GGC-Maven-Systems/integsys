@@ -8,8 +8,6 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +38,7 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import javafx.collections.transformation.FilteredList;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
@@ -50,7 +46,6 @@ import ph.com.guanzongroup.cas.sales.t1.SalesCommitment;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
 import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Detail;
-import ph.com.guanzongroup.integsys.model.ModelSalesCommitment_Main;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 
 /**
@@ -73,14 +68,12 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
 
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
-    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    private FilteredList<ModelSalesCommitment_Main> filteredData;
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail;
     @FXML
     private Label lblSource, lblStatus, lblBankApplicationStatus;
     @FXML
-    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfTransactionTotal, tfVATRate, tfVatSales, tfVatAmount, tfWTaxRate, tfWTax, tfSalesAmount, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
+    private TextField tfSearchClient, tfSearchTransactionNo, tfTransNo, tfClientType, tfClient, tfAddress, tfBranch, tfSalesPerson, tfReferralAgent, tfApplicationNo, tfATDNumber, tfPaymentMode, tfTerm, tfBank, tfInquiryNo, tfInquiryType, tfUnitType, tfTransactionTotal, tfVATRate, tfVatSales, tfVatAmount, tfWTaxRate, tfWTax, tfSalesAmount, tfVATExempt, tfBarcode, tfDescription, tfUnitPrice, tfQuantity;
     @FXML
     private HBox hbButtons;
     @FXML
@@ -285,7 +278,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
             taRemarks.setText(poController.Master().getRemarks());
             dpAppliedDate.setValue(poController.Master().getAppliedDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getAppliedDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             dpDueDate.setValue(poController.Master().getDueDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getDueDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-
+            tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poJSON));
             if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
                 tfBranch.setText(poController.Master().Inquiry().Branch().getBranchName());
                 tfSalesPerson.setText(poController.Master().Inquiry().SalesPerson().getFullName());
