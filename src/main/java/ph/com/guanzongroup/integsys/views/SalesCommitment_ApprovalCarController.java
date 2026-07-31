@@ -67,12 +67,10 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
 
     private GRiderCAS oApp;
     private JSONObject poJSON;
-    int pnDetail = 0, pnMain = 0;
+    int pnMain = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static SalesCommitment poController;
     public int pnEditMode;
-    boolean pbKeyPressed = false;
-    boolean pbPurchaseTypeChanged = false;
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
@@ -80,9 +78,8 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
     private ObservableList<ModelSalesCommitment_Main> main_data = FXCollections.observableArrayList();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private boolean pbEntered = false;
     private boolean tooltipShown = false;
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
+    JFXUtil.ReloadableTableTask loadTableMain;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private static final int ROWS_PER_PAGE = 50;
     private FilteredList<ModelSalesCommitment_Main> filteredData;
@@ -628,7 +625,6 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    pbEntered = true;
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;

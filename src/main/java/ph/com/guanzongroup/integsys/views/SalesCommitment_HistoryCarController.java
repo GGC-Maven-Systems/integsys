@@ -54,14 +54,11 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static SalesCommitment poController;
     public int pnEditMode;
-    boolean pbKeyPressed = false;
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private boolean pbEntered = false;
-    private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
 
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster;
@@ -309,7 +306,6 @@ public class SalesCommitment_HistoryCarController implements Initializable, Scre
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    pbEntered = true;
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;

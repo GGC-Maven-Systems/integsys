@@ -40,11 +40,9 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.transformation.FilteredList;
-import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
@@ -63,27 +61,19 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
 
     private GRiderCAS oApp;
     private JSONObject poJSON;
-    int pnDetail = 0, pnMain = 0;
+    int pnDetail = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static SalesCommitment poController;
     public int pnEditMode;
-    boolean pbKeyPressed = false;
-    boolean pbPurchaseTypeChanged = false;
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
     private ObservableList<ModelSalesCommitment_Detail> details_data = FXCollections.observableArrayList();
-    private ObservableList<ModelSalesCommitment_Main> main_data = FXCollections.observableArrayList();
-    List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
-    List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private boolean pbEntered = false;
-    private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
 
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    private static final int ROWS_PER_PAGE = 50;
     private FilteredList<ModelSalesCommitment_Main> filteredData;
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail;
@@ -398,7 +388,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                 tblViewDetailList,
                 details_data,
                 () -> {
-                    pbEntered = false;
                     Platform.runLater(() -> {
                         int lnCtr;
                         details_data.clear();
@@ -498,7 +487,6 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    pbEntered = true;
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;
@@ -510,7 +498,7 @@ public class SalesCommitment_HistoryMCController implements Initializable, Scree
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchClient":
-                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(),true);
+                            poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(), true);
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             }
