@@ -724,7 +724,7 @@ public class SalesCommitment_EntryCarController implements Initializable, Screen
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
         JFXUtil.inputDecimalOnly(tfVATRate);
         JFXUtil.setCommaFormatter(tfSalesAmount, tfVatAmount, tfVatSales);
-
+        JFXUtil.inputIntegersOnly(tfApplicationNo, tfATDNumber);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList);
     }
 

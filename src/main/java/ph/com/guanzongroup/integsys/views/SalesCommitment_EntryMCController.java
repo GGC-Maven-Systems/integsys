@@ -1067,8 +1067,7 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
         JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice, tfVatSales);
-        CustomCommonUtil.inputIntegersOnly(tfQuantity);
-
+        JFXUtil.inputIntegersOnly(tfQuantity,tfApplicationNo, tfATDNumber);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList, tblViewMainList);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetailList, tblViewMainList);

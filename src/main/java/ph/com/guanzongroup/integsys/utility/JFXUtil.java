@@ -1882,7 +1882,7 @@ public class JFXUtil {
         }
     }
 
-    /*Alternative version of inputDecimalOnly;*/
+    /*Alternative version of inputIntegersOnly;*/
  /* call once */
     public static void inputIntegersOnly(TextField... foTxtFields) {
         Pattern pattern = Pattern.compile("[0-9]*");

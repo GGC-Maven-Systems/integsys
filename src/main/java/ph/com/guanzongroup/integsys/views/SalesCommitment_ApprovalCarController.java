@@ -813,7 +813,7 @@ public class SalesCommitment_ApprovalCarController implements Initializable, Scr
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse);
         JFXUtil.inputDecimalOnly(tfVATRate);
         JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfVatSales);
-
+        JFXUtil.inputIntegersOnly(tfApplicationNo, tfATDNumber);
         JFXUtil.adjustColumnForScrollbar(tblViewMainList);
 
         JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelSalesCommitment_Main) item).getIndex01(), highlightedRowsMain);

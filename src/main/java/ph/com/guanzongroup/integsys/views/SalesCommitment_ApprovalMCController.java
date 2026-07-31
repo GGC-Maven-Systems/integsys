@@ -1114,7 +1114,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse, apDetail);
         JFXUtil.inputDecimalOnly(tfWTaxRate, tfVATRate);
         JFXUtil.setCommaFormatter(tfVatAmount, tfSalesAmount, tfUnitPrice, tfVatSales);
-        CustomCommonUtil.inputIntegersOnly(tfQuantity);
+        JFXUtil.inputIntegersOnly(tfQuantity, tfApplicationNo, tfATDNumber);
 
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetailList, tblViewMainList);
 
