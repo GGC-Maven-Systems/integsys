@@ -232,6 +232,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         }
                         poSalesInquiryController.SalesInquiry().loadRequirements();
                         poSalesInquiryController.SalesInquiry().loadBankApplications();
+                        poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnClose":
@@ -297,6 +298,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         }
                         poSalesInquiryController.SalesInquiry().loadRequirements();
                         poSalesInquiryController.SalesInquiry().loadBankApplications();
+                        poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnSearch":
@@ -434,6 +436,9 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     loadTableFollowUp.reload();
                     return;
                 }
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnBrowse", "btnSave", "btnCancel")) {
+                    JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
+                }
                 String currentTitle = tabpane.getSelectionModel().getSelectedItem().getText();
                 switch (currentTitle) {
                     case "Requirements":
@@ -448,9 +453,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     case "Attachments":
                         JFXUtil.clickTabByTitleText(tabpane, "Attachments");
                         break;
-                }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel")) {
-                    JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnAddAttachment", "btnRemoveAttachment", "btnArrowLeft", "btnArrowRight")) {
                 } else {

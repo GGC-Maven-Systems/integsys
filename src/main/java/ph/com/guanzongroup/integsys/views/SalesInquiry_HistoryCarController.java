@@ -215,6 +215,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                         }
                         poSalesInquiryController.SalesInquiry().loadRequirements();
                         poSalesInquiryController.SalesInquiry().loadBankApplications();
+                        poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
 
                         break;
@@ -272,7 +273,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                         JFXUtil.clickTabByTitleText(tabpane, "Attachments");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnBrowse", "btnSave", "btnCancel")) {
                     JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
                 }
 
@@ -830,20 +831,13 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                             } else {
                                 poSalesInquiryController.SalesInquiry().loadRequirements();
                                 poSalesInquiryController.SalesInquiry().loadBankApplications();
+                                poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                                 pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                                 loadRecordMaster();
                                 loadTableDetail.reload();
                                 initButton(pnEditMode);
                             }
-                            String currentTitle = tabpane.getSelectionModel().getSelectedItem().getText();
-                            switch (currentTitle) {
-                                case "Requirements":
-                                    JFXUtil.clickTabByTitleText(tabpane, "Requirements");
-                                    break;
-                                case "Bank Applications":
-                                    JFXUtil.clickTabByTitleText(tabpane, "Bank Applications");
-                                    break;
-                            }
+                            JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
                             loadRecordSearch();
                             return;
                     }
