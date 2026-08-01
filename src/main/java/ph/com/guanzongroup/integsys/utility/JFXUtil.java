@@ -19,10 +19,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
@@ -3919,5 +3916,20 @@ public class JFXUtil {
             }
         }
         return true;
+    }
+
+    public static void setNextBusinessDate(DatePicker... datePickers) {
+
+        LocalDate nextDate = LocalDate.now().plusDays(1);
+
+        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY) {
+            nextDate = LocalDate.now().plusDays(2); // Monday
+        } else if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            nextDate = LocalDate.now().plusDays(1); // Monday
+        }
+
+        for (DatePicker datePicker : datePickers) {
+            datePicker.setValue(nextDate);
+        }
     }
 }
