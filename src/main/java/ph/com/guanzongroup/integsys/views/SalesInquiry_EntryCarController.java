@@ -488,6 +488,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         case "Attachments":
                             JFXUtil.clearTextFields(apAttachments);
                             if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                                poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                                 poSalesInquiryController.SalesInquiry().loadAttachments();
                             }
                             loadTableAttachment.reload();
