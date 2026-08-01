@@ -129,7 +129,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose, btnArrowLeft, btnArrowRight, btnAddAttachment, btnRemoveAttachment;
+    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabpane;
     @FXML
@@ -1566,7 +1566,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apRequirements, apAttachments, btnAddAttachment, btnRemoveAttachment); //, apBankApplications);
+        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apRequirements, apAttachments); //, apBankApplications);
 
         switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
             case SalesInquiryStatic.QUOTED:
