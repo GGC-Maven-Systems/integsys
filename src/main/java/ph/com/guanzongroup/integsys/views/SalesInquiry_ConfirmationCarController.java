@@ -136,13 +136,11 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
     @FXML
     private Label lblSource, lblStatus;
     @FXML
-    private HBox hbButtons, mainHbox, hboxcontainer;
+    private HBox hbButtons, mainHbox;
     @FXML
     private Button btnUpdate, btnSearch, btnSave, btnCancel, btnConfirm, btnVoid, btnHistory, btnRetrieve, btnClose, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabpane;
-    @FXML
-    private VBox vboxcontainer;
     @FXML
     private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
