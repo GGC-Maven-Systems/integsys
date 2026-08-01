@@ -1737,7 +1737,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                 }
                 int lnAttachmentType = Integer.parseInt(lsAttachmentType);
                 cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
-
+                tfAttachmentSource.setText(poSalesInquiryController.SalesInquiry().TransactionAttachmentSource(pnAttachment));
                 if (lbloadImage) {
                     try {
                         String filePath = attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
