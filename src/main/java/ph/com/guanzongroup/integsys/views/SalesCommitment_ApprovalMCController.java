@@ -370,6 +370,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
     public void loadRecordMaster() {
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient);
+
         try {
             JFXUtil.setStatusValue(lblStatus, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
             poController.computeFields(false);
@@ -399,7 +400,7 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             tfVATExempt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().getVATExmpt(), true));
 
             boolean lbIsNotNull = !JFXUtil.isObjectEqualTo(poController.Master().getSourceNo(), null, "");
-            
+
             tfBranch.setText(lbIsNotNull ? poController.Master().Inquiry().Branch().getBranchName() : "");
             tfSalesPerson.setText(lbIsNotNull ? poController.Master().Inquiry().SalesPerson().getFullName() : "");
             tfReferralAgent.setText(lbIsNotNull ? poController.Master().Inquiry().ReferralAgent().getCompanyName() : "");
@@ -423,6 +424,9 @@ public class SalesCommitment_ApprovalMCController implements Initializable, Scre
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbShow = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfBarcode, tfDescription);
+            
             tfBarcode.setText(poController.Detail(pnDetail).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnDetail).Inventory().getDescription());
             tfUnitPrice.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getUnitPrice(), true));
