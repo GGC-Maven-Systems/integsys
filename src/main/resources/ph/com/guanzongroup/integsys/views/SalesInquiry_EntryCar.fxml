@@ -308,6 +308,14 @@
                                                                         <DatePicker fx:id="dpTargetDate" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
                                                                   <ComboBox fx:id="cmbClientType" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                                                                   <TextField fx:id="tfClient" layoutX="85.0" layoutY="78.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
+                                                                   <Button fx:id="btnAddClient" mnemonicParsing="false" onAction="#cmdButton_Click" GridPane.columnIndex="4" GridPane.rowIndex="8">
+                                                                      <GridPane.margin>
+                                                                         <Insets left="5.0" />
+                                                                      </GridPane.margin>
+                                                                      <graphic>
+                                                                         <FontAwesomeIconView glyphName="PLUS" />
+                                                                      </graphic>
+                                                                   </Button>
                                                                   <TextField fx:id="tfAddress" disable="true" editable="false" layoutX="85.0" layoutY="203.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9" />
                                                                   <TextField fx:id="tfContactNo" disable="true" editable="false" layoutX="489.0" layoutY="203.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="9" />
                                                       <TextArea fx:id="taRemarks" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="31.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="10">
