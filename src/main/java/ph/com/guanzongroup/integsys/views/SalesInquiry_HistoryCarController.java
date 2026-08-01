@@ -5,17 +5,22 @@
 package ph.com.guanzongroup.integsys.views;
 
 import ph.com.guanzongroup.integsys.model.ModelBankApplications_Detail;
+import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Attachment;
 import ph.com.guanzongroup.integsys.model.ModelRequirements_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
@@ -28,29 +33,37 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import static javafx.scene.input.KeyCode.DOWN;
 import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.F3;
-import static javafx.scene.input.KeyCode.TAB;
 import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
+
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
@@ -75,41 +88,53 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
     private String psCompanyId = "";
     private String psCategoryId = "";
     private String psSearchClientId = "";
+    private int pnAttachment = 0;
+    private int currentIndex = 0;
+    private final Map<String, String> imageinfo_temp = new HashMap<>();
+    private final JFXUtil.ImageViewer imageviewerutil = new JFXUtil.ImageViewer();
     ObservableList<String> ClientType = ModelSalesInquiry_Detail.ClientType;
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
+    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
 
     private ObservableList<ModelSalesInquiry_Detail> details_data = FXCollections.observableArrayList();
     private FilteredList<ModelSalesInquiry_Detail> filteredDataDetail;
     private ObservableList<ModelRequirements_Detail> requirements_data = FXCollections.observableArrayList();
     private ObservableList<ModelBankApplications_Detail> bankapplications_data = FXCollections.observableArrayList();
+    private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain, loadTableRequirements, loadTableBankApplications;
+    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain, loadTableRequirements, loadTableBankApplications, loadTableAttachment;
     private boolean pbEntered = false;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements;//, apBankApplications, apBankApplicationsButtons;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements, apAttachments;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy;//, tfPaymentMode, tfApplicationNo, tfBank;
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy, tfAttachmentNo, tfAttachmentSource;
     @FXML
-    private Label lblSource, lblStatus;//, lblBankApplicationStatus;
+    private Label lblSource, lblStatus;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnHistory, btnClose;//, btnApprove, btnDisApprove, btnCancelApplication;
+    private Button btnBrowse, btnHistory, btnClose, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabpane;
     @FXML
-    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;//, dpAppliedDate, dpApprovedDate;
+    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
-    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup;
+    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
     @FXML
-    private TextArea taRemarks;//, taBankAppRemarks;
+    private TextArea taRemarks;
     @FXML
-    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications;
+    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments;
     @FXML
-    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus;
+    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus, tblFollowUpRowNo, tblFollowUpTransNo, tblFollowUpTransDate, tblFollowUpMessage, tblFollowUpRemarks, tblFollowUpDate, tblFollowUpTime, tblFollowUpMethod, tblFollowUpSocMed, tblFollowUpResponse, tblFollowUpGoodsCompetitor, tblFollowUpMakeCompetitor, tblFollowUpDealerCompetitor, tblRowNoAttachment, tblFileNameAttachment;
+    @FXML
+    private Tab tabAttachments;
+    @FXML
+    private StackPane stackPane1;
+    @FXML
+    private ImageView imageView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -127,7 +152,9 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         initDetailsGrid();
         initRequirementsGrid();
         initBankApplicationsGrid();
+        initAttachmentsGrid();
         initTableOnClick();
+        initAttachmentPreviewPane();
         clearTextFields();
         pnEditMode = EditMode.UNKNOWN;
         initButton(pnEditMode);
@@ -212,6 +239,12 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
+                    case "btnArrowRight":
+                        slideImage(1);
+                        break;
+                    case "btnArrowLeft":
+                        slideImage(-1);
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -228,6 +261,9 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                     case "Bank Applications":
                         JFXUtil.clickTabByTitleText(tabpane, "Bank Applications");
                         break;
+                    case "Attachments":
+                        JFXUtil.clickTabByTitleText(tabpane, "Attachments");
+                        break;
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel")) {
                     JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
@@ -237,6 +273,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                 } else {
                     loadRecordMaster();
                     loadTableDetail.reload();
+                    loadTableAttachment.reload();
                 }
 
                 initButton(pnEditMode);
@@ -261,6 +298,17 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                     case "Bank Applications":
 //                        JFXUtil.clearTextFields(apBankApplications);
                         loadTableBankApplications.reload();
+                        break;
+                    case "Attachments":
+                        JFXUtil.clearTextFields(apAttachments);
+                        if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                            try {
+                                poSalesInquiryController.SalesInquiry().loadAttachments();
+                            } catch (SQLException | GuanzonException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        loadTableAttachment.reload();
                         break;
                 }
             }
@@ -365,86 +413,49 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         }
     }
 
-//    public void loadRecordBankApplications() {
-//        try {
-//            boolean lbShow1 = poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0;
-//            if (pnBankApplications < 0 || pnBankApplications > poSalesInquiryController.SalesInquiry().getBankApplicationsCount() - 1) {
-//                return;
-//            }
-//            Platform.runLater(() -> {
-//                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus();
-//                Map<String, String> statusMap = new HashMap<>();
-//                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-//                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-//                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-//                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-//                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-//                lblBankApplicationStatus.setText(lsStat);
-//            });
-//
-//            boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus(),
-//                    BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
-//            boolean lbShow2 = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getEditMode(), EditMode.UPDATE);
-//            JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
-//
-//            String lsPaymentMode = "";
-//            if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode(), null, "")) {
-//                lsPaymentMode = PurchaseType.get(Integer.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode()));
-//            } else {
-//                lsPaymentMode = "";
-//            }
-//            tfPaymentMode.setText(lsPaymentMode);
-//            tfApplicationNo.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApplicationNo());
-//            tfBank.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).Bank().getBankName());
-//            taBankAppRemarks.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getRemarks());
-//
-//            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getAppliedDate());
-//            dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
-//
-//            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApprovedDate());
-//            dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
-//            JFXUtil.updateCaretPositions(apBankApplications);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//        }
-//    }
-    private void tableKeyEvents(KeyEvent event) {
-        if (details_data.size() > 0) {
-            TableView currentTable = (TableView) event.getSource();
-            TablePosition focusedCell = currentTable.getFocusModel().getFocusedCell();
-            int index = 0;
-            if (focusedCell != null) {
-                switch (event.getCode()) {
-                    case TAB:
-                    case DOWN:
-                        index = JFXUtil.moveToNextRow(currentTable);
-                        break;
-                    case UP:
-                        index = JFXUtil.moveToPreviousRow(currentTable);
-                        break;
-                    default:
-                        break;
-                }
-                switch (currentTable.getId()) {
-                    case "tblViewTransDetails":
-                        pnDetail = index;
+    JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
+        @Override
+        protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
+            int newIndex = 0;
+            switch (currentTableID) {
+                case "tblViewTransDetails":
+                    if (!details_data.isEmpty()) {
+                        pnDetail = isMovedDown ? JFXUtil.moveToNextRow(currentTable)
+                                : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordDetail();
-                        break;
-                    case "tblViewRequirements":
-                        pnRequirements = index;
+                    }
+                    break;
+                case "tblViewRequirements":
+                    if (!requirements_data.isEmpty()) {
+                        pnRequirements = isMovedDown ? JFXUtil.moveToNextRow(currentTable)
+                                : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordRequirements();
-                        break;
-                    case "tblViewBankApplications":
-                        pnBankApplications = index;
-//                        loadRecordBankApplications();
-                        break;
-                }
-                event.consume();
+                    }
+                    break;
+                case "tblViewBankApplications":
+                    break;
+                case "tblAttachments":
+                    if (!attachment_data.isEmpty()) {
+                        pnAttachment = isMovedDown ? Integer.parseInt(attachment_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex03())
+                                : Integer.parseInt(attachment_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex03());
+                        loadRecordAttachment(true);
+                    }
+                    break;
             }
         }
-    }
+    };
 
     public void initTableOnClick() {
+        tblAttachments.setOnMouseClicked(event -> {
+            pnAttachment = tblAttachments.getSelectionModel().getSelectedIndex();
+            if (pnAttachment >= 0) {
+                imageviewerutil.scaleFactor = 1.0;
+                int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                pnAttachment = lnRow;
+                loadRecordAttachment(true);
+                JFXUtil.resetImageBounds(imageView, stackPane1);
+            }
+        });
         tblViewTransDetails.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
@@ -461,16 +472,8 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                 }
             }
         });
-//        tblViewBankApplications.setOnMouseClicked(event -> {
-//            if (bankapplications_data.size() > 0) {
-//                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-//                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-//                    loadRecordBankApplications();
-//                }
-//            }
-//        });
-        JFXUtil.setKeyEventFilter(this::tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications);
-        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications);  // need to use computed-size in min-width of the column to work
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblAttachments);
+        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblAttachments);  // need to use computed-size in min-width of the column to work
         JFXUtil.addCheckboxColumns(ModelRequirements_Detail.class, tblViewRequirements, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
                 }, 1, 2);
@@ -629,26 +632,59 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                                         )
                                 );
                             }
-//                            if (pnBankApplications < 0 || pnBankApplications
-//                                    >= bankapplications_data.size()) {
-//                                if (!bankapplications_data.isEmpty()) {
-//                                    /* FOCUS ON FIRST ROW */
-//                                    JFXUtil.selectAndFocusRow(tblViewBankApplications, 0);
-//                                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-//
-//                                }
-//                                loadRecordBankApplications();
-//                            } else {
-//                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-//                                JFXUtil.selectAndFocusRow(tblViewBankApplications, pnBankApplications);
-//                                loadRecordBankApplications();
-//                            }
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
+
+        loadTableAttachment = new JFXUtil.ReloadableTableTask(
+                tblAttachments,
+                attachment_data,
+                () -> {
+                    imageviewerutil.scaleFactor = 1.0;
+                    JFXUtil.resetImageBounds(imageView, stackPane1);
+                    Platform.runLater(() -> {
+                        try {
+                            attachment_data.clear();
+                            int lnCount = 0;
+                            for (int lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getTransactionAttachmentCount(); lnCtr++) {
+                                if (RecordStatus.INACTIVE.equals(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    continue;
+                                }
+                                lnCount += 1;
+                                attachment_data.add(
+                                        new ModelDeliveryAcceptance_Attachment(String.valueOf(lnCount),
+                                                String.valueOf(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(lnCtr).getModel().getFileName()),
+                                                String.valueOf(lnCtr)
+                                        )
+                                );
+                            }
+
+                            int lnTempRow = JFXUtil.getDetailRow(attachment_data, pnAttachment, 3);
+                            if (lnTempRow < 0 || lnTempRow >= attachment_data.size()) {
+                                if (!attachment_data.isEmpty()) {
+                                    JFXUtil.selectAndFocusRow(tblAttachments, 0);
+                                    int lnRow = Integer.parseInt(attachment_data.get(0).getIndex03());
+                                    pnAttachment = lnRow;
+                                    loadRecordAttachment(true);
+                                }
+                            } else {
+                                JFXUtil.selectAndFocusRow(tblAttachments, lnTempRow);
+                                int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                                pnAttachment = lnRow;
+                                loadRecordAttachment(true);
+                            }
+
+                            if (attachment_data.size() <= 0) {
+                                loadRecordAttachment(false);
+                            }
+                        } catch (Exception e) {
+                        }
+                    });
+                }
+        );
     }
 
     final ChangeListener<? super Boolean> txtField_Focus = (o, ov, nv) -> {
@@ -743,8 +779,8 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
 
     private void initComboBoxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
-                new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup));
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup);
+                new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup), new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
     }
 
     public void initDatePickers() {
@@ -764,7 +800,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         JFXUtil.setButtonsVisibility(lbShow2, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(true, taRemarks, apMaster, apDetail, apRequirements);//, apBankApplications, apBankApplicationsButtons);
+        JFXUtil.setDisabled(true, taRemarks, apMaster, apDetail, apRequirements, cmbAttachmentType);//, apBankApplications, apBankApplicationsButtons);
     }
 
     public void initDetailsGrid() {
@@ -793,6 +829,128 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         tblViewBankApplications.setItems(bankapplications_data);
     }
 
+    public void initAttachmentsGrid() {
+        JFXUtil.setColumnCenter(tblRowNoAttachment);
+        JFXUtil.setColumnLeft(tblFileNameAttachment);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblAttachments);
+        tblAttachments.setItems(attachment_data);
+    }
+
+    private void initAttachmentPreviewPane() {
+        imageviewerutil.initAttachmentPreviewPane(stackPane1, imageView);
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            imageviewerutil.ldstackPaneHeight = computedHeight;
+            loadTableAttachment.reload();
+            loadRecordAttachment(true);
+        });
+    }
+
+    public void slideImage(int direction) {
+        if (attachment_data.size() <= 0) {
+            return;
+        }
+        int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+        currentIndex = lnRow - 1;
+        int newIndex = currentIndex + direction;
+
+        if (newIndex != -1 && (newIndex <= attachment_data.size() - 1)) {
+            TranslateTransition slideOut = new TranslateTransition(Duration.millis(300), imageView);
+            slideOut.setByX(direction * -400);
+
+            JFXUtil.selectAndFocusRow(tblAttachments, newIndex);
+            int lnIndex = Integer.parseInt(attachment_data.get(newIndex).getIndex01());
+            int lnTempRow = JFXUtil.getDetailTempRow(attachment_data, lnIndex, 3);
+            pnAttachment = lnTempRow;
+            loadRecordAttachment(false);
+
+            slideOut.setOnFinished(event -> {
+                imageView.setTranslateX(direction * 400);
+                TranslateTransition slideIn = new TranslateTransition(Duration.millis(300), imageView);
+                slideIn.setToX(0);
+                slideIn.play();
+                loadRecordAttachment(true);
+            });
+
+            slideOut.play();
+        }
+        if (JFXUtil.isImageViewOutOfBounds(imageView, stackPane1)) {
+            JFXUtil.resetImageBounds(imageView, stackPane1);
+        }
+    }
+
+    public void loadRecordAttachment(boolean lbloadImage) {
+        try {
+            if (attachment_data.size() > 0) {
+                tfAttachmentNo.setText(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+                String lsAttachmentType = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                if (lsAttachmentType.equals("")) {
+                    poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().setDocumentType(DocumentType.OTHER);
+                    lsAttachmentType = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                }
+                int lnAttachmentType = Integer.parseInt(lsAttachmentType);
+                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
+
+                if (lbloadImage) {
+                    try {
+                        String filePath = attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        String filePath2;
+                        if (imageinfo_temp.containsKey(filePath)) {
+                            filePath2 = imageinfo_temp.get(filePath);
+                        } else {
+                            if (poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath() != null
+                                    && !"".equals(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath())) {
+                                filePath2 = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath() + "/" + filePath;
+                            } else {
+                                filePath2 = System.getProperty("sys.default.path.temp.attachments") + "/" + filePath;
+                            }
+                        }
+
+                        if (filePath != null && !filePath.isEmpty()) {
+                            Path imgPath = Paths.get(filePath2);
+                            String convertedPath = imgPath.toUri().toString();
+                            boolean isPdf = filePath.toLowerCase().endsWith(".pdf");
+
+                            stackPane1.getChildren().clear();
+                            if (!isPdf) {
+                                Image loimage = new Image(convertedPath);
+                                imageView.setImage(loimage);
+                                JFXUtil.adjustImageSize(loimage, imageView, imageviewerutil.ldstackPaneWidth, imageviewerutil.ldstackPaneHeight);
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                                delay.setOnFinished(event -> Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1)));
+                                delay.play();
+
+                                stackPane1.getChildren().add(imageView);
+                                stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                                StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                                StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+                                StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                                StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+                            } else {
+                                JFXUtil.PDFViewConfig(filePath2, stackPane1, btnArrowLeft, btnArrowRight, imageviewerutil.ldstackPaneWidth, imageviewerutil.ldstackPaneHeight);
+                            }
+                        } else {
+                            imageView.setImage(null);
+                        }
+                    } catch (Exception e) {
+                        imageView.setImage(null);
+                    }
+                }
+            } else {
+                if (!lbloadImage) {
+                    imageView.setImage(null);
+                    stackPane1.getChildren().clear();
+                    stackPane1.getChildren().add(imageView);
+                    stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                    Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1));
+                    pnAttachment = 0;
+                }
+            }
+        } catch (Exception ex) {
+        }
+    }
+
     public void loadRecordSearch() {
         try {
             lblSource.setText(poSalesInquiryController.SalesInquiry().Master().Company().getCompanyName() + " - " + poSalesInquiryController.SalesInquiry().Master().Industry().getDescription());
@@ -807,6 +965,6 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
 
     public void clearTextFields() {
         psSearchClientId = "";
-        JFXUtil.clearTextFields(apMaster, apDetail, apBrowse);
+        JFXUtil.clearTextFields(apMaster, apDetail, apBrowse, apAttachments);
     }
 }
