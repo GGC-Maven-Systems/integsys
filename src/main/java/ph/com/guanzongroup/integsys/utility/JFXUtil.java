@@ -3902,7 +3902,7 @@ public class JFXUtil {
             return "";
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
         return sdf.format(foDateValue);
     }
 
