@@ -96,7 +96,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
+    private Button btnAddClient, btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
     @FXML
     private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfDescription, tfBrand, tfMeasure, tfSellingPrice;
     @FXML
@@ -208,6 +208,35 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
 
                         break;
+                    case "btnAddClient":
+                        if(pnEditMode == EditMode.ADDNEW){
+                            if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                    poSalesInquiryController.SalesInquiry().removeDetails();
+                                    loadTableDetail.reload();
+                                } else {
+                                    return;
+                                }
+                            }
+                            try {
+                                poJSON = poSalesInquiryController.SalesInquiry().addClient();
+                            } catch (Exception ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                return;
+                            }
+                            
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            }
+                            
+                            loadRecordMaster();
+                        } else {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Adding for new client must be during new entry of sales inquiry.");
+                        }
+                        return;
                     case "btnUpdate":
                         poJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
                         poJSON = poSalesInquiryController.SalesInquiry().UpdateTransaction();
@@ -888,6 +917,7 @@ public class SalesInquiry_EntryLPController implements Initializable, ScreenInte
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         dragLock.isEnabled = lbShow; // for drag drop
         // Manage visibility and managed state of other buttons
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW , btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
