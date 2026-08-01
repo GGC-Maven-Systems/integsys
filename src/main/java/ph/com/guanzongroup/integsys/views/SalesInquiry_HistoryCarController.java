@@ -621,13 +621,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                                 String lsAppliedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
                                 String lsApprovedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
 
-                                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus();
-                                Map<String, String> statusMap = new HashMap<>();
-                                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-                                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-                                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-                                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-                                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
+                                String lsStat = JFXUtil.setStatusValue(null, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
 
                                 String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
                                         ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
