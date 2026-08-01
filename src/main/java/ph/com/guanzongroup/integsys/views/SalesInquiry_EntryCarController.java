@@ -263,6 +263,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                    poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                     poSalesInquiryController.SalesInquiry().removeDetails();
                                     loadTableDetail.reload();
                                 } else {
