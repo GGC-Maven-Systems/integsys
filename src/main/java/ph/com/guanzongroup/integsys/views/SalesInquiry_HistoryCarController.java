@@ -6,6 +6,7 @@ package ph.com.guanzongroup.integsys.views;
 
 import ph.com.guanzongroup.integsys.model.ModelBankApplications_Detail;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Attachment;
+import ph.com.guanzongroup.integsys.model.ModelFollowUp_Detail;
 import ph.com.guanzongroup.integsys.model.ModelRequirements_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -102,9 +103,10 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
     private FilteredList<ModelSalesInquiry_Detail> filteredDataDetail;
     private ObservableList<ModelRequirements_Detail> requirements_data = FXCollections.observableArrayList();
     private ObservableList<ModelBankApplications_Detail> bankapplications_data = FXCollections.observableArrayList();
+    private ObservableList<ModelFollowUp_Detail> followup_data = FXCollections.observableArrayList();
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain, loadTableRequirements, loadTableBankApplications, loadTableAttachment;
+    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain, loadTableRequirements, loadTableBankApplications, loadTableFollowUp, loadTableAttachment;
     private boolean pbEntered = false;
 
     @FXML
@@ -152,6 +154,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         initDetailsGrid();
         initRequirementsGrid();
         initBankApplicationsGrid();
+        initFollowUpGrid();
         initAttachmentsGrid();
         initTableOnClick();
         initAttachmentPreviewPane();
@@ -261,6 +264,9 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                     case "Bank Applications":
                         JFXUtil.clickTabByTitleText(tabpane, "Bank Applications");
                         break;
+                    case "Followup History":
+                        JFXUtil.clickTabByTitleText(tabpane, "Followup History");
+                        break;
                     case "Attachments":
                         JFXUtil.clickTabByTitleText(tabpane, "Attachments");
                         break;
@@ -273,6 +279,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                 } else {
                     loadRecordMaster();
                     loadTableDetail.reload();
+                    loadTableFollowUp.reload();
                     loadTableAttachment.reload();
                 }
 
@@ -298,6 +305,9 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                     case "Bank Applications":
 //                        JFXUtil.clearTextFields(apBankApplications);
                         loadTableBankApplications.reload();
+                        break;
+                    case "Followup History":
+                        loadTableFollowUp.reload();
                         break;
                     case "Attachments":
                         JFXUtil.clearTextFields(apAttachments);
@@ -472,8 +482,8 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                 }
             }
         });
-        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblAttachments);
-        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblAttachments);  // need to use computed-size in min-width of the column to work
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments);
+        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments);  // need to use computed-size in min-width of the column to work
         JFXUtil.addCheckboxColumns(ModelRequirements_Detail.class, tblViewRequirements, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
                 }, 1, 2);
@@ -636,6 +646,51 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
+                    });
+                });
+
+        loadTableFollowUp = new JFXUtil.ReloadableTableTask(
+                tblViewFollowUpHistory,
+                followup_data,
+                () -> {
+                    Platform.runLater(() -> {
+                        Platform.runLater(() -> {
+                            int lnCtr;
+                            followup_data.clear();
+                            try {
+                                if (pnEditMode != EditMode.UNKNOWN) {
+                                    poSalesInquiryController.SalesInquiry().loadBankApplicationList();
+                                }
+                                for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
+                                    String lsAppliedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
+                                    String lsApprovedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
+
+                                    String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus();
+                                    Map<String, String> statusMap = new HashMap<>();
+                                    statusMap.put(BankApplicationStatus.OPEN, "OPEN");
+                                    statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
+                                    statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
+                                    statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
+                                    String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
+
+                                    String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
+                                            ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
+
+                                    followup_data.add(
+                                            new ModelFollowUp_Detail(String.valueOf(lnCtr + 1),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getPONumber()),
+                                                    String.valueOf(lsBank),
+                                                    String.valueOf(lsAppliedDate),
+                                                    String.valueOf(lsApprovedDate),
+                                                    String.valueOf(lsStat)
+                                            )
+                                    );
+                                }
+                            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
+                        });
                     });
                 });
 
@@ -827,6 +882,13 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         JFXUtil.setColumnLeft(tblBank);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewBankApplications);
         tblViewBankApplications.setItems(bankapplications_data);
+    }
+
+    public void initFollowUpGrid() {
+        JFXUtil.setColumnCenter(tblFollowUpRowNo, tblFollowUpTransNo, tblFollowUpTransDate, tblFollowUpDate, tblFollowUpTime);
+        JFXUtil.setColumnLeft(tblFollowUpMessage, tblFollowUpRemarks, tblFollowUpMethod, tblFollowUpSocMed, tblFollowUpResponse, tblFollowUpGoodsCompetitor, tblFollowUpMakeCompetitor, tblFollowUpDealerCompetitor);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewFollowUpHistory);
+        tblViewFollowUpHistory.setItems(followup_data);
     }
 
     public void initAttachmentsGrid() {
