@@ -659,34 +659,27 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                             followup_data.clear();
                             try {
                                 if (pnEditMode != EditMode.UNKNOWN) {
-                                    poSalesInquiryController.SalesInquiry().loadBankApplicationList();
+                                    poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                                 }
-                                for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
-                                    String lsAppliedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
-                                    String lsApprovedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
-
-                                    String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus();
-                                    Map<String, String> statusMap = new HashMap<>();
-                                    statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-                                    statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-                                    statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-                                    statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-                                    String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-
-                                    String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
-                                            ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
-
+                                for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getFollowUpHistoryCount(); lnCtr++) {
                                     followup_data.add(
                                             new ModelFollowUp_Detail(String.valueOf(lnCtr + 1),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getPONumber()),
-                                                    String.valueOf(lsBank),
-                                                    String.valueOf(lsAppliedDate),
-                                                    String.valueOf(lsApprovedDate),
-                                                    String.valueOf(lsStat)
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getTransactionNo()),
+                                                    String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getTransactionDate())),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMessage()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getRemarks()),
+                                                    String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpDate())),
+                                                    String.valueOf(JFXUtil.formatTimeToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpTime())),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorMake()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorDealer())
                                             )
                                     );
                                 }
-                            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                            } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }

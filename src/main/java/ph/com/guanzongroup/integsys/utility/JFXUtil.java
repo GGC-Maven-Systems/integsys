@@ -3900,6 +3900,15 @@ public class JFXUtil {
         return sdf.format(foDateValue);
     }
 
+    public static String formatTimeToString(Date foDateValue) {
+        if (foDateValue == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(foDateValue);
+    }
+
     public static boolean areAllDisabled(Node... nodes) {
         if (nodes == null || nodes.length == 0) {
             return false;
