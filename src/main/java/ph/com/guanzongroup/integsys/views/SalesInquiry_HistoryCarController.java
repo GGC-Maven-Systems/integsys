@@ -69,6 +69,7 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.t1.status.CustomerInquiryFollowUpStatic;
 
 /**
  *
@@ -97,7 +98,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
-    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
+    ObservableList<String> documentType = ModelFollowUp_Detail.documentType;
 
     private ObservableList<ModelSalesInquiry_Detail> details_data = FXCollections.observableArrayList();
     private FilteredList<ModelSalesInquiry_Detail> filteredDataDetail;
@@ -664,10 +665,10 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getRemarks()),
                                                     String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpDate())),
                                                     String.valueOf(JFXUtil.formatTimeToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpTime())),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods()),
+                                                    String.valueOf(getCommunicationMethod(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode())),
+                                                    String.valueOf(getSocialMediaName(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode())),
+                                                    String.valueOf(getCustomerResponse(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode())),
+                                                    String.valueOf(getVehicleCondition(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods())),
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorMake()),
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorDealer())
                                             )
@@ -729,6 +730,53 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
         );
     }
 
+    public static String getSocialMediaName(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.SOCIAL_MEDIA.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCommunicationMethod(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COMM_METHOD_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COMM_METHOD_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COMMUNICATION_METHOD.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCustomerResponse(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getVehicleCondition(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COM_VHICLE_COND.get(i);
+            }
+        }
+        return "";
+    }
     final ChangeListener<? super Boolean> txtField_Focus = (o, ov, nv) -> {
         poJSON = new JSONObject();
         TextField txtPersonalInfo = (TextField) ((ReadOnlyBooleanPropertyBase) o).getBean();

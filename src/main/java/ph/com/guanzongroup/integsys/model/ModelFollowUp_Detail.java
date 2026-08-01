@@ -40,6 +40,11 @@ public class ModelFollowUp_Detail {
         this.index04 = new SimpleStringProperty(index04);
         this.index05 = new SimpleStringProperty(index05);
     }
+    public static ObservableList<String> documentType = FXCollections.observableArrayList("Asset",
+            "Liability",
+            "Owner's Equity",
+            "Revenue",
+            "Expenses");
 
     public ModelFollowUp_Detail(String index01,
             String index02,

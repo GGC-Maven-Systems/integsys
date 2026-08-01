@@ -79,6 +79,7 @@ import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
 import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.t1.status.CustomerInquiryFollowUpStatic;
 
 /**
  *
@@ -119,7 +120,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
-    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
+    ObservableList<String> documentType = ModelFollowUp_Detail.documentType;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableRequirements, loadTableBankApplications, loadTableFollowUp, loadTableAttachment;
 
     @FXML
@@ -258,7 +259,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnAddClient":
-                        if(pnEditMode == EditMode.ADDNEW){
+                        if (pnEditMode == EditMode.ADDNEW) {
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
@@ -933,10 +934,10 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getRemarks()),
                                                     String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpDate())),
                                                     String.valueOf(JFXUtil.formatTimeToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpTime())),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode()),
-                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods()),
+                                                    String.valueOf(getCommunicationMethod(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode())),
+                                                    String.valueOf(getSocialMediaName(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode())),
+                                                    String.valueOf(getCustomerResponse(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode())),
+                                                    String.valueOf(getVehicleCondition(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods())),
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorMake()),
                                                     String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorDealer())
                                             )
@@ -996,6 +997,54 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     });
                 }
         );
+    }
+
+    public static String getSocialMediaName(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.SOCIAL_MEDIA.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCommunicationMethod(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COMM_METHOD_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COMM_METHOD_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COMMUNICATION_METHOD.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCustomerResponse(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getVehicleCondition(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COM_VHICLE_COND.get(i);
+            }
+        }
+        return "";
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -1577,7 +1626,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         dragLock.isEnabled = lbShow;
         disableRowCheckbox.set(!lbShow); // set enable/disable in checkboxes in requirements
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW , btnAddClient);
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW, btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
