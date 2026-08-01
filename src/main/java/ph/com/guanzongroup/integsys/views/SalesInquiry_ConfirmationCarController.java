@@ -76,6 +76,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
@@ -129,27 +130,35 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain, loadTableRequirements, loadTableBankApplications, loadTableAttachment;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements, apAttachments;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy;
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy, tfAttachmentNo, tfAttachmentSource;
     @FXML
     private Label lblSource, lblStatus;
     @FXML
-    private HBox hbButtons, mainHbox;
+    private HBox hbButtons, mainHbox, hboxcontainer;
     @FXML
-    private Button btnUpdate, btnSearch, btnSave, btnCancel, btnConfirm, btnVoid, btnHistory, btnRetrieve, btnClose;
+    private Button btnUpdate, btnSearch, btnSave, btnCancel, btnConfirm, btnVoid, btnHistory, btnRetrieve, btnClose, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabpane;
     @FXML
+    private VBox vboxcontainer;
+    @FXML
     private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
-    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup;
+    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
     @FXML
     private TextArea taRemarks;
     @FXML
-    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewMainList;
+    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblAttachments, tblViewMainList;
     @FXML
-    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus, tblRowNo, tblClient, tblDate, tblReferenceNo;
+    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus, tblRowNoAttachment, tblFileNameAttachment, tblRowNo, tblClient, tblDate, tblReferenceNo;
+    @FXML
+    private Tab tabAttachments;
+    @FXML
+    private StackPane stackPane1;
+    @FXML
+    private ImageView imageView;
     @FXML
     private Pagination pgPagination;
 
@@ -1595,7 +1604,6 @@ public class SalesInquiry_ConfirmationCarController implements Initializable, Sc
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, apRequirements, apAttachments); //, apBankApplications);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
 
-        JFXUtil.setButtonsVisibility(lbShow1, btnAddAttachment, btnRemoveAttachment);
         JFXUtil.setDisabled(!lbShow1, cmbAttachmentType);
 
         switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
