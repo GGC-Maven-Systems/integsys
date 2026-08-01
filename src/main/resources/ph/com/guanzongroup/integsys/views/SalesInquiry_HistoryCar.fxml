@@ -496,9 +496,9 @@
                                                                         <TableColumn fx:id="tblFollowUpTime" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Follow Up Time" />
                                                                         <TableColumn fx:id="tblFollowUpMethod" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Method" />
                                                                         <TableColumn fx:id="tblFollowUpSocMed" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Social Media" />
-                                                                        <TableColumn fx:id="tblFollowUpResponse" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Response" />
+                                                                        <TableColumn fx:id="tblFollowUpResponse" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Response" />
                                                                         <TableColumn fx:id="tblFollowUpGoodsCompetitor" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" text="Goods Competitor" />
-                                                                        <TableColumn fx:id="tblFollowUpMakeCompetitor" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" text="Make Competitor" />
+                                                                        <TableColumn fx:id="tblFollowUpMakeCompetitor" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Make Competitor" />
                                                                         <TableColumn fx:id="tblFollowUpDealerCompetitor" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Dealer Competitor" />
                                                                      </columns>
                                                                   </TableView>
