@@ -352,19 +352,19 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
 
                                 // Confirmation Prompt
-                                JSONObject loJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
-                                if ("success".equals(loJSON.get("result"))) {
-                                    if (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-                                            loJSON = poSalesInquiryController.SalesInquiry().ConfirmTransaction("");
-                                            if ("success".equals((String) loJSON.get("result"))) {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            } else {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            }
-                                        }
-                                    }
-                                }
+//                                JSONObject loJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
+//                                if ("success".equals(loJSON.get("result"))) {
+//                                    if (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
+//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
+//                                            loJSON = poSalesInquiryController.SalesInquiry().ConfirmTransaction("");
+//                                            if ("success".equals((String) loJSON.get("result"))) {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            } else {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            }
+//                                        }
+//                                    }
+//                                }
 
                                 btnNew.fire();
                             }
