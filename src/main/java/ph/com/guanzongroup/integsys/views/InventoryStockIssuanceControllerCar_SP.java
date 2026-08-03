@@ -784,6 +784,7 @@ public class InventoryStockIssuanceControllerCar_SP implements Initializable, Sc
                             loTextField.requestFocus();
                         }
                         if (lnIssuedQty < 0.00) {
+                            tfIssuedQty.setText("0.00");
                             return;
                         }
                         // check if serialized

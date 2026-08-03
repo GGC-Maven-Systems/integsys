@@ -783,6 +783,7 @@ public class InventoryStockIssuanceControllerLP_Food implements Initializable, S
                             loTextField.requestFocus();
                         }
                         if (lnIssuedQty < 0.00) {
+                            tfIssuedQty.setText("0.00");
                             return;
                         }
                         // check if serialized

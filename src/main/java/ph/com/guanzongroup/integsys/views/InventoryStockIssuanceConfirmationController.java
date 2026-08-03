@@ -803,6 +803,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                             loTextField.requestFocus();
                         }
                         if (lnIssuedQty < 0.00) {
+                            tfIssuedQty.setText("0.00");
                             return;
                         }
                         // check if serialized
