@@ -412,9 +412,13 @@ public class SalesCommitment_EntryMCController implements Initializable, ScreenI
 
     public void loadRecordDetail() {
         try {
+
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbShow = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfBarcode, tfDescription);
+            
             tfBarcode.setText(poController.Detail(pnDetail).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnDetail).Inventory().getDescription());
             tfUnitPrice.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getUnitPrice(), true));
