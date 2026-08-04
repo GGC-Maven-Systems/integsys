@@ -487,7 +487,7 @@ public class SIPosting_SPCarController implements Initializable, ScreenInterface
                         }
                         //Validator
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             poPurchaseReceivingController.PurchaseOrderReceiving().setForm(PurchaseOrderReceivingStatus.POSTED);
                             poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().SaveTransaction();
                             if (!"success".equals((String) poJSON.get("result"))) {
@@ -522,7 +522,7 @@ public class SIPosting_SPCarController implements Initializable, ScreenInterface
                         break;
                     case "btnPost":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please review and verify all Journal Entry details before posting the transaction.");
                                 return;
