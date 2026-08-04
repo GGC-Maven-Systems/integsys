@@ -326,7 +326,7 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                                 JSONObject loJSON = poController.PurchaseOrderReturn().OpenTransaction(poController.PurchaseOrderReturn().Master().getTransactionNo());
                                 if ("success".equals(loJSON.get("result"))) {
                                     if (poController.PurchaseOrderReturn().Master().getTransactionStatus().equals(PurchaseOrderReturnStatus.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                                             loJSON = poController.PurchaseOrderReturn().ConfirmTransaction("Confirmed");
                                             if ("success".equals((String) loJSON.get("result"))) {
                                                 ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
@@ -347,7 +347,7 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                         break;
                     case "btnPost":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please review and verify all Journal Entry details before posting the transaction.");
                                 return;
