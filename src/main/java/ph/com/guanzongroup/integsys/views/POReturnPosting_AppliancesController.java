@@ -497,7 +497,7 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail.reload();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poController.PurchaseOrderReturn().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poController.PurchaseOrderReturn().Master().getIndustryId(), null);
@@ -513,7 +513,7 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail.reload();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;
