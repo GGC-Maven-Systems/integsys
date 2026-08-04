@@ -576,7 +576,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -879,6 +879,16 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -898,19 +908,10 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1521,7 +1522,6 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
             JFXUtil.updateCaretPositions(apJEMaster);
         }
     }
-
 
     public void loadRecordMaster() {
         try {

@@ -646,7 +646,7 @@ public class SIPosting_Controller implements Initializable, ScreenInterface {
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -956,6 +956,16 @@ public class SIPosting_Controller implements Initializable, ScreenInterface {
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -975,18 +985,8 @@ public class SIPosting_Controller implements Initializable, ScreenInterface {
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
-                    }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
-
                     }
                     break;
             }
@@ -1349,13 +1349,13 @@ public class SIPosting_Controller implements Initializable, ScreenInterface {
                         //retreiving using column index
                         for (int lnCtr = 0; lnCtr <= poPurchaseReceivingController.PurchaseOrderReceiving().getPurchaseOrderReceivingCount() - 1; lnCtr++) {
                             try {
-                            main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
-                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
-                                    poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
-                            ));
+                                main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
+                                        String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
+                                        poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
+                                ));
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -2186,7 +2186,7 @@ public class SIPosting_Controller implements Initializable, ScreenInterface {
         JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel, btnSerials);
         //Ready
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory);
-        JFXUtil.setButtonsVisibility(false, btnPost,btnReturn);
+        JFXUtil.setButtonsVisibility(false, btnPost, btnReturn);
 
         //Unkown || Ready
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);

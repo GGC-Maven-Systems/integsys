@@ -207,7 +207,7 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
             loadRecordSearch();
 
             poPurchaseReceivingController.PurchaseOrderReceiving().setForm(PurchaseOrderReceivingStatus.CONFIRMED_I);
-            poPurchaseReceivingController.PurchaseOrderReceiving().setTransactionStatus(PurchaseOrderReceivingStatus.CONFIRMED+PurchaseOrderReceivingStatus.RETURNED_I);
+            poPurchaseReceivingController.PurchaseOrderReceiving().setTransactionStatus(PurchaseOrderReceivingStatus.CONFIRMED + PurchaseOrderReceivingStatus.RETURNED_I);
             TriggerWindowEvent();
         });
 
@@ -628,7 +628,7 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -940,6 +940,16 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -959,19 +969,10 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1333,13 +1334,13 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                         //retreiving using column index
                         for (int lnCtr = 0; lnCtr <= poPurchaseReceivingController.PurchaseOrderReceiving().getPurchaseOrderReceivingCount() - 1; lnCtr++) {
                             try {
-                            main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
-                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
-                                    poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
-                            ));
+                                main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
+                                        String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
+                                        poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
+                                ));
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1347,7 +1348,7 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
 
                             if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED, PurchaseOrderReceivingStatus.PAID, PurchaseOrderReceivingStatus.CONFIRMED_I)) {
                                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
-                            }  else if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionStatus(), PurchaseOrderReceivingStatus.RETURNED_I)) {
+                            } else if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionStatus(), PurchaseOrderReceivingStatus.RETURNED_I)) {
                                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "FAA0A0", highlightedRowsMain);
                             }
                         }
@@ -1564,13 +1565,13 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
             } else {
                 JFXUtil.setDisabled(true, apJEMaster, apJEDetail);
             }
-            
+
             JFXUtil.setStatusValue(lblJEStatus, JournalStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Master().getTransactionStatus());
             if (poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Master().getTransactionNo() != null) {
                 tfJETransactionNo.setText(poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Master().getTransactionNo());
                 String lsJETransactionDate = CustomCommonUtil.formatDateToShortString(poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Master().getTransactionDate());
                 dpJETransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsJETransactionDate, "yyyy-MM-dd"));
-                
+
                 taJERemarks.setText(poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Master().getRemarks());
                 double lnTotalDebit = 0;
                 double lnTotalCredit = 0;
@@ -1581,7 +1582,7 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                     lnTotalDebit += poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Detail(lnCtr).getDebitAmount();
                     lnTotalCredit += poPurchaseReceivingController.PurchaseOrderReceiving().Journal().Detail(lnCtr).getCreditAmount();
                 }
-                
+
                 tfTotalCreditAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(lnTotalCredit, true));
                 tfTotalDebitAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(lnTotalDebit, true));
                 JFXUtil.updateCaretPositions(apJEMaster);
@@ -1886,7 +1887,7 @@ public class SIPosting_ConfirmationController implements Initializable, ScreenIn
                     try {
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             String lsExistJournal = poPurchaseReceivingController.PurchaseOrderReceiving().existJournal();
-                            if(lsExistJournal == null
+                            if (lsExistJournal == null
                                     || "".equals(lsExistJournal)) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Journal().ReloadDetail();
                             }
