@@ -370,7 +370,7 @@ public class CheckDepositInterBranch_PostingController implements Initializable,
                     loadTableMain.reload();
                     break;
                 case "btnPost":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             if (!poController.existJournal().equals("")) {

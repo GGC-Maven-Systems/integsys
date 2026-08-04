@@ -600,7 +600,7 @@ public class DisbursementVoucher_VerificationController implements Initializable
                     loadTableMain.reload();
                     break;
                 case "btnVerify":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             //validation for checking details in JE & JEP
@@ -716,7 +716,7 @@ public class DisbursementVoucher_VerificationController implements Initializable
                 return;
             }
 
-            if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+            if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                 return;
             }
 

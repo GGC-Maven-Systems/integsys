@@ -550,7 +550,7 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     loadTableMain.reload();
                     break;
                 case "btnApprove":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             if (!checkJEorJEPSaving()) {
@@ -696,7 +696,7 @@ public class CashDisbursement_ApprovalController implements Initializable, Scree
                     return;
                 }
 
-                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                     return;
                 }
 

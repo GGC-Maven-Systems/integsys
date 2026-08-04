@@ -547,7 +547,7 @@ public class CheckDepositInterBranch_ConfirmationController implements Initializ
                     loadTableMain.reload();
                     break;
                 case "btnApprove":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to confirm transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to confirm transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             if (!poController.existJournal().equals("")) {

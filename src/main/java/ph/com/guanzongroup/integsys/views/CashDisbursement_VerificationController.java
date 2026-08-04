@@ -511,7 +511,7 @@ public class CashDisbursement_VerificationController implements Initializable, S
                     loadTableMain.reload();
                     break;
                 case "btnVerify":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             if (!checkJEorJEPSaving()) {
@@ -646,7 +646,7 @@ public class CashDisbursement_VerificationController implements Initializable, S
                     return;
                 }
 
-                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+                if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                     return;
                 }
 
