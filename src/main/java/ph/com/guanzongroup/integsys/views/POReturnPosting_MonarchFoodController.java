@@ -93,7 +93,6 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
     private FilteredList<ModelDeliveryAcceptance_Detail> filteredDataDetail;
     Map<String, String> imageinfo_temp = new HashMap<>();
 
-
     private int currentIndex = 0;
     boolean lbSelectTabJE = false;
 
@@ -457,7 +456,7 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                     if (tfFreightDetail.isFocused()) {
                         pbEntered = true;
                     }
-                    if (tfDebitAmt.isFocused()) {
+                    if (tfCreditAmt.isFocused()) {
                         pbEnteredJE = true;
                     }
                     CommonUtils.SetNextFocus(txtField);
@@ -831,11 +830,11 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                                                     String.valueOf(poController.PurchaseOrderReturn().Detail(lnCtr).Inventory().getBarCode()),
                                                     String.valueOf(poController.PurchaseOrderReturn().Detail(lnCtr).Inventory().getDescription()),
                                                     String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PurchaseOrderReturn().Detail(lnCtr).getUnitPrce(), true)),
-                                                    String.valueOf( CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PurchaseOrderReturn().getReceiveQty(lnCtr), false)),
-                                                    String.valueOf( CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PurchaseOrderReturn().Detail(lnCtr).getQuantity(), false)),
+                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PurchaseOrderReturn().getReceiveQty(lnCtr), false)),
+                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PurchaseOrderReturn().Detail(lnCtr).getQuantity(), false)),
                                                     String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(lnTotal, true)) //identify total
                                             ));
-                                   
+
                                 }
                             }
                             if (pnDetail < 0 || pnDetail
@@ -1111,6 +1110,16 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                                 return;
                             }
                         }
+                        if (pbEnteredJE) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableJEDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNextJE(false, true);
+                                    pbEnteredJE = false;
+                                });
+                            });
+
+                        }
                         break;
                     case "tfDebitAmt":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -1130,19 +1139,10 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                                 });
                                 return;
                             } else {
-
+                                JFXUtil.textFieldMoveNext(tfCreditAmt);
                             }
                         }
-                        if (pbEnteredJE) {
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                loadTableJEDetail.reload();
-                                JFXUtil.runWithDelay(0.50, () -> {
-                                    moveNextJE(false, true);
-                                    pbEnteredJE = false;
-                                });
-                            });
 
-                        }
                         break;
                 }
                 JFXUtil.runWithDelay(0.50, () -> {
@@ -1160,7 +1160,7 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail, apJEDetail);
         JFXUtil.inputDecimalOnly(tfDiscountRate);
-        JFXUtil.setCommaFormatter(tfDiscountAmount, tfFreightAmt, tfFreightDetail,tfCost, tfCreditAmt, tfDebitAmt);
+        JFXUtil.setCommaFormatter(tfDiscountAmount, tfFreightAmt, tfFreightDetail, tfCost, tfCreditAmt, tfDebitAmt);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetails, tblViewMainList, tblViewJEDetails);
 
@@ -1292,8 +1292,8 @@ public class POReturnPosting_MonarchFoodController implements Initializable, Scr
                     break;
                 case "tblViewJEDetails":
                     if (!JEdetails_data.isEmpty()) {
-                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07()) : 
-                                Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                                : Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                         loadRecordJEDetail();
                     }
                     break;

@@ -456,7 +456,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                     if (tfFreightDetail.isFocused()) {
                         pbEntered = true;
                     }
-                    if (tfDebitAmt.isFocused()) {
+                    if (tfCreditAmt.isFocused()) {
                         pbEnteredJE = true;
                     }
                     CommonUtils.SetNextFocus(txtField);
@@ -1110,6 +1110,16 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
+                        if (pbEnteredJE) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableJEDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNextJE(false, true);
+                                    pbEnteredJE = false;
+                                });
+                            });
+
+                        }
                         break;
                     case "tfDebitAmt":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -1129,19 +1139,10 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                                 });
                                 return;
                             } else {
-
+                                JFXUtil.textFieldMoveNext(tfCreditAmt);
                             }
                         }
-                        if (pbEnteredJE) {
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                loadTableJEDetail.reload();
-                                JFXUtil.runWithDelay(0.50, () -> {
-                                    moveNextJE(false, true);
-                                    pbEnteredJE = false;
-                                });
-                            });
 
-                        }
                         break;
                 }
                 JFXUtil.runWithDelay(0.50, () -> {
@@ -1291,8 +1292,8 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                     break;
                 case "tblViewJEDetails":
                     if (!JEdetails_data.isEmpty()) {
-                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07()) : 
-                                Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                                : Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                         loadRecordJEDetail();
                     }
                     break;

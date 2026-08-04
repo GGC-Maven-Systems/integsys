@@ -93,7 +93,6 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
     private FilteredList<ModelDeliveryAcceptance_Detail> filteredDataDetail;
     Map<String, String> imageinfo_temp = new HashMap<>();
 
-
     private int currentIndex = 0;
     boolean lbSelectTabJE = false;
 
@@ -457,7 +456,7 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
                     if (tfFreightDetail.isFocused()) {
                         pbEntered = true;
                     }
-                    if (tfDebitAmt.isFocused()) {
+                    if (tfCreditAmt.isFocused()) {
                         pbEnteredJE = true;
                     }
                     CommonUtils.SetNextFocus(txtField);
@@ -1112,6 +1111,16 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
                                 return;
                             }
                         }
+                        if (pbEnteredJE) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableJEDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNextJE(false, true);
+                                    pbEnteredJE = false;
+                                });
+                            });
+
+                        }
                         break;
                     case "tfDebitAmt":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -1131,19 +1140,10 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
                                 });
                                 return;
                             } else {
-
+                                JFXUtil.textFieldMoveNext(tfCreditAmt);
                             }
                         }
-                        if (pbEnteredJE) {
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                loadTableJEDetail.reload();
-                                JFXUtil.runWithDelay(0.50, () -> {
-                                    moveNextJE(false, true);
-                                    pbEnteredJE = false;
-                                });
-                            });
 
-                        }
                         break;
                 }
                 JFXUtil.runWithDelay(0.50, () -> {
@@ -1293,8 +1293,8 @@ public class POReturnPosting_AppliancesController implements Initializable, Scre
                     break;
                 case "tblViewJEDetails":
                     if (!JEdetails_data.isEmpty()) {
-                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07()) : 
-                                Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                                : Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                         loadRecordJEDetail();
                     }
                     break;
