@@ -552,7 +552,7 @@ public class SIPosting_VerificationMCController implements Initializable, Screen
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Entry before saving.");
                                 return;
@@ -591,7 +591,7 @@ public class SIPosting_VerificationMCController implements Initializable, Screen
                         break;
                     case "btnVerify":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please review and verify all Journal Entry details before verifying the transaction.");
                                 return;
