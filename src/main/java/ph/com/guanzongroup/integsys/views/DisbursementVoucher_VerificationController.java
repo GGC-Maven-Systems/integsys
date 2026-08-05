@@ -72,6 +72,7 @@ import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.Logical;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.UserRight;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.cashflow.DisbursementVoucher;
@@ -621,6 +622,33 @@ public class DisbursementVoucher_VerificationController implements Initializable
                     } else {
                         return;
                     }
+                    
+                    if (oApp.getUserLevel() > UserRight.ENCODER) {
+                        poController.setForm(DisbursementStatic.APPROVED);
+                        poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
+                        if (poJSON != null && "success".equals(String.valueOf(poJSON.get("result")))) {
+                            pnEditMode = poController.getEditMode();
+                        }
+
+                        if (pnEditMode == EditMode.READY
+                        && !DisbursementStatic.APPROVED.equals(poController.Master().getTransactionStatus())
+                        && ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+                            try {
+                                poJSON = poController.ApproveTransaction("");
+                                if ("error".equals(String.valueOf(poJSON.get("result")))) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                } else {
+                                    ShowMessageFX.Information(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                    JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
+                                }
+                            } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
+                        }
+                    }
+                    
+                    poController.setForm(DisbursementStatic.VERIFIED); //Reset
                     break;
                 case "btnClose":
                     if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to close this Tab?")) {
@@ -783,7 +811,33 @@ public class DisbursementVoucher_VerificationController implements Initializable
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
                         }
+                        
+                        try {
+                            if (oApp.getUserLevel() > UserRight.ENCODER) {
+                                poController.setForm(DisbursementStatic.APPROVED);
+                                loOpenJSON =  poController.OpenTransaction(poController.Master().getTransactionNo());
+                                if (loOpenJSON != null && "success".equals(String.valueOf(loOpenJSON.get("result")))) {
+                                    pnEditMode = poController.getEditMode();
+                                }
 
+                                if (pnEditMode == EditMode.READY
+                                && !DisbursementStatic.APPROVED.equals(poController.Master().getTransactionStatus())
+                                && ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+                                    poJSON = poController.ApproveTransaction("");
+                                    if ("error".equals(String.valueOf(poJSON.get("result")))) {
+                                        ShowMessageFX.Warning(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                    } else {
+                                        ShowMessageFX.Information(null, pxeModuleName, String.valueOf(poJSON.get("message")));
+                                        JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
+                                    }
+                                }
+                            }
+                        } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        }
+
+                        poController.setForm(DisbursementStatic.VERIFIED);
                         pnEditMode = poController.getEditMode();
                         cmdReloadProcess("btnSave");
                     }
