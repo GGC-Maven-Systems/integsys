@@ -1561,14 +1561,14 @@ public class CheckDepositInterBranch_EntryController implements Initializable, S
                     case UP:
                         JFXUtil.altSwitch(txtFieldID, new Object[][]{
                             {new String[]{"tfCheckTransNo", "tfNote", "tfCheckNo"}, (Runnable) () -> moveNext(true, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(true, true)}
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(true, true)}
                         });
                         event.consume();
                         break;
                     case DOWN:
                         JFXUtil.altSwitch(txtFieldID, new Object[][]{
                             {new String[]{"tfCheckTransNo", "tfNote", "tfCheckNo"}, (Runnable) () -> moveNext(false, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(false, true)}
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(false, true)}
                         });
                         event.consume();
                         break;
@@ -1727,7 +1727,7 @@ public class CheckDepositInterBranch_EntryController implements Initializable, S
                 {poController.Journal().Detail(pnDetailJE).getAccountCode(), tfAccountCode},
                 {poController.Journal().Detail(pnDetailJE).Account_Chart().getDescription(), tfAccountDescription}, // if null or empty, then requesting focus to the txtfield
                 {poController.Journal().Detail(pnDetailJE).getDebitAmount(), tfDebitAmount},
-                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfCreditAmount); // default
+                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfDebitAmount); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

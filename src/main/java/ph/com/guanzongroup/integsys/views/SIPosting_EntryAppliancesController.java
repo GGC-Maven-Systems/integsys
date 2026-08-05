@@ -893,6 +893,16 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -912,19 +922,10 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1119,7 +1120,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poPurchaseReceivingController.PurchaseOrderReceiving().Master().getIndustryId(), null);
@@ -1135,7 +1136,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;

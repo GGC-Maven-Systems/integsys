@@ -598,7 +598,7 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                     loadTableMain.reload();
                     break;
                 case "btnApprove":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             //validation for checking details in JE & JEP
@@ -753,7 +753,7 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                 return;
             }
 
-            if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?")) {
+            if (!ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                 return;
             }
 
@@ -2545,8 +2545,8 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                     case UP:
                         JFXUtil.altSwitch(lsID, new Object[][]{
                             {new String[]{"tfPurchasedAmountDetail", "tfTaxCodeDetail", "tfParticularsDetail"}, (Runnable) () -> moveNext(true, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(true, true)},
-                            {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalCreditAmount"}, (Runnable) () -> moveNextJEP(true, true)},
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(true, true)},
+                            {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalDebitAmount"}, (Runnable) () -> moveNextJEP(true, true)},
                             {new String[]{"tfJournalProposalBranch", "tfJournalProposalDepartment", "taJournalProposalRemarks"}, (Runnable) () -> moveNextJEPMain(true, true)},
                             {new String[]{"tfTaxCode", "tfParticular", "tfBaseAmount", "tfTaxRate"}, (Runnable) () -> moveNextBIR(true, true)}
                         });
@@ -2555,8 +2555,8 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                     case DOWN:
                         JFXUtil.altSwitch(lsID, new Object[][]{
                             {new String[]{"tfPurchasedAmountDetail", "tfTaxCodeDetail", "tfParticularsDetail"}, (Runnable) () -> moveNext(false, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(false, true)},
-                            {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalCreditAmount"}, (Runnable) () -> moveNextJEP(false, true)},
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(false, true)},
+                            {new String[]{"tfJournalProposalAccountCode", "tfJournalProposalAccountDescription", "tfJournalProposalDebitAmount"}, (Runnable) () -> moveNextJEP(false, true)},
                             {new String[]{"tfJournalProposalBranch", "tfJournalProposalDepartment", "taJournalProposalRemarks"}, (Runnable) () -> moveNextJEPMain(false, true)},
                             {new String[]{"tfTaxCode", "tfParticular", "tfBaseAmount", "tfTaxRate"}, (Runnable) () -> moveNextBIR(false, true)}
                         });
@@ -2601,7 +2601,7 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                 {poController.JournalProposal(pnMainJEP).Detail(pnDetailJEP).getAccountCode(), tfJournalProposalAccountCode},
                 {poController.JournalProposal(pnMainJEP).Detail(pnDetailJEP).Account_Chart().getDescription(), tfJournalProposalAccountDescription}, // if null or empty, then requesting focus to the txtfield
                 {poController.JournalProposal(pnMainJEP).Detail(pnDetailJEP).getDebitAmount(), tfJournalProposalDebitAmount},
-                {poController.JournalProposal(pnMainJEP).Detail(pnDetailJEP).getCreditAmount(), tfJournalProposalCreditAmount},}, tfJournalProposalCreditAmount); // default
+                {poController.JournalProposal(pnMainJEP).Detail(pnDetailJEP).getCreditAmount(), tfJournalProposalCreditAmount},}, tfJournalProposalDebitAmount); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -2638,7 +2638,7 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
                 {poController.Journal().Detail(pnDetailJE).getAccountCode(), tfAccountCode},
                 {poController.Journal().Detail(pnDetailJE).Account_Chart().getDescription(), tfAccountDescription}, // if null or empty, then requesting focus to the txtfield
                 {poController.Journal().Detail(pnDetailJE).getDebitAmount(), tfDebitAmount},
-                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfCreditAmount); // default
+                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfDebitAmount); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

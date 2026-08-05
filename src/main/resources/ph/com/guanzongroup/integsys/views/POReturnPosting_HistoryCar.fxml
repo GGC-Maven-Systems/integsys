@@ -444,12 +444,12 @@
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                                                         </Label>
-                                                                                                        <Label text="Total Credit Amt" GridPane.columnIndex="5" GridPane.rowIndex="2">
+                                                                                                        <Label text="Total Credit Amt" GridPane.columnIndex="5" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                                                         </Label>
-                                                                                                        <Label text="Total Debit Amt" GridPane.columnIndex="5" GridPane.rowIndex="3">
+                                                                                                        <Label text="Total Debit Amt" GridPane.columnIndex="5" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
@@ -464,8 +464,8 @@
                                                                                       </font>
                                                                                   </Label>
                                                                                  </children></AnchorPane>
-                                                                                                        <TextField fx:id="tfTotalCreditAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                                                                                                        <TextField fx:id="tfTotalDebitAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                                                                                                                                                                                                                <TextField fx:id="tfTotalCreditAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                                                                                                        <TextField fx:id="tfTotalDebitAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                                                                                                         <TextArea fx:id="taJERemarks" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="27.0" prefWidth="797.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
                                                          <GridPane.margin>
                                                             <Insets top="1.0" />
@@ -509,12 +509,12 @@
                                                                                                         </Label>
                                                                                                         <Label text="Report Month/Year" GridPane.rowIndex="2" />
                                                                                                         <Label text="Reverse" GridPane.columnIndex="8" />
-                                                                                                        <Label text="Credit Amount" GridPane.columnIndex="8" GridPane.rowIndex="1">
+                                                                                                        <Label text="Credit Amount" GridPane.columnIndex="8" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                                                         </Label>
-                                                                                                        <Label text="Debit Amount" GridPane.columnIndex="8" GridPane.rowIndex="2">
+                                                                                                        <Label text="Debit Amount" GridPane.columnIndex="8" GridPane.rowIndex="1">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
@@ -523,8 +523,8 @@
                                                                                                         <TextField fx:id="tfJEAcctDescription" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
                                                                                                         <DatePicker fx:id="dpReportMonthYear" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                                                         <CheckBox fx:id="cbJEReverse" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="10" />
-                                                                                                        <TextField fx:id="tfCreditAmt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="1" />
-                                                                                                        <TextField fx:id="tfDebitAmt" alignment="CENTER_RIGHT" prefWidth="171.0" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
+                                                                                                                                                                                                                <TextField fx:id="tfCreditAmt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
+                                                                                                        <TextField fx:id="tfDebitAmt" alignment="CENTER_RIGHT" prefWidth="171.0" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="1" />
                                                                                                     </children>
                                                                   </GridPane>
                                                               </children>
