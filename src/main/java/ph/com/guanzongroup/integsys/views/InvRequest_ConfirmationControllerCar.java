@@ -100,7 +100,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType,
             tfVariant, tfColor, tfROQ, tfClassification, tfQOH,
-            tfReferenceNo, tfReservationQTY, tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo;
+            tfReferenceNo, tfReservationQTY, tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfSourceNo;
 
     @FXML
     private Label lblTransactionStatus, lblSource;
@@ -302,6 +302,11 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
         initDatePickerActions();
         tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
         taRemarks.setText(invRequestController.Master().getRemarks());
+        try {
+            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+        } catch (GuanzonException | SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+        }
     }
 
     private void initDatePickerActions() {
@@ -892,7 +897,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
         pnTblInvDetailRow = -1;
         dpTransactionDate.setValue(null);
         taRemarks.setText("");
-        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo);
+        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo, tfSourceNo);
 
     }
     //to go back to last selected row
@@ -993,6 +998,11 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;
+                case "tfSourceNo":
+                    if (lsValue.isEmpty()) {
+                        invRequestController.Master().setReferenceNo(lsValue);
+                    }
+                    break;
                 case "tfOrderQuantity":
                     break;
                 case "tfSearchReferenceNo":
@@ -1016,7 +1026,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
 
             CustomCommonUtil.setDisable(true,
                     tfInvType, tfReferenceNo, dpTransactionDate, tfVariant, tfColor, tfReservationQTY, tfBrand, tfModel, tfQOH, tfROQ, tfClassification);
-            CustomCommonUtil.setDisable(!lbShow, tfOrderQuantity, taRemarks);
+            CustomCommonUtil.setDisable(!lbShow, tfOrderQuantity, taRemarks, tfSourceNo);
 
         } else {
             CustomCommonUtil.setDisable(true, AnchorDetailMaster);
@@ -1049,7 +1059,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
 
     private void initTextFieldKeyPressed() {
         List<TextField> loTxtField = Arrays.asList(
-                tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo
+                tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfSourceNo
         );
 
         loTxtField.forEach(tf -> tf.setOnKeyPressed(event -> txtField_KeyPressed(event)));
@@ -1071,13 +1081,27 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
             if (event.getCode() == null) {
                 return;
             }
-            String lsValue = sourceField.getText().trim();
+            String lsValue = sourceField.getText();
+            if(lsValue == null){
+                lsValue = "";
+            } else {
+                lsValue.trim();
+            }
 
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
                 case F3:
                     switch (fieldId) {
+                        case "tfSourceNo":
+                            poJSON = invRequestController.SearchSource(lsValue, true);
+                            if (!"error".equals((String) poJSON.get("result"))) {
+                                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+                            } else {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                                tfSourceNo.setText("");
+                            }
+                            return;
                         case "tfSearchTransNo":
                             System.out.print("Company ID" + psCompanyID);
                             poJSON = invRequestController.searchTransaction();
@@ -1371,7 +1395,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo);
+        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfSourceNo);
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
     }
 
