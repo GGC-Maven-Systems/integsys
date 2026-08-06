@@ -97,7 +97,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
     private ObservableList<ModelInvOrderDetail> invOrderDetail_data = FXCollections.observableArrayList();
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
-    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY,
+    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY, tfSourceNo,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfMeasure;
 
     @FXML
@@ -281,33 +281,38 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
     }
 
     private void loadMaster() {
-        tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
-        String lsStatus = "";
-        switch (invRequestController.Master().getTransactionStatus()) {
-            case StockRequestStatus.OPEN:
-                lsStatus = "OPEN";
-                break;
-            case StockRequestStatus.CONFIRMED:
-                lsStatus = "CONFIRMED";
-                break;
-            case StockRequestStatus.PROCESSED:
-                lsStatus = "PROCESSED";
-                break;
-            case StockRequestStatus.CANCELLED:
-                lsStatus = "CANCELLED";
-                break;
-            case StockRequestStatus.VOID:
-                lsStatus = "VOID";
-                break;
+        try {
+            tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
+            String lsStatus = "";
+            switch (invRequestController.Master().getTransactionStatus()) {
+                case StockRequestStatus.OPEN:
+                    lsStatus = "OPEN";
+                    break;
+                case StockRequestStatus.CONFIRMED:
+                    lsStatus = "CONFIRMED";
+                    break;
+                case StockRequestStatus.PROCESSED:
+                    lsStatus = "PROCESSED";
+                    break;
+                case StockRequestStatus.CANCELLED:
+                    lsStatus = "CANCELLED";
+                    break;
+                case StockRequestStatus.VOID:
+                    lsStatus = "VOID";
+                    break;
+            }
+            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            lblTransactionStatus.setText(lsStatus);
+            dpTransactionDate.setOnAction(null);
+            dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                    SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
+            ));
+            initDatePickerActions();
+            tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+            taRemarks.setText(invRequestController.Master().getRemarks());
+        } catch (GuanzonException | SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        lblTransactionStatus.setText(lsStatus);
-        dpTransactionDate.setOnAction(null);
-        dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
-                SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
-        ));
-        initDatePickerActions();
-        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
-        taRemarks.setText(invRequestController.Master().getRemarks());
     }
 
     private void initDatePickerActions() {
@@ -879,7 +884,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
         pnTblInvDetailRow = -1;
         dpTransactionDate.setValue(null);
         taRemarks.setText("");
-        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo);
+        CustomCommonUtil.setText("", tfReferenceNo, tfSourceNo, tfTransactionNo);
 
     }
     //to go back to last selected row
@@ -1043,7 +1048,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
 
     private void initTextFieldKeyPressed() {
         List<TextField> loTxtField = Arrays.asList(
-                tfOrderQuantity, tfSearchTransNo, tfBarCode, tfDescription, tfSearchReferenceNo
+                tfOrderQuantity, tfSearchTransNo, tfBarCode, tfDescription, tfSearchReferenceNo, tfSourceNo
         );
 
         loTxtField.forEach(tf -> tf.setOnKeyPressed(event -> txtField_KeyPressed(event)));
@@ -1065,13 +1070,20 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
             if (event.getCode() == null) {
                 return;
             }
-            String lsValue = sourceField.getText().trim();
+            String lsValue = value.trim();
 
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
                 case F3:
                     switch (fieldId) {
+                        case "tfSourceNo":
+                            poJSON = invRequestController.SearchSource(lsValue, true);
+                            if (!"error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Search Information", null);
+                            }
+                            loadMaster();
+                            break;
                         case "tfOrderQuantity":
                             setOrderQuantityToDetail(tfOrderQuantity.getText(), tfROQ.getText());
 

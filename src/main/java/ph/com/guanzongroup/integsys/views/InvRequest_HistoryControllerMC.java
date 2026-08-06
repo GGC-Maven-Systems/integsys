@@ -88,7 +88,7 @@ public class InvRequest_HistoryControllerMC implements Initializable, ScreenInte
     private int pnEditMode;
 
     @FXML
-    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfReferenceNo,
+    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfReferenceNo, tfSourceNo,
             tfSearchTransNo, tfSearchReferenceNo;
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
@@ -559,6 +559,7 @@ public class InvRequest_HistoryControllerMC implements Initializable, ScreenInte
             }
             poJSON = invRequestController.SearchBranch(lsStatus, true);
             lblTransactionStatus.setText(lsStatus);
+            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
             dpTransactionDate.setOnAction(null);
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
                     SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
@@ -849,7 +850,7 @@ public class InvRequest_HistoryControllerMC implements Initializable, ScreenInte
         /*Master Fields */
         CustomCommonUtil.setDisable(!lbShow,
                 dpTransactionDate, tfTransactionNo, taRemarks,
-                tfReferenceNo);
+                tfReferenceNo, tfSourceNo);
         CustomCommonUtil.setDisable(!lbShow,
                 tfOrderQuantity);
         CustomCommonUtil.setDisable(true,
