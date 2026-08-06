@@ -979,6 +979,11 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
         if (!nv) {
             /*Lost Focus*/
             switch (lsTextFieldID) {
+                case "tfSourceNo":
+                    if(lsValue.isEmpty()){
+                        invRequestController.Master().setProjectId(lsValue);
+                    }
+                    break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;

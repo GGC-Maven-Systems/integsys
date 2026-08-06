@@ -971,7 +971,7 @@ public class InvRequest_ConfirmationControllerLP_Food implements Initializable, 
                     break;
                 case "tfSourceNo":
                     if (lsValue.isEmpty()) {
-                        invRequestController.Master().setReferenceNo(lsValue);
+                        invRequestController.Master().setProjectId(lsValue);
                     }
                     break;
                 case "tfOrderQuantity":

@@ -990,7 +990,7 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
                     break;
                 case "tfSourceNo":
                     if (lsValue.isEmpty()) {
-                        invRequestController.Master().setReferenceNo(lsValue);
+                        invRequestController.Master().setProjectId(lsValue);
                     }
                     break;
                 case "tfOrderQuantity":

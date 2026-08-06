@@ -999,6 +999,11 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
         if (!nv) {
             /*Lost Focus*/
             switch (lsTextFieldID) {
+                case "tfSourceNo":
+                    if(lsValue.isEmpty()){
+                        invRequestController.Master().setProjectId(lsValue);
+                    }
+                    break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;

@@ -989,6 +989,11 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
         if (!nv) {
             /*Lost Focus*/
             switch (lsTextFieldID) {
+                case "tfSourceNo":
+                    if(lsValue.isEmpty()){
+                        invRequestController.Master().setProjectId(lsValue);
+                    }
+                    break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;
