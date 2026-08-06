@@ -77,7 +77,10 @@ public class InventoryRequest_ApprovalControllerCar_SP implements Initializable,
 
     @FXML
     private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfModel, tfVariant, tfRequestQty,
-            tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty;
+            tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty, tfSourceNo;
+
+    @FXML
+    private TextArea taRemarks;
 
     @FXML
     private Button btnSearch, btnUpdate, btnSave, btnCancel, btnPrint, btnClose;
@@ -796,6 +799,8 @@ public class InventoryRequest_ApprovalControllerCar_SP implements Initializable,
         tfRequestQty.setText(tblColRequestQty.getCellData(fnRow));
         tfCancelQty.setText(tblColCancelQty.getCellData(fnRow));
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
+        taRemarks.setText(poAppController.getMaster().getRemarks());
+        tfSourceNo.setText(poAppController.getMaster().Project().getProjectID());
 
     }
 
