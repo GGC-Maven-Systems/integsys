@@ -22,7 +22,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -152,11 +152,9 @@
                                                                                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
                                                                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="139.0" minWidth="139.0" prefWidth="139.0" />
                                                                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="108.0" minWidth="-Infinity" prefWidth="52.0" />
-                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="135.0" minWidth="-Infinity" prefWidth="95.0" />
+                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="135.0" minWidth="-Infinity" prefWidth="106.66665649414062" />
                                                                                 <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="154.0" minWidth="-Infinity" prefWidth="102.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="62.0" minWidth="-Infinity" prefWidth="18.0" />
-                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="99.0" minWidth="-Infinity" prefWidth="33.0" />
+                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="175.0" />
                                                             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
                                                             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="194.0" minWidth="-Infinity" prefWidth="194.0" />
                                                             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
@@ -178,7 +176,7 @@
                                                             <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                             </rowConstraints>
                                                                             <children>
-                                                            <AnchorPane maxWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="13" GridPane.rowIndex="2">
+                                                            <AnchorPane maxWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="11" GridPane.rowIndex="2">
                                                                <GridPane.margin>
                                                                   <Insets />
                                                                </GridPane.margin>
@@ -202,6 +200,8 @@
                                                             <Label text="Remarks" GridPane.rowIndex="7" />
                                                             <TextArea fx:id="taRemarks" prefHeight="27.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.rowSpan="2147483647" />
                                                             <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                            <Label text="Source No" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+                                                            <TextField fx:id="tfSourceNo" maxHeight="25.0" maxWidth="1.7976931348623157E308" prefWidth="139.0" GridPane.columnIndex="6" GridPane.rowIndex="5" />
                                                                             </children>
                                                                         </GridPane>
                                                                     </children>
@@ -256,7 +256,7 @@
                                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Inv Type" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                                                             <TextField fx:id="tfInvType" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="ROQ" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-                                                            <TextField fx:id="tfROQ" maxWidth="70.0" minHeight="70.0" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="7" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.vgrow="NEVER" />
+                                                            <TextField fx:id="tfROQ" maxWidth="175.0" prefHeight="28.0" prefWidth="175.0" GridPane.columnIndex="7" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.vgrow="NEVER" />
                                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Class" GridPane.columnIndex="9" GridPane.rowIndex="3" />
                                                             <TextField fx:id="tfClassification" GridPane.columnIndex="11" GridPane.rowIndex="3" />
                                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Barcode" GridPane.columnIndex="4" />

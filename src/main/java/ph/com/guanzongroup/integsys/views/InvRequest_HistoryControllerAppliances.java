@@ -96,7 +96,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
             tblOrderQuantityDetail;
     @FXML
     private TextField tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH;
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfSourceNo;
     @FXML
     private Button btnBrowse, btnRetrieve, btnClose, btnTransHistory, btnPrint;
     @FXML
@@ -571,6 +571,11 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
+            try {
+                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            } catch (GuanzonException | SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            }
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);

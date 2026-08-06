@@ -87,7 +87,7 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
 
     @FXML
     private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfReferenceNo,
-            tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription;
+            tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfSourceNo;
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
     @FXML
@@ -565,6 +565,11 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
+            try {
+                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            } catch (GuanzonException | SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            }
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);
