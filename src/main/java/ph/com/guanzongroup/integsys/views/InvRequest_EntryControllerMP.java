@@ -1604,7 +1604,7 @@ public class InvRequest_EntryControllerMP implements Initializable, ScreenInterf
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfModel);
+        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfModel, tfSourceNo);
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
         tfBrand.setOnMouseClicked(e -> activeField = tfBrand);
         tfBarCode.setOnMouseClicked(e -> activeField = tfBarCode);

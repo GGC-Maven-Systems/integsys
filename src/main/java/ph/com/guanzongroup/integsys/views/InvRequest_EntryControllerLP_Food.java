@@ -1519,7 +1519,7 @@ public class InvRequest_EntryControllerLP_Food implements Initializable, ScreenI
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfBarCode, tfDescription);
+        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfBarCode, tfDescription, tfSourceNo);
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
 
         tfBarCode.setOnMouseClicked(e -> activeField = tfBarCode);
