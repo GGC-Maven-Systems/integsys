@@ -1507,7 +1507,9 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
         }
         if (pnTblDetailRow >= 0 && pnTblDetailRow < poPurchasingController.PurchaseOrder().Detail().size()) {
             try {
-                if (!poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId().equals("0007")) {
+
+
+                if (!"0007".equals(poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId())) {
                     if (pnTblDetailRow != -1) {
                         CustomCommonUtil.setDisable(!lbShow, tfBarcode, tfDescription);
                     }
@@ -2071,10 +2073,13 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                     boolean isSourceNotEmpty = !poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).getSouceNo().isEmpty();
                     tfBarcode.setDisable(isSourceNotEmpty);
                     tfDescription.setDisable(isSourceNotEmpty);
-                    if (poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId().equals("0007")) {
-                        CustomCommonUtil.setDisable(false, tfBarcode, tfDescription);
-                        tfOrderQuantity.requestFocus();
-                    }
+                    System.out.println("initDetailFocus : " + poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId());
+
+                        if (!"0007".equals(poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId()))  {
+                            CustomCommonUtil.setDisable(false, tfBarcode, tfDescription);
+                            tfOrderQuantity.requestFocus();
+                        }
+
                     if (isSourceNotEmpty && !tfBarcode.getText().isEmpty()) {
                         tfOrderQuantity.requestFocus();
                     } else {
