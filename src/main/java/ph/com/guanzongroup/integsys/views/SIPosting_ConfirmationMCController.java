@@ -1242,12 +1242,12 @@ public class SIPosting_ConfirmationMCController implements Initializable, Screen
                                 poJSON.put("message", "Future dates are not allowed.");
                                 pbSuccess = false;
                             }
-
-                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
-                                poJSON.put("result", "error");
-                                poJSON.put("message", "Reference date cannot be later than the receiving date.");
-                                pbSuccess = false;
-                            }
+//Disable by Arsiela 08-07-2026 03:23PM Requested by ma'am she
+//                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
+//                                poJSON.put("result", "error");
+//                                poJSON.put("message", "Reference date cannot be later than the receiving date.");
+//                                pbSuccess = false;
+//                            }
 
                             if (pbSuccess) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Master().setReferenceDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
