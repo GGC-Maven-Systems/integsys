@@ -508,6 +508,7 @@ public class UnitConversionController implements Initializable, ScreenInterface 
                             pnEditMode = EditMode.READY;
                             loadRecord();
                             loadTableDetail();
+                            initButton(pnEditMode);
                             break;
                     }
                 case ENTER:
@@ -614,11 +615,9 @@ public class UnitConversionController implements Initializable, ScreenInterface 
 
             switch (oParameters.UnitConversion().getModel().getRecordStatus()) {
                 case "1":
-                    btnDeactivate.setText("Deactivate");
                     lblStatus.setText("ACTIVE");
                     break;
                 case "0":
-                    btnDeactivate.setText("Activate");
                     lblStatus.setText("OPEN");
                     break;
                 case "3":
