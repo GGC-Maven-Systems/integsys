@@ -93,7 +93,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
     @FXML
     private TextField tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH;
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfSourceNo;
     @FXML
     private Button btnBrowse, btnRetrieve, btnClose, btnTransHistory, btnPrint;
     @FXML
@@ -570,6 +570,11 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
+            try {
+                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            } catch (GuanzonException | SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            }
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);

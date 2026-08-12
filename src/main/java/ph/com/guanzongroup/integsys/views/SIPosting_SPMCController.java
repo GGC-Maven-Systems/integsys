@@ -1219,12 +1219,12 @@ public class SIPosting_SPMCController implements Initializable, ScreenInterface 
                                 poJSON.put("message", "Future dates are not allowed.");
                                 pbSuccess = false;
                             }
-
-                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
-                                poJSON.put("result", "error");
-                                poJSON.put("message", "SI date cannot be later than the receiving date.");
-                                pbSuccess = false;
-                            }
+//Disable by Arsiela 08-07-2026 03:23PM Requested by ma'am she
+//                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
+//                                poJSON.put("result", "error");
+//                                poJSON.put("message", "SI date cannot be later than the receiving date.");
+//                                pbSuccess = false;
+//                            }
 
                             if (pbSuccess) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Master().setSalesInvoiceDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));

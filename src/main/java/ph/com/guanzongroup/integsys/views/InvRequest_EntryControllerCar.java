@@ -99,7 +99,8 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY, tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo;
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY,
+            tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfSourceNo;
 
     @FXML
     private Label lblTransactionStatus, lblSource;
@@ -309,6 +310,11 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
         initDatePickerActions();
         tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
         taRemarks.setText(invRequestController.Master().getRemarks());
+        try {
+            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+        } catch (GuanzonException | SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+        }
     }
 
     private void initDatePickerActions() {
@@ -869,7 +875,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
         pnTblInvDetailRow = -1;
         dpTransactionDate.setValue(null);
         taRemarks.setText("");
-        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo);
+        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo, tfSourceNo);
 
     }
     //to go back to last selected row
@@ -967,6 +973,11 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
         if (!nv) {
             /*Lost Focus*/
             switch (lsTextFieldID) {
+                case "tfSourceNo":
+                    if(lsValue.isEmpty()){
+                        invRequestController.Master().setProjectId(lsValue);
+                    }
+                    break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;
@@ -1002,7 +1013,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
             CustomCommonUtil.setDisable(true,
                     tfInvType, tfReservationQTY,
                     tfQOH, tfROQ, tfClassification, tfVariant, tfColor, tfBrand, tfModel);
-            CustomCommonUtil.setDisable(!lbShow, tfOrderQuantity, taRemarks);
+            CustomCommonUtil.setDisable(!lbShow, tfOrderQuantity, taRemarks, tfSourceNo);
             CustomCommonUtil.setDisable(!lbNew, tfBrand, tfModel);
 
         } else {
@@ -1036,7 +1047,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
 
     private void initTextFieldKeyPressed() {
         List<TextField> loTxtField = Arrays.asList(
-                tfOrderQuantity, tfSearchTransNo, tfBrand, tfModel, tfSearchReferenceNo
+                tfOrderQuantity, tfSearchTransNo, tfBrand, tfModel, tfSearchReferenceNo, tfSourceNo
         );
 
         loTxtField.forEach(tf -> tf.setOnKeyPressed(event -> txtField_KeyPressed(event)));
@@ -1058,13 +1069,27 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
             if (event.getCode() == null) {
                 return;
             }
-            String lsValue = sourceField.getText().trim();
+            String lsValue = sourceField.getText();
+            if(lsValue == null){
+                lsValue = "";
+            } else {
+                lsValue.trim();
+            }
 
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
                 case F3:
                     switch (fieldId) {
+                        case "tfSourceNo":
+                            poJSON = invRequestController.SearchSource(lsValue, true);
+                            if (!"error".equals((String) poJSON.get("result"))) {
+                                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+                            } else {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                                tfSourceNo.setText("");
+                            }
+                            return;
                         case "tfOrderQuantity":
                             setOrderQuantityToDetail(tfOrderQuantity.getText());
 
@@ -1472,7 +1497,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo);
+        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfSourceNo);
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
         tfBrand.setOnMouseClicked(e -> activeField = tfBrand);
         tfModel.setOnMouseClicked(e -> activeField = tfModel);
