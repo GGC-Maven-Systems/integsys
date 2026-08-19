@@ -39,6 +39,7 @@ import org.guanzon.cas.parameter.services.ParamControllers;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.integsys.model.ModelInventoryChildUnit;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -432,7 +433,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
                                                 String.valueOf(lnRowCount),
                                                 poController.Detail(lnCtr).Measure().getDescription(),
                                                 poController.Detail(lnCtr).UnitConversion().ConvertTo().getDescription(),
-                                                String.valueOf(poController.Detail(lnCtr).UnitConversion().getQuantityConverted()),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).UnitConversion().getQuantityConverted(), false),
                                                 poController.getStatus(poController.Detail(lnCtr).getRecordStatus())
                                         ));
                             }
