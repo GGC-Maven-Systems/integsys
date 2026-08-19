@@ -53,8 +53,8 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.BankApplicationStatus;
 
 /**
  *

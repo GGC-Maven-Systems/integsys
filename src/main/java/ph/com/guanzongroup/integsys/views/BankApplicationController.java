@@ -62,12 +62,12 @@ import javafx.scene.control.Pagination;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
-import ph.com.guanzongroup.cas.sales.t1.SalesBankApplication;
-import ph.com.guanzongroup.cas.sales.t1.model.Model_Bank_Application;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.SalesBankApplication;
+import ph.com.guanzongroup.cas.sales.model.Model_Bank_Application;
+import ph.com.guanzongroup.cas.sales.status.BankApplicationStatus;
 
 /**
  *
