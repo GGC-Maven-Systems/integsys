@@ -58,8 +58,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
 
 /**

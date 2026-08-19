@@ -29,8 +29,8 @@
     import org.guanzon.cas.parameter.services.ParamControllers;
     import org.json.simple.JSONObject;
     import org.json.simple.parser.ParseException;
-    import ph.com.guanzongroup.cas.sales.t1.SalesAgent;
-    import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
+    import ph.com.guanzongroup.cas.sales.SalesAgent;
+    import ph.com.guanzongroup.cas.sales.services.SalesControllers;
     import ph.com.guanzongroup.integsys.model.ModelListParameter;
     import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
     import ph.com.guanzongroup.integsys.utility.JFXUtil;

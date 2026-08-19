@@ -34,8 +34,8 @@ import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.RequirementsSourcePerGroup;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.RequirementsSourcePerGroup;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
