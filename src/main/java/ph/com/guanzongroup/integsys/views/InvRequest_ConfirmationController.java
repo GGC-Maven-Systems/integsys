@@ -322,7 +322,7 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = getReferenceNo();
+                String lsReferNo = getReferenceNo().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
