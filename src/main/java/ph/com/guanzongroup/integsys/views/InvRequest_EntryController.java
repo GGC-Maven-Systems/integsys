@@ -314,11 +314,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
         initDatePickerActions();
 //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
         taRemarks.setText(invRequestController.Master().getRemarks());
-        try {
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
-        } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-        }
+        tfSourceNo.setText(invRequestController.Master().getReferenceNo());
     }
 
     private void initDatePickerActions() {
@@ -339,12 +335,12 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-                   
+
                     if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -374,7 +370,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                         approved = false;
                     }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -797,16 +793,16 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
         }
     }
 
-    private String getReferenceNo(){
+    private String getReferenceNo() {
         String lsReferNo = tfSourceNo.getText();
-        if(lsReferNo != null && !"".equals(lsReferNo)){
+        if (lsReferNo != null && !"".equals(lsReferNo)) {
             int lnSeparatorIndex = lsReferNo.indexOf(';');
-               lsReferNo = lnSeparatorIndex >= 0
-                ? lsReferNo.substring(lnSeparatorIndex + 1)
-                : "";
+            lsReferNo = lnSeparatorIndex >= 0
+                    ? lsReferNo.substring(lnSeparatorIndex + 1)
+                    : "";
         }
-        
-        System.out.println("Reference No : "+lsReferNo);
+
+        System.out.println("Reference No : " + lsReferNo);
         return lsReferNo;
     }
 
@@ -1013,7 +1009,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
-                    if(lsValue.isEmpty()){
+                    if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
@@ -1038,8 +1034,16 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
         }
     };
 
-    private void initFields(int fnEditMode) {
+    private void restrictToOneSeparator(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+                textField.setText(oldValue);
+            }
+        });
+    }
 
+    private void initFields(int fnEditMode) {
+        restrictToOneSeparator(tfSourceNo);
         boolean lbShow = (fnEditMode == EditMode.UPDATE || fnEditMode == EditMode.ADDNEW);
         boolean lbNew = (fnEditMode == EditMode.ADDNEW);
 
@@ -1112,7 +1116,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                 return;
             }
             String lsValue = sourceField.getText();
-            if(lsValue == null){
+            if (lsValue == null) {
                 lsValue = "";
             } else {
                 lsValue.trim();
@@ -1126,7 +1130,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                         case "tfSourceNo":
                             poJSON = invRequestController.SearchSource(lsValue, true);
                             if (!"error".equals((String) poJSON.get("result"))) {
-                                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             } else {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
                                 tfSourceNo.setText("");
@@ -1585,7 +1589,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList( tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfSourceNo); //tfReferenceNo
+        List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfSourceNo); //tfReferenceNo
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
         tfBrand.setOnMouseClicked(e -> activeField = tfBrand);
         tfBarCode.setOnMouseClicked(e -> activeField = tfBarCode);

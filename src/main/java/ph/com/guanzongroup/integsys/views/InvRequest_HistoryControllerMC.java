@@ -559,7 +559,7 @@ public class InvRequest_HistoryControllerMC implements Initializable, ScreenInte
             }
             poJSON = invRequestController.SearchBranch(lsStatus, true);
             lblTransactionStatus.setText(lsStatus);
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
             dpTransactionDate.setOnAction(null);
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
                     SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)

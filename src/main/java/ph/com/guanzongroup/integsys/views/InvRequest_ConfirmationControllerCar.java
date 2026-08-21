@@ -302,11 +302,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
         initDatePickerActions();
         //tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
         taRemarks.setText(invRequestController.Master().getRemarks());
-        try {
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
-        } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-        }
+        tfSourceNo.setText(invRequestController.Master().getReferenceNo());
     }
 
     private void initDatePickerActions() {
@@ -1028,7 +1024,16 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
         }
     };
 
+    private void restrictToOneSeparator(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+                textField.setText(oldValue);
+            }
+        });
+    }
+
     private void initFields(int fnEditMode) {
+        restrictToOneSeparator(tfSourceNo);
         boolean lbShow = (fnEditMode == EditMode.UPDATE);
         /* Master Fields*/
         if (invRequestController.Master().getTransactionStatus().equals(StockRequestStatus.OPEN)
@@ -1109,7 +1114,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
                         case "tfSourceNo":
                             poJSON = invRequestController.SearchSource(lsValue, true);
                             if (!"error".equals((String) poJSON.get("result"))) {
-                                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             } else {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
                                 tfSourceNo.setText("");

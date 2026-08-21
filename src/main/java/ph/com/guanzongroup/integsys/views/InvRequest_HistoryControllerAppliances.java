@@ -572,7 +572,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
             taRemarks.setText(invRequestController.Master().getRemarks());
 
             try {
-                tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
             } catch (GuanzonException | SQLException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             }

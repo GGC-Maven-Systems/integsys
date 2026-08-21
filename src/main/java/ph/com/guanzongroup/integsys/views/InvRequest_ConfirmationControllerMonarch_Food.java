@@ -295,7 +295,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
                     lsStatus = "VOID";
                     break;
             }
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
             lblTransactionStatus.setText(lsStatus);
             dpTransactionDate.setOnAction(null);
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
@@ -1000,7 +1000,16 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
         }
     };
 
+    private void restrictToOneSeparator(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+                textField.setText(oldValue);
+            }
+        });
+    }
+
     private void initFields(int fnEditMode) {
+        restrictToOneSeparator(tfSourceNo);
 
         boolean lbShow = (fnEditMode == EditMode.UPDATE);
 
