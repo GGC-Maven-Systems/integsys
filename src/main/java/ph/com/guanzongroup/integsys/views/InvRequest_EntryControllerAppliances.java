@@ -98,7 +98,7 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH,  tfReservationQTY, //tfReferenceNo,
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReservationQTY, //tfReferenceNo,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfSourceNo;
 
     @FXML
@@ -332,12 +332,12 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
- 
+
                     if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty() ) { 
+                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -367,7 +367,7 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
                         approved = false;
                     }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -786,16 +786,16 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
         }
     }
 
-    private String getReferenceNo(){
+    private String getReferenceNo() {
         String lsReferNo = tfSourceNo.getText();
-        if(lsReferNo != null && !"".equals(lsReferNo)){
+        if (lsReferNo != null && !"".equals(lsReferNo)) {
             int lnSeparatorIndex = lsReferNo.indexOf(';');
-               lsReferNo = lnSeparatorIndex >= 0
-                ? lsReferNo.substring(lnSeparatorIndex + 1)
-                : "";
+            lsReferNo = lnSeparatorIndex >= 0
+                    ? lsReferNo.substring(lnSeparatorIndex + 1)
+                    : "";
         }
-        
-        System.out.println("Reference No : "+lsReferNo);
+
+        System.out.println("Reference No : " + lsReferNo);
         return lsReferNo;
     }
 
@@ -999,9 +999,12 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
-                    if(lsValue.isEmpty()){
+                    if (lsValue.isEmpty()) {
+                        invRequestController.Master().setReferenceNo(lsValue);
+                    } else {
                         invRequestController.Master().setReferenceNo(lsValue);
                     }
+                    tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                     break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
@@ -1025,8 +1028,43 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
 
     private void restrictToOneSeparator(TextField textField) {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+            // Allow blank
+            if (newValue.isEmpty()) {
+                return;
+            }
+
+            long separatorCount = newValue.chars().filter(ch -> ch == ';').count();
+
+            // More than one ';' is not allowed
+            if (separatorCount > 1) {
                 textField.setText(oldValue);
+                textField.positionCaret(textField.getText().length());
+                return;
+            }
+
+            if (newValue.contains(";")) {
+                int sepIndex = newValue.indexOf(';');
+                // ';' is the last char (nothing after it) AND text just got shorter
+                // -> user deleted the suffix down to nothing, so drop the ';' too
+                if (sepIndex == newValue.length() - 1 && newValue.length() < oldValue.length()) {
+                    String stripped = newValue.substring(0, sepIndex);
+                    textField.setText(stripped);
+                    textField.positionCaret(textField.getText().length());
+                }
+                return;
+            }
+
+            // No ';' yet. Only handle the "exactly one char added" case.
+            if (newValue.length() == oldValue.length() + 1) {
+                if (oldValue.isEmpty()) {
+                    // very first character typed into an empty field -> default "0" prefix
+                    textField.setText("0;" + newValue);
+                } else {
+                    // existing (e.g. programmatically-set) value with no separator yet ->
+                    // keep it as the prefix, start the suffix at the newly typed char
+                    textField.setText(oldValue + ";" + newValue.substring(oldValue.length()));
+                }
+                textField.positionCaret(textField.getText().length());
             }
         });
     }
@@ -1104,7 +1142,7 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
                 return;
             }
             String lsValue = sourceField.getText();
-            if(lsValue == null){
+            if (lsValue == null) {
                 lsValue = "";
             } else {
                 lsValue.trim();
@@ -1121,7 +1159,7 @@ public class InvRequest_EntryControllerAppliances implements Initializable, Scre
                                 tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             } else {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                tfSourceNo.setText("");
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             }
                             return;
                         case "tfOrderQuantity":

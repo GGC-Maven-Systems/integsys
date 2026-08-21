@@ -63,6 +63,7 @@ import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Detail;
 import org.guanzon.cas.inv.warehouse.status.StockRequestStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  *
@@ -214,15 +215,15 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
 
             }
         });
-        tfSearchReferenceNo.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                if (newValue.isEmpty()) {
-                    invRequestController.Master().setReferenceNo("");
-                    tfSearchReferenceNo.setText("");
-                    loadTableList();
-                }
-            }
-        });
+//        tfSearchReferenceNo.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                if (newValue.isEmpty()) {
+//                    invRequestController.Master().setReferenceNo("");
+//                    tfSearchReferenceNo.setText("");
+//                    loadTableList();
+//                }
+//            }
+//        });
     }
 
     private void loadRecordSearch() {
@@ -1011,7 +1012,10 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                 case "tfSourceNo":
                     if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
+                    } else {
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
+                    tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                     break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
@@ -1036,8 +1040,43 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
 
     private void restrictToOneSeparator(TextField textField) {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+            // Allow blank
+            if (newValue.isEmpty()) {
+                return;
+            }
+
+            long separatorCount = newValue.chars().filter(ch -> ch == ';').count();
+
+            // More than one ';' is not allowed
+            if (separatorCount > 1) {
                 textField.setText(oldValue);
+                textField.positionCaret(textField.getText().length());
+                return;
+            }
+
+            if (newValue.contains(";")) {
+                int sepIndex = newValue.indexOf(';');
+                // ';' is the last char (nothing after it) AND text just got shorter
+                // -> user deleted the suffix down to nothing, so drop the ';' too
+                if (sepIndex == newValue.length() - 1 && newValue.length() < oldValue.length()) {
+                    String stripped = newValue.substring(0, sepIndex);
+                    textField.setText(stripped);
+                    textField.positionCaret(textField.getText().length());
+                }
+                return;
+            }
+
+            // No ';' yet. Only handle the "exactly one char added" case.
+            if (newValue.length() == oldValue.length() + 1) {
+                if (oldValue.isEmpty()) {
+                    // very first character typed into an empty field -> default "0" prefix
+                    textField.setText("0;" + newValue);
+                } else {
+                    // existing (e.g. programmatically-set) value with no separator yet ->
+                    // keep it as the prefix, start the suffix at the newly typed char
+                    textField.setText(oldValue + ";" + newValue.substring(oldValue.length()));
+                }
+                textField.positionCaret(textField.getText().length());
             }
         });
     }
@@ -1133,7 +1172,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                                 tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             } else {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
-                                tfSourceNo.setText("");
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             }
                             return;
                         case "tfOrderQuantity":

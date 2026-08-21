@@ -97,7 +97,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
     private ObservableList<ModelInvOrderDetail> invOrderDetail_data = FXCollections.observableArrayList();
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
-    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH,  tfReservationQTY, tfSourceNo,
+    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH, tfReservationQTY, tfSourceNo,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfMeasure;
 
     @FXML
@@ -281,34 +281,34 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
     }
 
     private void loadMaster() {
-            tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
-            String lsStatus = "";
-            switch (invRequestController.Master().getTransactionStatus()) {
-                case StockRequestStatus.OPEN:
-                    lsStatus = "OPEN";
-                    break;
-                case StockRequestStatus.CONFIRMED:
-                    lsStatus = "CONFIRMED";
-                    break;
-                case StockRequestStatus.PROCESSED:
-                    lsStatus = "PROCESSED";
-                    break;
-                case StockRequestStatus.CANCELLED:
-                    lsStatus = "CANCELLED";
-                    break;
-                case StockRequestStatus.VOID:
-                    lsStatus = "VOID";
-                    break;
-            }
-            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
-            lblTransactionStatus.setText(lsStatus);
-            dpTransactionDate.setOnAction(null);
-            dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
-                    SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
-            ));
-            initDatePickerActions();
-    //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
-            taRemarks.setText(invRequestController.Master().getRemarks());
+        tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
+        String lsStatus = "";
+        switch (invRequestController.Master().getTransactionStatus()) {
+            case StockRequestStatus.OPEN:
+                lsStatus = "OPEN";
+                break;
+            case StockRequestStatus.CONFIRMED:
+                lsStatus = "CONFIRMED";
+                break;
+            case StockRequestStatus.PROCESSED:
+                lsStatus = "PROCESSED";
+                break;
+            case StockRequestStatus.CANCELLED:
+                lsStatus = "CANCELLED";
+                break;
+            case StockRequestStatus.VOID:
+                lsStatus = "VOID";
+                break;
+        }
+        tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+        lblTransactionStatus.setText(lsStatus);
+        dpTransactionDate.setOnAction(null);
+        dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
+        ));
+        initDatePickerActions();
+        //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+        taRemarks.setText(invRequestController.Master().getRemarks());
     }
 
     private void initDatePickerActions() {
@@ -330,12 +330,11 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
                         approved = false;
                     }
 
-           
                     if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty() ) { 
+                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -365,7 +364,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
                         approved = false;
                     }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -780,16 +779,16 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
         }
     }
 
-    private String getReferenceNo(){
+    private String getReferenceNo() {
         String lsReferNo = tfSourceNo.getText();
-        if(lsReferNo != null && !"".equals(lsReferNo)){
+        if (lsReferNo != null && !"".equals(lsReferNo)) {
             int lnSeparatorIndex = lsReferNo.indexOf(';');
-               lsReferNo = lnSeparatorIndex >= 0
-                ? lsReferNo.substring(lnSeparatorIndex + 1)
-                : "";
+            lsReferNo = lnSeparatorIndex >= 0
+                    ? lsReferNo.substring(lnSeparatorIndex + 1)
+                    : "";
         }
-        
-        System.out.println("Reference No : "+lsReferNo);
+
+        System.out.println("Reference No : " + lsReferNo);
         return lsReferNo;
     }
 
@@ -995,9 +994,12 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
-                    if(lsValue.isEmpty()){
+                    if (lsValue.isEmpty()) {
+                        invRequestController.Master().setReferenceNo(lsValue);
+                    } else {
                         invRequestController.Master().setReferenceNo(lsValue);
                     }
+                    tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                     break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
@@ -1016,8 +1018,43 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
 
     private void restrictToOneSeparator(TextField textField) {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.chars().filter(ch -> ch == ';').count() > 1) {
+            // Allow blank
+            if (newValue.isEmpty()) {
+                return;
+            }
+
+            long separatorCount = newValue.chars().filter(ch -> ch == ';').count();
+
+            // More than one ';' is not allowed
+            if (separatorCount > 1) {
                 textField.setText(oldValue);
+                textField.positionCaret(textField.getText().length());
+                return;
+            }
+
+            if (newValue.contains(";")) {
+                int sepIndex = newValue.indexOf(';');
+                // ';' is the last char (nothing after it) AND text just got shorter
+                // -> user deleted the suffix down to nothing, so drop the ';' too
+                if (sepIndex == newValue.length() - 1 && newValue.length() < oldValue.length()) {
+                    String stripped = newValue.substring(0, sepIndex);
+                    textField.setText(stripped);
+                    textField.positionCaret(textField.getText().length());
+                }
+                return;
+            }
+
+            // No ';' yet. Only handle the "exactly one char added" case.
+            if (newValue.length() == oldValue.length() + 1) {
+                if (oldValue.isEmpty()) {
+                    // very first character typed into an empty field -> default "0" prefix
+                    textField.setText("0;" + newValue);
+                } else {
+                    // existing (e.g. programmatically-set) value with no separator yet ->
+                    // keep it as the prefix, start the suffix at the newly typed char
+                    textField.setText(oldValue + ";" + newValue.substring(oldValue.length()));
+                }
+                textField.positionCaret(textField.getText().length());
             }
         });
     }
@@ -1104,10 +1141,12 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
                         case "tfSourceNo":
                             poJSON = invRequestController.SearchSource(lsValue, true);
                             if (!"error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Search Information", null);
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+                            } else {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             }
-                            loadMaster();
-                            break;
+                            return;
                         case "tfOrderQuantity":
                             setOrderQuantityToDetail(tfOrderQuantity.getText(), tfROQ.getText());
 
