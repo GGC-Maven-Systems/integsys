@@ -987,7 +987,7 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
             switch (lsTextFieldID) {
                 case "tfSourceNo":
                     if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfReferenceNo":

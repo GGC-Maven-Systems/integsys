@@ -982,7 +982,7 @@ public class InvRequest_ConfirmationControllerMP implements Initializable, Scree
             switch (lsTextFieldID) {
                 case "tfSourceNo":
                     if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfReferenceNo":

@@ -981,7 +981,7 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
             switch (lsTextFieldID) {
                 case "tfSourceNo":
                     if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfReferenceNo":

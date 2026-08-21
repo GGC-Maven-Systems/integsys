@@ -985,7 +985,7 @@ public class InvRequest_ConfirmationControllerCar_SP implements Initializable, S
                     break;
                 case "tfSourceNo":
                     if (lsValue.isEmpty()) {
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfOrderQuantity":

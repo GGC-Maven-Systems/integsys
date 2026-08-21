@@ -969,7 +969,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
             switch (lsTextFieldID) {
                 case "tfSourceNo":
                     if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfReferenceNo":

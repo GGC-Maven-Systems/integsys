@@ -991,7 +991,7 @@ public class InvRequest_EntryControllerCar_SP implements Initializable, ScreenIn
             switch (lsTextFieldID) {
                 case "tfSourceNo":
                     if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfReferenceNo":

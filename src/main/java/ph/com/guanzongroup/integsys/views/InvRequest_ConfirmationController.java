@@ -1000,7 +1000,7 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
                     break;
                 case "tfSourceNo":
                     if(lsValue.isEmpty()) {
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfOrderQuantity":

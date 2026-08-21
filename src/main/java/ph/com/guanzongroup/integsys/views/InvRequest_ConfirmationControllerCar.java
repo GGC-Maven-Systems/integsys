@@ -1000,7 +1000,7 @@ public class InvRequest_ConfirmationControllerCar implements Initializable, Scre
                     break;
                 case "tfSourceNo":
                     if (lsValue.isEmpty()) {
-                        invRequestController.Master().setProjectId(lsValue);
+                        invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
                 case "tfOrderQuantity":
