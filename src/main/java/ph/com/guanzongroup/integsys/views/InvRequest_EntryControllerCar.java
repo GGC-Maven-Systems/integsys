@@ -99,7 +99,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY,
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReservationQTY,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfSourceNo;
 
     @FXML
@@ -308,7 +308,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                 SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
         ));
         initDatePickerActions();
-        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+//        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
         taRemarks.setText(invRequestController.Master().getRemarks());
         try {
             tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
@@ -327,7 +327,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfReferenceNo.getText().trim();
+                //String lsReferNo = tfReferenceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -335,12 +335,12 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-
-                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
-                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-                        approved = false;
-                    }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
+            //comment by aldrich related to old referenceno as per mam she 08-21-2026
+//                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
+//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+//                        approved = false;
+//                    }
+                    if (selectedLocalDate.isBefore(transactionDate) ) { //&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -365,12 +365,12 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
-                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-                        approved = false;
-                    }
+//                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
+//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+//                        approved = false;
+//                    }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
+                    if (selectedLocalDate.isBefore(dateNow) ) { //&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -582,14 +582,14 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                         return;
                     }
                     LocalDate selectedLocalDate = dpTransactionDate.getValue();
-                    if (pnEditMode == EditMode.UPDATE) {
-                        if (!psOldDate.isEmpty()) {
-                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && tfReferenceNo.getText().isEmpty()) {
-                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
-                                return;
-                            }
-                        }
-                    }
+//                    if (pnEditMode == EditMode.UPDATE) {
+//                        if (!psOldDate.isEmpty()) {
+//                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && tfReferenceNo.getText().isEmpty()) {
+//                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
+//                                return;
+//                            }
+//                        }
+//                    }
 
                     // Validate Detail Count Before Backend Processing
                     int detailCount = invRequestController.getDetailCount();
@@ -875,7 +875,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
         pnTblInvDetailRow = -1;
         dpTransactionDate.setValue(null);
         taRemarks.setText("");
-        CustomCommonUtil.setText("", tfReferenceNo, tfTransactionNo, tfSourceNo);
+        CustomCommonUtil.setText("", tfTransactionNo, tfSourceNo);//tfReferenceNo, 
 
     }
     //to go back to last selected row
@@ -1008,7 +1008,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                 || invRequestController.Master().getTransactionStatus().equals(StockRequestStatus.CONFIRMED)) {
             CustomCommonUtil.setDisable(!lbShow, AnchorDetailMaster);
             CustomCommonUtil.setDisable(!lbNew,
-                    dpTransactionDate, tfReferenceNo);
+                    dpTransactionDate);//tfReferenceNo
 
             CustomCommonUtil.setDisable(true,
                     tfInvType, tfReservationQTY,
@@ -1497,7 +1497,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfSourceNo);
+      List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfSourceNo); //tfReferenceNo, 
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
         tfBrand.setOnMouseClicked(e -> activeField = tfBrand);
         tfModel.setOnMouseClicked(e -> activeField = tfModel);
