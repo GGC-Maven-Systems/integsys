@@ -320,7 +320,7 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                //String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -329,12 +329,10 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
                         approved = false;
                     }
 
- //comment by aldrich related to old referenceno as per mam she 08-21-2026
-
-//                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
+                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
                     if (selectedLocalDate.isBefore(transactionDate) ) { //&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
@@ -360,12 +358,12 @@ public class InvRequest_ConfirmationControllerMC_SP implements Initializable, Sc
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-//                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
+                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
 
-                    if (selectedLocalDate.isBefore(dateNow) ) { //&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"

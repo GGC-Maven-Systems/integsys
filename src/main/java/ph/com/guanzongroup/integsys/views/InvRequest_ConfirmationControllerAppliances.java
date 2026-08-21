@@ -99,7 +99,7 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH,  tfReservationQTY,
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReservationQTY,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfDescription, tfBarCode, tfSourceNo;
 
     @FXML
@@ -324,7 +324,7 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                //String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -333,13 +333,11 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
                         approved = false;
                     }
 
- //comment by aldrich related to old referenceno as per mam she 08-21-2026
-
-//                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
-                    if (selectedLocalDate.isBefore(transactionDate) ) { //&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
+                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -364,12 +362,12 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-//                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
+                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
 
-                    if (selectedLocalDate.isBefore(dateNow) ) { //&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -1077,7 +1075,7 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
                 return;
             }
             String lsValue = sourceField.getText();
-            if(lsValue == null){
+            if (lsValue == null) {
                 lsValue = "";
             } else {
                 lsValue.trim();
@@ -1390,7 +1388,7 @@ public class InvRequest_ConfirmationControllerAppliances implements Initializabl
     }
 
     private void initTextFieldFocus() {
-List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfSourceNo); //tfReferenceNo, 
+        List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfSourceNo); //tfReferenceNo, 
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
 
     }

@@ -87,7 +87,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
     private int pnEditMode;
 
     @FXML
-    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, 
+    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo,
             tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfMeasure;
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
@@ -183,7 +183,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
     private void clearDetailFields() {
         /* Detail Fields*/
         CustomCommonUtil.setText("", tfBrand, tfModel,
-                tfColor, tfReservationQTY,tfCancelledQTY, tfQOH,
+                tfColor, tfReservationQTY, tfCancelledQTY, tfQOH,
                 tfInvType, tfVariant, tfROQ, tfClassification,
                 tfMeasure);
         CustomCommonUtil.setText("0", tfOrderQuantity);
@@ -733,10 +733,10 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                     lsReservationQTY = String.valueOf(invRequestController.Detail(pnTblInvDetailRow).getReservedOrder());
                 }
                 tfReservationQTY.setText(lsReservationQTY);
-                
+
                 String lsCancelledQty = "0";
 
-                if (invRequestController.Detail(pnTblInvDetailRow).getCancelled()!= 0) {
+                if (invRequestController.Detail(pnTblInvDetailRow).getCancelled() != 0) {
                     lsCancelledQty = String.valueOf(invRequestController.Detail(pnTblInvDetailRow).getCancelled());
                 }
                 tfCancelledQTY.setText(lsCancelledQty);
@@ -764,7 +764,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                //String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -773,11 +773,11 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                         approved = false;
                     }
 
-//                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
-                    if (selectedLocalDate.isBefore(transactionDate) ) {//&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
+                    if (selectedLocalDate.isBefore(transactionDate)) {//&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -802,12 +802,12 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-//                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
+                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
 
-                    if (selectedLocalDate.isBefore(dateNow) ) { //&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -854,11 +854,11 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
         /*Master Fields */
         CustomCommonUtil.setDisable(!lbShow,
                 dpTransactionDate, tfTransactionNo, taRemarks
-                ); //tfReferenceNo
+        ); //tfReferenceNo
         CustomCommonUtil.setDisable(!lbShow,
                 tfOrderQuantity);
         CustomCommonUtil.setDisable(true,
-                tfInvType, tfVariant, tfColor, tfReservationQTY,tfCancelledQTY,
+                tfInvType, tfVariant, tfColor, tfReservationQTY, tfCancelledQTY,
                 tfQOH, tfROQ, tfClassification, tfModel, tfBrand, tfDescription, tfBarCode,
                 tfMeasure);
 //        if (!tfReferenceNo.getText().isEmpty()) {

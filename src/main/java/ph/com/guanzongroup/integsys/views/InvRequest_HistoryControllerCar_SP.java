@@ -180,7 +180,7 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
     private void clearDetailFields() {
         /* Detail Fields*/
         CustomCommonUtil.setText("", tfBrand, tfModel,
-                tfColor, tfReservationQTY,tfCancelledQTY, tfQOH, tfInvType, tfVariant, tfROQ, tfClassification);
+                tfColor, tfReservationQTY, tfCancelledQTY, tfQOH, tfInvType, tfVariant, tfROQ, tfClassification);
         CustomCommonUtil.setText("0", tfOrderQuantity);
     }
 
@@ -753,7 +753,7 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                //String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -762,11 +762,12 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
                         approved = false;
                     }
 
-//                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
-                    if (selectedLocalDate.isBefore(transactionDate) ) {//&& !lsReferNo.isEmpty()
+
+                    if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
+                    if (selectedLocalDate.isBefore(transactionDate)) {//&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -791,18 +792,19 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-//                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
-//                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
-//                        approved = false;
-//                    }
+                    if (selectedLocalDate.isBefore(dateNow) && lsReferNo.isEmpty()) {
+                        ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
+                        approved = false;
+                    }
 
-                    if (selectedLocalDate.isBefore(dateNow) ) { //&& !lsReferNo.isEmpty()
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
                                 + "If NO, the transaction date will be reset to today.",
                                 "Backdate Confirmation", null
                         );
+
                         if (proceed) {
                             if (poApp.getUserLevel() <= UserRight.ENCODER) {
                                 poJSON = ShowDialogFX.getUserApproval(poApp);
@@ -843,11 +845,11 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
         /*Master Fields */
         CustomCommonUtil.setDisable(!lbShow,
                 dpTransactionDate, tfTransactionNo, taRemarks
-                ); //tfReferenceNo
+        ); //tfReferenceNo
         CustomCommonUtil.setDisable(!lbShow,
                 tfOrderQuantity);
         CustomCommonUtil.setDisable(true,
-                tfInvType, tfVariant, tfColor, tfReservationQTY,tfCancelledQTY,
+                tfInvType, tfVariant, tfColor, tfReservationQTY, tfCancelledQTY,
                 tfQOH, tfROQ, tfClassification, tfModel, tfBrand, tfDescription, tfBarCode);
 //        if (!tfReferenceNo.getText().isEmpty()) {
 //            dpTransactionDate.setDisable(!lbShow);
