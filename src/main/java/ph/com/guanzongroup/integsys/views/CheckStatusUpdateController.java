@@ -112,7 +112,7 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
             "CANCELLATION", 
             "STALE", 
             "HOLD",
-            "BOUNCED / DISCHONORED");
+            "BOUNCED / DISHONORED");
     @FXML
     private AnchorPane AnchorMain, 
             apBrowse, 
