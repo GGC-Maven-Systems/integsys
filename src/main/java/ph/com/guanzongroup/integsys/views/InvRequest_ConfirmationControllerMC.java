@@ -315,7 +315,7 @@ public class InvRequest_ConfirmationControllerMC implements Initializable, Scree
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfSourceNo.getText().trim();
+                String lsReferNo = getReferenceNo().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -535,14 +535,14 @@ public class InvRequest_ConfirmationControllerMC implements Initializable, Scree
                         return;
                     }
                     LocalDate selectedLocalDate = dpTransactionDate.getValue();
-//                    if (pnEditMode == EditMode.UPDATE) {
-//                        if (!psOldDate.isEmpty()) {
-//                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && tfReferenceNo.getText().isEmpty()) {
-//                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
-//                                return;
-//                            }
-//                        }
-//                    }
+                    if (pnEditMode == EditMode.UPDATE) {
+                        if (!psOldDate.isEmpty()) {
+                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && getReferenceNo().isEmpty()) { //tfReferenceNo
+                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
+                                return;
+                            }
+                        }
+                    }
 
                     // Validate Detail Count Before Backend Processing
                     int detailCount = invRequestController.getDetailCount();
@@ -793,6 +793,19 @@ public class InvRequest_ConfirmationControllerMC implements Initializable, Scree
         }
     }
     
+    private String getReferenceNo(){
+        String lsReferNo = tfSourceNo.getText();
+        if(lsReferNo != null && !"".equals(lsReferNo)){
+            int lnSeparatorIndex = lsReferNo.indexOf(';');
+               lsReferNo = lnSeparatorIndex >= 0
+                ? lsReferNo.substring(lnSeparatorIndex + 1)
+                : "";
+        }
+        
+        System.out.println("Reference No : "+lsReferNo);
+        return lsReferNo;
+    }
+
     private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
         String result = (String) loJSON.get("result");
         if ("error".equals(result)) {

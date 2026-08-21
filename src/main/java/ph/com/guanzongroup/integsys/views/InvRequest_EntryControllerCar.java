@@ -327,7 +327,7 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfSourceNo.getText().trim(); //tfReferenceNo //comment by aldrich related to old referenceno as per mam she 08-21-2026
+                String lsReferNo = getReferenceNo().trim(); //tfReferenceNo //comment by aldrich related to old referenceno as per mam she 08-21-2026
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -582,14 +582,14 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
                         return;
                     }
                     LocalDate selectedLocalDate = dpTransactionDate.getValue();
-//                    if (pnEditMode == EditMode.UPDATE) {
-//                        if (!psOldDate.isEmpty()) {
-//                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && tfReferenceNo.getText().isEmpty()) {
-//                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
-//                                return;
-//                            }
-//                        }
-//                    }
+                    if (pnEditMode == EditMode.UPDATE) {
+                        if (!psOldDate.isEmpty()) {
+                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && getReferenceNo().isEmpty()) {
+                                ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
+                                return;
+                            }
+                        }
+                    }
 
                     // Validate Detail Count Before Backend Processing
                     int detailCount = invRequestController.getDetailCount();
@@ -773,6 +773,19 @@ public class InvRequest_EntryControllerCar implements Initializable, ScreenInter
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(e), e);
             ShowMessageFX.Error(MiscUtil.getException(e), psFormName, null);
         }
+    }
+
+    private String getReferenceNo(){
+        String lsReferNo = tfSourceNo.getText();
+        if(lsReferNo != null && !"".equals(lsReferNo)){
+            int lnSeparatorIndex = lsReferNo.indexOf(';');
+               lsReferNo = lnSeparatorIndex >= 0
+                ? lsReferNo.substring(lnSeparatorIndex + 1)
+                : "";
+        }
+        
+        System.out.println("Reference No : "+lsReferNo);
+        return lsReferNo;
     }
 
     private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
