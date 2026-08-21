@@ -565,11 +565,7 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
-            try {
-                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
-            } catch (GuanzonException | SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            }
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);
@@ -761,7 +757,6 @@ public class InvRequest_HistoryControllerCar_SP implements Initializable, Screen
                         ShowMessageFX.Warning("Invalid to future date.", psFormName, null);
                         approved = false;
                     }
-
 
                     if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);

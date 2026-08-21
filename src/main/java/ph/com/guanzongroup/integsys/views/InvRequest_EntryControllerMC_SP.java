@@ -99,7 +99,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
     @FXML
     private TextField tfTransactionNo, tfBrand, tfModel, tfInvType, tfSourceNo,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH,  tfReservationQTY,
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfReservationQTY,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription;
 
     @FXML
@@ -283,38 +283,34 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
     }
 
     private void loadMaster() {
-        try {
-            tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
-            String lsStatus = "";
-            switch (invRequestController.Master().getTransactionStatus()) {
-                case StockRequestStatus.OPEN:
-                    lsStatus = "OPEN";
-                    break;
-                case StockRequestStatus.CONFIRMED:
-                    lsStatus = "CONFIRMED";
-                    break;
-                case StockRequestStatus.PROCESSED:
-                    lsStatus = "PROCESSED";
-                    break;
-                case StockRequestStatus.CANCELLED:
-                    lsStatus = "CANCELLED";
-                    break;
-                case StockRequestStatus.VOID:
-                    lsStatus = "VOID";
-                    break;
-            }
-            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
-            lblTransactionStatus.setText(lsStatus);
-            dpTransactionDate.setOnAction(null);
-            dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
-                    SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
-            ));
-            initDatePickerActions();
-    //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
-            taRemarks.setText(invRequestController.Master().getRemarks());
-        } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
+        String lsStatus = "";
+        switch (invRequestController.Master().getTransactionStatus()) {
+            case StockRequestStatus.OPEN:
+                lsStatus = "OPEN";
+                break;
+            case StockRequestStatus.CONFIRMED:
+                lsStatus = "CONFIRMED";
+                break;
+            case StockRequestStatus.PROCESSED:
+                lsStatus = "PROCESSED";
+                break;
+            case StockRequestStatus.CANCELLED:
+                lsStatus = "CANCELLED";
+                break;
+            case StockRequestStatus.VOID:
+                lsStatus = "VOID";
+                break;
         }
+        tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+        lblTransactionStatus.setText(lsStatus);
+        dpTransactionDate.setOnAction(null);
+        dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
+        ));
+        initDatePickerActions();
+        //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+        taRemarks.setText(invRequestController.Master().getRemarks());
     }
 
     private void initDatePickerActions() {
@@ -340,7 +336,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -370,7 +366,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
                         approved = false;
                     }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"
@@ -792,16 +788,16 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
         }
     }
 
-    private String getReferenceNo(){
+    private String getReferenceNo() {
         String lsReferNo = tfSourceNo.getText();
-        if(lsReferNo != null && !"".equals(lsReferNo)){
+        if (lsReferNo != null && !"".equals(lsReferNo)) {
             int lnSeparatorIndex = lsReferNo.indexOf(';');
-               lsReferNo = lnSeparatorIndex >= 0
-                ? lsReferNo.substring(lnSeparatorIndex + 1)
-                : "";
+            lsReferNo = lnSeparatorIndex >= 0
+                    ? lsReferNo.substring(lnSeparatorIndex + 1)
+                    : "";
         }
-        
-        System.out.println("Reference No : "+lsReferNo);
+
+        System.out.println("Reference No : " + lsReferNo);
         return lsReferNo;
     }
 
@@ -1006,7 +1002,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
-                    if(lsValue.isEmpty()){
+                    if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
                     }
                     break;
@@ -1576,7 +1572,7 @@ public class InvRequest_EntryControllerMC_SP implements Initializable, ScreenInt
     }
 
     private void initTextFieldFocus() {
-       List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfSourceNo); //tfReferenceNo, 
+        List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfOrderQuantity, tfBrand, tfDescription, tfSourceNo); //tfReferenceNo, 
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
         tfBrand.setOnMouseClicked(e -> activeField = tfBrand);
         tfBarCode.setOnMouseClicked(e -> activeField = tfBarCode);

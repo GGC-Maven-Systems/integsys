@@ -570,11 +570,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
-            try {
-                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
-            } catch (GuanzonException | SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            }
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);
@@ -807,7 +803,7 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                         approved = false;
                     }
 
-                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) { 
+                    if (selectedLocalDate.isBefore(dateNow) && !lsReferNo.isEmpty()) {
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You selected a backdate with a reference number.\n\n"
                                 + "If YES, seek approval to proceed with the backdate.\n"

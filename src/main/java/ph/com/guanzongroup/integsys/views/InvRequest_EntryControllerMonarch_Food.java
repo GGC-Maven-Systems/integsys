@@ -281,7 +281,6 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
     }
 
     private void loadMaster() {
-        try {
             tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
             String lsStatus = "";
             switch (invRequestController.Master().getTransactionStatus()) {
@@ -310,9 +309,6 @@ public class InvRequest_EntryControllerMonarch_Food implements Initializable, Sc
             initDatePickerActions();
     //        tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
             taRemarks.setText(invRequestController.Master().getRemarks());
-        } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     private void initDatePickerActions() {
