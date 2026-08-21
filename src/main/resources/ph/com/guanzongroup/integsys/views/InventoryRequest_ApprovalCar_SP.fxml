@@ -254,7 +254,7 @@
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Cancel Qty" GridPane.columnIndex="14" GridPane.rowIndex="5" />
                                                       <TextField fx:id="tfCancelQty" alignment="CENTER_RIGHT" text="0" GridPane.columnIndex="16" GridPane.rowIndex="5" />
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Remarks" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Source No" GridPane.columnIndex="10" GridPane.rowIndex="1" />
+                                                      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Refer No." GridPane.columnIndex="10" GridPane.rowIndex="1" />
                                                       <TextField fx:id="tfSourceNo" editable="false" GridPane.columnIndex="12" GridPane.rowIndex="1" />
                                                       <TextArea fx:id="taRemarks" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.columnSpan="7" GridPane.rowIndex="2" />
                                                    </children>
