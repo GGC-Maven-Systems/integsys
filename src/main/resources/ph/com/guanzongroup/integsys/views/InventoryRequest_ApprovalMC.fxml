@@ -255,7 +255,7 @@
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Remarks" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                       <TextArea fx:id="taRemarks" editable="false" minWidth="-Infinity" prefHeight="54.0" prefWidth="500.0" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.rowSpan="2" />
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Refer No." GridPane.columnIndex="10" GridPane.rowIndex="1" />
-                                                      <TextField fx:id="tfSourceNo" editable="false" minWidth="-Infinity" GridPane.columnIndex="12" GridPane.rowIndex="1" />
+                                                      <TextField fx:id="tfSourceNo" editable="false" GridPane.columnIndex="12" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                                                    </children>
                                                 </GridPane>
                                       </children>

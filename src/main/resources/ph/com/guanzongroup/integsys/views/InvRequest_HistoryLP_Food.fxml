@@ -199,7 +199,7 @@
                                                             <Label text="Remarks" GridPane.rowIndex="7" />
                                                             <TextArea fx:id="taRemarks" prefHeight="27.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.rowSpan="2147483647" />
                                                             <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                            <TextField fx:id="tfSourceNo" editable="false" maxWidth="175.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+                                                            <TextField fx:id="tfSourceNo" editable="false" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="5" />
                                                                             </children>
                                                                         </GridPane>
                                                                     </children>
