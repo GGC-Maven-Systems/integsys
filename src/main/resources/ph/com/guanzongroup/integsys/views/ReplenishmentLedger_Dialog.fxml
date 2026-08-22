@@ -32,7 +32,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                            <children>
-                              <Button fx:id="btnAddLedger" contentDisplay="TOP" graphicTextGap="3.0" layoutX="503.0" layoutY="23.0" maxHeight="70.0" minWidth="150.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Add to Replenishment">
+                              <Button fx:id="btnAddLedger" contentDisplay="TOP" graphicTextGap="3.0" layoutX="503.0" layoutY="23.0" maxHeight="70.0" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Add">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -76,7 +76,8 @@
                                                 <TableColumn fx:id="tblDetailRow1" maxWidth="30.0" minWidth="30.0" prefWidth="30.0">
                                                    <graphic>
                                                       <CheckBox fx:id="chckSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
-                                                   </graphic></TableColumn>
+                                                   </graphic>
+                                                                </TableColumn>
                                               <TableColumn fx:id="tblDetailLedgerNo" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" text="Ledger No" />
                                                 <TableColumn fx:id="tblDetailSourceCode" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Source Code" />
                                                 <TableColumn fx:id="tblDetailSourceNo" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Source No" />
@@ -103,7 +104,7 @@
                            <children>
                               <AnchorPane fx:id="apBrowse" style="-fx-background-color: A0A0A0;">
                                  <children>
-                                    <GridPane prefHeight="45.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <GridPane AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
                                        <columnConstraints>
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" />
                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
@@ -111,7 +112,7 @@
                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="61.0" />
                                        </columnConstraints>
                                        <rowConstraints>
-                                          <RowConstraints minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
                                           <Label text="Ledger No">
