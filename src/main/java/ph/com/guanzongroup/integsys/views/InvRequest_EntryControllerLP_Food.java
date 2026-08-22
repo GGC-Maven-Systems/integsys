@@ -64,6 +64,7 @@ import org.guanzon.cas.inv.warehouse.StockRequest;
 import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Detail;
 import org.guanzon.cas.inv.warehouse.status.StockRequestStatus;
 import org.json.simple.parser.ParseException;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  *
@@ -991,12 +992,19 @@ public class InvRequest_EntryControllerLP_Food implements Initializable, ScreenI
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
+                    try {
                     if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
                     } else {
-                        invRequestController.Master().setReferenceNo(lsValue);
+                        poJSON = invRequestController.checkProjectCode(lsValue);
+                        if (JFXUtil.isJSONSuccess(poJSON)) {
+                            invRequestController.Master().setReferenceNo(lsValue);
+                        }
                     }
                     tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                }
                     break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);

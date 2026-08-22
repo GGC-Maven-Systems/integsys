@@ -1010,13 +1010,20 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
+                    try {
                     if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
-                    } else {
-                        invRequestController.Master().setReferenceNo(lsValue);
+                    } else {                      
+                        poJSON = invRequestController.checkProjectCode(lsValue);
+                        if (JFXUtil.isJSONSuccess(poJSON)) {
+                            invRequestController.Master().setReferenceNo(lsValue);
+                        }
                     }
                     tfSourceNo.setText(invRequestController.Master().getReferenceNo());
-                    break;
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                }
+                break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
                     break;
