@@ -25,7 +25,7 @@ import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.cas.parameter.services.ParamControllers;
+import org.guanzon.cas.client.DepartmentAssignment;
 import org.json.simple.JSONObject;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -44,7 +44,7 @@ public class DepartmentController implements Initializable, ScreenInterface {
     private GRiderCAS oApp;
     private final String pxeModuleName = "Department";
     private int pnEditMode;
-    private ParamControllers oParameters;
+    private DepartmentAssignment poDepartment;
     private boolean state = false;
     private boolean pbLoaded = false;
     private int pnInventory = 0;
@@ -89,13 +89,13 @@ public class DepartmentController implements Initializable, ScreenInterface {
     public void initialize(URL url, ResourceBundle rb) {
         try {
             initializeObject();
-            pnEditMode = oParameters.Department().getEditMode();
+            pnEditMode = poDepartment.getEditMode();
             initButton(pnEditMode);
             InitTextFields();
             ClickButton();
             initTabAnchor();
 
-            if (oParameters.Department().getEditMode() == EditMode.ADDNEW) {
+            if (poDepartment.getEditMode() == EditMode.ADDNEW) {
                 initButton(pnEditMode);
                 initTabAnchor();
                 loadRecord();
@@ -109,8 +109,13 @@ public class DepartmentController implements Initializable, ScreenInterface {
     private void initializeObject() {
         try {
             LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new ParamControllers(oApp, logwrapr);
-            oParameters.Department().setRecordStatus("0123");
+            poDepartment = new DepartmentAssignment();
+            poDepartment.setApplicationDriver(oApp);
+            poDepartment.setWithParentClass(false);
+            poDepartment.setLogWrapper(logwrapr);
+            poDepartment.initialize();
+            poDepartment.newRecord();
+            poDepartment.setRecordStatus("0123");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(DepartmentController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -142,10 +147,10 @@ public class DepartmentController implements Initializable, ScreenInterface {
                     case "btnNew":
                         clearAllFields();
                         txtField02.requestFocus();
-                        JSONObject poJSON = oParameters.Department().newRecord();
-                        pnEditMode = oParameters.Department().getEditMode();
+                        JSONObject poJSON = poDepartment.newRecord();
+                        pnEditMode = poDepartment.getEditMode();
                         if ("success".equals((String) poJSON.get("result"))) {
-                            pnEditMode = oParameters.Department().getEditMode();
+                            pnEditMode = poDepartment.getEditMode();
                             initButton(pnEditMode);
                             initTabAnchor();
                             loadRecord();
@@ -156,7 +161,7 @@ public class DepartmentController implements Initializable, ScreenInterface {
                         break;
                     case "btnBrowse":
                         String lsValue = (txtSeeks01.getText() == null) ? "" : txtSeeks01.getText();
-                        poJSON = oParameters.Department().searchRecord(lsValue, false);
+                        poJSON = poDepartment.searchRecord(lsValue, false);
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                             txtSeeks01.clear();
@@ -168,12 +173,12 @@ public class DepartmentController implements Initializable, ScreenInterface {
                         initTabAnchor();
                         break;
                     case "btnUpdate":
-                        poJSON = oParameters.Department().updateRecord();
+                        poJSON = poDepartment.updateRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                             break;
                         }
-                        pnEditMode = oParameters.Department().getEditMode();
+                        pnEditMode = poDepartment.getEditMode();
                         initButton(pnEditMode);
                         initTabAnchor();
                         break;
@@ -187,9 +192,9 @@ public class DepartmentController implements Initializable, ScreenInterface {
                         }
                         break;
                     case "btnSave":
-                        oParameters.Department().getModel().setModifyingId(oApp.getUserID());
-                        oParameters.Department().getModel().setModifiedDate(oApp.getServerDate());
-                        JSONObject saveResult = oParameters.Department().saveRecord();
+                        poDepartment.getModel().setModifyingId(oApp.getUserID());
+                        poDepartment.getModel().setModifiedDate(oApp.getServerDate());
+                        JSONObject saveResult = poDepartment.saveRecord();
                         if ("success".equals((String) saveResult.get("result"))) {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
                             pnEditMode = EditMode.UNKNOWN;
@@ -200,20 +205,20 @@ public class DepartmentController implements Initializable, ScreenInterface {
                         }
                         break;
                     case "btnActivate":
-                        String Status = oParameters.Department().getModel().getRecordStatus();
-                        String id = oParameters.Department().getModel().getDepartmentId();
+                        String Status = poDepartment.getModel().getRecordStatus();
+                        String id = poDepartment.getModel().getDepartmentId();
                         JSONObject poJsON;
 
                         switch (Status) {
                             case "0":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-                                    oParameters.Department().initialize();
-                                    poJsON = oParameters.Department().activateRecord();
+                                    poDepartment.initialize();
+                                    poJsON = poDepartment.activateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
                                     }
-                                    poJsON = oParameters.Department().openRecord(id);
+                                    poJsON = poDepartment.openRecord(id);
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
@@ -225,14 +230,14 @@ public class DepartmentController implements Initializable, ScreenInterface {
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                                    ShowMessageFX.Information(String.valueOf(oParameters.Department().getEditMode()), "Computerized Accounting System", pxeModuleName);
+                                    ShowMessageFX.Information(String.valueOf(poDepartment.getEditMode()), "Computerized Accounting System", pxeModuleName);
 
-                                    poJsON = oParameters.Department().deactivateRecord();
+                                    poJsON = poDepartment.deactivateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
                                     }
-                                    poJsON = oParameters.Department().openRecord(id);
+                                    poJsON = poDepartment.openRecord(id);
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
@@ -312,15 +317,15 @@ public class DepartmentController implements Initializable, ScreenInterface {
             try {
                 switch (lnIndex) {
                     case 2:
-                        oParameters.Department().getModel().setDescription(lsValue);
+                        poDepartment.getModel().setDescription(lsValue);
                         break;
                     case 4:
-                        oParameters.Department().getModel().setDepartmentCode(lsValue);
+                        poDepartment.getModel().setDepartmentCode(lsValue);
                         break;
                     case 5:
-                        oParameters.Department().getModel().setDeptMobileNo(lsValue);
+                        poDepartment.getModel().setDeptMobileNo(lsValue);
                     case 6:
-                        oParameters.Department().getModel().setDeptEmail(lsValue);
+                        poDepartment.getModel().setDeptEmail(lsValue);
                         break;
                     default:
                         break;
@@ -344,25 +349,25 @@ public class DepartmentController implements Initializable, ScreenInterface {
                 case F3:
                     switch (lnIndex) {
                         case 3:
-                            poJson = oParameters.Department().searchDepartmentHead(lsValue, false);
+                            poJson = poDepartment.searchDepartmentHead(lsValue, false);
                             if ("error".equalsIgnoreCase(poJson.get("result").toString())) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                             }
-                            txtField03.setText((String) oParameters.Department().getModel().DepartmentHeadAssign().getCompanyName());
+                            txtField03.setText((String) poDepartment.getModel().DepartmentHeadAssign().getCompanyName());
                             break;
                         case 7:
-                            poJson = oParameters.Department().searchHead(lsValue, false);
+                            poJson = poDepartment.searchHead(lsValue, false);
                             if ("error".equalsIgnoreCase(poJson.get("result").toString())) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                             }
-                            txtField07.setText((String) oParameters.Department().getModel().HeadAssign().getCompanyName());
+                            txtField07.setText((String) poDepartment.getModel().HeadAssign().getCompanyName());
                             break;
                         case 8:
-                            poJson = oParameters.Department().searchSupervisor(lsValue, false);
+                            poJson = poDepartment.searchSupervisor(lsValue, false);
                             if ("error".equalsIgnoreCase(poJson.get("result").toString())) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                             }
-                            txtField08.setText((String) oParameters.Department().getModel().SupervisorAssign().getCompanyName());
+                            txtField08.setText((String) poDepartment.getModel().SupervisorAssign().getCompanyName());
                             break;
 
                     }
@@ -395,13 +400,13 @@ public class DepartmentController implements Initializable, ScreenInterface {
                 case F3:
                     switch (lnIndex) {
                         case 01:
-                            poJson = oParameters.Department().searchRecord(lsValue, false);
+                            poJson = poDepartment.searchRecord(lsValue, false);
                             if ("error".equals((String) poJson.get("result"))) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                                 txtSeeks01.clear();
                                 break;
                             }
-                            txtSeeks01.setText((String) oParameters.Department().getModel().getDescription());
+                            txtSeeks01.setText((String) poDepartment.getModel().getDescription());
                             pnEditMode = EditMode.READY;
                             loadRecord();
                             break;
@@ -424,20 +429,20 @@ public class DepartmentController implements Initializable, ScreenInterface {
 
     private void loadRecord() {
         try {
-            boolean lbActive = oParameters.Department().getModel().getRecordStatus() == "1";
+            boolean lbActive = poDepartment.getModel().getRecordStatus() == "1";
 
-            psPrimary = oParameters.Department().getModel().getDepartmentId();
+            psPrimary = poDepartment.getModel().getDepartmentId();
 
-            txtField01.setText(oParameters.Department().getModel().getDepartmentId());
-            txtField02.setText(oParameters.Department().getModel().getDescription());
-            txtField03.setText(oParameters.Department().getModel().DepartmentHeadAssign().getCompanyName());
-            txtField02.setText(oParameters.Department().getModel().getDepartmentCode());
-            txtField02.setText(oParameters.Department().getModel().getDeptMobileNo());
-            txtField02.setText(oParameters.Department().getModel().getDeptEmail());
-            txtField03.setText(oParameters.Department().getModel().HeadAssign().getCompanyName());
-            txtField03.setText(oParameters.Department().getModel().SupervisorAssign().getCompanyName());
+            txtField01.setText(poDepartment.getModel().getDepartmentId());
+            txtField02.setText(poDepartment.getModel().getDescription());
+            txtField03.setText(poDepartment.getModel().DepartmentHeadAssign().getCompanyName());
+            txtField02.setText(poDepartment.getModel().getDepartmentCode());
+            txtField02.setText(poDepartment.getModel().getDeptMobileNo());
+            txtField02.setText(poDepartment.getModel().getDeptEmail());
+            txtField03.setText(poDepartment.getModel().HeadAssign().getCompanyName());
+            txtField03.setText(poDepartment.getModel().SupervisorAssign().getCompanyName());
 
-            switch (oParameters.Department().getModel().getRecordStatus()) {
+            switch (poDepartment.getModel().getRecordStatus()) {
                 case "1":
                     btnActivate.setText("Deactivate");
                     faActivate.setGlyphName("CLOSE");
@@ -458,7 +463,7 @@ public class DepartmentController implements Initializable, ScreenInterface {
     void cbField01_Clicked(MouseEvent event) {
         if (cbField01.isSelected()) {
             try {
-                oParameters.Department().getModel().setRecordStatus("1");
+                poDepartment.getModel().setRecordStatus("1");
             } catch (SQLException ex) {
                 Logger.getLogger(DepartmentController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (GuanzonException ex) {
@@ -466,7 +471,7 @@ public class DepartmentController implements Initializable, ScreenInterface {
             }
         } else {
             try {
-                oParameters.Department().getModel().setRecordStatus("0");
+                poDepartment.getModel().setRecordStatus("0");
             } catch (SQLException | GuanzonException ex) {
             }
         }

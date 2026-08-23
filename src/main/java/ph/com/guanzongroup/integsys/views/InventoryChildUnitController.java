@@ -33,9 +33,9 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.cas.parameter.InventoryChildUnit;
-import org.guanzon.cas.parameter.model.Model_Inventory_Child_Unit;
-import org.guanzon.cas.parameter.services.ParamControllers;
+import org.guanzon.cas.inv.InventoryChildUnit;
+import org.guanzon.cas.inv.model.Model_Inventory_Child_Unit;
+import org.guanzon.cas.inv.services.InvControllers;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.integsys.model.ModelInventoryChildUnit;
@@ -83,7 +83,7 @@ public class InventoryChildUnitController implements Initializable, ScreenInterf
     public void initialize(URL location, ResourceBundle resources) {
         try {
             poJSON = new JSONObject();
-            poController = new ParamControllers(oApp, null).InventoryChildUnit();
+            poController = new InvControllers(oApp, null).InventoryChildUnit();
             poController.initialize();// Initialize transaction
 //            poController.setRecordStatus("0123");
 
