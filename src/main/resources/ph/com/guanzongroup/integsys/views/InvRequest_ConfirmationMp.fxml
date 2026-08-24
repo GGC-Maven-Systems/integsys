@@ -239,12 +239,10 @@
                                                                                 <Label text="Date" GridPane.rowIndex="4" />
                                                                                 <Label text="Refer No." GridPane.rowIndex="5" />
                                                                                 <TextField fx:id="tfTransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                                                <TextField fx:id="tfReferenceNo" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                             <Label text="Remarks" GridPane.rowIndex="7" />
                                                             <TextArea fx:id="taRemarks" prefHeight="27.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.rowSpan="2147483647" />
                                                             <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                            <Label text="Source No" GridPane.columnIndex="4" GridPane.rowIndex="5" />
-                                                            <TextField fx:id="tfSourceNo" minWidth="-Infinity" prefWidth="173.0" promptText="Press F3: Search" GridPane.columnIndex="6" GridPane.rowIndex="5" />
+                                                            <TextField fx:id="tfSourceNo" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="5" />
                                                                             </children>
                                                                         </GridPane>
                                                                     </children>

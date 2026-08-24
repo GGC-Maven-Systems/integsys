@@ -804,7 +804,7 @@ public class InventoryRequest_ApprovalControllerCar implements Initializable, Sc
         tfCancelQty.setText(tblColCancelQty.getCellData(fnRow));
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
         taRemarks.setText(poAppController.getMaster().getRemarks());
-        tfSourceNo.setText(poAppController.getMaster().Project().getProjectID());
+        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
 
     }
 

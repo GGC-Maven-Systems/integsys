@@ -86,7 +86,7 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
     private int pnEditMode;
 
     @FXML
-    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfReferenceNo, tfSourceNo,
+    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfSourceNo,
             tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription;
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
@@ -554,7 +554,7 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
                     break;
             }
             poJSON = invRequestController.SearchBranch(lsStatus, true);
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
             lblTransactionStatus.setText(lsStatus);
             dpTransactionDate.setOnAction(null);
             dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
@@ -562,7 +562,7 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
             ));
 
             initDatePickerActions();
-            tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+            //tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
 
             taRemarks.setText(invRequestController.Master().getRemarks());
 
@@ -749,7 +749,7 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -758,11 +758,12 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
                         approved = false;
                     }
 
+
                     if (selectedLocalDate.isBefore(transactionDate) && lsReferNo.isEmpty()) {
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
+                    if (selectedLocalDate.isBefore(transactionDate)) {//&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -799,6 +800,7 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
                                 + "If NO, the transaction date will be reset to today.",
                                 "Backdate Confirmation", null
                         );
+
                         if (proceed) {
                             if (poApp.getUserLevel() <= UserRight.ENCODER) {
                                 poJSON = ShowDialogFX.getUserApproval(poApp);
@@ -839,15 +841,15 @@ public class InvRequest_HistoryControllerMC_SP implements Initializable, ScreenI
         /*Master Fields */
         CustomCommonUtil.setDisable(!lbShow,
                 dpTransactionDate, tfTransactionNo, taRemarks,
-                tfReferenceNo, tfSourceNo);
+                tfSourceNo);//tfReferenceNo,
         CustomCommonUtil.setDisable(!lbShow,
                 tfOrderQuantity);
         CustomCommonUtil.setDisable(true,
                 tfInvType, tfVariant, tfColor, tfReservationQTY, tfCancelledQTY,
                 tfQOH, tfROQ, tfClassification, tfModel, tfBrand, tfDescription, tfBarCode);
-        if (!tfReferenceNo.getText().isEmpty()) {
-            dpTransactionDate.setDisable(!lbShow);
-        }
+//        if (!tfReferenceNo.getText().isEmpty()) {
+//            dpTransactionDate.setDisable(!lbShow);
+//        }
 
     }
 

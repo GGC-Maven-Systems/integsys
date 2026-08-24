@@ -63,6 +63,7 @@ import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Detail;
 import org.guanzon.cas.inv.warehouse.status.StockRequestStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  *
@@ -98,7 +99,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
     private ObservableList<ModelInvTableListInformation> tableListInformation_data = FXCollections.observableArrayList();
 
     @FXML
-    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH, tfReferenceNo, tfReservationQTY, tfSourceNo,
+    private TextField tfTransactionNo, tfBrand, tfInvType, tfROQ, tfClassification, tfQOH, tfReservationQTY, tfSourceNo,
             tfOrderQuantity, tfSearchTransNo, tfSearchReferenceNo, tfDescription, tfBarCode, tfMeasure;
 
     @FXML
@@ -275,38 +276,34 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
     }
 
     private void loadMaster() {
-        try {
-            tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
-            String lsStatus = "";
-            switch (invRequestController.Master().getTransactionStatus()) {
-                case StockRequestStatus.OPEN:
-                    lsStatus = "OPEN";
-                    break;
-                case StockRequestStatus.CONFIRMED:
-                    lsStatus = "CONFIRMED";
-                    break;
-                case StockRequestStatus.PROCESSED:
-                    lsStatus = "PROCESSED";
-                    break;
-                case StockRequestStatus.CANCELLED:
-                    lsStatus = "CANCELLED";
-                    break;
-                case StockRequestStatus.VOID:
-                    lsStatus = "VOID";
-                    break;
-            }
-            tfSourceNo.setText(invRequestController.Master().Project().getProjectID());
-            lblTransactionStatus.setText(lsStatus);
-            dpTransactionDate.setOnAction(null);
-            dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
-                    SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
-            ));
-            initDatePickerActions();
-            tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
-            taRemarks.setText(invRequestController.Master().getRemarks());
-        } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        tfTransactionNo.setText(invRequestController.Master().getTransactionNo());
+        String lsStatus = "";
+        switch (invRequestController.Master().getTransactionStatus()) {
+            case StockRequestStatus.OPEN:
+                lsStatus = "OPEN";
+                break;
+            case StockRequestStatus.CONFIRMED:
+                lsStatus = "CONFIRMED";
+                break;
+            case StockRequestStatus.PROCESSED:
+                lsStatus = "PROCESSED";
+                break;
+            case StockRequestStatus.CANCELLED:
+                lsStatus = "CANCELLED";
+                break;
+            case StockRequestStatus.VOID:
+                lsStatus = "VOID";
+                break;
         }
+        tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+        lblTransactionStatus.setText(lsStatus);
+        dpTransactionDate.setOnAction(null);
+        dpTransactionDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                SQLUtil.dateFormat(invRequestController.Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)
+        ));
+        initDatePickerActions();
+        ////tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+        taRemarks.setText(invRequestController.Master().getRemarks());
     }
 
     private void initDatePickerActions() {
@@ -319,7 +316,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = getReferenceNo().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -332,7 +329,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
+                    if (selectedLocalDate.isBefore(transactionDate)) { //&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -539,7 +536,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
                     LocalDate selectedLocalDate = dpTransactionDate.getValue();
                     if (pnEditMode == EditMode.UPDATE) {
                         if (!psOldDate.isEmpty()) {
-                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && tfReferenceNo.getText().isEmpty()) {
+                            if (!CustomCommonUtil.formatLocalDateToShortString(selectedLocalDate).equals(psOldDate) && getReferenceNo().isEmpty()) { //tfReferenceNo
                                 ShowMessageFX.Warning("A reference number is required for backdated transactions.", psFormName, null);
                                 return;
                             }
@@ -770,6 +767,19 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
         }
     }
 
+    private String getReferenceNo() {
+        String lsReferNo = tfSourceNo.getText();
+        if (lsReferNo != null && !"".equals(lsReferNo)) {
+            int lnSeparatorIndex = lsReferNo.indexOf(';');
+            lsReferNo = lnSeparatorIndex >= 0
+                    ? lsReferNo.substring(lnSeparatorIndex + 1)
+                    : "";
+        }
+
+        System.out.println("Reference No : " + lsReferNo);
+        return lsReferNo;
+    }
+
     private boolean isJSONSuccess(JSONObject loJSON, String fsModule) {
         String result = (String) loJSON.get("result");
         if ("error".equals(result)) {
@@ -870,7 +880,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
         pnTblInvDetailRow = -1;
         dpTransactionDate.setValue(null);
         taRemarks.setText("");
-        CustomCommonUtil.setText("", tfReferenceNo, tfSourceNo, tfTransactionNo);
+        //        CustomCommonUtil.setText("", tfReferenceNo, tfSourceNo, tfTransactionNo);
 
     }
     //to go back to last selected row
@@ -968,9 +978,19 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
             /*Lost Focus*/
             switch (lsTextFieldID) {
                 case "tfSourceNo":
-                    if(lsValue.isEmpty()){
-                        invRequestController.Master().setProjectId(lsValue);
+                    try {
+                    if (lsValue.isEmpty()) {
+                        invRequestController.Master().setReferenceNo(lsValue);
+                    } else {
+                        poJSON = invRequestController.checkProjectCode(lsValue);
+                        if (JFXUtil.isJSONSuccess(poJSON)) {
+                            invRequestController.Master().setReferenceNo(lsValue);
+                        }
                     }
+                    tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                }
                     break;
                 case "tfReferenceNo":
                     invRequestController.Master().setReferenceNo(lsValue);
@@ -987,7 +1007,50 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
         }
     };
 
+    private void restrictToOneSeparator(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // Allow blank
+            if (newValue.isEmpty()) {
+                return;
+            }
+
+            long separatorCount = newValue.chars().filter(ch -> ch == ';').count();
+
+            // More than one ';' is not allowed
+            if (separatorCount > 1) {
+                textField.setText(oldValue);
+                textField.positionCaret(textField.getText().length());
+                return;
+            }
+
+            if (newValue.contains(";")) {
+                int sepIndex = newValue.indexOf(';');
+                // ';' is the last char (nothing after it) AND text just got shorter
+                // -> user deleted the suffix down to nothing, so drop the ';' too
+                if (sepIndex == newValue.length() - 1 && newValue.length() < oldValue.length()) {
+                    String stripped = newValue.substring(0, sepIndex);
+                    textField.setText(stripped);
+                    textField.positionCaret(textField.getText().length());
+                }
+                return;
+            }
+
+            // No ';' yet. Only handle the "exactly one char added" case.
+            if (newValue.length() == oldValue.length() + 1) {
+                if (oldValue.isEmpty()) {
+                    // very first character typed into an empty field -> default "0" prefix
+                    textField.setText("0;" + newValue);
+                } else {
+                    // existing (e.g. programmatically-set) value with no separator yet ->
+                    // keep it as the prefix, start the suffix at the newly typed char
+                    textField.setText(oldValue + ";" + newValue.substring(oldValue.length()));
+                }
+                textField.positionCaret(textField.getText().length());
+            }
+        });
+    }
     private void initFields(int fnEditMode) {
+        restrictToOneSeparator(tfSourceNo);
 
         boolean lbShow = (fnEditMode == EditMode.UPDATE);
 
@@ -995,11 +1058,11 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
         if (invRequestController.Master().getTransactionStatus().equals(StockRequestStatus.OPEN)
                 || invRequestController.Master().getTransactionStatus().equals(StockRequestStatus.CONFIRMED)) {
             CustomCommonUtil.setDisable(!lbShow, AnchorDetailMaster);
-            CustomCommonUtil.setDisable(true,
-                    tfReferenceNo);
+//            CustomCommonUtil.setDisable(true,
+//                    tfReferenceNo);
 
             CustomCommonUtil.setDisable(true,
-                    tfInvType, tfReferenceNo, dpTransactionDate, tfReservationQTY,
+                    tfInvType, dpTransactionDate, tfReservationQTY, //tfReferenceNo, 
                     tfQOH, tfROQ, tfClassification, tfBrand, tfBarCode, tfDescription);
             CustomCommonUtil.setDisable(!lbShow, tfOrderQuantity, taRemarks);
 
@@ -1066,10 +1129,12 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
                         case "tfSourceNo":
                             poJSON = invRequestController.SearchSource(lsValue, true);
                             if (!"error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Search Information", null);
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
+                            } else {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                                tfSourceNo.setText(invRequestController.Master().getReferenceNo());
                             }
-                            loadMaster();
-                            break;
+                            return;
                         case "tfSearchTransNo":
                             System.out.print("Company ID" + psCompanyID);
                             poJSON = invRequestController.searchTransaction();
@@ -1358,7 +1423,7 @@ public class InvRequest_ConfirmationControllerMonarch_Food implements Initializa
     }
 
     private void initTextFieldFocus() {
-        List<TextField> loTxtField = Arrays.asList(tfReferenceNo, tfOrderQuantity, tfSearchReferenceNo, tfSourceNo);
+        List<TextField> loTxtField = Arrays.asList(tfOrderQuantity, tfSearchReferenceNo, tfSourceNo); //tfReferenceNo, 
         loTxtField.forEach(tf -> tf.focusedProperty().addListener(txtField_Focus));
 
     }
