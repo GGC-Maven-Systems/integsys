@@ -200,7 +200,7 @@
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="10.0" minWidth="10.0" prefWidth="10.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="90.0" minWidth="-Infinity" prefWidth="90.0" />
                                                       <ColumnConstraints hgrow="NEVER" maxWidth="10.0" minWidth="10.0" prefWidth="10.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="175.0" minWidth="-Infinity" prefWidth="175.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="10.0" minWidth="10.0" prefWidth="10.0" />
@@ -255,7 +255,7 @@
                                                       <TextField fx:id="tfCancelQty" alignment="CENTER_RIGHT" text="0" GridPane.columnIndex="16" GridPane.rowIndex="5" />
                                                       <Text layoutX="29.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Remarks" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                       <TextArea fx:id="taRemarks" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.columnSpan="7" GridPane.rowIndex="2" />
-                                                      <Text layoutX="55.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Source No" GridPane.columnIndex="10" GridPane.rowIndex="1" />
+                                                      <Text layoutX="55.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Refer No." GridPane.columnIndex="10" GridPane.rowIndex="1" />
                                                       <TextField fx:id="tfSourceNo" editable="false" layoutX="110.0" layoutY="21.0" GridPane.columnIndex="12" GridPane.rowIndex="1" />
                                                    </children>
                                                 </GridPane>
