@@ -10,8 +10,6 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,8 +53,8 @@ import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
 
 /**
@@ -98,9 +96,9 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnHistory, btnClose;
+    private Button btnAddClient, btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
     @FXML
-    private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfInquiryStatus, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfCategory, tfDescription, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice;
+    private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfCategory, tfDescription, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice;
     @FXML
     private DatePicker dpTransactionDate, dpTargetDate;
     @FXML
@@ -210,6 +208,36 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
 
                         break;
+                    case "btnAddClient":
+                        if(pnEditMode == EditMode.ADDNEW){
+                            if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                    poSalesInquiryController.SalesInquiry().Master().setClientId("");
+                                    poSalesInquiryController.SalesInquiry().removeDetails();
+                                    loadTableDetail.reload();
+                                } else {
+                                    return;
+                                }
+                            }
+                            try {
+                                poJSON = poSalesInquiryController.SalesInquiry().addClient();
+                            } catch (Exception ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                return;
+                            }
+                            
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            }
+                            
+                            loadRecordMaster();
+                        } else {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Adding for new client must be during new entry of sales inquiry.");
+                        }
+                        return;
                     case "btnUpdate":
                         poJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
                         poJSON = poSalesInquiryController.SalesInquiry().UpdateTransaction();
@@ -240,6 +268,21 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             return;
                         }
                     case "btnHistory":
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+
+                        try {
+                            poSalesInquiryController.SalesInquiry().ShowStatusHistory();
+                            return;
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
                         break;
                     case "btnSave":
                         //Validator
@@ -269,7 +312,30 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                                 }
 
                                 btnNew.fire();
+                            }
+                        } else {
+                            return;
+                        }
+                        break;
+                    case "btnVoid":
+                        poJSON = new JSONObject();
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void transaction?") == true) {
+                            poJSON = poSalesInquiryController.SalesInquiry().VoidTransaction("");
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            } else {
+                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                //Clear data
+                                poSalesInquiryController.SalesInquiry().resetMaster();
+                                poSalesInquiryController.SalesInquiry().Detail().clear();
+                                clearTextFields();
 
+                                poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
+                                poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
+                                poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
+                                //                            poSalesInquiryController.SalesInquiry().initFields();
+                                pnEditMode = EditMode.UNKNOWN;
                             }
                         } else {
                             return;
@@ -292,40 +358,21 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                         tfBarcode.requestFocus();
                     }
                 }
-
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     public void loadRecordMaster() {
-
         boolean lbDisable = pnEditMode == EditMode.ADDNEW;
         JFXUtil.setDisabled(!lbDisable, tfClient, cmbClientType);
 
         try {
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(SalesInquiryStatic.QUOTED, "QUOTED");
-                statusMap.put(SalesInquiryStatic.SALE, "SALE");
-                statusMap.put(SalesInquiryStatic.CONFIRMED, "CONFIRMED");
-                statusMap.put(SalesInquiryStatic.OPEN, "OPEN");
-                statusMap.put(SalesInquiryStatic.VOID, "VOIDED");
-                statusMap.put(SalesInquiryStatic.CANCELLED, "CANCELLED");
-                statusMap.put(SalesInquiryStatic.LOST, "LOST");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblStatus.setText(lsStat);
-
-                switch (poSalesInquiryController.SalesInquiry().Master().getInquiryStatus()) {
-                    case "0":
-                        tfInquiryStatus.setText("OPEN");
-                        break;
-                    default:
-                        tfInquiryStatus.setText("");
-                        break;
-                }
+                lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
             });
 
             // Transaction Date
@@ -347,18 +394,15 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
 
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
-
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
 //
                 } else {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType()));
                 }
             } else {
-
                 cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
             }
@@ -366,8 +410,8 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -395,6 +439,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -437,7 +482,6 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -534,6 +578,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -674,7 +719,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                                         if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getStockId(), null, "")) {
                                             if (!pbKeyPressed) {
                                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                        "Are you sure you want to change the supplier name?\nPlease note that doing so will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -696,7 +741,6 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
                         }
                         break;
-
                 }
 
                 loadRecordMaster();
@@ -722,10 +766,9 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             } else {
                 tfCategory.requestFocus();
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -776,7 +819,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                                 if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().removeDetails();
                                         loadTableDetail.reload();
                                     } else {
@@ -928,6 +971,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -983,7 +1027,6 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
                             loadRecordMaster();
                             pbSuccess = true; //Set to original value
-
                         }
                         break;
                     default:
@@ -992,6 +1035,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
     final EventHandler<ActionEvent> comboBoxActionListener = event -> {
@@ -1009,7 +1053,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
                                 if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getStockId(), null, "")) {
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                         poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                         poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -1042,7 +1086,6 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
     };
 
     private void initComboBoxes() {
-
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType)
         );
@@ -1056,7 +1099,6 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
     }
 
     public void initTextFields() {
-
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfSalesPerson, tfReferralAgent, tfInquiryType);
         JFXUtil.setFocusListener(txtDetail_Focus, tfCategory, tfBrand, tfBarcode, tfDescription, tfModel, tfColor);
@@ -1072,9 +1114,10 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
         dragLock.isEnabled = lbShow;
 
         // Manage visibility and managed state of other buttons
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW , btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail);
@@ -1085,7 +1128,8 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             case SalesInquiryStatic.LOST:
             case SalesInquiryStatic.VOID:
             case SalesInquiryStatic.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+            case SalesInquiryStatic.CONFIRMED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
         }
     }
@@ -1104,6 +1148,7 @@ public class SalesInquiry_EntryAppliancesController implements Initializable, Sc
             lblSource.setText(poSalesInquiryController.SalesInquiry().Master().Company().getCompanyName() + " - " + poSalesInquiryController.SalesInquiry().Master().Industry().getDescription());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 

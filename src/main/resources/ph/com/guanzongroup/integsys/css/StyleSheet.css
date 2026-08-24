@@ -331,6 +331,111 @@
     -fx-background-color: white;
 }
 
+/* =========================================================================
+   JFXTimePicker Main Field & Action Button
+   ========================================================================= */
+
+/* Matches your .date-picker .arrow-button styling */
+.jfx-time-picker .jfx-time-picker-button {
+    -fx-background-color: -fx-primary-color;
+    -fx-background-radius: 0;
+}
+
+/* Matches your .date-picker .arrow-button:hover */
+.jfx-time-picker .jfx-time-picker-button:hover {
+    -fx-background-color: gray;
+}
+
+/* Matches your .date-picker .arrow-button .arrow styling for the icon fill */
+.jfx-time-picker .jfx-time-picker-button .jfx-svg-glyph {
+    -fx-background-color: white;
+    -fx-fill: white;
+}
+
+/* Matches your disabled text-field styling */
+.jfx-time-picker:disabled > .text-field {
+    -fx-border-color: gray;
+    -fx-background-color: #EEEEEE;
+    -fx-border-radius: 3 0 0 3;
+    -fx-border-width: 1 0 1 1;
+}
+
+
+/* =========================================================================
+   JFXTimePicker Popup & Header Layout
+   ========================================================================= */
+
+/* Matches your .date-picker-popup container border preference */
+.jfx-time-picker-content {
+    -fx-border-color: transparent;
+    -fx-background-color: white;
+}
+
+/* Matches your .month-year-pane header container */
+.jfx-time-picker-content .time-header {
+    -fx-background-color: -fx-primary-color;
+}
+
+/* Matches your .month-year-pane .label styling for header text */
+.jfx-time-picker-content .time-header .label,
+.jfx-time-picker-content .time-header .button {
+    -fx-text-fill: white;
+}
+
+
+/* =========================================================================
+   Clock Dial & Digit Selector Cells
+   ========================================================================= */
+
+/* Center selection circle indicator */
+.jfx-time-picker-content .jfx-clock-face .clock-pointer-circle {
+    -fx-background-color: -fx-primary-color;
+    -fx-fill: -fx-primary-color;
+}
+
+/* Clock hand line indicator */
+.jfx-time-picker-content .jfx-clock-face .clock-pointer-line {
+    -fx-stroke: -fx-primary-color;
+}
+
+/* Inactive, default digital cells (Matches your .cell selector) */
+.jfx-time-picker-content .jfx-clock-face .cell {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
+/* Inactive digital cell hover state (Matches your .cell:hover selector) */
+.jfx-time-picker-content .jfx-clock-face .cell:hover {
+    -fx-background-color: -fx-light-grey-color;
+}
+
+/* Selected active digit cell container (Matches your .selected selector) */
+.jfx-time-picker-content .jfx-clock-face .cell.selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+/* Focused active cell state overrides (Matches your .selected:focused selector) */
+.jfx-time-picker-content .jfx-clock-face .cell.selected:focused {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+
+/* =========================================================================
+   Popup Bottom Control Action Buttons
+   ========================================================================= */
+
+/* Stylizes bottom action buttons like "OK" or "Cancel" to match selections */
+.jfx-time-picker-content .jfx-time-picker-buttons-container .button {
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-weight: bold;
+}
+
+.jfx-time-picker-content .jfx-time-picker-buttons-container .button:hover {
+    -fx-background-color: -fx-light-grey-color;
+}
+
 /* BUTTON BODY CSS END */
 
 /*******************************************************************************

@@ -130,6 +130,7 @@ public class OtherPaymentStatusByBatchController implements Initializable, Scree
             initButtons();
             initLoadTable();
             initCheckboxes();
+            pagination.setPageCount(1);
             Platform.runLater(() -> {
                 poController.setTransactionStatus(OtherPaymentStatus.OPEN);
                 poController.setIndustryID(psIndustryId);
@@ -306,7 +307,9 @@ public class OtherPaymentStatusByBatchController implements Initializable, Scree
                     }
                 });
             } else {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                if (tfSearchIndustry.getText().isEmpty()) {
+                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                }
             }
             loadTableMain.reload();
         } catch (SQLException | GuanzonException ex) {

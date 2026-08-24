@@ -179,7 +179,7 @@ public class POQRequestReportController implements Initializable, ScreenInterfac
         tblTotal.setVisible(!lbShow);
         tblRow.setVisible(!lbShow);
         tblItem.setVisible(!lbShow);
-        loadTableMain.reload();
+//        loadTableMain.reload();
 //        } catch (SQLException | GuanzonException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

@@ -326,7 +326,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                                 JSONObject loJSON = poController.PurchaseOrderReturn().OpenTransaction(poController.PurchaseOrderReturn().Master().getTransactionNo());
                                 if ("success".equals(loJSON.get("result"))) {
                                     if (poController.PurchaseOrderReturn().Master().getTransactionStatus().equals(PurchaseOrderReturnStatus.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                                             loJSON = poController.PurchaseOrderReturn().ConfirmTransaction("Confirmed");
                                             if ("success".equals((String) loJSON.get("result"))) {
                                                 ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
@@ -347,7 +347,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                         break;
                     case "btnPost":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please review and verify all Journal Entry details before posting the transaction.");
                                 return;
@@ -456,7 +456,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                     if (tfFreightDetail.isFocused()) {
                         pbEntered = true;
                     }
-                    if (tfDebitAmt.isFocused()) {
+                    if (tfCreditAmt.isFocused()) {
                         pbEnteredJE = true;
                     }
                     CommonUtils.SetNextFocus(txtField);
@@ -497,7 +497,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail.reload();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poController.PurchaseOrderReturn().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poController.PurchaseOrderReturn().Master().getIndustryId(), null);
@@ -513,7 +513,7 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail.reload();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;
@@ -1110,6 +1110,16 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                                 return;
                             }
                         }
+                        if (pbEnteredJE) {
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                loadTableJEDetail.reload();
+                                JFXUtil.runWithDelay(0.50, () -> {
+                                    moveNextJE(false, true);
+                                    pbEnteredJE = false;
+                                });
+                            });
+
+                        }
                         break;
                     case "tfDebitAmt":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -1129,19 +1139,10 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                                 });
                                 return;
                             } else {
-
+                                JFXUtil.textFieldMoveNext(tfCreditAmt);
                             }
                         }
-                        if (pbEnteredJE) {
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                loadTableJEDetail.reload();
-                                JFXUtil.runWithDelay(0.50, () -> {
-                                    moveNextJE(false, true);
-                                    pbEnteredJE = false;
-                                });
-                            });
 
-                        }
                         break;
                 }
                 JFXUtil.runWithDelay(0.50, () -> {
@@ -1291,8 +1292,8 @@ public class POReturnPosting_LPController implements Initializable, ScreenInterf
                     break;
                 case "tblViewJEDetails":
                     if (!JEdetails_data.isEmpty()) {
-                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07()) : 
-                                Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        pnJEDetail = isMovedDown ? Integer.parseInt(JEdetails_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                                : Integer.parseInt(JEdetails_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                         loadRecordJEDetail();
                     }
                     break;

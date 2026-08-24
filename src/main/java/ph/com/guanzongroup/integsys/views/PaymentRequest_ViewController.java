@@ -191,7 +191,7 @@ public class PaymentRequest_ViewController implements Initializable {
             tfAdvances.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().PurchaseOrder().getAmountPaid(), true));
             tfSourceNo.setText(poController.Master().getSourceNo());
 
-            tfSourceTranTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().PurchaseOrder().getTranTotal(), true));
+            tfSourceTranTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Master().PurchaseOrder().getNetTotal(), true));
         } catch (SQLException | GuanzonException | NullPointerException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }

@@ -88,7 +88,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
     private int pnEditMode;
 
     @FXML
-    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo, tfReferenceNo,
+    private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo,
             tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription;
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail,
@@ -96,7 +96,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
             tblOrderQuantityDetail;
     @FXML
     private TextField tfBrand, tfModel, tfInvType,
-            tfVariant, tfColor, tfROQ, tfClassification, tfQOH;
+            tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfSourceNo;
     @FXML
     private Button btnBrowse, btnRetrieve, btnClose, btnTransHistory, btnPrint;
     @FXML
@@ -186,7 +186,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
     private void clearDetailFields() {
         /* Detail Fields*/
         CustomCommonUtil.setText("", tfBrand, tfModel,
-                tfColor, tfReservationQTY,tfCancelledQTY, tfQOH, tfInvType, tfVariant, tfROQ, tfClassification);
+                tfColor, tfReservationQTY, tfCancelledQTY, tfQOH, tfInvType, tfVariant, tfROQ, tfClassification);
         CustomCommonUtil.setText("0", tfOrderQuantity);
     }
 
@@ -567,10 +567,10 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
             ));
 
             initDatePickerActions();
-            tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
+            //tfReferenceNo.setText(invRequestController.Master().getReferenceNo());
 
             taRemarks.setText(invRequestController.Master().getRemarks());
-
+            tfSourceNo.setText(invRequestController.Master().getReferenceNo());
         } catch (SQLException | GuanzonException e) {
             ShowMessageFX.Error(getStage(), e.getMessage(), "Error", psFormName);
 //            System.exit(1);
@@ -773,7 +773,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
                 }
                 LocalDate dateNow = LocalDate.now();
                 psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
-                String lsReferNo = tfReferenceNo.getText().trim();
+                String lsReferNo = tfSourceNo.getText().trim();
                 boolean approved = true;
                 if (pnEditMode == EditMode.UPDATE) {
                     psOldDate = CustomCommonUtil.formatLocalDateToShortString(transactionDate);
@@ -786,7 +786,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
                         ShowMessageFX.Warning("Invalid to backdate. Please enter a reference number first.", psFormName, null);
                         approved = false;
                     }
-                    if (selectedLocalDate.isBefore(transactionDate) && !lsReferNo.isEmpty()) {
+                    if (selectedLocalDate.isBefore(transactionDate)) {//&& !lsReferNo.isEmpty()
                         boolean proceed = ShowMessageFX.YesNo(
                                 "You are changing the transaction date\n"
                                 + "If YES, seek approval to proceed with the changed date.\n"
@@ -823,6 +823,7 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
                                 + "If NO, the transaction date will be reset to today.",
                                 "Backdate Confirmation", null
                         );
+
                         if (proceed) {
                             if (poApp.getUserLevel() <= UserRight.ENCODER) {
                                 poJSON = ShowDialogFX.getUserApproval(poApp);
@@ -862,16 +863,16 @@ public class InvRequest_HistoryControllerAppliances implements Initializable, Sc
         boolean lbShow = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
         /*Master Fields */
         CustomCommonUtil.setDisable(!lbShow,
-                dpTransactionDate, tfTransactionNo, taRemarks,
-                tfReferenceNo);
+                dpTransactionDate, tfTransactionNo, taRemarks
+        ); //tfReferenceNo
         CustomCommonUtil.setDisable(!lbShow,
                 tfOrderQuantity);
         CustomCommonUtil.setDisable(true,
-                tfInvType, tfVariant, tfColor, tfReservationQTY,tfCancelledQTY,
+                tfInvType, tfVariant, tfColor, tfReservationQTY, tfCancelledQTY,
                 tfQOH, tfROQ, tfClassification, tfModel, tfBrand, tfDescription, tfBarCode);
-        if (!tfReferenceNo.getText().isEmpty()) {
-            dpTransactionDate.setDisable(!lbShow);
-        }
+//        if (!tfReferenceNo.getText().isEmpty()) {
+//            dpTransactionDate.setDisable(!lbShow);
+//        }
 
     }
 

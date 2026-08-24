@@ -341,7 +341,7 @@ public class CheckRelease_EntryController implements Initializable, ScreenInterf
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
                      pnEditMode = poGLControllers.CheckReleases().getEditMode();
-                        if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm this transaction?")) {
+//                        if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm this transaction?")) { //Removed prompt for confirmation Upon saving entry must be automatically confirmed - Arsiela 08-04-2026
                                 poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
                                 poJSON = poGLControllers.CheckReleases().ConfirmTransaction("");
                           
@@ -352,9 +352,9 @@ public class CheckRelease_EntryController implements Initializable, ScreenInterf
                                 initButtons(pnEditMode);
                                 return;
                             }
-                            ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
+//                            ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
                             poJSON = poGLControllers.CheckReleases().OpenTransaction(poGLControllers.CheckReleases().Master().getTransactionNo());
-                        }
+//                        }
                     /*This Block of Codes was disabled
                     * @Purpose : See Change br workshhet (Check Release - for clarification pa ang process kay sir rex)
                      * @Link    : https://docs.google.com/spreadsheets/d/13RYvX0UCRnsGeg9hozSY_EQyS128eBze/edit?gid=1782002725#gid=1782002725

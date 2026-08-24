@@ -207,7 +207,7 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
             loadRecordSearch();
 
             poPurchaseReceivingController.PurchaseOrderReceiving().setForm(PurchaseOrderReceivingStatus.CONFIRMED_I);
-          poPurchaseReceivingController.PurchaseOrderReceiving().setTransactionStatus(PurchaseOrderReceivingStatus.CONFIRMED+PurchaseOrderReceivingStatus.RETURNED_I);
+            poPurchaseReceivingController.PurchaseOrderReceiving().setTransactionStatus(PurchaseOrderReceivingStatus.CONFIRMED + PurchaseOrderReceivingStatus.RETURNED_I);
             TriggerWindowEvent();
         });
 
@@ -625,7 +625,7 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -931,6 +931,16 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -950,19 +960,10 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1157,7 +1158,7 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poPurchaseReceivingController.PurchaseOrderReceiving().Master().getIndustryId(), null);
@@ -1173,7 +1174,7 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;
@@ -1257,12 +1258,12 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                                 poJSON.put("message", "Future dates are not allowed.");
                                 pbSuccess = false;
                             }
-
-                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
-                                poJSON.put("result", "error");
-                                poJSON.put("message", "SI date cannot be later than the receiving date.");
-                                pbSuccess = false;
-                            }
+//Disable by Arsiela 08-07-2026 03:23PM Requested by ma'am she
+//                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
+//                                poJSON.put("result", "error");
+//                                poJSON.put("message", "SI date cannot be later than the receiving date.");
+//                                pbSuccess = false;
+//                            }
 
                             if (pbSuccess) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Master().setSalesInvoiceDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
@@ -1323,13 +1324,13 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                         for (int lnCtr = 0; lnCtr <= poPurchaseReceivingController.PurchaseOrderReceiving().getPurchaseOrderReceivingCount() - 1; lnCtr++) {
                             try {
 
-                            main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
-                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
-                                    poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
-                            ));
+                                main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
+                                        String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
+                                        poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
+                                ));
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1728,6 +1729,8 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
             Platform.runLater(() -> {
                 loadTableAttachment();
             });
+            pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
+            initButton(pnEditMode);
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1753,7 +1756,7 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                     try {
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             String lsExistJournal = poPurchaseReceivingController.PurchaseOrderReceiving().existJournal();
-                            if(lsExistJournal == null
+                            if (lsExistJournal == null
                                     || "".equals(lsExistJournal)) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Journal().ReloadDetail();
                             }
@@ -2154,8 +2157,6 @@ public class SIPosting_ConfirmationAppliancesController implements Initializable
                 if (event.getClickCount() == 2) {
                     tfOrderNo.setText("");
                     loadTableDetailFromMain();
-                    pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
-                    initButton(pnEditMode);
                 }
             }
         });

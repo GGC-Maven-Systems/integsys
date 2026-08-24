@@ -547,7 +547,7 @@ public class CheckDepositInterBranch_ConfirmationController implements Initializ
                     loadTableMain.reload();
                     break;
                 case "btnApprove":
-                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to confirm transaction?")) {
+                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to confirm transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.")) {
                         pnEditMode = poController.getEditMode();
                         if (pnEditMode == EditMode.READY) {
                             if (!poController.existJournal().equals("")) {
@@ -658,7 +658,7 @@ public class CheckDepositInterBranch_ConfirmationController implements Initializ
                             try ( PDDocument document = PDDocument.load(selectedFile)) {
                                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                                 int pageCount = document.getNumberOfPages();
-                                if (pageCount > 5) {
+                                if (pageCount > 20) {
                                     ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
                                     return;
                                 }
@@ -1579,14 +1579,14 @@ public class CheckDepositInterBranch_ConfirmationController implements Initializ
                     case UP:
                         JFXUtil.altSwitch(txtFieldID, new Object[][]{
                             {new String[]{"tfCheckTransNo", "tfNote", "tfCheckNo"}, (Runnable) () -> moveNext(true, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(true, true)}
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(true, true)}
                         });
                         event.consume();
                         break;
                     case DOWN:
                         JFXUtil.altSwitch(txtFieldID, new Object[][]{
                             {new String[]{"tfCheckTransNo", "tfNote", "tfCheckNo"}, (Runnable) () -> moveNext(false, true)},
-                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfCreditAmount"}, (Runnable) () -> moveNextJE(false, true)}
+                            {new String[]{"tfAccountCode", "tfAccountDescription", "tfDebitAmount"}, (Runnable) () -> moveNextJE(false, true)}
                         });
                         event.consume();
                         break;
@@ -1728,7 +1728,7 @@ public class CheckDepositInterBranch_ConfirmationController implements Initializ
                 {poController.Journal().Detail(pnDetailJE).getAccountCode(), tfAccountCode},
                 {poController.Journal().Detail(pnDetailJE).Account_Chart().getDescription(), tfAccountDescription}, // if null or empty, then requesting focus to the txtfield
                 {poController.Journal().Detail(pnDetailJE).getDebitAmount(), tfDebitAmount},
-                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfCreditAmount); // default
+                {poController.Journal().Detail(pnDetailJE).getCreditAmount(), tfCreditAmount},}, tfDebitAmount); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

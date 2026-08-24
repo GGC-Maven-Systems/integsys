@@ -26,7 +26,7 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelResultSet;
 
 public class SalesInquirySourceController implements Initializable, ScreenInterface {

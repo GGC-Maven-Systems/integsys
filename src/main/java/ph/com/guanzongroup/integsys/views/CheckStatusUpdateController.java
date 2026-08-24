@@ -376,8 +376,17 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
             initButton(pnEditMode);
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException | ScriptException ex) {
             Logger.getLogger(CheckStatusUpdateController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(CheckStatusUpdateController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+            try {
+                if (oApp != null) {
+
+                    oApp.rollbackTrans(); // 🔥 force rollback
+                }
+            } catch (SQLException ex1) {
+                Logger.getLogger(ProjectController.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -527,16 +536,16 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
 
     private void loadRecordMasterCheck() {
         try {
-            tfBankName.setText(poCheckStatusUpdateController.CheckPayments().getModel().Banks().getBankName() != null ? poCheckStatusUpdateController.CheckPayments().getModel().Banks().getBankName() : "");
-            tfBankAccount.setText(poCheckStatusUpdateController.CheckPayments().getModel().getBankAcountID() != null ? poCheckStatusUpdateController.CheckPayments().getModel().getBankAcountID() : "");
+            tfBankName.setText(poCheckStatusUpdateController.Master().CheckPayments().Banks().getBankName() != null ? poCheckStatusUpdateController.Master().CheckPayments().Banks().getBankName() : "");
+            tfBankAccount.setText(poCheckStatusUpdateController.Master().CheckPayments().getBankAcountID() != null ? poCheckStatusUpdateController.Master().CheckPayments().getBankAcountID() : "");
             tfPayeeName.setText(poCheckStatusUpdateController.Master().CheckPayments().Payee().getPayeeName() != null ? poCheckStatusUpdateController.Master().CheckPayments().Payee().getPayeeName() : "");
             tfCheckNo.setText(poCheckStatusUpdateController.Master().CheckPayments().getCheckNo());
-            dpCheckDate.setValue(poCheckStatusUpdateController.CheckPayments().getModel().getCheckDate() != null
-                    ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poCheckStatusUpdateController.CheckPayments().getModel().getCheckDate(), SQLUtil.FORMAT_SHORT_DATE))
+            dpCheckDate.setValue(poCheckStatusUpdateController.Master().CheckPayments().getCheckDate() != null
+                    ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poCheckStatusUpdateController.Master().CheckPayments().getCheckDate(), SQLUtil.FORMAT_SHORT_DATE))
                     : null);
-            tfCheckAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poCheckStatusUpdateController.CheckPayments().getModel().getAmount(), true));
+            tfCheckAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poCheckStatusUpdateController.Master().CheckPayments().getAmount(), true));
             int selectedItem = -1;
-            switch (poCheckStatusUpdateController.CheckPayments().getModel().getTransactionStatus()) {
+            switch (poCheckStatusUpdateController.Master().CheckPayments().getTransactionStatus()) {
                 case "1": //OPEN
                     selectedItem = 0;
                     break;
@@ -569,7 +578,7 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
 //                            : null);
                     break;
             }
-            taRemarks.setText(poCheckStatusUpdateController.CheckPayments().getModel().getRemarks());
+            taRemarks.setText(poCheckStatusUpdateController.Master().CheckPayments().getRemarks());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(CheckStatusUpdateController.class
                     .getName()).log(Level.SEVERE, null, ex);

@@ -19,10 +19,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
@@ -91,6 +88,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
@@ -147,7 +145,7 @@ import static ph.com.guanzongroup.integsys.GUI.oApp;
 import ph.com.guanzongroup.integsys.views.ScreenInterface;
 
 /**
- * Date : 4/28/2025 Recent update: 06/03/2026
+ * Date : 4/28/2025 Recent update: 07/24/2026
  *
  * @author Aldrich
  */
@@ -964,6 +962,34 @@ public class JFXUtil {
                 combo.setOnAction(savedHandler);
             } else if (node instanceof Parent) {
                 clearTextInputsRecursive((Parent) node);
+            }
+        }
+    }
+
+    public static void clearNodes(Node... nodes) {
+        for (Node node : nodes) {
+            if (node == null) {
+                continue;
+            }
+
+            if (node instanceof TextInputControl) {
+                ((TextInputControl) node).clear();
+
+            } else if (node instanceof ComboBox) {
+                ((ComboBox<?>) node).getSelectionModel().clearSelection();
+                ((ComboBox<?>) node).setValue(null);
+
+            } else if (node instanceof DatePicker) {
+                ((DatePicker) node).setValue(null);
+
+            } else if (node instanceof CheckBox) {
+                ((CheckBox) node).setSelected(false);
+
+            } else if (node instanceof RadioButton) {
+                ((RadioButton) node).setSelected(false);
+
+            } else if (node instanceof Label) {
+                ((Label) node).setText("");
             }
         }
     }
@@ -1853,7 +1879,7 @@ public class JFXUtil {
         }
     }
 
-    /*Alternative version of inputDecimalOnly;*/
+    /*Alternative version of inputIntegersOnly;*/
  /* call once */
     public static void inputIntegersOnly(TextField... foTxtFields) {
         Pattern pattern = Pattern.compile("[0-9]*");
@@ -2190,6 +2216,66 @@ public class JFXUtil {
         );
 
         timeline.play();
+    }
+
+    public static void applyButtonHoverFade(Button button, String colorHex) {
+        if (button == null) {
+            return;
+        }
+
+        final String baseStyle = (button.getStyle() == null || button.getStyle().trim().isEmpty())
+                ? ""
+                : button.getStyle().trim() + (button.getStyle().trim().endsWith(";") ? "" : ";");
+        final Color accent = Color.web(colorHex);
+        final int red = (int) Math.round(accent.getRed() * 255);
+        final int green = (int) Math.round(accent.getGreen() * 255);
+        final int blue = (int) Math.round(accent.getBlue() * 255);
+        final DoubleProperty backgroundOpacity = new SimpleDoubleProperty(1.0);
+        final AtomicReference<Timeline> activeAnimation = new AtomicReference<>();
+        final int fadeMillis = 100;
+
+        ChangeListener<Number> styleUpdater = (obs, oldVal, newVal) -> {
+            boolean isTransparent = backgroundOpacity.get() < 0.999;
+            button.setStyle(baseStyle + String.format(Locale.US,
+                    " -fx-background-color: rgba(%d,%d,%d,%.3f); -fx-text-fill: %s;",
+                    red,
+                    green,
+                    blue,
+                    backgroundOpacity.get(),
+                    isTransparent ? String.format(Locale.US, "rgba(%d,%d,%d,1.000)", red, green, blue) : "rgba(255,255,255,1.000)"
+            ));
+        };
+        backgroundOpacity.addListener(styleUpdater);
+        styleUpdater.changed(null, null, null);
+
+        EventHandler<? super MouseEvent> previousOnMouseEntered = button.getOnMouseEntered();
+        EventHandler<? super MouseEvent> previousOnMouseExited = button.getOnMouseExited();
+
+        button.setOnMouseEntered(event -> {
+            if (previousOnMouseEntered != null) {
+                previousOnMouseEntered.handle(event);
+            }
+            Timeline timeline = activeAnimation.getAndSet(new Timeline(
+                    new KeyFrame(Duration.millis(fadeMillis), new KeyValue(backgroundOpacity, 0.0))
+            ));
+            if (timeline != null) {
+                timeline.stop();
+            }
+            activeAnimation.get().play();
+        });
+
+        button.setOnMouseExited(event -> {
+            if (previousOnMouseExited != null) {
+                previousOnMouseExited.handle(event);
+            }
+            Timeline timeline = activeAnimation.getAndSet(new Timeline(
+                    new KeyFrame(Duration.millis(fadeMillis), new KeyValue(backgroundOpacity, 1.0))
+            ));
+            if (timeline != null) {
+                timeline.stop();
+            }
+            activeAnimation.get().play();
+        });
     }
 
     /*Used in Dashboard*/
@@ -2695,6 +2781,16 @@ public class JFXUtil {
             BooleanProperty disableAll,
             TriConsumer<T, Integer, Integer, Boolean> onChange,
             int... columnIndexes) {
+        addCheckboxColumns(modelClass, table, disableAll, onChange, null, columnIndexes);
+    }
+
+    public static <T> void addCheckboxColumns(
+            Class<T> modelClass,
+            TableView<T> table,
+            BooleanProperty disableAll,
+            TriConsumer<T, Integer, Integer, Boolean> onChange,
+            TriConsumer3<T, Integer, Integer> onDisabledClick,
+            int... columnIndexes) {
 
         for (int colIndex : columnIndexes) {
             @SuppressWarnings("unchecked")
@@ -2763,6 +2859,29 @@ public class JFXUtil {
                                     }
                                 }
                             });
+
+                            // Capture clicks while disabled so caller can react with row/column context.
+                            setOnMouseClicked(evt -> {
+                                if (!disableAll.get()) {
+                                    return;
+                                }
+
+                                if (onDisabledClick == null) {
+                                    return;
+                                }
+
+                                if (getTableRow() == null || getTableRow().getItem() == null) {
+                                    return;
+                                }
+
+                                @SuppressWarnings("unchecked")
+                                T row = (T) getTableRow().getItem();
+                                int rowIndex = getTableRow().getIndex();
+
+                                onDisabledClick.accept(row, rowIndex, finalColIndex);
+
+                                evt.consume();
+                            });
                         }
 
                         @Override
@@ -2785,6 +2904,12 @@ public class JFXUtil {
     public interface TriConsumer<T, U, V, W> {
 
         void accept(T t, U u, V v, W w);
+    }
+
+    @FunctionalInterface
+    public interface TriConsumer3<T, U, V> {
+
+        void accept(T t, U u, V v);
     }
 
     /*Programmatically clicks particular tab based on its title*/
@@ -3673,7 +3798,7 @@ public class JFXUtil {
         });
     }
     /*Reserved values for cmdButton purposes*/
-    public static String[] buttonPackArray1 = {"btnSave", "btnCancel", "btnApprove", "btnDisapprove", "btnVoid", "btnConfirm", "btnPost"};
+    public static String[] buttonPackArray1 = {"btnSave", "btnCancel", "btnApprove", "btnDisapprove", "btnVoid", "btnConfirm", "btnPost", "btnActivate", "btnDeactivate"};
     public static String[] buttonPackArray2 = {"btnRetrieve", "btnSearch", "btnUndo", "btnArrowRight", "btnArrowLeft", "btnHistory", "btnPrint", "btnRemoveAttachment", "btnAddAttachment"};
 
     /*Detects if a string is pure number*/
@@ -3738,7 +3863,7 @@ public class JFXUtil {
         return calendar.getTime();
     }
 
-    //For combobox two basis value
+    //For combobox when basis value are two
     public static class Status {
 
         private final String code;
@@ -3760,6 +3885,51 @@ public class JFXUtil {
         @Override
         public String toString() {
             return description; // what ComboBox displays
+        }
+    }
+
+    public static String formatDateToString(Date foDateValue) {
+        if (foDateValue == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(foDateValue);
+    }
+
+    public static String formatTimeToString(Date foDateValue) {
+        if (foDateValue == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+        return sdf.format(foDateValue);
+    }
+
+    public static boolean areAllDisabled(Node... nodes) {
+        if (nodes == null || nodes.length == 0) {
+            return false;
+        }
+        for (Node node : nodes) {
+            if (node == null || !node.isDisable()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void setNextBusinessDate(DatePicker... datePickers) {
+
+        LocalDate nextDate = LocalDate.now().plusDays(1);
+
+        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY) {
+            nextDate = LocalDate.now().plusDays(2); // Monday
+        } else if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            nextDate = LocalDate.now().plusDays(1); // Monday
+        }
+
+        for (DatePicker datePicker : datePickers) {
+            datePicker.setValue(nextDate);
         }
     }
 }

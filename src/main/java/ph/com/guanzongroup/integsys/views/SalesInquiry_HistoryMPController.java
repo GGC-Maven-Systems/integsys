@@ -9,8 +9,6 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,8 +46,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 
 /**
  *
@@ -81,7 +78,7 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
     @FXML
     private Button btnBrowse, btnHistory, btnClose;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfInquiryType, tfClient, tfAddress, tfInquiryStatus, tfContactNo,
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfInquiryType, tfClient, tfAddress, tfContactNo,
             tfBrand, tfModel, tfColor, tfBarcode, tfDescription, tfCategory, tfModelVariant, tfSellingPrice, tfReferralAgent;
     @FXML
     private TextArea taRemarks;
@@ -113,7 +110,7 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
         initDetailsGrid();
         initTableOnClick();
         clearTextFields();
-        pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
+        pnEditMode = EditMode.UNKNOWN;
         initButton(pnEditMode);
 
         Platform.runLater(() -> {
@@ -176,6 +173,21 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                         }
                         break;
                     case "btnHistory":
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+
+                        try {
+                            poSalesInquiryController.SalesInquiry().ShowStatusHistory();
+                            return;
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -191,8 +203,8 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                 initButton(pnEditMode);
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-
         }
     }
 
@@ -200,25 +212,7 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
         try {
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(SalesInquiryStatic.QUOTED, "QUOTED");
-                statusMap.put(SalesInquiryStatic.SALE, "SALE");
-                statusMap.put(SalesInquiryStatic.CONFIRMED, "CONFIRMED");
-                statusMap.put(SalesInquiryStatic.OPEN, "OPEN");
-                statusMap.put(SalesInquiryStatic.VOID, "VOIDED");
-                statusMap.put(SalesInquiryStatic.CANCELLED, "CANCELLED");
-                statusMap.put(SalesInquiryStatic.LOST, "LOST");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblStatus.setText(lsStat);
-
-                switch (poSalesInquiryController.SalesInquiry().Master().getInquiryStatus()) {
-                    case "0":
-                        tfInquiryStatus.setText("OPEN");
-                        break;
-                    default:
-                        tfInquiryStatus.setText("");
-                        break;
-                }
+                lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
             });
 
             // Transaction Date
@@ -245,8 +239,8 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -266,6 +260,7 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -318,7 +313,6 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -330,12 +324,11 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                                 String lsModelVariant = "";
                                 String lsColor = "";
                                 String lsDescription = "";
-                                if (poSalesInquiryController.SalesInquiry().Detail(lnCtr).getStockId() != null 
-                                    && !"".equals(poSalesInquiryController.SalesInquiry().Detail(lnCtr).getStockId())) {
+                                if (poSalesInquiryController.SalesInquiry().Detail(lnCtr).getStockId() != null
+                                        && !"".equals(poSalesInquiryController.SalesInquiry().Detail(lnCtr).getStockId())) {
                                     lsBarcode = poSalesInquiryController.SalesInquiry().Detail(lnCtr).Inventory().getBarCode();
                                     //lsDescription = poSalesInquiryController.SalesInquiry().Detail(lnCtr).Inventory().getDescription();
                                 }
-                                
                                 if (poSalesInquiryController.SalesInquiry().Detail(lnCtr).Brand().getDescription() != null) {
                                     lsBrand = poSalesInquiryController.SalesInquiry().Detail(lnCtr).Brand().getDescription();
                                 }
@@ -348,12 +341,10 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                                 if (poSalesInquiryController.SalesInquiry().Detail(lnCtr).Color().getDescription() != null) {
                                     lsColor = " " + poSalesInquiryController.SalesInquiry().Detail(lnCtr).Color().getDescription();
                                 }
-                                
                                 lsDescription = lsBrand
-                                    + lsModel 
-                                    + lsModelVariant
-                                    + lsColor;
-                                
+                                        + lsModel
+                                        + lsModelVariant
+                                        + lsColor;
                                 details_data.add(
                                         new ModelSalesInquiry_Detail(
                                                 String.valueOf(poSalesInquiryController.SalesInquiry().Detail(lnCtr).getPriority()),
@@ -378,8 +369,8 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
     }
@@ -401,7 +392,6 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
                         psSearchClientId = "";
                     }
                     break;
-
             }
             if (lsTxtFieldID.equals("tfSearchClient") || lsTxtFieldID.equals("tfSearchReferenceNo")) {
                 loadRecordSearch();
@@ -460,11 +450,11 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
             }
         } catch (GuanzonException | SQLException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     private void initComboBoxes() {
-        
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType)
         );
@@ -511,6 +501,7 @@ public class SalesInquiry_HistoryMPController implements Initializable, ScreenIn
             tfSearchReferenceNo.setText("");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 

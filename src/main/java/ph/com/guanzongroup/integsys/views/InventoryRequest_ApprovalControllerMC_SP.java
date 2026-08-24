@@ -76,9 +76,10 @@ public class InventoryRequest_ApprovalControllerMC_SP implements Initializable, 
     private Label lblSource;
 
     @FXML
-    private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfModel, tfVariant, tfRequestQty,
+    private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfModel, tfVariant, tfRequestQty, tfSourceNo,
             tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty;
-
+    @FXML
+    private TextArea taRemarks;
     @FXML
     private Button btnSearch, btnUpdate, btnSave, btnCancel, btnPrint, btnClose;
 
@@ -803,13 +804,15 @@ public class InventoryRequest_ApprovalControllerMC_SP implements Initializable, 
         tfRequestQty.setText(tblColRequestQty.getCellData(fnRow));
         tfCancelQty.setText(tblColCancelQty.getCellData(fnRow));
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
+        taRemarks.setText(poAppController.getMaster().getRemarks());
+        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
 
     }
 
     private void getLoadedTransaction() throws CloneNotSupportedException, SQLException, GuanzonException {
         tfClusterName.setText(poAppController.getBranchCluster().getClusterDescription());
         lblSource.setText((poAppController.getMaster().Company().getCompanyName() == null ? "" : (poAppController.getMaster().Company().getCompanyName() + " - "))
-                    + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
+                + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
 
         reloadTableDetail();
         loadSelectedDetail(pnCTransactionDetail);

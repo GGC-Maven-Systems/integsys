@@ -589,7 +589,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -893,6 +893,16 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -912,19 +922,10 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1119,7 +1120,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poPurchaseReceivingController.PurchaseOrderReceiving().Master().getIndustryId(), null);
@@ -1135,7 +1136,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;
@@ -1219,12 +1220,12 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                                 poJSON.put("message", "Future dates are not allowed.");
                                 pbSuccess = false;
                             }
-
-                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
-                                poJSON.put("result", "error");
-                                poJSON.put("message", "SI date cannot be later than the receiving date.");
-                                pbSuccess = false;
-                            }
+//Disable by Arsiela 08-07-2026 03:23PM Requested by ma'am she
+//                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
+//                                poJSON.put("result", "error");
+//                                poJSON.put("message", "SI date cannot be later than the receiving date.");
+//                                pbSuccess = false;
+//                            }
 
                             if (pbSuccess) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Master().setSalesInvoiceDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
@@ -1281,23 +1282,23 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                     if (poPurchaseReceivingController.PurchaseOrderReceiving().getPurchaseOrderReceivingCount() > 0) {
                         //pending
                         //retreiving using column index
-                       
+
                         for (int lnCtr = 0; lnCtr <= poPurchaseReceivingController.PurchaseOrderReceiving().getPurchaseOrderReceivingCount() - 1; lnCtr++) {
                             try {
-                                 
-                            main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
-                                    String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
-                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
-                                    poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
-                            ));
+
+                                main_data.add(new ModelDeliveryAcceptance_Main(String.valueOf(lnCtr + 1),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).Supplier().getCompanyName()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getDueDate()),
+                                        String.valueOf(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getReferenceNo()),
+                                        String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionTotal(), true)),
+                                        poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionNo()
+                                ));
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
 
-                            if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED,PurchaseOrderReceivingStatus.PAID)) {
+                            if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().PurchaseOrderReceivingList(lnCtr).getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED, PurchaseOrderReceivingStatus.PAID)) {
                                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
                             }
                         }
@@ -1666,6 +1667,8 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
             Platform.runLater(() -> {
                 loadTableAttachment();
             });
+            pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
+            initButton(pnEditMode);
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -2015,12 +2018,13 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
             if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED, PurchaseOrderReceivingStatus.PAID)) {
                 ShowMessageFX.Warning(null, pxeModuleName, "Only the Invoice Date, To Follow Invoice, and Invoice No. are editable\nfor posted and paid transactions.");
                 return;
-            }            switch (nodeID) {
+            }
+            switch (nodeID) {
                 case "cbVatInclusive":
                     if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getSalesInvoice(), null, "")
                             && !JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED, PurchaseOrderReceivingStatus.PAID)) {
                         ShowMessageFX.Warning(null, pxeModuleName,
-                               "Only available when Invoice No is provided or set \"To-follow\".");
+                                "Only available when Invoice No is provided or set \"To-follow\".");
                     }
                     break;
             }
@@ -2031,7 +2035,7 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                     if (JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getSalesInvoice(), null, "")
                             && !JFXUtil.isObjectEqualTo(poPurchaseReceivingController.PurchaseOrderReceiving().Master().getTransactionStatus(), PurchaseOrderReceivingStatus.POSTED, PurchaseOrderReceivingStatus.PAID)) {
                         ShowMessageFX.Warning(null, pxeModuleName,
-                               "Only available when Invoice No is provided or set \"To-follow\".");
+                                "Only available when Invoice No is provided or set \"To-follow\".");
                     }
                     break;
             }
@@ -2087,8 +2091,6 @@ public class SIPosting_EntryAppliancesController implements Initializable, Scree
                 if (event.getClickCount() == 2) {
                     tfOrderNo.setText("");
                     loadTableDetailFromMain();
-                    pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
-                    initButton(pnEditMode);
                 }
             }
         });

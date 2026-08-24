@@ -133,6 +133,17 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
+                              <Button fx:id="btnVoid" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="TIMES" size="20" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
                               <Button fx:id="btnHistory" contentDisplay="TOP" ellipsisString="" layoutX="695.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="BOOK" size="20" />
@@ -232,10 +243,6 @@
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font></Label>
-                                                                          <Label text="Inquiry Status" GridPane.columnIndex="5" GridPane.rowIndex="2">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
                                                       <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="5">
                                                                                  <font>
                                                                                     <Font size="12.0" />
@@ -284,7 +291,6 @@
                                                                           <TextField fx:id="tfBranch" disable="true" editable="false" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                   <TextField fx:id="tfSalesPerson" layoutX="100.0" layoutY="135.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                                                   <TextField fx:id="tfReferralAgent" layoutX="100.0" layoutY="105.0" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                                          <TextField fx:id="tfInquiryStatus" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                                                                   <TextField fx:id="tfInquiryType" promptText="Press F3: Search" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                                                   <ComboBox fx:id="cmbPurchaseType" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                                                                         <DatePicker fx:id="dpTargetDate" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="5" />
@@ -297,6 +303,14 @@
                                                             <Insets top="1.0" />
                                                          </GridPane.margin>
                                                       </TextArea>
+                                                      <Button fx:id="btnAddClient" mnemonicParsing="false" onAction="#cmdButton_Click" GridPane.columnIndex="4" GridPane.rowIndex="8">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="5.0" />
+                                                                                 </GridPane.margin>
+                                                                                 <graphic>
+                                                                                    <FontAwesomeIconView glyphName="PLUS" />
+                                                                                 </graphic>
+                                                                              </Button>
                                                                       </children>
                                                                   </GridPane>
                                                               </children>

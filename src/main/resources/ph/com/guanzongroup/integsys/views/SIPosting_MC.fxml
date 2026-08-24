@@ -57,30 +57,30 @@
                                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label text="Supplier">
+                                 <Label text="Supplier">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Reference No." GridPane.columnIndex="8">
+                                                <Label text="Receiving Branch" GridPane.columnIndex="4">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="lblSource" layoutX="367.0" layoutY="14.0" text="Company - Industry" GridPane.columnIndex="11">
+                                                <Label text="Reference No." GridPane.columnIndex="8">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Receiving Branch" GridPane.columnIndex="4">
+                                                <Label fx:id="lblSource" layoutX="367.0" layoutY="14.0" text="Company - Industry" GridPane.columnIndex="11">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="tfSearchSupplier" promptText="Press F3: Search" GridPane.columnIndex="2" />
-                                    <TextField fx:id="tfSearchReceiveBranch" promptText="Press F3: Search" GridPane.columnIndex="6" />
-                                    <TextField fx:id="tfSearchReferenceNo" promptText="Press F3: Search" GridPane.columnIndex="10" />
-                                 </children>
+                                                <TextField fx:id="tfSearchSupplier" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                                <TextField fx:id="tfSearchReceiveBranch" promptText="Press F3: Search" GridPane.columnIndex="6" />
+                                                <TextField fx:id="tfSearchReferenceNo" promptText="Press F3: Search" GridPane.columnIndex="10" />
+                                            </children>
                               </GridPane>
                            </children>
                            </AnchorPane>
@@ -222,10 +222,8 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                
                                           <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                              <children>
-                                                
                                                 <VBox maxWidth="1000.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
                                           <AnchorPane VBox.vgrow="NEVER">
@@ -357,7 +355,8 @@
                                                                                           <Font name="System Bold" size="14.0" />
                                                                                       </font>
                                                                                   </Label>
-                                                                                 </children></AnchorPane>
+                                                                                 </children>
+                                                                                                        </AnchorPane>
                                                                                                         <TextField fx:id="tfTransactionTotal" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="738.0" layoutY="80.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="11" GridPane.rowIndex="2" />
                                                                                                         <TextField fx:id="tfDiscountRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="3" />
                                                                                                         <TextField fx:id="tfDiscountAmount" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="11" GridPane.rowIndex="4" />
@@ -404,52 +403,55 @@
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                       </rowConstraints>
                                                                       <children>
-                                                                        <Label text="Order No.">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                          <Label text="Brand" GridPane.rowIndex="1">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                          <Label text="Description" GridPane.rowIndex="2">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
-                                                      <Label text="SRP" GridPane.columnIndex="8">
+                                                                      <Label text="Order No.">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
-                                                                              </Label>
-                                                                          <Label text="Order" GridPane.columnIndex="4" GridPane.rowIndex="4">
+                                                                                                        </Label>
+                                                                                                        <Label text="Brand" GridPane.rowIndex="1">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Description" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Order" GridPane.columnIndex="4" GridPane.rowIndex="4">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                                         </Label>
-                                                                          <Label text="Received Qty" GridPane.columnIndex="4" GridPane.rowIndex="5">
+                                                                                                        <Label text="Received Qty" GridPane.columnIndex="4" GridPane.rowIndex="5">
                                                                               <font>
                                                                                   <Font name="System Bold" size="12.0" />
                                                                               </font>
                                                                           </Label>
-                                                                              <Label text="Disc. Rate (%)" GridPane.columnIndex="8" GridPane.rowIndex="1" />
-                                                                              <Label text="Addl. Disc. Amt" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                                                              <Label layoutX="654.0" layoutY="74.0" text="Cost" GridPane.columnIndex="8" GridPane.rowIndex="5">
+                                                                                                        <Label text="SRP" GridPane.columnIndex="8">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                                                        <Label text="Disc. Rate (%)" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                                                                                                        <Label text="Addl. Disc. Amt" GridPane.columnIndex="8" GridPane.rowIndex="2" />
+                                                                                                        <Label text="VAT able" GridPane.columnIndex="8" GridPane.rowIndex="4" />
+                                                                                                        <Label layoutX="654.0" layoutY="74.0" text="Cost" GridPane.columnIndex="8" GridPane.rowIndex="5">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <Label text="VAT able" GridPane.columnIndex="8" GridPane.rowIndex="4" />
-                                                                        <TextField fx:id="tfOrderNo" disable="true" editable="false" GridPane.columnIndex="2" />
-                                                                          <TextField fx:id="tfBrand" disable="true" editable="false" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                                          <TextField fx:id="tfDescription" disable="true" editable="false" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="tfOrderQuantity" alignment="CENTER_RIGHT" disable="true" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="4" />
-                                                      <TextField fx:id="tfReceiveQuantity" alignment="CENTER_RIGHT" disable="true" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="5" />
-                                                                              <TextField fx:id="tfSRPAmount" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="743.0" layoutY="69.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="10" />
-                                                                              <TextField fx:id="tfDiscRateDetail" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="10" GridPane.rowIndex="1" />
-                                                                              <TextField fx:id="tfAddlDiscAmtDetail" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
-                                                                              <CheckBox fx:id="cbVatable" mnemonicParsing="false" onAction="#cmdCheckBox_Click" prefHeight="17.0" prefWidth="8.0" GridPane.columnIndex="10" GridPane.rowIndex="4" />
-                                                      <TextField fx:id="tfCost" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="5" />
-                                                                      </children>
+                                                                                                        <TextField fx:id="tfOrderNo" disable="true" editable="false" GridPane.columnIndex="2" />
+                                                                                                        <TextField fx:id="tfBrand" disable="true" editable="false" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                                        <TextField fx:id="tfDescription" disable="true" editable="false" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
+                                                                                                        <TextField fx:id="tfOrderQuantity" alignment="CENTER_RIGHT" disable="true" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="4" />
+                                                                                                        <TextField fx:id="tfReceiveQuantity" alignment="CENTER_RIGHT" disable="true" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="5" />
+                                                                                                        <TextField fx:id="tfSRPAmount" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="743.0" layoutY="69.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="10" />
+                                                                                                        <TextField fx:id="tfDiscRateDetail" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="10" GridPane.rowIndex="1" />
+                                                                                                        <TextField fx:id="tfAddlDiscAmtDetail" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
+                                                                                                        <CheckBox fx:id="cbVatable" mnemonicParsing="false" onAction="#cmdCheckBox_Click" prefHeight="17.0" prefWidth="8.0" GridPane.columnIndex="10" GridPane.rowIndex="4" />
+                                                                                                        <TextField fx:id="tfCost" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="5" />
+                                                                                                    </children>
                                                                   </GridPane>
                                                               </children>
                                                           </AnchorPane>
@@ -539,10 +541,8 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                
                                           <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                              <children>
-                                                
                                                 <VBox maxWidth="885.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
                                           <AnchorPane>
@@ -570,43 +570,49 @@
                                                                               <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                       </rowConstraints>
                                                                       <children>
-                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="7" />
-                                                                            <Label fx:id="lblJEStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="7">
-                                                                                <font>
-                                                                                    <Font name="System Bold" size="14.0" />
-                                                                                </font>
-                                                                            </Label>
-                                                                          <Label text="Trans No.">
+                                                                      <Label text="Trans No.">
                                                                               <font>
                                                                                   <Font name="System Bold" size="14.0" />
                                                                               </font>
                                                                           </Label>
-                                                                              <Label text="Date" GridPane.rowIndex="2">
+                                                                                                        <Label text="Date" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                          <Label text="Remarks" GridPane.rowIndex="3">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Remarks" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                              <Label text="Total Debit Amt" GridPane.columnIndex="5" GridPane.rowIndex="3">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Total Debit Amt" GridPane.columnIndex="5" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
-                                                                                 </font></Label>
-                                                                              <Label text="Total Credit Amt" GridPane.columnIndex="5" GridPane.rowIndex="2">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Total Credit Amt" GridPane.columnIndex="5" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
-                                                                                 </font></Label>
-                                                                          <TextField fx:id="tfJETransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                              <DatePicker fx:id="dpJETransactionDate" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                              <TextField fx:id="tfTotalCreditAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                                                                              <TextField fx:id="tfTotalDebitAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
-                                                      <TextArea fx:id="taJERemarks" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="27.0" prefWidth="797.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <TextField fx:id="tfJETransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
+                                                                                                        <DatePicker fx:id="dpJETransactionDate" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                                        <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="7">
+                                                                                 <children>
+                                                                                                              <Label fx:id="lblJEStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
+                                                                                      <font>
+                                                                                          <Font name="System Bold" size="14.0" />
+                                                                                      </font>
+                                                                                  </Label>
+                                                                                 </children></AnchorPane>
+                                                                                                        <TextField fx:id="tfTotalDebitAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                                                                                                        <TextField fx:id="tfTotalCreditAmt" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                                                                                                        <TextArea fx:id="taJERemarks" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="27.0" prefWidth="797.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
                                                          <GridPane.margin>
                                                             <Insets top="1.0" />
                                                          </GridPane.margin>
                                                       </TextArea>
-                                                                      </children>
+                                                                                                    </children>
                                                                   </GridPane>
                                                               </children>
                                                           </AnchorPane>
@@ -632,32 +638,35 @@
                                                                               <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                       </rowConstraints>
                                                                       <children>
-                                                                        <Label text="Account Code">
+                                                                      <Label text="Account Code">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                          <Label text="Description" GridPane.rowIndex="1">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Description" GridPane.rowIndex="1">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                              <Label text="Credit Amount" GridPane.columnIndex="8" GridPane.rowIndex="1">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
-                                                      <Label text="Debit Amount" GridPane.columnIndex="8" GridPane.rowIndex="2">
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <Label text="Report Month/Year" GridPane.rowIndex="2" />
+                                                                                                        <Label text="Reverse" GridPane.columnIndex="8" />
+                                                                                                        <Label text="Debit Amount" GridPane.columnIndex="8" GridPane.rowIndex="1">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <Label text="Report Month/Year" GridPane.rowIndex="2" />
-                                                                        <TextField fx:id="tfJEAcctCode" promptText="Press F3: Search" GridPane.columnIndex="2" />
-                                                                          <TextField fx:id="tfJEAcctDescription" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
-                                                                              <DatePicker fx:id="dpReportMonthYear" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                              <TextField fx:id="tfCreditAmt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="1" />
-                                                      <TextField fx:id="tfDebitAmt" alignment="CENTER_RIGHT" prefWidth="171.0" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
-                                                                              <CheckBox fx:id="cbJEReverse" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="10" />
-                                                                              <Label text="Reverse" GridPane.columnIndex="8" />
-                                                                      </children>
+                                                                                                        <Label text="Credit Amount" GridPane.columnIndex="8" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                                                        </Label>
+                                                                                                        <TextField fx:id="tfJEAcctCode" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                                                                                        <TextField fx:id="tfJEAcctDescription" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
+                                                                                                        <DatePicker fx:id="dpReportMonthYear" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                                        <CheckBox fx:id="cbJEReverse" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="10" />
+                                                                                                        <TextField fx:id="tfDebitAmt" alignment="CENTER_RIGHT" prefWidth="171.0" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="1" />
+                                                                                                        <TextField fx:id="tfCreditAmt" alignment="CENTER_RIGHT" promptText="0.0000" GridPane.columnIndex="10" GridPane.rowIndex="2" />
+                                                                                                    </children>
                                                                   </GridPane>
                                                               </children>
                                                           </AnchorPane>

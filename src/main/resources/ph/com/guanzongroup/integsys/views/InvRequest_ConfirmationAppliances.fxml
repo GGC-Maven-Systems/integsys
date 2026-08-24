@@ -22,7 +22,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -192,9 +192,9 @@
                                                                                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
                                                                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="139.0" minWidth="139.0" prefWidth="139.0" />
                                                                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="108.0" minWidth="-Infinity" prefWidth="52.0" />
-                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="135.0" minWidth="-Infinity" prefWidth="95.0" />
+                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="135.0" minWidth="-Infinity" prefWidth="108.0" />
                                                                                 <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="154.0" minWidth="-Infinity" prefWidth="102.0" />
+                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="154.0" minWidth="-Infinity" prefWidth="105.0" />
                                                             <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="62.0" minWidth="-Infinity" prefWidth="18.0" />
                                                             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="99.0" minWidth="-Infinity" prefWidth="33.0" />
                                                             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
@@ -239,10 +239,10 @@
                                                                                 <Label text="Date" GridPane.rowIndex="4" />
                                                                                 <Label text="Refer No." GridPane.rowIndex="5" />
                                                                                 <TextField fx:id="tfTransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                                                <TextField fx:id="tfReferenceNo" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                             <Label text="Remarks" GridPane.rowIndex="7" />
                                                             <TextArea fx:id="taRemarks" prefHeight="27.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.rowSpan="2147483647" />
                                                             <DatePicker fx:id="dpTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                            <TextField fx:id="tfSourceNo" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="5" />
                                                                             </children>
                                                                         </GridPane>
                                                                     </children>

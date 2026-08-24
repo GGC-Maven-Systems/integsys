@@ -59,8 +59,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
 
 /**
@@ -103,7 +103,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
     @FXML
-    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfInquiryStatus, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfDescription, tfBrand, tfModel, tfColor, tfSellingPrice, tfModelVariant;
+    private TextField tfSearchClient, tfSearchReferenceNo, tfTransactionNo, tfBranch, tfSalesPerson, tfClient, tfAddress, tfContactNo, tfInquiryType, tfReferralAgent, tfBarcode, tfDescription, tfBrand, tfModel, tfColor, tfSellingPrice, tfModelVariant;
     @FXML
     private Label lblSource, lblStatus;
     @FXML
@@ -125,7 +125,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         poSalesInquiryController = new SalesControllers(oApp, null);
         poJSON = new JSONObject();
         poJSON = poSalesInquiryController.SalesInquiry().InitTransaction(); // Initialize transaction
@@ -220,6 +219,21 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                             return;
                         }
                     case "btnHistory":
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+
+                        try {
+                            poSalesInquiryController.SalesInquiry().ShowStatusHistory();
+                            return;
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
                         break;
                     case "btnRetrieve":
                         retrieveSalesInquiry();
@@ -254,7 +268,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                                         }
                                     }
                                 }
-
                             }
                         } else {
                             return;
@@ -280,7 +293,16 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                         break;
                     case "btnVoid":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to void transaction?") == true) {
+                        String lsStat = "";
+                        switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
+                            case SalesInquiryStatic.OPEN:
+                                lsStat = "void";
+                                break;
+                            case SalesInquiryStatic.CONFIRMED:
+                                lsStat = "cancel";
+                                break;
+                        }
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to " + lsStat + " transaction?") == true) {
                             if (SalesInquiryStatic.CONFIRMED.equals(poSalesInquiryController.SalesInquiry().Master().getTransactionStatus())) {
                                 poJSON = poSalesInquiryController.SalesInquiry().CancelTransaction("");
                             } else {
@@ -330,6 +352,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -342,7 +365,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
         } else {
             loadTableMain.reload();
         }
-
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -360,7 +382,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                         break;
                 }
                 loadRecordMaster();
-
             });
 
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
@@ -428,7 +449,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                             poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
                         }
                         break;
-
                 }
 
                 loadRecordMaster();
@@ -475,10 +495,9 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             } else {
                 tfBrand.requestFocus();
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -633,6 +652,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -688,7 +708,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                             pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
                             loadRecordMaster();
                             pbSuccess = true; //Set to original value
-
                         }
                         break;
                     default:
@@ -697,6 +716,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -708,6 +728,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             tfSearchReferenceNo.setText("");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -733,6 +754,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -742,23 +764,14 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
         try {
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(SalesInquiryStatic.QUOTED, "QUOTED");
-                statusMap.put(SalesInquiryStatic.SALE, "SALE");
-                statusMap.put(SalesInquiryStatic.CONFIRMED, "CONFIRMED");
-                statusMap.put(SalesInquiryStatic.OPEN, "OPEN");
-                statusMap.put(SalesInquiryStatic.VOID, "VOIDED");
-                statusMap.put(SalesInquiryStatic.CANCELLED, "CANCELLED");
-                statusMap.put(SalesInquiryStatic.LOST, "LOST");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblStatus.setText(lsStat);
+                lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
 
-                switch (poSalesInquiryController.SalesInquiry().Master().getInquiryStatus()) {
-                    case "0":
-                        tfInquiryStatus.setText("OPEN");
+                switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
+                    case SalesInquiryStatic.OPEN:
+                        btnVoid.setText("Void");
                         break;
-                    default:
-                        tfInquiryStatus.setText("");
+                    case SalesInquiryStatic.CONFIRMED:
+                        btnVoid.setText("Cancel");
                         break;
                 }
             });
@@ -782,7 +795,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
@@ -790,7 +802,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType()));
                 }
             } else {
-
                 cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
             }
@@ -798,8 +809,8 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadTableDetailFromMain() {
@@ -822,9 +833,9 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
             Platform.runLater(() -> {
                 loadTableDetail.reload();
             });
-
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -838,7 +849,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -879,6 +889,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -902,6 +913,7 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                                     ));
                                 } catch (GuanzonException | SQLException ex) {
                                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                                 }
 
                                 if (poSalesInquiryController.SalesInquiry().SalesInquiryList(lnCtr).getTransactionStatus().equals(SalesInquiryStatic.CONFIRMED)) {
@@ -916,7 +928,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
                                 /* FOCUS ON FIRST ROW */
                                 JFXUtil.selectAndFocusRow(tblViewMainList, 0);
                                 pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
-
                             }
                         } else {
                             /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
@@ -957,18 +968,15 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
     };
 
     private void initComboBoxes() {
-
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType),
                 new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbClientType, cmbPurchaseType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType);
-
     }
 
     public void initDatePickers() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpTargetDate);
         JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpTargetDate);
-
     }
 
     public void initTextFields() {
@@ -982,7 +990,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
     }
 
     public void initTableOnClick() {
-
         tblViewTransDetails.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
@@ -1010,7 +1017,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -1035,7 +1041,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
     }
 
     private void initButton(int fnValue) {
-
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
@@ -1084,7 +1089,6 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
 
         filteredData = new FilteredList<>(main_data, b -> true);
         tblViewMainList.setItems(filteredData);
-
     }
 
     private void tableKeyEvents(KeyEvent event) {
@@ -1118,5 +1122,4 @@ public class SalesInquiry_ConfirmationSPMCController implements Initializable, S
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail, apBrowse);
     }
-
 }

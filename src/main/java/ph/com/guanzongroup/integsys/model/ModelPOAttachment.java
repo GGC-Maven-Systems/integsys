@@ -36,8 +36,8 @@ public class ModelPOAttachment {
     public StringProperty index19;
     public StringProperty index20;
     /*04272026 - Team 1 Removed 'Billing Statement' option in documentType as it dd not exist to options used in DV*/
-    public static ObservableList<String> documentType = FXCollections.observableArrayList("Other", "Delivery Receipt", "Sales Invoice", "Official Receipt");
-
+    public static ObservableList<String> documentType = FXCollections.observableArrayList("Other", "Delivery Receipt", "Sales Invoice", "Official Receipt", "Quotation");
+    
     public ModelPOAttachment(String index01,
             String index02,
             String index03,

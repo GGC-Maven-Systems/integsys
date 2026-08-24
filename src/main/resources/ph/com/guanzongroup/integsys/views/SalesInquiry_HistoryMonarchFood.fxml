@@ -189,10 +189,6 @@
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font></Label>
-                                                                          <Label text="Inquiry Status" GridPane.columnIndex="5" GridPane.rowIndex="2">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
                                                       <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="5">
                                                                                  <font>
                                                                                     <Font size="12.0" />
@@ -213,7 +209,6 @@
                                                             <Insets top="1.0" />
                                                          </GridPane.margin>
                                                       </TextArea>
-                                                                          <TextField fx:id="tfInquiryStatus" disable="true" editable="false" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                                                                   <ComboBox fx:id="cmbPurchaseType" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                                                                         <DatePicker fx:id="dpTargetDate" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="5" />
                                                                   <TextField fx:id="tfContactNo" disable="true" editable="false" layoutX="489.0" layoutY="203.0" GridPane.columnIndex="7" GridPane.rowIndex="9" />

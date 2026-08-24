@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -107,6 +108,7 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
     private String psFormName = "Purchase Order SPMC";
     private LogWrapper logWrapper;
     private JSONObject poJSON;
+    private final AtomicLong pnDetailLoadToken = new AtomicLong(0);
 
     private int pnEditMode;
     private int pnTblMainRow = -1;
@@ -679,6 +681,7 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                     Platform.runLater(() -> btnNew.fire());
                     break;
                 case "btnCancel":
+                    pnDetailLoadToken.incrementAndGet();
                     if (ShowMessageFX.YesNo(null, "Cancel Confirmation", "Are you sure you want to cancel?")) {
                         if (pnEditMode == EditMode.ADDNEW) {
                             clearDetailFields();
@@ -699,6 +702,9 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                             if (!tfSupplier.getText().isEmpty()) {
                                 loadTableMain();
                             }
+                            detail_data.clear();
+                            tblVwOrderDetails.setItems(detail_data);
+                            tblVwOrderDetails.setPlaceholder(new Label("NO RECORD TO LOAD"));
                         } else {
                             clearMasterFields();
                             clearDetailFields();
@@ -793,7 +799,7 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                             try (PDDocument document = PDDocument.load(selectedFile)) {
                                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                                 int pageCount = document.getNumberOfPages();
-                                if (pageCount > 5) {
+                                if (pageCount > 20) {
                                     ShowMessageFX.Warning(null, psFormName, "PDF exceeds maximum allowed pages.");
                                     return;
                                 }
@@ -851,7 +857,9 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                     break;
             }
             if (lsButton.equals("btnRetrieve") || lsButton.equals("btnAddAttachment") || lsButton.equals("btnRemoveAttachment")
-                    || lsButton.equals("btnArrowRight") || lsButton.equals("btnArrowLeft") || lsButton.equals("btnRetrieve") || lsButton.equals("btnHistory")) {
+                    || lsButton.equals("btnArrowRight")
+                    || lsButton.equals("btnArrowRight") || lsButton.equals("btnArrowLeft") || lsButton.equals("btnRetrieve")
+                    || lsButton.equals("btnHistory") || lsButton.equals("btnCancel")) {
             } else {
                 loadRecordMaster();
                 loadTableDetail();
@@ -1507,7 +1515,9 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
         }
         if (pnTblDetailRow >= 0 && pnTblDetailRow < poPurchasingController.PurchaseOrder().Detail().size()) {
             try {
-                if (!poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId().equals("0007")) {
+
+
+                if (!"0007".equals(poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId())) {
                     if (pnTblDetailRow != -1) {
                         CustomCommonUtil.setDisable(!lbShow, tfBarcode, tfDescription);
                     }
@@ -1715,6 +1725,7 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
     }
 
     private void loadTableDetail() {
+        final long lnTaskToken = pnDetailLoadToken.incrementAndGet();
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setMaxSize(50, 50);
         progressIndicator.setStyle("-fx-accent: #FF8201;");
@@ -1780,6 +1791,9 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                     }
                     final double totalAmountFinal = grandTotalAmount;
                     Platform.runLater(() -> {
+                        if (lnTaskToken != pnDetailLoadToken.get()) {
+                            return;
+                        }
                         detail_data.setAll(detailsList); // Properly update list
                         tblVwOrderDetails.setItems(detail_data);
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -2016,11 +2030,15 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
 
     private void loadTableDetailAndSelectedRow() {
         if (pnTblDetailRow >= 0) {
+            final long lnTaskToken = pnDetailLoadToken.get();
             Platform.runLater(() -> {
                 // Run a delay after the UI thread is free
                 PauseTransition delay = new PauseTransition(Duration.millis(10));
                 delay.setOnFinished(event -> {
                     Platform.runLater(() -> { // Run UI updates in the next cycle
+                        if (lnTaskToken != pnDetailLoadToken.get() || pnEditMode == EditMode.UNKNOWN || pnTblDetailRow < 0) {
+                            return;
+                        }
                         loadTableDetail();
                     });
                 });
@@ -2071,10 +2089,13 @@ public class PurchaseOrder_EntrySPMCController implements Initializable, ScreenI
                     boolean isSourceNotEmpty = !poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).getSouceNo().isEmpty();
                     tfBarcode.setDisable(isSourceNotEmpty);
                     tfDescription.setDisable(isSourceNotEmpty);
-                    if (poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId().equals("0007")) {
-                        CustomCommonUtil.setDisable(false, tfBarcode, tfDescription);
-                        tfOrderQuantity.requestFocus();
-                    }
+                    System.out.println("initDetailFocus : " + poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId());
+
+                        if (!"0007".equals(poPurchasingController.PurchaseOrder().Detail(pnTblDetailRow).Inventory().getInventoryTypeId()))  {
+                            CustomCommonUtil.setDisable(false, tfBarcode, tfDescription);
+                            tfOrderQuantity.requestFocus();
+                        }
+
                     if (isSourceNotEmpty && !tfBarcode.getText().isEmpty()) {
                         tfOrderQuantity.requestFocus();
                     } else {

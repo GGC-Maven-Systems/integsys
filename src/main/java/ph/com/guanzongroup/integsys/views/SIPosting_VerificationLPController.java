@@ -491,7 +491,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please check the Journal Entry before saving.");
                                 return;
@@ -530,7 +530,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                         break;
                     case "btnVerify":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to verify transaction?\nPlease ensure that the Journal Entry period date is correct before proceeding.") == true) {
                             if (!lbSelectTabJE) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Please review and verify all Journal Entry details before verifying the transaction.");
                                 return;
@@ -576,7 +576,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                     loadRecordMaster();
                     loadTableDetail();
                     JFXUtil.clearTextFields(apAttachments);
-            poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
+                    poPurchaseReceivingController.PurchaseOrderReceiving().loadAttachments();
                     loadTableAttachment();
 
                     Tab currentTab = tabPaneForm.getSelectionModel().getSelectedItem();
@@ -879,6 +879,16 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                             return;
                         }
                     }
+                    if (pbEntered) {
+                        JFXUtil.runWithDelay(0.50, () -> {
+                            loadTableJEDetail();
+                            JFXUtil.runWithDelay(0.50, () -> {
+                                moveNextJE(false);
+                                pbEntered = false;
+                            });
+                        });
+
+                    }
                     break;
                 case "tfDebitAmt":
                     lsValue = JFXUtil.removeComma(lsValue);
@@ -898,19 +908,10 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                             });
                             return;
                         } else {
-
+                            JFXUtil.textFieldMoveNext(tfCreditAmt);
                         }
                     }
-                    if (pbEntered) {
-                        JFXUtil.runWithDelay(0.50, () -> {
-                            loadTableJEDetail();
-                            JFXUtil.runWithDelay(0.50, () -> {
-                                moveNextJE(false);
-                                pbEntered = false;
-                            });
-                        });
 
-                    }
                     break;
             }
             if (JFXUtil.isObjectEqualTo(lsTxtFieldID, "tfJEAcctCode", "tfJEAcctDescription", "tfCreditAmt", "tfDebitAmt")) {
@@ -1108,7 +1109,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                         case "tfJEAcctDescription":
                             poJSON = poPurchaseReceivingController.PurchaseOrderReceiving().Journal().SearchAccountCode(pnJEDetail, lsValue, false, poPurchaseReceivingController.PurchaseOrderReceiving().Master().getIndustryId(), null);
@@ -1124,7 +1125,7 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
 
                             pnJEDetail = Integer.parseInt(String.valueOf(poJSON.get("row")));
                             loadTableJEDetail();
-                            JFXUtil.textFieldMoveNext(tfCreditAmt);
+                            JFXUtil.textFieldMoveNext(tfDebitAmt);
                             break;
                     }
                     break;
@@ -1207,12 +1208,12 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                                 poJSON.put("message", "Future dates are not allowed.");
                                 pbSuccess = false;
                             }
-
-                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
-                                poJSON.put("result", "error");
-                                poJSON.put("message", "SI date cannot be later than the receiving date.");
-                                pbSuccess = false;
-                            }
+//Disable by Arsiela 08-07-2026 03:23PM Requested by ma'am she
+//                            if (pbSuccess && (selectedDate.isAfter(transactionDate))) {
+//                                poJSON.put("result", "error");
+//                                poJSON.put("message", "SI date cannot be later than the receiving date.");
+//                                pbSuccess = false;
+//                            }
 
                             if (pbSuccess) {
                                 poPurchaseReceivingController.PurchaseOrderReceiving().Master().setSalesInvoiceDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
@@ -1522,7 +1523,6 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
         }
     }
 
-
     public void loadRecordMaster() {
         try {
             boolean lbShow1 = (pnEditMode == EditMode.UPDATE);
@@ -1674,6 +1674,8 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                     dialogStage.close();
                 }
             }
+            pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
+            initButton(pnEditMode);
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -2094,8 +2096,6 @@ public class SIPosting_VerificationLPController implements Initializable, Screen
                 if (event.getClickCount() == 2) {
                     tfOrderNo.setText("");
                     loadTableDetailFromMain();
-                    pnEditMode = poPurchaseReceivingController.PurchaseOrderReceiving().getEditMode();
-                    initButton(pnEditMode);
                 }
             }
         });

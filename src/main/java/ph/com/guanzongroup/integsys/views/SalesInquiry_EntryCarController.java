@@ -4,7 +4,11 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import ph.com.guanzongroup.integsys.model.ModelBankApplications_Detail;
+import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Attachment;
+import ph.com.guanzongroup.integsys.model.ModelFollowUp_Detail;
 import ph.com.guanzongroup.integsys.model.ModelRequirements_Detail;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -13,11 +17,13 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -42,12 +48,16 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
+import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.parser.ParseException;
 import javafx.animation.PauseTransition;
 import java.text.SimpleDateFormat;
@@ -59,12 +69,17 @@ import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.json.simple.JSONObject;
-import ph.com.guanzongroup.cas.sales.t1.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.t1.status.SalesInquiryStatic;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import org.guanzon.appdriver.constant.UserRight;
-import ph.com.guanzongroup.cas.sales.t1.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.status.BankApplicationStatus;
+import ph.com.guanzongroup.cas.sales.status.CustomerInquiryFollowUpStatic;
 
 /**
  *
@@ -83,44 +98,59 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
+    private int pnAttachment = 0;
     private ObservableList<ModelSalesInquiry_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelRequirements_Detail> requirements_data = FXCollections.observableArrayList();
     private ObservableList<ModelBankApplications_Detail> bankapplications_data = FXCollections.observableArrayList();
+    private ObservableList<ModelFollowUp_Detail> followup_data = FXCollections.observableArrayList();
+    private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
 
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEntered = false;
     private final JFXUtil.RowDragLock dragLock = new JFXUtil.RowDragLock(true);
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
+    private int currentIndex = 0;
+    private int pnFollowUp = 0;
+    private final Map<String, String> imageinfo_temp = new HashMap<>();
+    private final JFXUtil.ImageViewer imageviewerutil = new JFXUtil.ImageViewer();
+    private FileChooser fileChooser;
 
     ObservableList<String> ClientType = ModelSalesInquiry_Detail.ClientType;
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     ObservableList<String> CategoryType = ModelSalesInquiry_Detail.CategoryType;
     ObservableList<String> CustomerGroup = ModelSalesInquiry_Detail.CustomerGroup;
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableRequirements, loadTableBankApplications;
+    ObservableList<String> documentType = ModelFollowUp_Detail.documentType;
+    JFXUtil.ReloadableTableTask loadTableDetail, loadTableRequirements, loadTableBankApplications, loadTableFollowUp, loadTableAttachment;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements, apBankApplications, apBankApplicationsButtons;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apInquiry, apFields, apMaster, apDetail, apTableDetail, apRequirements, apAttachments;
     @FXML
-    private Label lblSource, lblStatus, lblBankApplicationStatus;
+    private Label lblSource, lblStatus;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnHistory, btnClose, btnApprove, btnDisApprove, btnCancelApplication;
+    private Button btnAddClient, btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabpane;
     @FXML
-    private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryStatus, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy, tfPaymentMode, tfApplicationNo, tfBank;
+    private TextField tfTransactionNo, tfBranch, tfSalesPerson, tfReferralAgent, tfInquiryType, tfClient, tfAddress, tfContactNo, tfBrand, tfModel, tfColor, tfModelVariant, tfSellingPrice, tfRequirement, tfReceivedBy, tfAttachmentNo, tfAttachmentSource;
     @FXML
-    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate, dpAppliedDate, dpApprovedDate;
+    private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
-    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup;
+    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
     @FXML
-    private TextArea taRemarks, taBankAppRemarks;
+    private TextArea taRemarks;
     @FXML
-    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications;
+    private TableView tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments;
     @FXML
-    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus;
+    private TableColumn tblRowNoDetail, tblBrandDetail, tblDescriptionDetail, tblRequirementRowNo, tblRequired, tblSubmitted, tblRequirements, tblReceivedBy, tblReceivedDate, tblBankAppRowNo, tblBankAppNo, tblBank, tblAppliedDate, tblApprovedDate, tblStatus, tblFollowUpRowNo, tblFollowUpTransNo, tblFollowUpTransDate, tblFollowUpMessage, tblFollowUpRemarks, tblFollowUpDate, tblFollowUpTime, tblFollowUpMethod, tblFollowUpSocMed, tblFollowUpResponse, tblFollowUpGoodsCompetitor, tblFollowUpMakeCompetitor, tblFollowUpDealerCompetitor, tblRowNoAttachment, tblFileNameAttachment;
+    @FXML
+    private Tab tabAttachments;
+    @FXML
+    private StackPane stackPane1;
+    @FXML
+    private ImageView imageView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -138,7 +168,10 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         initDetailsGrid();
         initRequirementsGrid();
         initBankApplicationsGrid();
+        initFollowUpGrid();
+        initAttachmentsGrid();
         initTableOnClick();
+        initAttachmentPreviewPane();
         clearTextFields();
         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
         initButton(pnEditMode);
@@ -199,6 +232,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         }
                         poSalesInquiryController.SalesInquiry().loadRequirements();
                         poSalesInquiryController.SalesInquiry().loadBankApplications();
+                        poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnClose":
@@ -225,6 +259,36 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         poSalesInquiryController.SalesInquiry().initFields();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
+                    case "btnAddClient":
+                        if (pnEditMode == EditMode.ADDNEW) {
+                            if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                    poSalesInquiryController.SalesInquiry().Master().setClientId("");
+                                    poSalesInquiryController.SalesInquiry().removeDetails();
+                                    loadTableDetail.reload();
+                                } else {
+                                    return;
+                                }
+                            }
+                            try {
+                                poJSON = poSalesInquiryController.SalesInquiry().addClient();
+                            } catch (Exception ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                return;
+                            }
+
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            }
+
+                            loadRecordMaster();
+                        } else {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Adding for new client must be during new entry of sales inquiry.");
+                        }
+                        return;
                     case "btnUpdate":
                         poJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
                         poJSON = poSalesInquiryController.SalesInquiry().UpdateTransaction();
@@ -234,10 +298,11 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         }
                         poSalesInquiryController.SalesInquiry().loadRequirements();
                         poSalesInquiryController.SalesInquiry().loadBankApplications();
+                        poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail, apRequirements, apBankApplications);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail, apRequirements);//, apBankApplications);
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -258,6 +323,21 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             return;
                         }
                     case "btnHistory":
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
+
+                        try {
+                            poSalesInquiryController.SalesInquiry().ShowStatusHistory();
+                            return;
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
                         break;
                     case "btnSave":
                         //Validator
@@ -272,22 +352,45 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
 
                                 // Confirmation Prompt
-                                JSONObject loJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
-                                if ("success".equals(loJSON.get("result"))) {
-                                    if (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
-                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-                                            loJSON = poSalesInquiryController.SalesInquiry().ConfirmTransaction("");
-                                            if ("success".equals((String) loJSON.get("result"))) {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            } else {
-                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-                                            }
-                                        }
-                                    }
-                                }
+//                                JSONObject loJSON = poSalesInquiryController.SalesInquiry().OpenTransaction(poSalesInquiryController.SalesInquiry().Master().getTransactionNo());
+//                                if ("success".equals(loJSON.get("result"))) {
+//                                    if (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus().equals(SalesInquiryStatic.OPEN)) {
+//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
+//                                            loJSON = poSalesInquiryController.SalesInquiry().ConfirmTransaction("");
+//                                            if ("success".equals((String) loJSON.get("result"))) {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            } else {
+//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+//                                            }
+//                                        }
+//                                    }
+//                                }
 
                                 btnNew.fire();
+                            }
+                        } else {
+                            return;
+                        }
+                        break;
+                    case "btnVoid":
+                        poJSON = new JSONObject();
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void transaction?") == true) {
+                            poJSON = poSalesInquiryController.SalesInquiry().VoidTransaction("");
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            } else {
+                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                //Clear data
+                                poSalesInquiryController.SalesInquiry().resetMaster();
+                                poSalesInquiryController.SalesInquiry().Detail().clear();
+                                clearTextFields();
 
+                                poSalesInquiryController.SalesInquiry().Master().setIndustryId(psIndustryId);
+                                poSalesInquiryController.SalesInquiry().Master().setCompanyId(psCompanyId);
+                                poSalesInquiryController.SalesInquiry().Master().setCategoryCode(psCategoryId);
+                                //                            poSalesInquiryController.SalesInquiry().initFields();
+                                pnEditMode = EditMode.UNKNOWN;
                             }
                         } else {
                             return;
@@ -317,6 +420,12 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
 //                        poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setTransactionStatus(BankApplicationStatus.CANCELLED);
                         poSalesInquiryController.SalesInquiry().CancelBankApplication("", pnBankApplications);
                         break;
+                    case "btnArrowRight":
+                        slideImage(1);
+                        break;
+                    case "btnArrowLeft":
+                        slideImage(-1);
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -324,7 +433,11 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
 
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisApprove", "btnCancelApplication")) {
                     loadTableBankApplications.reload();
+                    loadTableFollowUp.reload();
                     return;
+                }
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnBrowse", "btnSave", "btnCancel")) {
+                    JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
                 }
                 String currentTitle = tabpane.getSelectionModel().getSelectedItem().getText();
                 switch (currentTitle) {
@@ -334,14 +447,19 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     case "Bank Applications":
                         JFXUtil.clickTabByTitleText(tabpane, "Bank Applications");
                         break;
+                    case "Followup History":
+                        JFXUtil.clickTabByTitleText(tabpane, "Followup History");
+                        break;
+                    case "Attachments":
+                        JFXUtil.clickTabByTitleText(tabpane, "Attachments");
+                        break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnCancel")) {
-                    JFXUtil.clickTabByTitleText(tabpane, "Inquiry");
-                }
-                if (lsButton.equals("btnPrint")) { //|| lsButton.equals("btnCancel")
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnPrint", "btnAddAttachment", "btnRemoveAttachment", "btnArrowLeft", "btnArrowRight")) {
                 } else {
                     loadRecordMaster();
                     loadTableDetail.reload();
+                    loadTableFollowUp.reload();
+                    loadTableAttachment.reload();
                 }
 
                 initButton(pnEditMode);
@@ -352,10 +470,10 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         tfBrand.requestFocus();
                     }
                 }
-
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -367,20 +485,29 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     switch (tabTitle) {
                         case "Inquiry":
                             break;
+                        case "Attachments":
+                            JFXUtil.clearTextFields(apAttachments);
+                            if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                                poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
+                                poSalesInquiryController.SalesInquiry().loadAttachments();
+                            }
+                            loadTableAttachment.reload();
+                            break;
                         case "Requirements":
                             JFXUtil.clearTextFields(apRequirements);
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 && !pbPurchaseTypeChanged) {
                                 } else {
-                                    
-                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(cmbCustomerGroup.getSelectionModel().getSelectedIndex()));
+                                    poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList().clear();
+                                    int lnSelected = cmbCustomerGroup.getSelectionModel().getSelectedIndex() > 0 ? cmbCustomerGroup.getSelectionModel().getSelectedIndex() : 0;
+                                    poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(lnSelected));
                                     pbPurchaseTypeChanged = false;
                                 }
                             }
                             loadTableRequirements.reload();
                             break;
                         case "Bank Applications":
-                            JFXUtil.clearTextFields(apBankApplications);
+//                            JFXUtil.clearTextFields(apBankApplications);
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0 && !pbPurchaseTypeChanged) {
                                 } else {
@@ -389,10 +516,14 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             }
                             loadTableBankApplications.reload();
                             break;
+                        case "Followup History":
+                            loadTableFollowUp.reload();
+                            break;
                     }
                 }
             } catch (SQLException | GuanzonException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         });
     }
@@ -403,25 +534,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         try {
             Platform.runLater(() -> {
                 String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().Master().getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(SalesInquiryStatic.QUOTED, "QUOTED");
-                statusMap.put(SalesInquiryStatic.SALE, "SALE");
-                statusMap.put(SalesInquiryStatic.CONFIRMED, "CONFIRMED");
-                statusMap.put(SalesInquiryStatic.OPEN, "OPEN");
-                statusMap.put(SalesInquiryStatic.VOID, "VOIDED");
-                statusMap.put(SalesInquiryStatic.CANCELLED, "CANCELLED");
-                statusMap.put(SalesInquiryStatic.LOST, "LOST");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblStatus.setText(lsStat);
-
-                switch (poSalesInquiryController.SalesInquiry().Master().getInquiryStatus()) {
-                    case "0":
-                        tfInquiryStatus.setText("OPEN");
-                        break;
-                    default:
-                        tfInquiryStatus.setText("");
-                        break;
-                }
+                lblStatus.setText(poSalesInquiryController.SalesInquiry().getInquiryStatus(lsActive).toUpperCase());
             });
 
             // Transaction Date
@@ -443,14 +556,16 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-
                 cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
                 } else {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getClientType()));
                 }
-                cmbCategoryType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getCategoryType()));
+
+                if (poSalesInquiryController.SalesInquiry().Master().getCategoryType() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getCategoryType())) {
+                    cmbCategoryType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getCategoryType()));
+                }
             } else {
                 cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
@@ -460,8 +575,8 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void loadRecordDetail() {
@@ -477,6 +592,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -502,100 +618,61 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             }
             tfRequirement.setText(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).RequirementSource().getDescription());
             tfReceivedBy.setText(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).SalesPerson().getFullName());
-            String lsdpReceivedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).getReceivedDate());
-            dpReceivedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpReceivedDate, "yyyy-MM-dd"));
+            String lsdpReceivedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).getReceivedDate());
+            dpReceivedDate.setValue(!lsdpReceivedDate.equals("") ? CustomCommonUtil.parseDateStringToLocalDate(lsdpReceivedDate, "yyyy-MM-dd") : null);
 
             boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(pnRequirements).SalesPerson().getFullName(), null, "");
             JFXUtil.setDisabled(lbShow, dpReceivedDate);
             JFXUtil.updateCaretPositions(apRequirements);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
-    public void loadRecordBankApplications() {
-        try {
-            boolean lbShow1 = poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0;
-            JFXUtil.setDisabled(!lbShow1, apBankApplicationsButtons);
-            if (pnBankApplications < 0 || pnBankApplications > poSalesInquiryController.SalesInquiry().getBankApplicationsCount() - 1) {
-                return;
-            }
-            Platform.runLater(() -> {
-                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus();
-                Map<String, String> statusMap = new HashMap<>();
-                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
-                lblBankApplicationStatus.setText(lsStat);
-            });
-            JFXUtil.setDisabled(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getEditMode() == EditMode.ADDNEW, apBankApplicationsButtons, dpApprovedDate);
-
-            boolean lbShow = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getTransactionStatus(),
-                    BankApplicationStatus.APPROVED, BankApplicationStatus.DISAPPROVED, BankApplicationStatus.CANCELLED);
-            boolean lbShow2 = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getEditMode(), EditMode.UPDATE);
-            JFXUtil.setDisabled(lbShow || lbShow2, tfBank);
-
-            String lsPaymentMode = "";
-            if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode(), null, "")) {
-                lsPaymentMode = PurchaseType.get(Integer.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getPaymentMode()));
-            } else {
-                lsPaymentMode = "";
-            }
-            tfPaymentMode.setText(lsPaymentMode);
-            tfApplicationNo.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApplicationNo());
-            tfBank.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).Bank().getBankName());
-            taBankAppRemarks.setText(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getRemarks());
-
-            String lsdpAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getAppliedDate());
-            dpAppliedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpAppliedDate, "yyyy-MM-dd"));
-
-            String lsdpApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApprovedDate());
-            dpApprovedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsdpApprovedDate, "yyyy-MM-dd"));
-            JFXUtil.updateCaretPositions(apBankApplications);
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-        }
-    }
-
-    private void tableKeyEvents(KeyEvent event) {
-        if (details_data.size() > 0) {
-            TableView currentTable = (TableView) event.getSource();
-            TablePosition focusedCell = currentTable.getFocusModel().getFocusedCell();
-            int index = 0;
-            if (focusedCell != null) {
-                switch (event.getCode()) {
-                    case TAB:
-                    case DOWN:
-                        index = JFXUtil.moveToNextRow(currentTable);
-                        break;
-                    case UP:
-                        index = JFXUtil.moveToPreviousRow(currentTable);
-                        break;
-                    default:
-                        break;
-                }
-                switch (currentTable.getId()) {
-                    case "tblViewTransDetails":
-                        pnDetail = index;
+    JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
+        @Override
+        protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
+            int newIndex = 0;
+            switch (currentTableID) {
+                case "tblViewTransDetails":
+                    if (!details_data.isEmpty()) {
+                        pnDetail = isMovedDown ? JFXUtil.moveToNextRow(currentTable)
+                                : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordDetail();
-                        break;
-                    case "tblViewRequirements":
-                        pnRequirements = index;
+                    }
+                    break;
+                case "tblViewRequirements":
+                    if (!requirements_data.isEmpty()) {
+                        pnRequirements = isMovedDown ? JFXUtil.moveToNextRow(currentTable)
+                                : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordRequirements();
-                        break;
-                    case "tblViewBankApplications":
-                        pnBankApplications = index;
-                        loadRecordBankApplications();
-                        break;
-                }
-                event.consume();
+                    }
+                    break;
+                case "tblViewBankApplications":
+                    break;
+                case "tblAttachments":
+                    if (!attachment_data.isEmpty()) {
+                        pnAttachment = isMovedDown ? Integer.parseInt(attachment_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex03())
+                                : Integer.parseInt(attachment_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex03());
+                        loadRecordAttachment(true);
+                    }
+                    break;
             }
         }
-    }
+    };
 
     public void initTableOnClick() {
+        tblAttachments.setOnMouseClicked(event -> {
+            pnAttachment = tblAttachments.getSelectionModel().getSelectedIndex();
+            if (pnAttachment >= 0) {
+                imageviewerutil.scaleFactor = 1.0;
+                int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                pnAttachment = lnRow;
+                loadRecordAttachment(true);
+                JFXUtil.resetImageBounds(imageView, stackPane1);
+            }
+        });
         tblViewTransDetails.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
@@ -612,20 +689,11 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                 }
             }
         });
-        tblViewBankApplications.setOnMouseClicked(event -> {
-            if (bankapplications_data.size() > 0) {
-                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-                    moveNextBankApplications(false, false);
-                }
-            }
-        });
-        JFXUtil.setKeyEventFilter(this::tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications);
-        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications); // need to use computed-size in min-width of the column to work
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments);
+        JFXUtil.adjustColumnForScrollbar(tblViewTransDetails, tblViewRequirements, tblViewBankApplications, tblViewFollowUpHistory, tblAttachments); // need to use computed-size in min-width of the column to work
         JFXUtil.enableRowDragAndDrop(tblViewTransDetails, item -> ((ModelSalesInquiry_Detail) item).index01Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index03Property(),
                 item -> ((ModelSalesInquiry_Detail) item).index04Property(), dragLock, index -> {
-
                     for (ModelSalesInquiry_Detail d : details_data) {
                         String brand = d.getIndex04();
                         String model = d.getIndex05();
@@ -642,6 +710,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 }
                             } catch (SQLException | GuanzonException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
                             try {
                                 poSalesInquiryController.SalesInquiry().Detail(i).setPriority(Integer.parseInt(priorityStr));
@@ -668,15 +737,20 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).isSubmitted(lbisTrue);
                             poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedBy(lbisTrue ? oApp.getUserID() : "");
                             try {
-                                SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
-                                String lsDummyDate = sdfFormat.format(SQLUtil.toDate(JFXUtil.convertToIsoFormat("01/01/1900"), SQLUtil.FORMAT_SHORT_DATE));
-                                LocalDate localDate = LocalDate.parse(lsDummyDate);
-                                Timestamp timestamp = Timestamp.valueOf(localDate.atStartOfDay());
-                                poJSON = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedDate(lbisTrue ? oApp.getServerDate() : timestamp);
+                                if (lbisTrue) {
+                                    SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
+                                    String lsDummyDate = sdfFormat.format(SQLUtil.toDate(JFXUtil.convertToIsoFormat("01/01/1900"), SQLUtil.FORMAT_SHORT_DATE));
+                                    LocalDate localDate = LocalDate.parse(lsDummyDate);
+                                    Timestamp timestamp = Timestamp.valueOf(localDate.atStartOfDay());
+                                    poJSON = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedDate(lbisTrue ? oApp.getServerDate() : timestamp);
+                                } else {
+                                    poJSON = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(rowIndex).setReceivedDate(null);
+                                }
                                 pnRequirements = rowIndex;
                                 loadTableRequirements.reload();
                             } catch (SQLException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                             }
                             break;
                     }
@@ -693,7 +767,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         int lnCtr;
                         details_data.clear();
                         try {
-
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poSalesInquiryController.SalesInquiry().loadDetail();
                             }
@@ -760,8 +833,8 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
 
@@ -777,14 +850,14 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 int lnIsRequired = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).isRequired() ? 1 : 0;
                                 int lnIsSubmitted = poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).isSubmitted() ? 1 : 0;
 
-                                String lsReceivedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).getReceivedDate());
+                                String lsReceivedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).getReceivedDate());
                                 requirements_data.add(
                                         new ModelRequirements_Detail(String.valueOf(lnCtr + 1),
                                                 String.valueOf(lnIsRequired),
                                                 String.valueOf(lnIsSubmitted),
                                                 String.valueOf(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).RequirementSource().getDescription()),
                                                 String.valueOf(poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(lnCtr).SalesPerson().getFullName()),
-                                                String.valueOf(CustomCommonUtil.parseDateStringToLocalDate(lsReceivedDate, "yyyy-MM-dd"))
+                                                String.valueOf(lsReceivedDate)
                                         ));
                             }
                             if (pnRequirements < 0 || pnRequirements
@@ -793,7 +866,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewRequirements, 0);
                                     pnRequirements = tblViewRequirements.getSelectionModel().getSelectedIndex();
-
                                 }
                                 loadRecordRequirements();
                             } else {
@@ -803,6 +875,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             }
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -819,23 +892,17 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 poSalesInquiryController.SalesInquiry().loadBankApplicationList();
                             }
                             for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getBankApplicationsCount(); lnCtr++) {
-                                String lsAppliedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
-                                String lsApprovedDate = CustomCommonUtil.formatDateToShortString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
+                                String lsAppliedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getAppliedDate());
+                                String lsApprovedDate = JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApprovedDate());
 
-                                String lsActive = pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus();
-                                Map<String, String> statusMap = new HashMap<>();
-                                statusMap.put(BankApplicationStatus.OPEN, "OPEN");
-                                statusMap.put(BankApplicationStatus.APPROVED, "APPROVED");
-                                statusMap.put(BankApplicationStatus.DISAPPROVED, "DISAPPROVED");
-                                statusMap.put(BankApplicationStatus.CANCELLED, "CANCELLED");
-                                String lsStat = statusMap.getOrDefault(lsActive, "UNKNOWN"); //default
+                                String lsStat = JFXUtil.setStatusValue(null, BankApplicationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getTransactionStatus());
 
                                 String lsBank = JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName(), null, "")
                                         ? "" : poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).Bank().getBankName();
 
                                 bankapplications_data.add(
                                         new ModelBankApplications_Detail(String.valueOf(lnCtr + 1),
-                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getApplicationNo()),
+                                                String.valueOf(poSalesInquiryController.SalesInquiry().BankApplicationsList(lnCtr).getPONumber()),
                                                 String.valueOf(lsBank),
                                                 String.valueOf(lsAppliedDate),
                                                 String.valueOf(lsApprovedDate),
@@ -843,24 +910,145 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                         )
                                 );
                             }
-                            if (pnBankApplications < 0 || pnBankApplications
-                                    >= bankapplications_data.size()) {
-                                if (!bankapplications_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewBankApplications, 0);
-                                    pnBankApplications = tblViewBankApplications.getSelectionModel().getSelectedIndex();
-                                }
-                                loadRecordBankApplications();
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                JFXUtil.selectAndFocusRow(tblViewBankApplications, pnBankApplications);
-                                loadRecordBankApplications();
-                            }
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
+
+        loadTableFollowUp = new JFXUtil.ReloadableTableTask(
+                tblViewFollowUpHistory,
+                followup_data,
+                () -> {
+                    Platform.runLater(() -> {
+                        Platform.runLater(() -> {
+                            int lnCtr;
+                            followup_data.clear();
+                            try {
+                                if (pnEditMode != EditMode.UNKNOWN) {
+                                    poSalesInquiryController.SalesInquiry().loadFollowUpHistory();
+                                }
+                                for (lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getFollowUpHistoryCount(); lnCtr++) {
+                                    followup_data.add(
+                                            new ModelFollowUp_Detail(String.valueOf(lnCtr + 1),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getTransactionNo()),
+                                                    String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getTransactionDate())),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMessage()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getRemarks()),
+                                                    String.valueOf(JFXUtil.formatDateToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpDate())),
+                                                    String.valueOf(JFXUtil.formatTimeToString(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getFollowUpTime())),
+                                                    String.valueOf(getCommunicationMethod(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getMethodCode())),
+                                                    String.valueOf(getSocialMediaName(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getSocialMediaCode())),
+                                                    String.valueOf(getCustomerResponse(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getResponseCode())),
+                                                    String.valueOf(getVehicleCondition(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorGoods())),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorMake()),
+                                                    String.valueOf(poSalesInquiryController.SalesInquiry().FollowUpHistoryList(lnCtr).getCompetitorDealer())
+                                            )
+                                    );
+                                }
+                            } catch (SQLException | GuanzonException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
+                        });
+                    });
+                });
+
+        loadTableAttachment = new JFXUtil.ReloadableTableTask(
+                tblAttachments,
+                attachment_data,
+                () -> {
+                    imageviewerutil.scaleFactor = 1.0;
+                    JFXUtil.resetImageBounds(imageView, stackPane1);
+                    Platform.runLater(() -> {
+                        try {
+                            attachment_data.clear();
+                            int lnCount = 0;
+                            for (int lnCtr = 0; lnCtr < poSalesInquiryController.SalesInquiry().getTransactionAttachmentCount(); lnCtr++) {
+                                if (RecordStatus.INACTIVE.equals(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    continue;
+                                }
+                                lnCount += 1;
+                                attachment_data.add(
+                                        new ModelDeliveryAcceptance_Attachment(String.valueOf(lnCount),
+                                                String.valueOf(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(lnCtr).getModel().getFileName()),
+                                                String.valueOf(lnCtr)
+                                        )
+                                );
+                            }
+
+                            int lnTempRow = JFXUtil.getDetailRow(attachment_data, pnAttachment, 3);
+                            if (lnTempRow < 0 || lnTempRow >= attachment_data.size()) {
+                                if (!attachment_data.isEmpty()) {
+                                    JFXUtil.selectAndFocusRow(tblAttachments, 0);
+                                    int lnRow = Integer.parseInt(attachment_data.get(0).getIndex03());
+                                    pnAttachment = lnRow;
+                                    loadRecordAttachment(true);
+                                }
+                            } else {
+                                JFXUtil.selectAndFocusRow(tblAttachments, lnTempRow);
+                                int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex03());
+                                pnAttachment = lnRow;
+                                loadRecordAttachment(true);
+                            }
+
+                            if (attachment_data.size() <= 0) {
+                                loadRecordAttachment(false);
+                            }
+                        } catch (Exception e) {
+                        }
+                    });
+                }
+        );
+    }
+
+    public static String getSocialMediaName(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.SOCIAL_MEDIA_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.SOCIAL_MEDIA.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCommunicationMethod(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COMM_METHOD_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COMM_METHOD_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COMMUNICATION_METHOD.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getCustomerResponse(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.CUSTOMER_RESPONSE.get(i);
+            }
+        }
+        return "";
+    }
+
+    public static String getVehicleCondition(String code) {
+        if (code == null) {
+            return "";
+        }
+        for (int i = 0; i < CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE.length; i++) {
+            if (code.equals(CustomerInquiryFollowUpStatic.COM_VHICLE_COND_CODE[i])) {
+                return CustomerInquiryFollowUpStatic.COM_VHICLE_COND.get(i);
+            }
+        }
+        return "";
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -876,15 +1064,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             return;
                         }
                         loadRecordMaster();
-                        break;
-                    case "taBankAppRemarks"://Remarks
-                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setRemarks(lsValue);
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        loadRecordBankApplications();
                         break;
                 }
             });
@@ -957,7 +1136,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                         if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
                                             if (!pbKeyPressed) {
                                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                        "Are you sure you want to change the supplier name?\nPlease note that doing so will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
+                                                        "Are you sure you want to change the supplier name?\nPlease note that this action will delete all purchase order receiving details.\n\nDo you wish to proceed?") == true) {
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                                     poJSON = poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -979,7 +1158,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             poJSON = poSalesInquiryController.SalesInquiry().Master().setClientId("");
                         }
                         break;
-
                 }
 
                 loadRecordMaster();
@@ -1005,29 +1183,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                 loadRecordRequirements();
             });
 
-    ChangeListener<Boolean> txtBankApplications_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                /*Lost Focus*/
-                switch (lsID) {
-                    case "tfApplicationNo":
-                        poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setApplicationNo(lsValue);
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            System.err.println((String) poJSON.get("message"));
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
-                        break;
-                    case "tfBank":
-                        if (lsValue.isEmpty()) {
-                            poJSON = poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).setBankId(lsValue);
-                            JFXUtil.runWithDelay(0.70, () -> loadTableBankApplications.reload());
-                        }
-                        break;
-                }
-                loadRecordBankApplications();
-            });
-
     public void moveNext(boolean isUp, boolean continueNext) {
         apDetail.requestFocus();
         if (continueNext) {
@@ -1049,21 +1204,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             pnRequirements = isUp ? JFXUtil.moveToPreviousRow(tblViewRequirements) : JFXUtil.moveToNextRow(tblViewRequirements);
         }
         loadRecordRequirements();
-    }
-
-    public void moveNextBankApplications(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apBankApplications.requestFocus();
-            pnBankApplications = isUp ? JFXUtil.moveToPreviousRow(tblViewBankApplications) : JFXUtil.moveToNextRow(tblViewBankApplications);
-        }
-        loadRecordBankApplications();
-        if (JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getApplicationNo(), null, "")) {
-            tfApplicationNo.requestFocus();
-        } else if (JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().BankApplicationsList(pnBankApplications).getBankId(), null, "")) {
-            tfBank.requestFocus();
-        } else {
-            tfApplicationNo.requestFocus();
-        }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -1097,11 +1237,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             moveNextRequirements(true, true);
                             event.consume();
                             break;
-                        case "tfApplicationNo":
-                        case "tfBank":
-                            moveNextBankApplications(true, true);
-                            event.consume();
-                            break;
                     }
                     break;
                 case DOWN:
@@ -1117,11 +1252,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             moveNextRequirements(false, true);
                             event.consume();
                             break;
-                        case "tfApplicationNo":
-                        case "tfBank":
-                            moveNextBankApplications(false, true);
-                            event.consume();
-                            break;
                         default:
                             break;
                     }
@@ -1133,7 +1263,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                            "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                            "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                         poSalesInquiryController.SalesInquiry().removeDetails();
                                         loadTableDetail.reload();
                                     } else {
@@ -1233,15 +1363,6 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             }
                             loadTableRequirements.reload();
                             break;
-                        case "tfBank":
-                            poJSON = poSalesInquiryController.SalesInquiry().SearchBank(lsValue, false, pnBankApplications);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                tfBank.setText("");
-                                break;
-                            }
-                            loadTableBankApplications.reload();
-                            break;
                     }
                     break;
                 default:
@@ -1249,6 +1370,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             }
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1362,10 +1484,10 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             break;
                     }
                 }
-
             }
         } catch (SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
     final EventHandler<ActionEvent> comboBoxActionListener = event -> {
@@ -1384,7 +1506,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 if (poSalesInquiryController.SalesInquiry().getDetailCount() > 0) {
                                     if (!JFXUtil.isObjectEqualTo(poSalesInquiryController.SalesInquiry().Detail(0).getBrandId(), null, "")) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                                "Are you sure you want to change the client name?\nPlease note that doing so will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
+                                                "Are you sure you want to change the client name?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
                                             poSalesInquiryController.SalesInquiry().Master().setClientId("");
                                             poSalesInquiryController.SalesInquiry().Master().setAddressId("");
                                             poSalesInquiryController.SalesInquiry().Master().setContactId("");
@@ -1412,7 +1534,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                                 }
 
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                        "Are you sure you want to change the Purchase Type?\nPlease note that doing so will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
+                                        "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
                                     poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
                                     poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
                                     poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
@@ -1431,10 +1553,11 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                         poSalesInquiryController.SalesInquiry().Master().setCategoryType(String.valueOf(selectedIndex));
                         break;
                     case "cmbCustomerGroup":
-                        if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0) {
-                            if (!poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(0).getCustomerGroup().equals(String.valueOf(selectedIndex))) {
+                        if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 && requirements_data != null) {
+                            if (!poSalesInquiryController.SalesInquiry().SalesInquiryRequimentsList(0).getCustomerGroup().equals(String.valueOf(selectedIndex))
+                                    && !requirements_data.isEmpty()) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                        "Are you sure you want to change the Customer group?\nPlease note that doing so will delete all requirements list.\n\nDo you wish to proceed?") == true) {
+                                        "Are you sure you want to change the Customer group?\nPlease note that this action will delete all requirements list.\n\nDo you wish to proceed?") == true) {
                                     poJSON = poSalesInquiryController.SalesInquiry().getRequirements(String.valueOf(selectedIndex));
                                     if ("error".equals((String) poJSON.get("result"))) {
                                         ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -1462,31 +1585,41 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                 }
             } catch (GuanzonException | SQLException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         });
     };
 
     private void initComboBoxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
-                new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup));
+                new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup), new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
+
+        cmbAttachmentType.setOnAction(event -> {
+            if (attachment_data.size() > 0) {
+                try {
+                    int selectedIndex = cmbAttachmentType.getSelectionModel().getSelectedIndex();
+                    poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().setDocumentType("000" + selectedIndex);
+                    cmbAttachmentType.getSelectionModel().select(selectedIndex);
+                } catch (Exception e) {
+                }
+            }
+        });
     }
 
     public void initDatePickers() {
-        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpTargetDate, dpReceivedDate, dpAppliedDate, dpApprovedDate);
-        JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpTargetDate, dpReceivedDate, dpAppliedDate, dpApprovedDate);
+        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpTransactionDate, dpTargetDate, dpReceivedDate); //, dpAppliedDate, dpApprovedDate);
+        JFXUtil.setActionListener(this::datepicker_Action, dpTransactionDate, dpTargetDate, dpReceivedDate); //, dpAppliedDate, dpApprovedDate);
     }
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtArea_Focus, taRemarks, taBankAppRemarks);
+        JFXUtil.setFocusListener(txtArea_Focus, taRemarks); //, taBankAppRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient, tfSalesPerson, tfReferralAgent, tfInquiryType);
         JFXUtil.setFocusListener(txtDetail_Focus, tfBrand, tfModel, tfColor);
 
         JFXUtil.setFocusListener(txtRequirements_Focus, tfRequirement, tfReceivedBy);
-        JFXUtil.setFocusListener(txtBankApplications_Focus, tfApplicationNo, tfBank);
-
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail, apRequirements, apBankApplications);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apDetail, apRequirements, apAttachments); //, apBankApplications);
         JFXUtil.setDisabled(oApp.getUserLevel() <= UserRight.ENCODER, tfSalesPerson);
     }
 
@@ -1497,12 +1630,13 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         dragLock.isEnabled = lbShow;
         disableRowCheckbox.set(!lbShow); // set enable/disable in checkboxes in requirements
         // Manage visibility and managed state of other buttons
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW, btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apRequirements, apBankApplications);
+        JFXUtil.setDisabled(!lbShow, taRemarks, apMaster, apDetail, apRequirements, apAttachments); //, apBankApplications);
 
         switch (poSalesInquiryController.SalesInquiry().Master().getTransactionStatus()) {
             case SalesInquiryStatic.QUOTED:
@@ -1510,7 +1644,8 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             case SalesInquiryStatic.LOST:
             case SalesInquiryStatic.VOID:
             case SalesInquiryStatic.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+            case SalesInquiryStatic.CONFIRMED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
         }
     }
@@ -1538,16 +1673,146 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
         tblViewBankApplications.setItems(bankapplications_data);
     }
 
+    public void initFollowUpGrid() {
+        JFXUtil.setColumnCenter(tblFollowUpRowNo, tblFollowUpTransNo, tblFollowUpTransDate, tblFollowUpDate, tblFollowUpTime);
+        JFXUtil.setColumnLeft(tblFollowUpMessage, tblFollowUpRemarks, tblFollowUpMethod, tblFollowUpSocMed, tblFollowUpResponse, tblFollowUpGoodsCompetitor, tblFollowUpMakeCompetitor, tblFollowUpDealerCompetitor);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewFollowUpHistory);
+        tblViewFollowUpHistory.setItems(followup_data);
+    }
+
+    public void initAttachmentsGrid() {
+        JFXUtil.setColumnCenter(tblRowNoAttachment);
+        JFXUtil.setColumnLeft(tblFileNameAttachment);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblAttachments);
+        tblAttachments.setItems(attachment_data);
+    }
+
+    private void initAttachmentPreviewPane() {
+        imageviewerutil.initAttachmentPreviewPane(stackPane1, imageView);
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            imageviewerutil.ldstackPaneHeight = computedHeight;
+            loadTableAttachment.reload();
+            loadRecordAttachment(true);
+        });
+    }
+
+    public void slideImage(int direction) {
+        if (attachment_data.size() <= 0) {
+            return;
+        }
+        int lnRow = Integer.parseInt(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+        currentIndex = lnRow - 1;
+        int newIndex = currentIndex + direction;
+
+        if (newIndex != -1 && (newIndex <= attachment_data.size() - 1)) {
+            TranslateTransition slideOut = new TranslateTransition(Duration.millis(300), imageView);
+            slideOut.setByX(direction * -400);
+
+            JFXUtil.selectAndFocusRow(tblAttachments, newIndex);
+            int lnIndex = Integer.parseInt(attachment_data.get(newIndex).getIndex01());
+            int lnTempRow = JFXUtil.getDetailTempRow(attachment_data, lnIndex, 3);
+            pnAttachment = lnTempRow;
+            loadRecordAttachment(false);
+
+            slideOut.setOnFinished(event -> {
+                imageView.setTranslateX(direction * 400);
+                TranslateTransition slideIn = new TranslateTransition(Duration.millis(300), imageView);
+                slideIn.setToX(0);
+                slideIn.play();
+                loadRecordAttachment(true);
+            });
+
+            slideOut.play();
+        }
+        if (JFXUtil.isImageViewOutOfBounds(imageView, stackPane1)) {
+            JFXUtil.resetImageBounds(imageView, stackPane1);
+        }
+    }
+
+    public void loadRecordAttachment(boolean lbloadImage) {
+        try {
+            if (attachment_data.size() > 0) {
+                tfAttachmentNo.setText(attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex01());
+                String lsAttachmentType = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                if (lsAttachmentType.equals("")) {
+                    poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().setDocumentType(DocumentType.OTHER);
+                    lsAttachmentType = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getDocumentType();
+                }
+                int lnAttachmentType = Integer.parseInt(lsAttachmentType);
+                cmbAttachmentType.getSelectionModel().select(lnAttachmentType);
+                tfAttachmentSource.setText(poSalesInquiryController.SalesInquiry().TransactionAttachmentSource(pnAttachment));
+                if (lbloadImage) {
+                    try {
+                        String filePath = attachment_data.get(tblAttachments.getSelectionModel().getSelectedIndex()).getIndex02();
+                        String filePath2;
+                        if (imageinfo_temp.containsKey(filePath)) {
+                            filePath2 = imageinfo_temp.get(filePath);
+                        } else {
+                            if (poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath() != null
+                                    && !"".equals(poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath())) {
+                                filePath2 = poSalesInquiryController.SalesInquiry().TransactionAttachmentList(pnAttachment).getModel().getImagePath() + "/" + filePath;
+                            } else {
+                                filePath2 = System.getProperty("sys.default.path.temp.attachments") + "/" + filePath;
+                            }
+                        }
+
+                        if (filePath != null && !filePath.isEmpty()) {
+                            Path imgPath = Paths.get(filePath2);
+                            String convertedPath = imgPath.toUri().toString();
+                            boolean isPdf = filePath.toLowerCase().endsWith(".pdf");
+
+                            stackPane1.getChildren().clear();
+                            if (!isPdf) {
+                                Image loimage = new Image(convertedPath);
+                                imageView.setImage(loimage);
+                                JFXUtil.adjustImageSize(loimage, imageView, imageviewerutil.ldstackPaneWidth, imageviewerutil.ldstackPaneHeight);
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                                delay.setOnFinished(event -> Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1)));
+                                delay.play();
+
+                                stackPane1.getChildren().add(imageView);
+                                stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                                StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                                StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+                                StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                                StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+                            } else {
+                                JFXUtil.PDFViewConfig(filePath2, stackPane1, btnArrowLeft, btnArrowRight, imageviewerutil.ldstackPaneWidth, imageviewerutil.ldstackPaneHeight);
+                            }
+                        } else {
+                            imageView.setImage(null);
+                        }
+                    } catch (Exception e) {
+                        imageView.setImage(null);
+                    }
+                }
+            } else {
+                if (!lbloadImage) {
+                    imageView.setImage(null);
+                    stackPane1.getChildren().clear();
+                    stackPane1.getChildren().add(imageView);
+                    stackPane1.getChildren().addAll(btnArrowLeft, btnArrowRight);
+                    Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane1));
+                    pnAttachment = 0;
+                }
+            }
+        } catch (Exception ex) {
+        }
+    }
+
     public void loadRecordSearch() {
         try {
             lblSource.setText(poSalesInquiryController.SalesInquiry().Master().Company().getCompanyName() + " - " + poSalesInquiryController.SalesInquiry().Master().Industry().getDescription());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     public void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apDetail, apBrowse, apRequirements, apBankApplications);
+        JFXUtil.clearTextFields(apMaster, apDetail, apBrowse, apRequirements, apAttachments); //, apBankApplications);
     }
 }
