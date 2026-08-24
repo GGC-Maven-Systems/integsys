@@ -808,7 +808,7 @@ public class InventoryRequest_ApprovalControllerMC implements Initializable, Scr
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
 
         taRemarks.setText(poAppController.getMaster().getRemarks());
-        tfSourceNo.setText(poAppController.getMaster().Project().getProjectID());
+        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
     }
 
     private void getLoadedTransaction() throws CloneNotSupportedException, SQLException, GuanzonException {
