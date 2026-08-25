@@ -36,7 +36,6 @@ import static javafx.scene.input.KeyCode.TAB;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -109,6 +108,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
+            pgPagination.setPageCount(1);
             poJSON = new JSONObject();
             poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
             poController.initialize();// Initialize transaction
@@ -314,8 +314,16 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                loadRecordMaster();
-                loadTableDetail.reload();
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+                    poController.resetTransaction();
+                    pnEditMode = EditMode.UNKNOWN;
+                    clearTextFields();
+                }
+
+                if (lsButton.equals("btnRetrieve")) {
+                } else {
+                    loadRecordMaster();
+                }
                 initButton(pnEditMode);
             }
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
@@ -509,15 +517,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     }
                                 });
                             });
-                            break;
-                    }
-                },
-                (row, rowIndex, colIndex) -> {
-                    switch (colIndex) {
-                        case 0:
-                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                            break;
-                        default:
                             break;
                     }
                 },
@@ -799,7 +798,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 case "tblViewDetails":
 //                    if (!detail_data.isEmpty()) {
 //                        pnDetail = newIndex;
-//                        moveNext(false, false);
 //                    }
                     break;
             }
@@ -879,7 +877,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 ModelReplenishment_Detail selected = (ModelReplenishment_Detail) tblViewDetails.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnDetail = Integer.parseInt(selected.getIndex02()) - 1;
-//                    moveNext(false, false);
                 }
             }
         });
@@ -896,17 +893,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
         // Manage visibility and managed state of other buttons
-        //Update 
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-
-        //Ready
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
-
-        //Unkown || Ready
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
-//        JFXUtil.setButtonsVisibility(false, btnReturn);
-
         if (fnValue != EditMode.READY) {
             return;
         }

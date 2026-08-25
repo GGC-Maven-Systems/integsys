@@ -269,15 +269,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                             break;
                     }
                 },
-                (row, rowIndex, colIndex) -> {
-                    switch (colIndex) {
-                        case 0:
-                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                            break;
-                        default:
-                            break;
-                    }
-                },
                 0);//starts 0,1,2 
     }
 
@@ -297,7 +288,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 main_data,
                 () -> {
                     Platform.runLater(() -> {
-//                        try {
                         main_data.clear();
                         if (cloned == null) {
                             return;
@@ -336,10 +326,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                             /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
                             JFXUtil.selectAndFocusRow(tblViewDetails, pnDetail);
                         }
-//                        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        }
                     });
                 });
     }

@@ -121,7 +121,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 //                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 loadRecordSearch();
-                poController.setRecordStatus("0134");
+                poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
                 btnNew.fire();
             });
         } catch (SQLException | GuanzonException ex) {
@@ -285,18 +285,21 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                loadRecordMaster();
-                loadTableDetail.reload();
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+                    poController.resetTransaction();
+                    pnEditMode = EditMode.UNKNOWN;
+                    clearTextFields();
+                }
+                if (lsButton.equals("btnRetrieve")) {
+                } else {
+                    loadRecordMaster();
+                }
                 initButton(pnEditMode);
 
             }
-        } catch (SQLException | GuanzonException ex) {
+        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (ParseException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -421,15 +424,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             break;
                     }
                 },
-                (row, rowIndex, colIndex) -> {
-                    switch (colIndex) {
-                        case 0:
-                            ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                            break;
-                        default:
-                            break;
-                    }
-                },
                 0);//starts 0,1,2 
     }
 
@@ -449,11 +443,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 detail_data,
                 () -> {
                     Platform.runLater(() -> {
-//                        try {
                         detail_data.clear();
-                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                poController.ReloadDetail();
-                        }
                         int lnRowCount = 0;
 
                         if (isCashFund()) {
@@ -497,10 +487,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             JFXUtil.selectAndFocusRow(tblViewDetails, pnDetail);
                         }
                         loadRecordMaster();
-//                        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        }
                     });
                 });
     }
@@ -722,7 +708,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 case "tblViewDetails":
 //                    if (!detail_data.isEmpty()) {
 //                        pnDetail = newIndex;
-//                        moveNext(false, false);
 //                    }
                     break;
             }
@@ -743,7 +728,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 ModelReplenishment_Detail selected = (ModelReplenishment_Detail) tblViewDetails.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnDetail = Integer.parseInt(selected.getIndex02()) - 1;
-//                    moveNext(false, false);
                 }
             }
         });
@@ -755,20 +739,16 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     }
 
     private void initButton(int fnValue) {
+        boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
-        // Manage visibility and managed state of other buttons
-        //Update 
+
+        JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-
-        //Ready
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
-
-        //Unkown || Ready
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
-//        JFXUtil.setButtonsVisibility(false, btnReturn);
 
         if (fnValue != EditMode.READY) {
             return;
