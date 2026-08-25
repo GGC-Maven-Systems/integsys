@@ -617,8 +617,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         try {
             lblStatus.setText("UNKNOWN");
             checkboxState();
-            if (pnDetail < 0 || pnDetail > poController.getCashFundLedgerListCount() - 1) {
-                return;
+            if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
+                btnVoid.setText("Cancel");
+            } else {
+                btnVoid.setText("Void");
             }
             JFXUtil.setStatusValue(lblStatus, ReplenishmentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getTransactionStatus());
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
@@ -626,7 +628,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             JFXUtil.setCmbValue(cmbFundType, !poController.getModel().getFundType().equals("") ? Integer.valueOf(poController.getModel().getFundType()) : -1);
             tfFundDescription.setText(poController.getModel().CashFund().getDescription());
             tfTransactionAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getTransactionAmount().doubleValue(), true));
-//        taRemarks.setText(poController.getModel().get());
+            taRemarks.setText(poController.getModel().getRemarks());
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -735,7 +737,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "taRemarks":
-//                        poJSON = poController.Master().setRemarks(lsValue);
+                        poJSON = poController.getModel().setRemarks(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -763,14 +765,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails, tblViewMainList);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetails, tblViewMainList);
-
-        JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
-            if (nodeID.equals("chckSelectAll")) {
-                if (!detail_data.isEmpty()) {
-                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                }
-            }
-        });
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
@@ -874,21 +868,32 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     }
 
     private void initButton(int fnValue) {
-
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
-        boolean lbShow2 = (fnValue == EditMode.READY);
-        boolean lbShow3 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
+        boolean lbShow3 = (fnValue == EditMode.READY);
+        boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
+        // Manage visibility and managed state of other buttons
+        //Update 
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
 
+        //Ready
+        JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
+
+        //Unkown || Ready
         JFXUtil.setDisabled(!lbShow1, apMaster);
+        JFXUtil.setButtonsVisibility(lbShow4, btnClose);
+//        JFXUtil.setButtonsVisibility(false, btnReturn);
 
         if (fnValue != EditMode.READY) {
             return;
         }
         switch (poController.getModel().getTransactionStatus()) {
-            case ReplenishmentRequestStatus.OPEN:
-            case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.APPROVED:
+                JFXUtil.setButtonsVisibility(false, btnApprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+                break;
+            case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
+                JFXUtil.setButtonsVisibility(false, btnApprove, btnUpdate, btnVoid);
                 break;
         }
     }

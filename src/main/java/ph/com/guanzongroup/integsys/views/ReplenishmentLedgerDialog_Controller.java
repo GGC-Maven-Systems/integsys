@@ -403,14 +403,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails);
 
         JFXUtil.adjustColumnForScrollbar(tblViewDetails);
-
-        JFXUtil.handleDisabledNodeClick(apTable, pnEditMode, nodeID -> {
-            if (nodeID.equals("chckSelectAll")) {
-                if (!main_data.isEmpty()) {
-                    ShowMessageFX.Information(null, pxeModuleName, "Checkbox is available only when the record is not in Add or Update mode.");
-                }
-            }
-        });
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
