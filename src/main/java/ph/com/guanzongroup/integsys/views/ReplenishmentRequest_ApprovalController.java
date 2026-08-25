@@ -503,11 +503,15 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
 
                         if (!origFundType.isEmpty()) {
                             if (!origFundType.equals(selectedFundType)) {
-                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                        "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                    poController.resetTransaction();
-                                    clearTextFields();
-                                    loadTableDetail.reload();
+                                if (isDetailCountMoreThanOne()) {
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        poController.resetTransaction();
+                                        clearTextFields();
+                                        loadTableDetail.reload();
+                                    } else {
+                                        loadTableDetail.reload();
+                                    }
                                 }
                             }
                         }
