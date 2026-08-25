@@ -260,13 +260,13 @@
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Text>
-                                                        <TextField fx:id="tfSearchFundDescription" promptText="Press F3 Search" GridPane.columnIndex="2" />
+                                                        <TextField fx:id="tfSearchFundDescription" promptText="Press F3: Search" GridPane.columnIndex="2" />
                                                         <Text layoutX="54.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Transaction No" GridPane.columnIndex="4">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Text>
-                                                        <TextField fx:id="tfSearchTransactionNo" layoutX="150.0" layoutY="20.0" promptText="Press F3 Search" GridPane.columnIndex="5" />
+                                                        <TextField fx:id="tfSearchTransactionNo" layoutX="150.0" layoutY="20.0" promptText="Press F3: Search" GridPane.columnIndex="5" />
                                                     </children>
                                     </GridPane>
                                  </children>

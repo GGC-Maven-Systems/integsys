@@ -36,9 +36,11 @@ import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.cashflow.ReplenishmentRequest;
 import ph.com.guanzongroup.cas.cashflow.model.Model_Cash_Fund_Ledger;
+import ph.com.guanzongroup.cas.cashflow.model.Model_PettyCashLedger;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
-import ph.com.guanzongroup.integsys.model.ModelReplenishment_Detail;
-import ph.com.guanzongroup.integsys.model.ModelReplenishment_Main;
+import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
+import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
+import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -57,9 +59,9 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     private boolean pbEntered = false;
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     ArrayList<String> checkedItem = new ArrayList<>();
-    ArrayList<Model_Cash_Fund_Ledger> checkedItems = new ArrayList<>();
-
-    private ObservableList<ModelReplenishment_Main> main_data = FXCollections.observableArrayList();
+    ArrayList<Model_Cash_Fund_Ledger> checkedItems_cashFund = new ArrayList<>();
+    ArrayList<Model_PettyCashLedger> checkedItems_pettyCash = new ArrayList<>();
+    private ObservableList<ModelReplenishmentLedger> main_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableDetail;
     private int pnDetail = 0;
     Map<String, JFXUtil.Data> cloned;
@@ -80,32 +82,33 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        try {
-            poJSON = new JSONObject();
-            poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
-            poController.initialize();// Initialize transaction
+//        try {
+        poJSON = new JSONObject();
+//            poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
+//            poController.initialize();// Initialize transaction
 //            poController.setRecordStatus("0123");
 
-            initTextFields();
-            clearTextFields();
-            pnEditMode = EditMode.UNKNOWN;
-            initButton(pnEditMode);
-            initLoadTable();
-            initTableOnClick();
-            initDetailGrid();
-            initCheckboxes();
-            Platform.runLater(() -> {
+        initTextFields();
+        clearTextFields();
+        pnEditMode = EditMode.UNKNOWN;
+        initButton(pnEditMode);
+        initLoadTable();
+        initTableOnClick();
+        initDetailGrid();
+        initCheckboxes();
+        Platform.runLater(() -> {
+            loadTableDetail.reload();
 //                poController.setIndustryID(psIndustryId);
 //                poController.setCompanyID(psCompanyId);
 //                poController.setIndustryId(psIndustryId);
 //                poController.setCompanyId(psCompanyId);
-                poController.setWithUI(true);
-                poController.setRecordStatus("0134");
-            });
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
+//                poController.setWithUI(true);
+//                poController.setRecordStatus("0134");
+        });
+//        } catch (SQLException | GuanzonException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//        }
     }
 
     @Override
@@ -140,7 +143,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                        appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
+                        CommonUtils.closeStage(btnClose);
                     } else {
                         return;
                     }
@@ -176,35 +179,49 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
             return;
         }
-        checkedItems.clear();
+
+        checkedItems_cashFund.clear();
+        checkedItems_pettyCash.clear();
         List<String> list = new ArrayList<>();
         for (Object item : tblViewDetails.getItems()) {
-            ModelReplenishment_Detail item1 = (ModelReplenishment_Detail) item;
+            ModelReplenishmentLedger item1 = (ModelReplenishmentLedger) item;
             String lschecked = item1.getIndex01();
             int lnReference = Integer.valueOf(item1.getIndex07()) - 1;
             if (lschecked.equals("1")) {
                 list.add(item1.getIndex06());
-                checkedItems.add(poController.CashFundLedgerList(lnReference));
-                System.out.println("check items : " + checkedItems.get(checkedItems.size() - 1));
+                if (isCashFund()) {
+                    checkedItems_cashFund.add(poController.LoadCashFundLedgerList(lnReference));
+                } else {
+                    checkedItems_pettyCash.add(poController.LoadPettyCashLedgerList(lnReference));
+                }
+            }
+        }
+        if (isCashFund()) {
+            if (checkedItems_cashFund.isEmpty()) {
+                return;
+            }
+        } else {
+            if (checkedItems_pettyCash.isEmpty()) {
+                return;
             }
         }
 
-        if (checkedItems.isEmpty()) {
-            return;
-        }
         switch (action) {
             case "btnAddLedger":
-                poJSON = poController.AddCashFundLedger(checkedItems);
+                if (isCashFund()) {
+                    poJSON = poController.AddCashFundLedger(checkedItems_cashFund);
+                } else {
+                    poJSON = poController.AddPettyCashLedger(checkedItems_pettyCash);
+                }
                 break;
             default:
                 break;
         }
         if (!"success".equals((String) poJSON.get("result"))) {
             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-        } else {
-            ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-            resetCheckboxSelection();
         }
+        resetCheckboxSelection();
+        CommonUtils.closeStage(btnClose);
         pnEditMode = poController.getEditMode();
     }
 
@@ -238,7 +255,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     }
 
     private void initCheckboxes() {
-        JFXUtil.addCheckboxColumns(ModelReplenishment_Detail.class, tblViewDetails, disableRowCheckbox,
+        JFXUtil.addCheckboxColumns(ModelReplenishmentLedger.class, tblViewDetails, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
@@ -286,8 +303,9 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
 
                         List<Map.Entry<String, JFXUtil.Data>> entryList
                                 = new ArrayList<>(cloned.entrySet());
-
+                        int lnCtr = 0;
                         for (int i = 0; i < entryList.size(); i++) {
+                            lnCtr += 1;
                             Map.Entry<String, JFXUtil.Data> entry = entryList.get(i);
 //                            String lsRowNo = entry.getKey();
                             JFXUtil.Data data = entry.getValue();
@@ -297,21 +315,17 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                             String lsDate = data.value4;
                             String lsAmount = data.value5;
                             checkedItems(i);
-                            main_data.add(new ModelReplenishment_Main(checkedItem.get(i),
+                            main_data.add(new ModelReplenishmentLedger(checkedItem.get(i),
                                     lsLedgerNo,
                                     lsSourceCode,
                                     lsSourceNo,
                                     lsDate,
-                                    lsAmount
+                                    lsAmount, String.valueOf(lnCtr)
                             ));
                         }
-                        if (pnEditMode == EditMode.READY) {
-                            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
-                            JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
-                        } else {
-                            disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
-                            JFXUtil.setDisabled(true, chckSelectAll);
-                        }
+                        disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                        JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
+
                         if (pnDetail < 0 || pnDetail
                                 >= main_data.size()) {
                             if (!main_data.isEmpty()) {
@@ -409,7 +423,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     private void initTableOnClick() {
         tblViewDetails.setOnMouseClicked(event -> {
             if (!main_data.isEmpty() && event.getClickCount() == 1) {
-                ModelReplenishment_Detail selected = (ModelReplenishment_Detail) tblViewDetails.getSelectionModel().getSelectedItem();
+                ModelReplenishmentLedger selected = (ModelReplenishmentLedger) tblViewDetails.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnDetail = Integer.parseInt(selected.getIndex02()) - 1;
                 }
@@ -424,7 +438,14 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
 
     public void addData(Map<String, JFXUtil.Data> dataMap) {
         cloned = new HashMap<>(dataMap);
-        loadTableDetail.reload();
+    }
+
+    private boolean isCashFund() {
+        return poController.getModel().getFundType().equals("1") ? true : false;
+    }
+
+    public void addController(ReplenishmentRequest loController) {
+        poController = loController;
     }
 
     private void initButton(int fnValue) {

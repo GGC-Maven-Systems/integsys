@@ -32,7 +32,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                            <children>
-                              <Button fx:id="btnAddLedger" contentDisplay="TOP" graphicTextGap="3.0" layoutX="503.0" layoutY="23.0" maxHeight="70.0" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Add">
+                              <Button fx:id="btnAddLedger" contentDisplay="TOP" graphicTextGap="3.0" layoutX="503.0" layoutY="23.0" maxHeight="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Add">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -71,7 +71,7 @@
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="500.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
-                                          <TableView fx:id="tblViewMainList">
+                                          <TableView fx:id="tblViewDetails">
                                             <columns>
                                                 <TableColumn fx:id="tblDetailRow1" maxWidth="30.0" minWidth="30.0" prefWidth="30.0">
                                                    <graphic>
@@ -120,7 +120,7 @@
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Label>
-                                          <TextField promptText="Filter by ledger no" GridPane.columnIndex="2" />
+                                          <TextField fx:id="tfSearchLedgerNo" promptText="Press F3: Search" GridPane.columnIndex="2" />
                                        </children>
                                     </GridPane>
                                  </children>
