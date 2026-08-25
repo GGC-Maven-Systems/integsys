@@ -102,6 +102,8 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     @FXML
     private TableColumn tblDetailRow1, tblDetailLedgerNo, tblDetailSourceCode, tblDetailSourceNo, tblDetailDate, tblDetailAmount, tblRowNo, tblTransactionNo, tblDate, tblFundType, tblFundDescription, tblAmount;
     @FXML
+    private CheckBox chckSelectAll;
+    @FXML
     private Pagination pgPagination;
 
     @Override
@@ -565,13 +567,16 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
 
     private void loadRecordMaster() {
         try {
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(detail_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(detail_data.isEmpty(), chckSelectAll);
+            } else {
+                disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(true, chckSelectAll);
+            }
+
             lblStatus.setText("UNKNOWN");
             checkboxState();
-            if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
-                btnVoid.setText("Cancel");
-            } else {
-                btnVoid.setText("Void");
-            }
             JFXUtil.setStatusValue(lblStatus, ReplenishmentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getTransactionStatus());
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             dpTransactionDate.setValue(poController.getModel().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
@@ -838,8 +843,8 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
-        JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
+//        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
+        JFXUtil.setButtonsVisibility(lbShow3, btnHistory, btnApprove);
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
         if (fnValue != EditMode.READY) {
@@ -848,11 +853,11 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         switch (poController.getModel().getTransactionStatus()) {
             case ReplenishmentRequestStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(false, btnApprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnApprove, btnUpdate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnApprove);
                 break;
         }
     }

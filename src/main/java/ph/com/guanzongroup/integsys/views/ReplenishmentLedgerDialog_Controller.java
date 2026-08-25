@@ -305,6 +305,13 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                                     lsAmount
                             ));
                         }
+                        if (pnEditMode == EditMode.READY) {
+                            disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                            JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);
+                        } else {
+                            disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                            JFXUtil.setDisabled(true, chckSelectAll);
+                        }
                         if (pnDetail < 0 || pnDetail
                                 >= main_data.size()) {
                             if (!main_data.isEmpty()) {

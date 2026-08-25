@@ -640,6 +640,14 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
 
     private void loadRecordMaster() {
         try {
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(detail_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(detail_data.isEmpty(), chckSelectAll);
+            } else {
+                disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(true, chckSelectAll);
+            }
+
             lblStatus.setText("UNKNOWN");
             checkboxState();
             if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
@@ -821,9 +829,9 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
             switch (currentTableID) {
                 case "tblViewDetails":
-//                    if (!detail_data.isEmpty()) {
-//                        pnDetail = newIndex;
-//                    }
+                    if (!detail_data.isEmpty()) {
+                        pnDetail = newIndex;
+                    }
                     break;
             }
         }

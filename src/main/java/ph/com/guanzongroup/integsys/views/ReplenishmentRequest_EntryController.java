@@ -569,6 +569,13 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 
     private void loadRecordMaster() {
         try {
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(detail_data.isEmpty()); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(detail_data.isEmpty(), chckSelectAll);
+            } else {
+                disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
+                JFXUtil.setDisabled(true, chckSelectAll);
+            }
             lblStatus.setText("UNKNOWN");
             checkboxState();
             if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
