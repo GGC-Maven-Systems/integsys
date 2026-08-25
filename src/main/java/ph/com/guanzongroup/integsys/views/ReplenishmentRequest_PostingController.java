@@ -86,7 +86,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster, apTable, apBrowse;
     @FXML
-    private Button btnSave, btnUpdate, btnAddLedger, btnRemoveLedger, btnCancel, btnApprove, btnVoid, btnHistory, btnRetrieve, btnClose;
+    private Button btnApprove, btnHistory, btnBrowse, btnClose;
     @FXML
     private TextField tfTransactionNo, tfFundDescription, tfTransactionAmount, tfSearchFundDescription, tfSearchTransactionNo;
     @FXML
@@ -101,8 +101,6 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     private TableView tblViewDetails, tblViewMainList;
     @FXML
     private TableColumn tblDetailRow1, tblDetailLedgerNo, tblDetailSourceCode, tblDetailSourceNo, tblDetailDate, tblDetailAmount, tblRowNo, tblTransactionNo, tblDate, tblFundType, tblFundDescription, tblAmount;
-    @FXML
-    private CheckBox chckSelectAll;
     @FXML
     private Pagination pgPagination;
 
@@ -618,7 +616,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                     break;
                 case F3:
                     switch (lsID) {
-                 
+
                         case "tfFundDescription":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (isDetailCountMoreThanOne()) {
