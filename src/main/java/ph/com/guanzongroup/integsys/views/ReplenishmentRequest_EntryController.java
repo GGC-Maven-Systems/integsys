@@ -753,7 +753,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
 
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew);
+        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnAddLedger,btnRemoveLedger);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setDisabled(!lbShow1, apMaster);

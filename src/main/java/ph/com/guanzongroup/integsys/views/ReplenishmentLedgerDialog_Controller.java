@@ -153,18 +153,13 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     break;
             }
-            loadRecordDetail();
-            loadTableDetail.reload();
-            initButton(pnEditMode);
+//            loadRecordDetail();
+//            loadTableDetail.reload();
+//            initButton(pnEditMode);
         }
-//        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     private void processAction(String action) {
-//        try {
         String lsMessage = "";
         switch (action) {
             case "btnAddLedger":
@@ -212,9 +207,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
             resetCheckboxSelection();
         }
         pnEditMode = poController.getEditMode();
-//        } catch (SQLException | ParseException | CloneNotSupportedException | ScriptException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     private void resetCheckboxSelection() {
@@ -353,6 +345,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 case F3:
                     switch (lsID) {
                         case "tfSearchLedgerNo":
+//                            poController.load
                             poJSON = poController.SearchFund(lsValue, false, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -376,9 +369,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                         }
                         break;
                 }
-//                JFXUtil.runWithDelay(.5, () -> {
-//                    loadTableDetail.reload();
-//                });
             });
 
     public void initTextFields() {
@@ -397,10 +387,9 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
             int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
             switch (currentTableID) {
                 case "tblViewDetails":
-//                    if (!main_data.isEmpty()) {
-//                        pnDetail = newIndex;
-//                        moveNext(false, false);
-//                    }
+                    if (!main_data.isEmpty()) {
+                        pnDetail = newIndex;
+                    }
                     break;
             }
         }
@@ -420,7 +409,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 ModelReplenishment_Detail selected = (ModelReplenishment_Detail) tblViewDetails.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     pnDetail = Integer.parseInt(selected.getIndex02()) - 1;
-//                    moveNext(false, false);
                 }
             }
         });

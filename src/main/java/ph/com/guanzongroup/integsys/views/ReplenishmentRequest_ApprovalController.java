@@ -685,6 +685,8 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        poController.resetTransaction();
+                                        loadTableDetail.reload();
                                     } else {
                                         return;
                                     }
@@ -720,6 +722,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
                                             poController.resetTransaction();
+                                            loadTableDetail.reload();
                                         } else {
                                             loadRecordMaster();
                                             return;
@@ -772,8 +775,14 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfSearchFundDescription":
+                        if (lsValue.isEmpty()) {
+                            retrieveReplenishment();
+                        }
                         break;
                     case "tfSearchTransactionNo":
+                        if (lsValue.isEmpty()) {
+                            retrieveReplenishment();
+                        }
                         break;
                 }
             });
@@ -893,7 +902,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
