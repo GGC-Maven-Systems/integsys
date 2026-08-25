@@ -643,6 +643,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfFundDescription":
+                        try {
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
 //                                if (!JFXUtil.isObjectEqualTo(poController.Master().getStockId(), null, "") && lbProceed) {
@@ -663,11 +664,19 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 //                                }
                             }
                             if (lbProceed) { // uniquely inserted due to retrieval delay
-//                                poController.getModel().setCashFundId("");
+                                if (isCashFund()) {
+                                    poController.getModel().CashFund().setCashFundId("");
+                                } else {
+                                    poController.getModel().PettyCash().setPettyId("");
+                                }
                                 loadRecordMaster();
                             }
                         }
-                        break;
+                    } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                    break;
                     case "tfTransactionAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {

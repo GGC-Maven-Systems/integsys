@@ -211,16 +211,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                             return;
                         }
                         break;
-                    case "btnNew":
-                        clearTextFields();
-                        poController.initialize();
-                        poJSON = poController.newRecord();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        pnEditMode = poController.getEditMode();
-                        break;
                     case "btnUpdate":
                         poJSON = poController.updateRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
@@ -721,6 +711,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfFundDescription":
+                        try {
                         if (lsValue.isEmpty()) {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
 //                                if (!JFXUtil.isObjectEqualTo(poController.Master().getStockId(), null, "") && lbProceed) {
@@ -728,6 +719,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     if (!pbKeyPressed) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                            poController.resetTransaction();
                                         } else {
                                             loadRecordMaster();
                                             return;
@@ -740,11 +732,19 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
 //                                }
                             }
                             if (lbProceed) { // uniquely inserted due to retrieval delay
-//                                poController.getModel().setCashFundId("");
+                                if (isCashFund()) {
+                                    poController.getModel().CashFund().setCashFundId("");
+                                } else {
+                                    poController.getModel().PettyCash().setPettyId("");
+                                }
                                 loadRecordMaster();
                             }
                         }
-                        break;
+                    } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                    break;
                     case "tfTransactionAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
