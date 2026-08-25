@@ -79,7 +79,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     private int pnDetail = 0;
     private int pnMain = 0;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Cash Fund", "Petty Cash Fund");
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Petty Cash Fund", "Cash Fund");
     JFXUtil.StageManager stageLedger = new JFXUtil.StageManager();
     private static final int ROWS_PER_PAGE = 50;
     private FilteredList<ModelReplenishment_Main> filteredData;
@@ -581,7 +581,11 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             dpTransactionDate.setValue(poController.getModel().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             JFXUtil.setCmbValue(cmbFundType, !poController.getModel().getFundType().equals("") ? Integer.valueOf(poController.getModel().getFundType()) : -1);
-            tfFundDescription.setText(poController.getModel().CashFund().getDescription());
+            if (isCashFund()) {
+                tfFundDescription.setText(poController.getModel().CashFund().getDescription());
+            } else {
+                tfFundDescription.setText(poController.getModel().PettyCash().getDescription());
+            }
             tfTransactionAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getTransactionAmount().doubleValue(), true));
             taRemarks.setText(poController.getModel().getRemarks());
             JFXUtil.updateCaretPositions(apMaster);
@@ -592,7 +596,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     }
 
     private boolean isCashFund() {
-        return cmbFundType.getSelectionModel().getSelectedIndex() == 0 ? true : false;
+        return cmbFundType.getSelectionModel().getSelectedIndex() == 1 ? true : false;
     }
 
     private boolean isDetailCountMoreThanOne() {

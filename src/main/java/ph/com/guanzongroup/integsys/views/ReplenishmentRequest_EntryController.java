@@ -73,7 +73,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     JFXUtil.ReloadableTableTask loadTableDetail;
     private int pnDetail = 0;
 
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Cash Fund", "Petty Cash Fund");
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Petty Cash Fund", "Cash Fund");
     JFXUtil.StageManager stageLedger = new JFXUtil.StageManager();
 
     @FXML
@@ -93,7 +93,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     @FXML
     private TableView tblViewDetails;
     @FXML
-    private TableColumn tblDetailRow1, tblLedgerNo, tblSourceCode, tblSourceNo, tblDate, tblAmount;
+    private TableColumn tblDetailRow1, tblDetailLedgerNo, tblDetailSourceCode, tblDetailSourceNo, tblDetailDate, tblDetailAmount;
     @FXML
     private CheckBox chckSelectAll;
 
@@ -389,10 +389,14 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 
                         if (!origFundType.isEmpty()) {
                             if (!origFundType.equals(selectedFundType)) {
-                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                        "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                    poController.resetTransaction();
-                                    loadTableDetail.reload();
+                                if (isDetailCountMoreThanOne()) {
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        poController.resetTransaction();
+                                        loadTableDetail.reload();
+                                    } else {
+                                        loadTableDetail.reload();
+                                    }
                                 }
                             }
                         }
@@ -587,7 +591,11 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             dpTransactionDate.setValue(poController.getModel().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             JFXUtil.setCmbValue(cmbFundType, !poController.getModel().getFundType().equals("") ? Integer.valueOf(poController.getModel().getFundType()) : -1);
-            tfFundDescription.setText(poController.getModel().CashFund().getDescription());
+            if (isCashFund()) {
+                tfFundDescription.setText(poController.getModel().CashFund().getDescription());
+            } else {
+                tfFundDescription.setText(poController.getModel().PettyCash().getDescription());
+            }
             tfTransactionAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getTransactionAmount().doubleValue(), true));
             taRemarks.setText(poController.getModel().getRemarks());
             JFXUtil.updateCaretPositions(apMaster);
@@ -600,7 +608,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
-        return cmbFundType.getSelectionModel().getSelectedIndex() == 0 ? true : false;
+        return cmbFundType.getSelectionModel().getSelectedIndex() == 1 ? true : false;
     }
 
     private boolean isDetailCountMoreThanOne() {
@@ -747,9 +755,9 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     };
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblLedgerNo, tblSourceNo, tblDate);
-        JFXUtil.setColumnLeft(tblDetailRow1, tblSourceCode);
-        JFXUtil.setColumnRight(tblAmount);
+        JFXUtil.setColumnCenter(tblDetailLedgerNo, tblDetailSourceNo, tblDetailDate);
+        JFXUtil.setColumnLeft(tblDetailRow1, tblDetailSourceCode);
+        JFXUtil.setColumnRight(tblDetailAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetails);
         tblViewDetails.setItems(detail_data);
     }
@@ -772,15 +780,13 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
-        boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
 
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnAddLedger, btnRemoveLedger);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
+        JFXUtil.setButtonsVisibility(lbShow, btnAddLedger, btnRemoveLedger, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
-        JFXUtil.setDisabled(!lbShow1, apMaster);
-        JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnClose);
+        JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnNew, btnClose);
 
         if (fnValue != EditMode.READY) {
             return;
