@@ -83,17 +83,17 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     @FXML
     private TextField tfTransactionNo, tfFundDescription, tfTransactionAmount;
     @FXML
+    private Label lblStatus, lblSource;
+    @FXML
     private DatePicker dpTransactionDate;
     @FXML
     private ComboBox cmbFundType;
-    @FXML
-    private Label lblStatus, lblSource;
     @FXML
     private TextArea taRemarks;
     @FXML
     private TableView tblViewDetails;
     @FXML
-    private TableColumn tblDetailRow1, tblDetailLedgerNo, tblDetailSourceCode, tblDetailSourceNo, tblDetailDate, tblDetailAmount;
+    private TableColumn tblDetailRow1, tblLedgerNo, tblSourceCode, tblSourceNo, tblDate, tblAmount;
     @FXML
     private CheckBox chckSelectAll;
 
@@ -301,7 +301,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     }
 
     private void processAction(String action) {
-//        try {
         String lsMessage = "";
         switch (action) {
             case "btnRemoveLedger":
@@ -349,9 +348,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             resetCheckboxSelection();
         }
         pnEditMode = poController.getEditMode();
-//        } catch (SQLException | ParseException | CloneNotSupportedException | ScriptException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     private void resetCheckboxSelection() {
@@ -734,9 +730,9 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     };
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblDetailLedgerNo, tblDetailSourceNo, tblDetailDate);
-        JFXUtil.setColumnLeft(tblDetailRow1, tblDetailSourceCode);
-        JFXUtil.setColumnRight(tblDetailAmount);
+        JFXUtil.setColumnCenter(tblLedgerNo, tblSourceNo, tblDate);
+        JFXUtil.setColumnLeft(tblDetailRow1, tblSourceCode);
+        JFXUtil.setColumnRight(tblAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetails);
         tblViewDetails.setItems(detail_data);
     }
