@@ -334,6 +334,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             }
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -471,7 +472,18 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbFundType":
-                        //if changed then should clear all
+                        String origFundType = !JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), null, "") ? poController.getModel().getFundType() : "";
+                        String selectedFundType = String.valueOf(selectedIndex);
+
+                        if (!origFundType.isEmpty()) {
+                            if (!origFundType.equals(selectedFundType)) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                    poController.resetTransaction();
+                                    loadTableDetail.reload();
+                                }
+                            }
+                        }
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));

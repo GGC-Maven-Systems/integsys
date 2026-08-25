@@ -368,7 +368,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
                 case "chckSelectAll": // this is the id
-                    //set to 1 all of column 2 row data value to enable checked
                     for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
                         if (checkedBox.isSelected()) {
                             checkedItem.set(lnCtr, "1");
@@ -385,7 +384,18 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbFundType":
-                        //if changed then should clear all
+                        String origFundType = !JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), null, "") ? poController.getModel().getFundType() : "";
+                        String selectedFundType = String.valueOf(selectedIndex);
+
+                        if (!origFundType.isEmpty()) {
+                            if (!origFundType.equals(selectedFundType)) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                        "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                    poController.resetTransaction();
+                                    loadTableDetail.reload();
+                                }
+                            }
+                        }
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -753,11 +763,11 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
 
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnAddLedger,btnRemoveLedger);
+        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnAddLedger, btnRemoveLedger);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setDisabled(!lbShow1, apMaster);
-        JFXUtil.setButtonsVisibility(lbShow4, btnClose);
+        JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnClose);
 
         if (fnValue != EditMode.READY) {
             return;

@@ -132,7 +132,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
-//        try {
         Object source = event.getSource();
         if (source instanceof Button) {
             Button clickedButton = (Button) source;
