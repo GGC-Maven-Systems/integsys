@@ -691,6 +691,12 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     break;
                 case F3:
                     switch (lsID) {
+                        case "tfSearchFundDescription":
+                            poJSON = poController.SearchFund(lsValue, false, true);
+                            break;
+                        case "tfSearchTransactionNo":
+                            poJSON = poController.searchRecord(lsValue, false);
+                            break;
                         case "tfFundDescription":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (isDetailCountMoreThanOne()) {
@@ -805,9 +811,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchFundDescription, tfSearchTransactionNo);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse);
-
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails, tblViewMainList);
-
         JFXUtil.adjustColumnForScrollbar(tblViewDetails, tblViewMainList);
     }
 

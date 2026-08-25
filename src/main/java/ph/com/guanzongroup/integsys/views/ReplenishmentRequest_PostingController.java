@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -25,11 +26,13 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import static javafx.scene.input.KeyCode.ENTER;
+import static javafx.scene.input.KeyCode.F3;
 import static javafx.scene.input.KeyCode.TAB;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
@@ -48,6 +51,7 @@ import ph.com.guanzongroup.cas.cashflow.model.Model_Cash_Fund_Ledger;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
 import ph.com.guanzongroup.cas.cashflow.status.ReplenishmentRequestStatus;
 import ph.com.guanzongroup.integsys.model.ModelReplenishment_Detail;
+import ph.com.guanzongroup.integsys.model.ModelReplenishment_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -55,7 +59,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  *
  * @author Team 1
  */
-public class ReplenishmentRequest_EntryController implements Initializable, ScreenInterface {
+public class ReplenishmentRequest_PostingController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
     static ReplenishmentRequest poController;
@@ -69,19 +73,22 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<Model_Cash_Fund_Ledger> checkedItems = new ArrayList<>();
 
+    private ObservableList<ModelReplenishment_Main> main_data = FXCollections.observableArrayList();
     private ObservableList<ModelReplenishment_Detail> detail_data = FXCollections.observableArrayList();
-    JFXUtil.ReloadableTableTask loadTableDetail;
+    JFXUtil.ReloadableTableTask loadTableDetail, loadTableMain;
     private int pnDetail = 0;
-
+    private int pnMain = 0;
+    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     ObservableList<String> comboboxlist = FXCollections.observableArrayList("Cash Fund", "Petty Cash Fund");
     JFXUtil.StageManager stageLedger = new JFXUtil.StageManager();
-
+    private static final int ROWS_PER_PAGE = 50;
+    private FilteredList<ModelReplenishment_Main> filteredData;
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster, apTable, apBrowse;
     @FXML
-    private Button btnBrowse, btnNew, btnSearch, btnSave, btnUpdate, btnAddLedger, btnRemoveLedger, btnCancel, btnVoid, btnHistory, btnClose;
+    private Button btnSave, btnUpdate, btnAddLedger, btnRemoveLedger, btnCancel, btnApprove, btnVoid, btnHistory, btnRetrieve, btnClose;
     @FXML
-    private TextField tfTransactionNo, tfFundDescription, tfTransactionAmount;
+    private TextField tfTransactionNo, tfFundDescription, tfTransactionAmount, tfSearchFundDescription, tfSearchTransactionNo;
     @FXML
     private Label lblStatus, lblSource;
     @FXML
@@ -91,15 +98,18 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     @FXML
     private TextArea taRemarks;
     @FXML
-    private TableView tblViewDetails;
+    private TableView tblViewDetails, tblViewMainList;
     @FXML
-    private TableColumn tblDetailRow1, tblLedgerNo, tblSourceCode, tblSourceNo, tblDate, tblAmount;
+    private TableColumn tblDetailRow1, tblDetailLedgerNo, tblDetailSourceCode, tblDetailSourceNo, tblDetailDate, tblDetailAmount, tblRowNo, tblTransactionNo, tblDate, tblFundType, tblFundDescription, tblAmount;
     @FXML
     private CheckBox chckSelectAll;
+    @FXML
+    private Pagination pgPagination;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
+            pgPagination.setPageCount(1);
             poJSON = new JSONObject();
             poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
             poController.initialize();// Initialize transaction
@@ -111,6 +121,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             initButton(pnEditMode);
             initLoadTable();
             initTableOnClick();
+            initMainGrid();
             initDetailGrid();
             initCheckboxes();
             initComboboxes();
@@ -120,9 +131,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 //                poController.setIndustryId(psIndustryId);
 //                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
-                loadRecordSearch();
-                poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
-                btnNew.fire();
+                poController.setRecordStatus("0123");
             });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -203,79 +212,17 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             return;
                         }
                         break;
-                    case "btnNew":
-                        clearTextFields();
-                        poController.initialize();
-                        poJSON = poController.newRecord();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        pnEditMode = poController.getEditMode();
-                        break;
-                    case "btnUpdate":
-                        poJSON = poController.updateRecord();
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        }
-                        pnEditMode = poController.getEditMode();
-                        resetCheckboxSelection();
-                        break;
-                    case "btnCancel":
-                        if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
-                            poController.initialize();
-                            clearTextFields();
-
-                            poController.setIndustryId(psIndustryId);
-                            pnEditMode = EditMode.UNKNOWN;
-                            break;
-                        } else {
-                            return;
-                        }
-                    case "btnSave":
-                        //Validator
+                    case "btnApprove":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, "Close Tab", "Are you sure you want to save the transaction?") == true) {
-                            poJSON = poController.SaveRecord();
-                            if (!"success".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                loadTableDetail.reload();
-                                return;
-                            } else {
-                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                loadRecordMaster();
-                                btnNew.fire();
-                            }
-                        } else {
-                            return;
-                        }
-                        break;
-                    case "btnAddLedger":
-                        showLedgerDialog();
-                        break;
-                    case "btnRemoveLedger":
-                        processAction("btnRemoveLedger");
-                        break;
-                    case "btnVoid":
-                        poJSON = new JSONObject();
-                        String lsStatus = "";
-                        if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
-                            lsStatus = "cancel";
-                        } else {
-                            lsStatus = "void";
-                        }
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to " + lsStatus + " transaction?") == true) {
-                            if (poController.getModel().getTransactionStatus().equals(ReplenishmentRequestStatus.OPEN)) {
-                                poJSON = poController.VoidRecord();
-                            } else {
-                                poJSON = poController.CancelRecord();
-                            }
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?") == true) {
+                            poJSON = poController.ApproveRecord();
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
                             }
                         } else {
                             return;
@@ -290,15 +237,82 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
                 }
+
                 if (lsButton.equals("btnRetrieve")) {
                 } else {
                     loadRecordMaster();
                 }
                 initButton(pnEditMode);
-
             }
         } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    public void retrieveReplenishment() {
+        try {
+            poJSON = new JSONObject();
+            poController.setRecordStatus(ReplenishmentRequestStatus.OPEN + "" + ReplenishmentRequestStatus.APPROVED);
+            poJSON = poController.loadTransactionList(tfSearchFundDescription.getText(), tfSearchTransactionNo.getText());
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+            } else {
+                loadTableMain.reload();
+            }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void showLedgerDialog() {
+        poJSON = new JSONObject();
+        stageLedger.closeDialog();
+        if (isCashFund()) {
+            if (poController.getLoadCashFundLedgerListCount() <= 0) {
+                ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
+                return;
+            }
+        } else {
+            if (poController.getLoadPettyCashLedgerListCount() <= 0) {
+                ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
+                return;
+            }
+        }
+
+        Map<String, JFXUtil.Data> data = new HashMap<>();
+        data.clear();
+        int lnCount = 0;
+        if (isCashFund()) {
+            for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
+                lnCount += 1;
+                data.put("0", new JFXUtil.Data(String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
+                        poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
+                        poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
+                        JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
+                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)));
+            }
+        } else {
+            for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
+                lnCount += 1;
+                data.put("0", new JFXUtil.Data(String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
+                        poController.PettyCashLedgerList(lnCtr).getSourceCode(),
+                        poController.PettyCashLedgerList(lnCtr).getSourceNo(),
+                        JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
+                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true)));
+            }
+        }
+
+        ReplenishmentLedgerDialog_Controller controller = new ReplenishmentLedgerDialog_Controller();
+        controller.addData(data);
+        try {
+            stageLedger.setOnHidden(event -> {
+                stageLedger = null;
+                loadTableDetail.reload();
+            });
+            stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", false, false, true);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
@@ -368,6 +382,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
                 case "chckSelectAll": // this is the id
+                    //set to 1 all of column 2 row data value to enable checked
                     for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
                         if (checkedBox.isSelected()) {
                             checkedItem.set(lnCtr, "1");
@@ -448,6 +463,62 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     }
 
     public void initLoadTable() {
+        loadTableMain = new JFXUtil.ReloadableTableTask(
+                tblViewMainList,
+                main_data,
+                () -> {
+                    Platform.runLater(() -> {
+//                        try {
+                        main_data.clear();
+                        JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
+                        int lnRowCount = 0;
+                        if (isCashFund()) {
+                            for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
+                                lnRowCount += 1;
+                                checkedItems(lnCtr);
+                                main_data.add(new ModelReplenishment_Main(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
+                                        poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
+                                        poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)
+                                ));
+//                            if (poController.CashFundLedgerList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
+//                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
+//                            }
+                            }
+                        } else {
+                            for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
+                                lnRowCount += 1;
+                                checkedItems(lnCtr);
+                                main_data.add(new ModelReplenishment_Main(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.LoadPettyCashLedgerList(lnCtr).getLedgerNo()),
+                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceCode(),
+                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.LoadPettyCashLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadPettyCashLedgerList(lnCtr).getTransactionDate(), true)
+                                ));
+//                            if (poController.CashFundLedgerList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
+//                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
+//                            }
+                            }
+                        }
+
+                        if (pnMain < 0 || pnMain
+                                >= main_data.size()) {
+                            if (!main_data.isEmpty()) {
+                                /* FOCUS ON FIRST ROW */
+                                JFXUtil.selectAndFocusRow(tblViewMainList, 0);
+                                pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                            }
+                        } else {
+                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                            JFXUtil.selectAndFocusRow(tblViewMainList, pnMain);
+                        }
+                        JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMainList, filteredData);
+                    });
+                });
+
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetails,
                 detail_data,
@@ -455,35 +526,18 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     Platform.runLater(() -> {
                         detail_data.clear();
                         int lnRowCount = 0;
-
-                        if (isCashFund()) {
-                            for (int lnCtr = 0; lnCtr < poController.getCashFundLedgerListCount(); lnCtr++) {
-                                lnRowCount += 1;
-                                checkedItems(lnCtr);
-                                detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
-                                        String.valueOf(poController.CashFundLedgerList(lnCtr).getLedgerNo()),
-                                        poController.CashFundLedgerList(lnCtr).getSourceCode(),
-                                        poController.CashFundLedgerList(lnCtr).getSourceNo(),
-                                        JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getTransactionDate(), true),
-                                        String.valueOf(lnRowCount)
-                                ));
-                            }
-                        } else {
-                            for (int lnCtr = 0; lnCtr < poController.getPettyCashLedgerListCount(); lnCtr++) {
-                                lnRowCount += 1;
-                                checkedItems(lnCtr);
-                                detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
-                                        String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
-                                        poController.PettyCashLedgerList(lnCtr).getSourceCode(),
-                                        poController.PettyCashLedgerList(lnCtr).getSourceNo(),
-                                        JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true),
-                                        String.valueOf(lnRowCount)
-                                ));
-                            }
+                        for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
+                            lnRowCount += 1;
+                            checkedItems(lnCtr);
+                            detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
+                                    String.valueOf(poController.CashFundLedgerList(lnCtr).getLedgerNo()),
+                                    poController.CashFundLedgerList(lnCtr).getSourceCode(),
+                                    poController.CashFundLedgerList(lnCtr).getSourceNo(),
+                                    JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
+                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getTransactionDate(), true),
+                                    String.valueOf(lnRowCount)
+                            ));
                         }
-
                         if (pnDetail < 0 || pnDetail
                                 >= detail_data.size()) {
                             if (!detail_data.isEmpty()) {
@@ -499,62 +553,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         loadRecordMaster();
                     });
                 });
-    }
-
-    public void showLedgerDialog() {
-        poJSON = new JSONObject();
-        stageLedger.closeDialog();
-        if (isCashFund()) {
-            if (poController.getLoadCashFundLedgerListCount() <= 0) {
-                ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
-                return;
-            }
-        } else {
-            if (poController.getLoadPettyCashLedgerListCount() <= 0) {
-                ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
-                return;
-            }
-        }
-
-        Map<String, JFXUtil.Data> data = new HashMap<>();
-        data.clear();
-        int lnCount = 0;
-        if (isCashFund()) {
-            for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
-                lnCount += 1;
-                data.put("0", new JFXUtil.Data(String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
-                        poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
-                        poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
-                        JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
-                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)));
-            }
-        } else {
-            for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
-                lnCount += 1;
-                data.put("0", new JFXUtil.Data(String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
-                        poController.PettyCashLedgerList(lnCtr).getSourceCode(),
-                        poController.PettyCashLedgerList(lnCtr).getSourceNo(),
-                        JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true)));
-            }
-        }
-
-        ReplenishmentLedgerDialog_Controller controller = new ReplenishmentLedgerDialog_Controller();
-        controller.addData(data);
-        try {
-            stageLedger.setOnHidden(event -> {
-                stageLedger = null;
-                loadTableDetail.reload();
-            });
-            stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", false, false, true);
-        } catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    public void loadRecordSearch() {
-
     }
 
     private void checkboxState() {
@@ -589,8 +587,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    boolean lbProceed = true;
-    boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
         return cmbFundType.getSelectionModel().getSelectedIndex() == 0 ? true : false;
@@ -603,6 +599,8 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             return poController.getPettyCashLedgerListCount() > 1 ? true : false;
         }
     }
+    boolean lbProceed = true;
+    boolean pbKeyPressed = false;
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
@@ -620,19 +618,15 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     break;
                 case F3:
                     switch (lsID) {
-                        case "tfSearchFundDescription":
-                            poJSON = poController.SearchFund(lsValue, false, true);
-                            break;
-                        case "tfSearchTransactionNo":
-                            poJSON = poController.searchRecord(lsValue, false);
-                            break;
+                 
                         case "tfFundDescription":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (isDetailCountMoreThanOne()) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                        btnNew.fire();
+                                        poController.resetTransaction();
+                                        loadTableDetail.reload();
                                     } else {
                                         return;
                                     }
@@ -667,7 +661,8 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                     if (!pbKeyPressed) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                            btnNew.fire();
+                                            poController.resetTransaction();
+                                            loadTableDetail.reload();
                                         } else {
                                             loadRecordMaster();
                                             return;
@@ -716,13 +711,30 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 }
                 loadRecordMaster();
             });
+    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
+            (lsID, lsValue) -> {
+                switch (lsID) {
+                    case "tfSearchFundDescription":
+                        if (lsValue.isEmpty()) {
+                            retrieveReplenishment();
+                        }
+                        break;
+                    case "tfSearchTransactionNo":
+                        if (lsValue.isEmpty()) {
+                            retrieveReplenishment();
+                        }
+                        break;
+                }
+            });
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfTransactionNo, tfFundDescription, tfTransactionAmount);
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
-        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails);
-        JFXUtil.adjustColumnForScrollbar(tblViewDetails);
+        JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchFundDescription, tfSearchTransactionNo);
+
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apBrowse);
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails, tblViewMainList);
+        JFXUtil.adjustColumnForScrollbar(tblViewDetails, tblViewMainList);
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
@@ -731,23 +743,82 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
             switch (currentTableID) {
                 case "tblViewDetails":
-//                    if (!detail_data.isEmpty()) {
-//                        pnDetail = newIndex;
-//                    }
+                    if (!detail_data.isEmpty()) {
+                        pnDetail = newIndex;
+                    }
                     break;
             }
         }
     };
 
-    private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblLedgerNo, tblSourceNo, tblDate);
-        JFXUtil.setColumnLeft(tblDetailRow1, tblSourceCode);
+    public void loadTableDetailFromMain() {
+        try {
+            poJSON = new JSONObject();
+
+            ModelReplenishment_Main selected = (ModelReplenishment_Main) tblViewMainList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
+                String lsTransactionNo = selected.getIndex02();
+                stageLedger.closeDialog();
+                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.getModel().getTransactionNo(), lsTransactionNo)) {
+                    return;
+                }
+                pnMain = pnRowMain;
+                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
+                if (isCashFund()) {
+                    poJSON = poController.openRecord(poController.CashFundLedgerList(pnMain).getCashFundId());
+                    if ("error".equals((String) poJSON.get("result"))) {
+                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                        return;
+                    }
+                } else {
+                    poJSON = poController.openRecord(poController.PettyCashLedgerList(pnMain).getPettyID());
+                    if ("error".equals((String) poJSON.get("result"))) {
+                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                        return;
+                    }
+                }
+            }
+            Platform.runLater(() -> {
+                loadTableDetail.reload();
+                loadRecordMaster();
+            });
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void initMainGrid() {
+        JFXUtil.setColumnCenter(tblRowNo, tblTransactionNo, tblDate);
+        JFXUtil.setColumnLeft(tblFundType, tblFundDescription);
         JFXUtil.setColumnRight(tblAmount);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewMainList);
+
+        filteredData = new FilteredList<>(main_data, b -> true);
+        tblViewMainList.setItems(filteredData);
+    }
+
+    private void initDetailGrid() {
+        JFXUtil.setColumnCenter(tblDetailLedgerNo, tblDetailSourceNo, tblDetailDate);
+        JFXUtil.setColumnLeft(tblDetailRow1, tblDetailSourceCode);
+        JFXUtil.setColumnRight(tblDetailAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetails);
         tblViewDetails.setItems(detail_data);
     }
 
     private void initTableOnClick() {
+        tblViewMainList.setOnMouseClicked(event -> {
+            pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+            if (pnMain >= 0) {
+                if (event.getClickCount() == 2) {
+                    loadTableDetailFromMain();
+                    pnEditMode = poController.getEditMode();
+                    initButton(pnEditMode);
+                }
+            }
+        });
         tblViewDetails.setOnMouseClicked(event -> {
             if (!detail_data.isEmpty() && event.getClickCount() == 1) {
                 ModelReplenishment_Detail selected = (ModelReplenishment_Detail) tblViewDetails.getSelectionModel().getSelectedItem();
@@ -756,6 +827,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 }
             }
         });
+        JFXUtil.applyRowHighlighting(tblViewMainList, item -> ((ModelReplenishment_Main) item).getIndex01(), highlightedRowsMain);
     }
 
     public void clearTextFields() {
@@ -764,28 +836,25 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     }
 
     private void initButton(int fnValue) {
-        boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
-
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnAddLedger, btnRemoveLedger);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
+        // Manage visibility and managed state of other buttons
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
+        JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
         JFXUtil.setDisabled(!lbShow1, apMaster);
-        JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnClose);
-
+        JFXUtil.setButtonsVisibility(lbShow4, btnClose);
         if (fnValue != EditMode.READY) {
             return;
         }
         switch (poController.getModel().getTransactionStatus()) {
             case ReplenishmentRequestStatus.APPROVED:
-//                JFXUtil.setButtonsVisibility(false, btnApprove);
+                JFXUtil.setButtonsVisibility(false, btnApprove);
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnApprove, btnUpdate, btnVoid);
                 break;
         }
     }

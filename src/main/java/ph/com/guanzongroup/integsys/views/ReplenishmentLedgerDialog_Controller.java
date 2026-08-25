@@ -372,11 +372,8 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchLedgerNo);
-
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse);
-
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails);
-
         JFXUtil.adjustColumnForScrollbar(tblViewDetails);
     }
 
@@ -424,11 +421,9 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     }
 
     private void initButton(int fnValue) {
-
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
 //        JFXUtil.setDisabled(!lbShow1, apMaster);
         if (fnValue != EditMode.READY) {
             return;
