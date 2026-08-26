@@ -15,6 +15,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -37,9 +39,6 @@ import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.cashflow.ReplenishmentRequest;
 import ph.com.guanzongroup.cas.cashflow.model.Model_Cash_Fund_Ledger;
 import ph.com.guanzongroup.cas.cashflow.model.Model_PettyCashLedger;
-import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
-import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
-import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -80,6 +79,9 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     private CheckBox chckSelectAll;
     @FXML
     private TextField tfSearchLedgerNo;
+    private ChangeListener<String> detailSearchListener;
+    private FilteredList<ModelReplenishmentLedger> filteredDataDetail;
+    boolean lbresetpredicate = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -418,7 +420,35 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         JFXUtil.setColumnLeft(tblDetailRow1, tblDetailSourceCode);
         JFXUtil.setColumnRight(tblDetailAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetails);
-        tblViewDetails.setItems(main_data);
+
+        filteredDataDetail = new FilteredList<>(main_data, b -> true);
+        autoSearch(tfSearchLedgerNo);
+
+        SortedList<ModelReplenishmentLedger> sortedData = new SortedList<>(filteredDataDetail);
+        sortedData.comparatorProperty().bind(tblViewDetails.comparatorProperty());
+        tblViewDetails.setItems(sortedData);
+    }
+
+    private void autoSearch(TextField txtField) {
+        detailSearchListener = (observable, oldValue, newValue) -> {
+            filteredDataDetail.setPredicate(orders -> {
+                lbresetpredicate = true;
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                String lowerCaseFilter = newValue.toLowerCase();
+                return orders.getIndex02().toLowerCase().contains(lowerCaseFilter);
+            });
+            // If no results and autoSearchMain is enabled, remove listener and trigger autoSearchMain
+            if (filteredDataDetail.isEmpty()) {
+            } else {
+                if (filteredDataDetail.size() == main_data.size()) {
+                    tblViewDetails.getSelectionModel().select(pnDetail);
+                    tblViewDetails.getFocusModel().focus(pnDetail);
+                }
+            }
+        };
+        txtField.textProperty().addListener(detailSearchListener);
     }
 
     private void initTableOnClick() {
