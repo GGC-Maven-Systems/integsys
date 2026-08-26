@@ -177,6 +177,9 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 Button clickedButton = (Button) source;
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
+                    case "btnRetrieve":
+                        retrieveReplenishment();
+                        break;
                     case "btnHistory":
                         if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
                             ShowMessageFX.Warning("No status history to load!", pxeModuleName, null);
@@ -442,23 +445,19 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
+
                             if (lbisTrue) {
-                                // First row can always be checked
-                                if (rowIndex == 0) {
-                                    checkedItem.set(rowIndex, "1");
-                                } else {
-                                    // The previous row must be checked first
-                                    if ("1".equals(checkedItem.get(rowIndex - 1))) {
-                                        checkedItem.set(rowIndex, "1");
-                                    } else {
-                                        // Cannot check this row yet
-                                        checkedItem.set(rowIndex, "0");
-                                    }
+                                // Check this row and all rows after it
+                                for (int i = rowIndex; i < checkedItem.size(); i++) {
+                                    checkedItem.set(i, "1");
                                 }
+
                             } else {
-                                // Unchecking this row
+                                // Uncheck this row
                                 checkedItem.set(rowIndex, "0");
-                                // Uncheck all rows after this one
+
+                                // Keep the existing logic:
+                                // all rows after this one must also be unchecked
                                 for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
                                     checkedItem.set(i, "0");
                                 }
@@ -476,7 +475,6 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                     }
                                 });
                             });
-
                             break;
                     }
                 },
