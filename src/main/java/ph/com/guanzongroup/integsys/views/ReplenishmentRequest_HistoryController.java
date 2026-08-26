@@ -202,7 +202,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                         break;
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-                    poController.resetTransaction();
+                    resetValues();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
                     loadTableDetail.reload();
@@ -219,6 +219,13 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    private void resetValues() {
+        poController.resetTransaction();
+        poController.getModel().setFundId("");
+        poController.getModel().setRemarks("");
+        poController.getModel().setTransactionAmount(0.00);
     }
 
     public void initLoadTable() {
@@ -279,6 +286,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
 
     private void loadRecordMaster() {
         try {
+            poController.computeFields();
             lblStatus.setText("UNKNOWN");
             JFXUtil.setStatusValue(lblStatus, ReplenishmentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getTransactionStatus());
             tfTransactionNo.setText(poController.getModel().getTransactionNo());

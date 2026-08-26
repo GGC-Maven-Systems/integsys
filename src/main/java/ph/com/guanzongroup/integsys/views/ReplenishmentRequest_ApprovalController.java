@@ -313,7 +313,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         break;
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-                    poController.resetTransaction();
+                    resetValues();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
                     loadTableDetail.reload();
@@ -454,6 +454,13 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         }
     }
 
+    private void resetValues() {
+        poController.resetTransaction();
+        poController.getModel().setFundId("");
+        poController.getModel().setRemarks("");
+        poController.getModel().setTransactionAmount(0.00);
+    }
+
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -487,7 +494,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 if (isDetailCountMoreThanOne()) {
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Type?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                        poController.resetTransaction();
+                                        resetValues();
                                         clearTextFields();
                                         loadTableDetail.reload();
                                     } else {
@@ -497,7 +504,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 }
                             }
                         }
-                        poController.resetTransaction();
+                        resetValues();
                         clearTextFields();
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -670,6 +677,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
 
     private void loadRecordMaster() {
         try {
+            poController.computeFields();
             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                 disableRowCheckbox.set(detail_data.isEmpty()); // set enable/disable in checkboxes in requirements
                 JFXUtil.setDisabled(detail_data.isEmpty(), chckSelectAll);
@@ -758,7 +766,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                        poController.resetTransaction();
+                                        resetValues();
                                         clearTextFields();
                                         loadTableDetail.reload();
                                     } else {
@@ -794,7 +802,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     if (!pbKeyPressed) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
-                                            poController.resetTransaction();
+                                            resetValues();
                                             clearTextFields();
                                             loadTableDetail.reload();
                                         } else {
