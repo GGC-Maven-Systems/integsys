@@ -244,38 +244,29 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                     switch (colIndex) {
                         case 0:
                             boolean lbisTrue = newVal;
-                            if (lbisTrue) {
-                                int firstUncheckedIndex = -1;
-                                for (int i = 0; i < checkedItem.size(); i++) {
-                                    if (!"1".equals(checkedItem.get(i))) {
-                                        firstUncheckedIndex = i;
-                                        break;
-                                    }
-                                }
-                                if (rowIndex == firstUncheckedIndex) {
 
-                                    for (int i = rowIndex; i < checkedItem.size(); i++) {
-                                        checkedItem.set(i, "1");
-                                    }
-                                } else {
-                                    // Selection rejected
-                                    checkedItem.set(rowIndex, "0");
-                                    lbisTrue = false;
+                            if (lbisTrue) {
+
+                                // Check this row and all rows BEFORE it
+                                for (int i = 0; i <= rowIndex; i++) {
+                                    checkedItem.set(i, "1");
                                 }
+
                             } else {
-                                checkedItem.set(rowIndex, "0");
-                                for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
+
+                                // Uncheck this row and all rows AFTER it
+                                for (int i = rowIndex; i < checkedItem.size(); i++) {
                                     checkedItem.set(i, "0");
                                 }
                             }
-                            // Capture the final result for the lambda
-                            final boolean lbFinalIsTrue = lbisTrue;
+
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
                                     JFXUtil.selectAndFocusRow(tblViewDetails, rowIndex);
                                 });
                             });
+
                             break;
                     }
                 },
