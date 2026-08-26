@@ -1,12 +1,8 @@
 package ph.com.guanzongroup.integsys.views;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,11 +13,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -33,7 +27,6 @@ import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.TAB;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -42,7 +35,6 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.cashflow.ReplenishmentRequest;
 import ph.com.guanzongroup.cas.cashflow.model.Model_Cash_Fund_Ledger;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
@@ -109,10 +101,11 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             initButton(pnEditMode);
             initLoadTable();
             initTableOnClick();
+            initComboboxes();
             initDetailGrid();
             Platform.runLater(() -> {
-//                poController.setIndustryID(psIndustryId);
-//                poController.setCompanyId(psCompanyId);
+                poController.getModel().setIndustryId(psIndustryId);
+                poController.getModel().setCompanyId(psCompanyId);
                 poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
@@ -254,7 +247,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                                         poController.CashFundLedgerList(lnCtr).getSourceCode(),
                                         poController.CashFundLedgerList(lnCtr).getSourceNo(),
                                         JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getTransactionDate(), true),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getCreditAmount(), true),
                                         String.valueOf(lnRowCount)
                                 ));
                             }
@@ -266,7 +259,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                                         poController.PettyCashLedgerList(lnCtr).getSourceCode(),
                                         poController.PettyCashLedgerList(lnCtr).getSourceNo(),
                                         JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getCreditAmount(), true),
                                         String.valueOf(lnRowCount)
                                 ));
                             }
@@ -346,9 +339,16 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                     switch (lsID) {
                         case "tfSearchFundDescription":
                             poJSON = poController.SearchFund(lsValue, false, true);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
                             poJSON = poController.searchRecord(lsValue, false);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
                             break;
                     }
                     loadTableDetail.reload();
@@ -411,6 +411,11 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                 }
             }
         });
+    }
+
+    private void initComboboxes() {
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbFundType));
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbFundType);
     }
 
     public void clearTextFields() {

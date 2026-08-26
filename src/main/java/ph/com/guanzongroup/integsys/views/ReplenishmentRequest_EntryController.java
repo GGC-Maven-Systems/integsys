@@ -197,7 +197,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         } else {
-//                            poJSON = poController.populateDetail();
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;

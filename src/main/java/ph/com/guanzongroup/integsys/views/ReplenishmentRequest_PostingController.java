@@ -55,8 +55,6 @@ import ph.com.guanzongroup.integsys.model.ModelReplenishment_Detail;
 import ph.com.guanzongroup.integsys.model.ModelReplenishment_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
-import static ph.com.guanzongroup.integsys.views.ReplenishmentRequest_ApprovalController.poController;
-import static ph.com.guanzongroup.integsys.views.ReplenishmentRequest_EntryController.poController;
 
 /**
  *
@@ -603,6 +601,10 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 });
     }
 
+    private void loadRecordSearch() {
+        tfSearchFundDescription.setText(poController.getfund());
+    }
+
     private void loadRecordMaster() {
         try {
             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -668,7 +670,16 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                     break;
                 case F3:
                     switch (lsID) {
-
+                        case "tfSearchFundDescription":
+                            poJSON = poController.SearchFund(lsValue, false, true);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordSearch();
+                            break;
+                        case "tfSearchTransactionNo":
+                            retrieveReplenishment();
+                            break;
                         case "tfFundDescription":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (isDetailCountMoreThanOne()) {
@@ -761,11 +772,13 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 switch (lsID) {
                     case "tfSearchFundDescription":
                         if (lsValue.isEmpty()) {
+                            poController.setFund(lsValue);
                             retrieveReplenishment();
                         }
                         break;
                     case "tfSearchTransactionNo":
                         if (lsValue.isEmpty()) {
+                            poController.setFund(lsValue);
                             retrieveReplenishment();
                         }
                         break;
@@ -811,7 +824,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
-                poJSON = poController.openRecord(poController.TransactionList(pnMain).getTransactionNo());
+                poJSON = poController.OpenRecord(poController.TransactionList(pnMain).getTransactionNo());
                 if ("error".equals((String) poJSON.get("result"))) {
                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                     return;
@@ -821,7 +834,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 loadTableDetail.reload();
                 loadRecordMaster();
             });
-        } catch (SQLException | GuanzonException ex) {
+        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }

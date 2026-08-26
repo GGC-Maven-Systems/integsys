@@ -677,6 +677,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 });
     }
 
+    private void loadRecordSearch() {
+        tfSearchFundDescription.setText(poController.getfund());
+    }
+
     private void loadRecordMaster() {
         try {
             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -749,9 +753,13 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     switch (lsID) {
                         case "tfSearchFundDescription":
                             poJSON = poController.SearchFund(lsValue, false, true);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
-                            poJSON = poController.searchRecord(lsValue, false);
+                            retrieveReplenishment();
                             break;
                         case "tfFundDescription":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -843,11 +851,13 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 switch (lsID) {
                     case "tfSearchFundDescription":
                         if (lsValue.isEmpty()) {
+                            poController.setFund(lsValue);
                             retrieveReplenishment();
                         }
                         break;
                     case "tfSearchTransactionNo":
                         if (lsValue.isEmpty()) {
+                            poController.setFund(lsValue);
                             retrieveReplenishment();
                         }
                         break;
@@ -893,7 +903,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
-                poJSON = poController.openRecord(poController.TransactionList(pnMain).getTransactionNo());
+                poJSON = poController.OpenRecord(poController.TransactionList(pnMain).getTransactionNo());
                 if ("error".equals((String) poJSON.get("result"))) {
                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                     return;
@@ -903,7 +913,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 loadTableDetail.reload();
                 loadRecordMaster();
             });
-        } catch (SQLException | GuanzonException ex) {
+        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
