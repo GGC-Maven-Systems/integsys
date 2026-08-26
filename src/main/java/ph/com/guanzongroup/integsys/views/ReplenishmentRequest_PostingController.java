@@ -221,8 +221,8 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                         break;
                     case "btnApprove":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?") == true) {
-                            poJSON = poController.ApproveRecord();
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?") == true) {
+                            poJSON = poController.PostRecord();
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
@@ -252,7 +252,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 }
                 initButton(pnEditMode);
             }
-        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
+        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }

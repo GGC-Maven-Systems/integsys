@@ -120,7 +120,7 @@
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="tfSearchLedgerNo" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                          <TextField fx:id="tfSearchLedgerNo" promptText="Type: Search" GridPane.columnIndex="2" />
                                        </children>
                                     </GridPane>
                                  </children>
