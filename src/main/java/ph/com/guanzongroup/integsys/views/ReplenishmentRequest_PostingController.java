@@ -700,9 +700,9 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadTableDetail.reload();
                             break;
                     }
-                    loadTableDetail.reload();
                     break;
             }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {

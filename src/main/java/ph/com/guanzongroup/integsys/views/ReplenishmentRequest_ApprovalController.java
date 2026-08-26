@@ -781,9 +781,9 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadTableDetail.reload();
                             break;
                     }
-                    loadTableDetail.reload();
                     break;
             }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {

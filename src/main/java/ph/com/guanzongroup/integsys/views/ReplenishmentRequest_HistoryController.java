@@ -345,13 +345,14 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                             loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
-                            poJSON = poController.searchRecord(lsValue, false);
+                            poJSON = poController.searchRecord(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                loadTableDetail.reload();
                             }
                             break;
                     }
-                    loadTableDetail.reload();
                     break;
             }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
