@@ -297,7 +297,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
                     poController.resetTransaction();
                     clearTextFields();
                     pnEditMode = EditMode.UNKNOWN;
