@@ -468,7 +468,11 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                     checkedItem.set(i, "0");
                                 }
                             }
-
+                            boolean allOnes = checkedItem.stream().allMatch("1"::equals);
+                            chckSelectAll.setSelected(allOnes);
+                            //set external temporary data of index to save as reference
+                            // if detected unchecked then must update
+                            pnDetail = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
