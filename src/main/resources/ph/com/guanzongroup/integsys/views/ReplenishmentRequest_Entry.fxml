@@ -68,7 +68,7 @@
                               </Button>
                               <Button fx:id="btnRemoveLedger" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" minWidth="80.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Rmv Ledger">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="TIMES" size="20" styleClass="FontIcon" />
+                                    <FontAwesomeIconView glyphName="MINUS" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
                               <Button fx:id="btnCancel" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Cancel">
