@@ -119,8 +119,8 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             initCheckboxes();
             initComboboxes();
             Platform.runLater(() -> {
-//                poController.setIndustryID(psIndustryId);
-//                poController.setCompanyID(psCompanyId);
+                poController.getModel().setIndustryId(psIndustryId);
+                poController.getModel().setCompanyId(psCompanyId);
                 poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
