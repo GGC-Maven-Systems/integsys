@@ -514,37 +514,39 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     private void initCheckboxes() {
         JFXUtil.addCheckboxColumns(ModelReplenishment_Detail.class, tblViewDetails, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
-                    boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
-
+                            boolean lbisTrue = newVal;
                             if (lbisTrue) {
-                                // Check this row and all rows after it
-                                for (int i = rowIndex; i < checkedItem.size(); i++) {
-                                    checkedItem.set(i, "1");
+                                int firstUncheckedIndex = -1;
+                                for (int i = 0; i < checkedItem.size(); i++) {
+                                    if (!"1".equals(checkedItem.get(i))) {
+                                        firstUncheckedIndex = i;
+                                        break;
+                                    }
                                 }
+                                if (rowIndex == firstUncheckedIndex) {
 
+                                    for (int i = rowIndex; i < checkedItem.size(); i++) {
+                                        checkedItem.set(i, "1");
+                                    }
+                                } else {
+                                    // Selection rejected
+                                    checkedItem.set(rowIndex, "0");
+                                    lbisTrue = false;
+                                }
                             } else {
-                                // Uncheck this row
                                 checkedItem.set(rowIndex, "0");
-
-                                // Keep the existing logic:
-                                // all rows after this one must also be unchecked
                                 for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
                                     checkedItem.set(i, "0");
                                 }
                             }
-                            boolean allOnes = checkedItem.stream().allMatch("1"::equals);
-                            chckSelectAll.setSelected(allOnes);
-                            //set external temporary data of index to save as reference
-                            // if detected unchecked then must update
-                            pnDetail = rowIndex;
+                            // Capture the final result for the lambda
+                            final boolean lbFinalIsTrue = lbisTrue;
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
-                                    if (lbisTrue) {
-                                        JFXUtil.selectAndFocusRow(tblViewDetails, rowIndex);
-                                    }
+                                    JFXUtil.selectAndFocusRow(tblViewDetails, rowIndex);
                                 });
                             });
                             break;
