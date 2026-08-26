@@ -427,6 +427,8 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                 }
                             }
                         }
+                        poController.resetTransaction();
+                        clearTextFields();
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));

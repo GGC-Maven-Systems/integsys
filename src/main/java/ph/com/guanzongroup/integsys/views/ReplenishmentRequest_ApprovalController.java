@@ -497,6 +497,8 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 }
                             }
                         }
+                        poController.resetTransaction();
+                        clearTextFields();
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));

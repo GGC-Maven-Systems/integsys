@@ -406,6 +406,8 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                 }
                             }
                         }
+                        poController.resetTransaction();
+                        clearTextFields();
                         poJSON = poController.getModel().setFundType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
