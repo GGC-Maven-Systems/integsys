@@ -401,6 +401,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                         loadTableDetail.reload();
                                     } else {
                                         loadTableDetail.reload();
+                                        return;
                                     }
                                 }
                             }

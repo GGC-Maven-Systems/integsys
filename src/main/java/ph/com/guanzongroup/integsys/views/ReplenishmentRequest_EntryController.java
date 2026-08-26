@@ -422,6 +422,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                         loadTableDetail.reload();
                                     } else {
                                         loadTableDetail.reload();
+                                        return;
                                     }
                                 }
                             }

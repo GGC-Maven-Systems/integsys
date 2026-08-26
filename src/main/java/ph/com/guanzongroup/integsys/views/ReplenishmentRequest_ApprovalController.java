@@ -492,6 +492,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                         loadTableDetail.reload();
                                     } else {
                                         loadTableDetail.reload();
+                                        return;
                                     }
                                 }
                             }
