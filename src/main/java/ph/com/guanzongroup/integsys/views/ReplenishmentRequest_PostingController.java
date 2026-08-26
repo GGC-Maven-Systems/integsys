@@ -537,17 +537,32 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                     Platform.runLater(() -> {
                         detail_data.clear();
                         int lnRowCount = 0;
-                        for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
-                            lnRowCount += 1;
-                            checkedItems(lnCtr);
-                            detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
-                                    String.valueOf(poController.CashFundLedgerList(lnCtr).getLedgerNo()),
-                                    poController.CashFundLedgerList(lnCtr).getSourceCode(),
-                                    poController.CashFundLedgerList(lnCtr).getSourceNo(),
-                                    JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
-                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getTransactionDate(), true),
-                                    String.valueOf(lnRowCount)
-                            ));
+                        if (isCashFund()) {
+                            for (int lnCtr = 0; lnCtr < poController.getCashFundLedgerListCount(); lnCtr++) {
+                                lnRowCount += 1;
+                                checkedItems(lnCtr);
+                                detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.CashFundLedgerList(lnCtr).getLedgerNo()),
+                                        poController.CashFundLedgerList(lnCtr).getSourceCode(),
+                                        poController.CashFundLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getCreditAmount(), true),
+                                        String.valueOf(lnRowCount)
+                                ));
+                            }
+                        } else {
+                            for (int lnCtr = 0; lnCtr < poController.getPettyCashLedgerListCount(); lnCtr++) {
+                                lnRowCount += 1;
+                                checkedItems(lnCtr);
+                                detail_data.add(new ModelReplenishment_Detail(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
+                                        poController.PettyCashLedgerList(lnCtr).getSourceCode(),
+                                        poController.PettyCashLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getCreditAmount(), true),
+                                        String.valueOf(lnRowCount)
+                                ));
+                            }
                         }
                         if (pnDetail < 0 || pnDetail
                                 >= detail_data.size()) {
@@ -850,7 +865,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         // Manage visibility and managed state of other buttons
 //        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
         JFXUtil.setButtonsVisibility(lbShow3, btnHistory, btnApprove);
-        JFXUtil.setDisabled(!lbShow1, apMaster);
+        JFXUtil.setDisabled(!lbShow1, apMaster, chckSelectAll);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
         if (fnValue != EditMode.READY) {
             return;

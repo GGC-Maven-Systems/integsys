@@ -495,7 +495,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                         poController.CashFundLedgerList(lnCtr).getSourceCode(),
                                         poController.CashFundLedgerList(lnCtr).getSourceNo(),
                                         JFXUtil.formatDateToString(poController.CashFundLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getTransactionDate(), true),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.CashFundLedgerList(lnCtr).getCreditAmount(), true),
                                         String.valueOf(lnRowCount)
                                 ));
                             }
@@ -508,7 +508,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                         poController.PettyCashLedgerList(lnCtr).getSourceCode(),
                                         poController.PettyCashLedgerList(lnCtr).getSourceNo(),
                                         JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getCreditAmount(), true),
                                         String.valueOf(lnRowCount)
                                 ));
                             }
@@ -790,7 +790,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
         JFXUtil.setButtonsVisibility(lbShow, btnAddLedger, btnRemoveLedger, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
 
-        JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setDisabled(!lbShow, apMaster, chckSelectAll);
 
         JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnNew, btnClose);
 
