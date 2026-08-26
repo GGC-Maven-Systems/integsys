@@ -447,7 +447,27 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
-                            checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            if (lbisTrue) {
+                                // First row can always be checked
+                                if (rowIndex == 0) {
+                                    checkedItem.set(rowIndex, "1");
+                                } else {
+                                    // The previous row must be checked first
+                                    if ("1".equals(checkedItem.get(rowIndex - 1))) {
+                                        checkedItem.set(rowIndex, "1");
+                                    } else {
+                                        // Cannot check this row yet
+                                        checkedItem.set(rowIndex, "0");
+                                    }
+                                }
+                            } else {
+                                // Unchecking this row
+                                checkedItem.set(rowIndex, "0");
+                                // Uncheck all rows after this one
+                                for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
+                                    checkedItem.set(i, "0");
+                                }
+                            }
                             boolean allOnes = checkedItem.stream().allMatch("1"::equals);
                             chckSelectAll.setSelected(allOnes);
                             //set external temporary data of index to save as reference
@@ -461,6 +481,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                     }
                                 });
                             });
+
                             break;
                     }
                 },
@@ -617,7 +638,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
-        return cmbFundType.getSelectionModel().getSelectedIndex() == 1 ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
     }
 
     private boolean isDetailCountMoreThanOne() {

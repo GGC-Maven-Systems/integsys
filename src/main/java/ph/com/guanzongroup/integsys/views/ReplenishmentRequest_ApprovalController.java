@@ -515,7 +515,27 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
-                            checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            if (lbisTrue) {
+                                // First row can always be checked
+                                if (rowIndex == 0) {
+                                    checkedItem.set(rowIndex, "1");
+                                } else {
+                                    // The previous row must be checked first
+                                    if ("1".equals(checkedItem.get(rowIndex - 1))) {
+                                        checkedItem.set(rowIndex, "1");
+                                    } else {
+                                        // Cannot check this row yet
+                                        checkedItem.set(rowIndex, "0");
+                                    }
+                                }
+                            } else {
+                                // Unchecking this row
+                                checkedItem.set(rowIndex, "0");
+                                // Uncheck all rows after this one
+                                for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
+                                    checkedItem.set(i, "0");
+                                }
+                            }
                             boolean allOnes = checkedItem.stream().allMatch("1"::equals);
                             chckSelectAll.setSelected(allOnes);
                             //set external temporary data of index to save as reference
@@ -529,6 +549,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     }
                                 });
                             });
+
                             break;
                     }
                 },
@@ -696,7 +717,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     }
 
     private boolean isCashFund() {
-        return cmbFundType.getSelectionModel().getSelectedIndex() == 1 ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
     }
 
     private boolean isDetailCountMoreThanOne() {
@@ -871,18 +892,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
-                if (isCashFund()) {
-                    poJSON = poController.openRecord(poController.CashFundLedgerList(pnMain).getCashFundId());
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
-                } else {
-                    poJSON = poController.openRecord(poController.PettyCashLedgerList(pnMain).getPettyID());
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                        return;
-                    }
+                poJSON = poController.openRecord(poController.TransactionList(pnMain).getTransactionNo());
+                if ("error".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                    return;
                 }
             }
             Platform.runLater(() -> {

@@ -316,7 +316,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
     boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
-        return cmbFundType.getSelectionModel().getSelectedIndex() == 0 ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
     }
 
     private boolean isDetailCountMoreThanOne() {

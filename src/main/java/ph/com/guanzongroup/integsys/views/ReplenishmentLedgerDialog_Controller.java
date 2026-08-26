@@ -261,9 +261,30 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         JFXUtil.addCheckboxColumns(ModelReplenishmentLedger.class, tblViewDetails, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
                     boolean lbisTrue = newVal;
+
                     switch (colIndex) {
                         case 0:
-                            checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            if (lbisTrue) {
+                                // First row can always be checked
+                                if (rowIndex == 0) {
+                                    checkedItem.set(rowIndex, "1");
+                                } else {
+                                    // The previous row must be checked first
+                                    if ("1".equals(checkedItem.get(rowIndex - 1))) {
+                                        checkedItem.set(rowIndex, "1");
+                                    } else {
+                                        // Cannot check this row yet
+                                        checkedItem.set(rowIndex, "0");
+                                    }
+                                }
+                            } else {
+                                // Unchecking this row
+                                checkedItem.set(rowIndex, "0");
+                                // Uncheck all rows after this one
+                                for (int i = rowIndex + 1; i < checkedItem.size(); i++) {
+                                    checkedItem.set(i, "0");
+                                }
+                            }
                             boolean allOnes = checkedItem.stream().allMatch("1"::equals);
                             chckSelectAll.setSelected(allOnes);
                             //set external temporary data of index to save as reference
@@ -277,6 +298,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                                     }
                                 });
                             });
+
                             break;
                     }
                 },
@@ -472,7 +494,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     }
 
     private boolean isCashFund() {
-        return poController.getModel().getFundType().equals("1") ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
     }
 
     public void addController(ReplenishmentRequest loController) {
