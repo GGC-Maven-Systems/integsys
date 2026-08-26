@@ -64,9 +64,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
     private ObservableList<ModelReplenishmentLedger> main_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableDetail;
     private int pnDetail = 0;
-    Map<String, JFXUtil.Data> cloned;
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Cash Fund", "Petty Cash Fund");
-    JFXUtil.StageManager stageLedger = new JFXUtil.StageManager();
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apTable, apBrowse;
     @FXML
@@ -85,12 +82,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        try {
         poJSON = new JSONObject();
-//            poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
-//            poController.initialize();// Initialize transaction
-//            poController.setRecordStatus("0123");
-
         initTextFields();
         clearTextFields();
         pnEditMode = EditMode.UNKNOWN;
@@ -101,17 +93,8 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         initCheckboxes();
         Platform.runLater(() -> {
             loadTableDetail.reload();
-//                poController.setIndustryID(psIndustryId);
-//                poController.setCompanyID(psCompanyId);
-//                poController.setIndustryId(psIndustryId);
-//                poController.setCompanyId(psCompanyId);
-//                poController.setWithUI(true);
-//                poController.setRecordStatus("0134");
         });
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
+
     }
 
     @Override
@@ -158,9 +141,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     break;
             }
-//            loadRecordDetail();
-//            loadTableDetail.reload();
-//            initButton(pnEditMode);
+
         }
     }
 
@@ -361,12 +342,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 });
     }
 
-    private void loadRecordDetail() {
-
-    }
-    boolean lbProceed = true;
-    boolean pbKeyPressed = false;
-
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -377,7 +352,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    pbEntered = true;
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;
@@ -483,10 +457,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         JFXUtil.clearTextFields(apBrowse);
     }
 
-    public void addData(Map<String, JFXUtil.Data> dataMap) {
-        cloned = new HashMap<>(dataMap);
-    }
-
     private boolean isCashFund() {
         return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
     }
@@ -499,7 +469,6 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-//        JFXUtil.setDisabled(!lbShow1, apMaster);
         if (fnValue != EditMode.READY) {
             return;
         }

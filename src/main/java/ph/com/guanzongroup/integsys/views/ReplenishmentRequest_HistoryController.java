@@ -2,13 +2,10 @@ package ph.com.guanzongroup.integsys.views;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,7 +33,6 @@ import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.cashflow.ReplenishmentRequest;
-import ph.com.guanzongroup.cas.cashflow.model.Model_Cash_Fund_Ledger;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
 import ph.com.guanzongroup.cas.cashflow.status.ReplenishmentRequestStatus;
 import ph.com.guanzongroup.integsys.model.ModelReplenishment_Detail;
@@ -56,16 +52,12 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
     private String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     private String psIndustryId = "";
     private String psCompanyId = "";
-    private boolean pbEntered = false;
-    BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
-    ArrayList<String> checkedItem = new ArrayList<>();
-    ArrayList<Model_Cash_Fund_Ledger> checkedItems = new ArrayList<>();
 
     private ObservableList<ModelReplenishment_Detail> detail_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableDetail;
     private int pnDetail = 0;
 
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Cash Fund", "Petty Cash Fund");
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Petty Cash Fund", "Cash Fund");
     JFXUtil.StageManager stageLedger = new JFXUtil.StageManager();
 
     @FXML
@@ -93,7 +85,6 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             poJSON = new JSONObject();
             poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
             poController.initialize();// Initialize transaction
-//            poController.setRecordStatus("0123");
 
             initTextFields();
             clearTextFields();
@@ -283,7 +274,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
     }
 
     public void loadRecordSearch() {
-
+        tfSearchFundDescription.setText(poController.getfund());
     }
 
     private void loadRecordMaster() {
@@ -306,19 +297,9 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    boolean lbProceed = true;
-    boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
         return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
-    }
-
-    private boolean isDetailCountMoreThanOne() {
-        if (isCashFund()) {
-            return poController.getCashFundLedgerListCount() > 1 ? true : false;
-        } else {
-            return poController.getPettyCashLedgerListCount() > 1 ? true : false;
-        }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -331,7 +312,6 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    pbEntered = true;
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;
@@ -345,7 +325,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                             loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
-                             poJSON = poController.searchRecord(lsValue, true);
+                            poJSON = poController.searchRecord(lsValue, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
@@ -387,9 +367,9 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
             switch (currentTableID) {
                 case "tblViewDetails":
-//                    if (!detail_data.isEmpty()) {
-//                        pnDetail = newIndex;
-//                    }
+                    if (!detail_data.isEmpty()) {
+                        pnDetail = newIndex;
+                    }
                     break;
             }
         }

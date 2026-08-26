@@ -557,6 +557,10 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 stageLedger = new JFXUtil.StageManager();
             }
             poController.loadLedger(true);
+            if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), "")) {
+                ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must be identified");
+                return;
+            }
             if (isCashFund()) {
                 if (poController.getLoadCashFundLedgerListCount() <= 0) {
                     ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
