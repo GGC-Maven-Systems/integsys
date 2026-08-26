@@ -526,7 +526,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                         JFXUtil.formatDateToString(poController.TransactionList(lnCtr).getTransactionDate()),
                                         getFund(poController.TransactionList(lnCtr).getFundType()),
                                         lsFundDesc,
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTransactionDate(), true)
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTransactionAmount(), true)
                                 ));
                                 if (poController.TransactionList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
                                     JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
