@@ -41,6 +41,7 @@ import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
 import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -297,31 +298,31 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 () -> {
                     Platform.runLater(() -> {
                         main_data.clear();
-                        if (cloned == null) {
-                            return;
-                        }
-
-                        List<Map.Entry<String, JFXUtil.Data>> entryList
-                                = new ArrayList<>(cloned.entrySet());
-                        int lnCtr = 0;
-                        for (int i = 0; i < entryList.size(); i++) {
-                            lnCtr += 1;
-                            Map.Entry<String, JFXUtil.Data> entry = entryList.get(i);
-//                            String lsRowNo = entry.getKey();
-                            JFXUtil.Data data = entry.getValue();
-                            String lsLedgerNo = data.value1;
-                            String lsSourceCode = data.value2;
-                            String lsSourceNo = data.value3;
-                            String lsDate = data.value4;
-                            String lsAmount = data.value5;
-                            checkedItems(i);
-                            main_data.add(new ModelReplenishmentLedger(checkedItem.get(i),
-                                    lsLedgerNo,
-                                    lsSourceCode,
-                                    lsSourceNo,
-                                    lsDate,
-                                    lsAmount, String.valueOf(lnCtr)
-                            ));
+                        int lnCtrCount = 0;
+                        if (isCashFund()) {
+                            for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
+                                lnCtrCount += 1;
+                                checkedItems(lnCtr);
+                                main_data.add(new ModelReplenishmentLedger(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
+                                        poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
+                                        poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getCreditAmount(), true), String.valueOf(lnCtrCount)
+                                ));
+                            }
+                        } else {
+                            for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
+                                lnCtrCount += 1;
+                                checkedItems(lnCtr);
+                                main_data.add(new ModelReplenishmentLedger(checkedItem.get(lnCtr),
+                                        String.valueOf(poController.LoadPettyCashLedgerList(lnCtr).getLedgerNo()),
+                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceCode(),
+                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceNo(),
+                                        JFXUtil.formatDateToString(poController.LoadPettyCashLedgerList(lnCtr).getTransactionDate()),
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadPettyCashLedgerList(lnCtr).getCreditAmount(), true), String.valueOf(lnCtrCount)
+                                ));
+                            }
                         }
                         disableRowCheckbox.set(main_data.isEmpty()); // set enable/disable in checkboxes in requirements
                         JFXUtil.setDisabled(main_data.isEmpty(), chckSelectAll);

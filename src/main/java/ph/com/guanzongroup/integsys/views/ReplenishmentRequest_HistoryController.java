@@ -112,12 +112,17 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
             initDetailGrid();
             Platform.runLater(() -> {
 //                poController.setIndustryID(psIndustryId);
-//                poController.setCompanyID(psCompanyId);
-//                poController.setIndustryId(psIndustryId);
 //                poController.setCompanyId(psCompanyId);
+                poController.setIndustryId(psIndustryId);
+                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 loadRecordSearch();
                 poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
+                try {
+                    lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                }
             });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -158,7 +163,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                 switch (lsButton) {
                     case "btnHistory":
                         if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
-                            ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Warning("No status history to load!", pxeModuleName, null);
                             return;
                         }
 
@@ -166,7 +171,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Error("No status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
@@ -216,6 +221,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                     poController.resetTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
+                    loadTableDetail.reload();
                 }
                 if (lsButton.equals("btnRetrieve")) {
                 } else {

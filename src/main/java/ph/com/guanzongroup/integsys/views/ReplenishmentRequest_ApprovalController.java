@@ -129,10 +129,15 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             Platform.runLater(() -> {
 //                poController.setIndustryID(psIndustryId);
 //                poController.setCompanyID(psCompanyId);
-//                poController.setIndustryId(psIndustryId);
-//                poController.setCompanyId(psCompanyId);
+                poController.setIndustryId(psIndustryId);
+                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 poController.setRecordStatus("0134");
+                try {
+                    lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                }
             });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -310,6 +315,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     poController.resetTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
+                    loadTableDetail.reload();
                 }
 
                 if (lsButton.equals("btnRetrieve")) {
@@ -361,34 +367,8 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     return;
                 }
             }
-
-            Map<String, JFXUtil.Data> data = new HashMap<>();
-            data.clear();
-            int lnCount = 0;
-            if (isCashFund()) {
-                for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
-                    lnCount += 1;
-                    data.put("0", new JFXUtil.Data(String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
-                            poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
-                            poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
-                            JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
-                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)));
-                }
-            } else {
-                for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
-                    lnCount += 1;
-                    data.put("0", new JFXUtil.Data(String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
-                            poController.PettyCashLedgerList(lnCtr).getSourceCode(),
-                            poController.PettyCashLedgerList(lnCtr).getSourceNo(),
-                            JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true)));
-                }
-            }
-
             ReplenishmentLedgerDialog_Controller controller = new ReplenishmentLedgerDialog_Controller();
             controller.addController(poController);
-            controller.addData(data);
-            controller.addData(data);
             try {
                 stageLedger.setOnHidden(event -> {
                     stageLedger = null;
@@ -399,10 +379,9 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -566,60 +545,60 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         }
     }
 
+    private String getFund(String lsValue) {
+        return JFXUtil.isObjectEqualTo(lsValue, "1") ? "Cash Fund" : "Petty Cash";
+    }
+
+    private boolean isCashFund(String lsValue) {
+        return JFXUtil.isObjectEqualTo(lsValue, "1") ? true : false;
+    }
+
     public void initLoadTable() {
         loadTableMain = new JFXUtil.ReloadableTableTask(
                 tblViewMainList,
                 main_data,
                 () -> {
                     Platform.runLater(() -> {
-//                        try {
-                        main_data.clear();
-                        JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
-                        int lnRowCount = 0;
-                        if (isCashFund()) {
-                            for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
+                        try {
+                            main_data.clear();
+                            JFXUtil.disableAllHighlight(tblViewMainList, highlightedRowsMain);
+                            int lnRowCount = 0;
+                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 lnRowCount += 1;
-                                checkedItems(lnCtr);
-                                main_data.add(new ModelReplenishment_Main(checkedItem.get(lnCtr),
-                                        String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
-                                        poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
-                                        poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
-                                        JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)
+                                String lsFundDesc = "";
+                                if (isCashFund(poController.TransactionList(lnCtr).getFundType())) {
+                                    lsFundDesc = poController.TransactionList(lnCtr).CashFund().getDescription();
+                                } else {
+                                    lsFundDesc = poController.TransactionList(lnCtr).PettyCash().getDescription();
+                                }
+                                main_data.add(new ModelReplenishment_Main(String.valueOf(lnRowCount),
+                                        String.valueOf(poController.TransactionList(lnCtr).getTransactionNo()),
+                                        JFXUtil.formatDateToString(poController.TransactionList(lnCtr).getTransactionDate()),
+                                        getFund(poController.TransactionList(lnCtr).getFundType()),
+                                        lsFundDesc,
+                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTransactionDate(), true)
                                 ));
-//                            if (poController.CashFundLedgerList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
-//                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
-//                            }
+                                if (poController.TransactionList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
+                                    JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
+                                }
                             }
-                        } else {
-                            for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
-                                lnRowCount += 1;
-                                checkedItems(lnCtr);
-                                main_data.add(new ModelReplenishment_Main(checkedItem.get(lnCtr),
-                                        String.valueOf(poController.LoadPettyCashLedgerList(lnCtr).getLedgerNo()),
-                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceCode(),
-                                        poController.LoadPettyCashLedgerList(lnCtr).getSourceNo(),
-                                        JFXUtil.formatDateToString(poController.LoadPettyCashLedgerList(lnCtr).getTransactionDate()),
-                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadPettyCashLedgerList(lnCtr).getTransactionDate(), true)
-                                ));
-//                            if (poController.CashFundLedgerList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
-//                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
-//                            }
-                            }
-                        }
 
-                        if (pnMain < 0 || pnMain
-                                >= main_data.size()) {
-                            if (!main_data.isEmpty()) {
-                                /* FOCUS ON FIRST ROW */
-                                JFXUtil.selectAndFocusRow(tblViewMainList, 0);
-                                pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                            if (pnMain < 0 || pnMain
+                                    >= main_data.size()) {
+                                if (!main_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    JFXUtil.selectAndFocusRow(tblViewMainList, 0);
+                                    pnMain = tblViewMainList.getSelectionModel().getSelectedIndex();
+                                }
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                JFXUtil.selectAndFocusRow(tblViewMainList, pnMain);
                             }
-                        } else {
-                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                            JFXUtil.selectAndFocusRow(tblViewMainList, pnMain);
+                            JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMainList, filteredData);
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-                        JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMainList, filteredData);
                     });
                 });
 
@@ -667,6 +646,12 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             } else {
                 disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
                 JFXUtil.setDisabled(true, chckSelectAll);
+            }
+
+            if (pnEditMode == EditMode.UPDATE) {
+                JFXUtil.setDisabled(true, cmbFundType, tfFundDescription);
+            } else {
+                JFXUtil.setDisabled(false, cmbFundType, tfFundDescription);
             }
 
             lblStatus.setText("UNKNOWN");
@@ -945,12 +930,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         // Manage visibility and managed state of other buttons
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnApprove, btnVoid);
-        if (!lbShow1) {
-            JFXUtil.setDisabledExcept(true, apMaster, cmbFundType);
-        } else {
-            JFXUtil.setDisabledExcept(false, apMaster);
-            JFXUtil.setDisabled(true, tfTransactionNo, tfTransactionAmount, dpTransactionDate);
-        }
+        JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
         if (fnValue != EditMode.READY) {
             return;

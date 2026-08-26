@@ -121,12 +121,17 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             Platform.runLater(() -> {
 //                poController.setIndustryID(psIndustryId);
 //                poController.setCompanyID(psCompanyId);
-//                poController.setIndustryId(psIndustryId);
-//                poController.setCompanyId(psCompanyId);
+                poController.setIndustryId(psIndustryId);
+                poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 loadRecordSearch();
                 poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
                 btnNew.fire();
+                try {
+                    lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                }
             });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -171,7 +176,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         break;
                     case "btnHistory":
                         if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
-                            ShowMessageFX.Warning("No parameter status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Warning("No status history to load!", pxeModuleName, null);
                             return;
                         }
 
@@ -179,7 +184,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error("No parameter status history to load!", pxeModuleName, null);
+                            ShowMessageFX.Error("No status history to load!", pxeModuleName, null);
                         } catch (Exception ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
@@ -298,6 +303,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     clearTextFields();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
+                    loadTableDetail.reload();
                 }
                 if (lsButton.equals("btnRetrieve")) {
                 } else {
@@ -546,34 +552,8 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     return;
                 }
             }
-
-            Map<String, JFXUtil.Data> data = new HashMap<>();
-            data.clear();
-            int lnCount = 0;
-            if (isCashFund()) {
-                for (int lnCtr = 0; lnCtr < poController.getLoadCashFundLedgerListCount(); lnCtr++) {
-                    lnCount += 1;
-                    data.put("0", new JFXUtil.Data(String.valueOf(poController.LoadCashFundLedgerList(lnCtr).getLedgerNo()),
-                            poController.LoadCashFundLedgerList(lnCtr).getSourceCode(),
-                            poController.LoadCashFundLedgerList(lnCtr).getSourceNo(),
-                            JFXUtil.formatDateToString(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate()),
-                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.LoadCashFundLedgerList(lnCtr).getTransactionDate(), true)));
-                }
-            } else {
-                for (int lnCtr = 0; lnCtr < poController.getLoadPettyCashLedgerListCount(); lnCtr++) {
-                    lnCount += 1;
-                    data.put("0", new JFXUtil.Data(String.valueOf(poController.PettyCashLedgerList(lnCtr).getLedgerNo()),
-                            poController.PettyCashLedgerList(lnCtr).getSourceCode(),
-                            poController.PettyCashLedgerList(lnCtr).getSourceNo(),
-                            JFXUtil.formatDateToString(poController.PettyCashLedgerList(lnCtr).getTransactionDate()),
-                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PettyCashLedgerList(lnCtr).getTransactionDate(), true)));
-                }
-            }
-
             ReplenishmentLedgerDialog_Controller controller = new ReplenishmentLedgerDialog_Controller();
             controller.addController(poController);
-            controller.addData(data);
-            controller.addData(data);
             try {
                 stageLedger.setOnHidden(event -> {
                     stageLedger = null;
@@ -584,10 +564,9 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(ReplenishmentRequest_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -604,6 +583,13 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 disableRowCheckbox.set(true); // set enable/disable in checkboxes in requirements
                 JFXUtil.setDisabled(true, chckSelectAll);
             }
+
+            if (pnEditMode == EditMode.UPDATE) {
+                JFXUtil.setDisabled(true, cmbFundType, tfFundDescription);
+            } else {
+                JFXUtil.setDisabled(false, cmbFundType, tfFundDescription);
+            }
+
             lblStatus.setText("UNKNOWN");
             if (ReplenishmentRequestStatus.APPROVED.equals(poController.getModel().getTransactionStatus())) {
                 btnVoid.setText("Cancel");
@@ -803,12 +789,9 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 
         JFXUtil.setButtonsVisibility(lbShow, btnAddLedger, btnRemoveLedger, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow3, btnUpdate, btnHistory, btnVoid);
-        if (!lbShow) {
-            JFXUtil.setDisabledExcept(true, apMaster, cmbFundType);
-        } else {
-            JFXUtil.setDisabledExcept(false, apMaster);
-            JFXUtil.setDisabled(true, tfTransactionNo, tfTransactionAmount, dpTransactionDate);
-        }
+
+        JFXUtil.setDisabled(!lbShow, apMaster);
+
         JFXUtil.setButtonsVisibility(lbShow4, btnBrowse, btnNew, btnClose);
 
         if (fnValue != EditMode.READY) {
