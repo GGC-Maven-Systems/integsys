@@ -70,6 +70,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     private String psIndustryId = "";
     private String psCompanyId = "";
     private boolean pbEntered = false;
+    boolean tooltipShown = false;
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<Model_Cash_Fund_Ledger> checkedItems_cashFund = new ArrayList<>();
@@ -88,7 +89,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster, apTable, apBrowse;
     @FXML
-    private Button btnApprove, btnHistory, btnBrowse, btnClose;
+    private Button btnPost, btnHistory, btnRetrieve, btnClose;
     @FXML
     private TextField tfTransactionNo, tfFundDescription, tfTransactionAmount, tfSearchFundDescription, tfSearchTransactionNo;
     @FXML
@@ -133,7 +134,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
-                poController.setRecordStatus("0123");
+                poController.setRecordStatus("12");
                 try {
                     lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
@@ -185,7 +186,6 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                             ShowMessageFX.Warning("No status history to load!", pxeModuleName, null);
                             return;
                         }
-
                         try {
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
@@ -196,24 +196,6 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
-                    case "btnBrowse":
-                        poController.setRecordStatus("0134");
-                        poJSON = poController.searchRecord("", false);
-                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        } else {
-//                            poJSON = poController.populateDetail();
-                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                return;
-                            }
-                        }
-                        resetCheckboxSelection();
-                        detail_data.clear();
-                        JFXUtil.clearTextFields(apMaster);
-                        pnEditMode = poController.getEditMode();
-                        break;
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -222,7 +204,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                             return;
                         }
                         break;
-                    case "btnApprove":
+                    case "btnPost":
                         poJSON = new JSONObject();
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to post transaction?") == true) {
                             poJSON = poController.PostRecord();
@@ -242,7 +224,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnPost", "btnVoid", "btnCancel")) {
                     poController.resetTransaction();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
@@ -524,7 +506,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                         lsFundDesc,
                                         CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTransactionAmount(), true)
                                 ));
-                                if (poController.TransactionList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.APPROVED)) {
+                                if (poController.TransactionList(lnCtr).getTransactionStatus().equals(ReplenishmentRequestStatus.POSTED)) {
                                     JFXUtil.highlightByKey(tblViewMainList, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
                                 }
                             }
@@ -676,6 +658,10 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                             loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", txtField);
+                                tooltipShown = true;
+                            }
                             retrieveReplenishment();
                             break;
                         case "tfFundDescription":
@@ -888,8 +874,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         boolean lbShow3 = (fnValue == EditMode.READY);
         boolean lbShow4 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
         // Manage visibility and managed state of other buttons
-//        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnAddLedger, btnRemoveLedger);
-        JFXUtil.setButtonsVisibility(lbShow3, btnHistory, btnApprove);
+        JFXUtil.setButtonsVisibility(lbShow3, btnHistory, btnPost);
         JFXUtil.setDisabled(!lbShow1, apMaster, chckSelectAll);
         JFXUtil.setButtonsVisibility(lbShow4, btnClose);
         if (fnValue != EditMode.READY) {
@@ -897,12 +882,11 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         }
         switch (poController.getModel().getTransactionStatus()) {
             case ReplenishmentRequestStatus.APPROVED:
-                JFXUtil.setButtonsVisibility(false, btnApprove);
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnPost);
                 break;
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnApprove);
+                JFXUtil.setButtonsVisibility(false, btnPost);
                 break;
         }
     }

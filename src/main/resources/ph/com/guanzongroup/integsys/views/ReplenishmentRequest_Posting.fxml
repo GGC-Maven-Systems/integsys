@@ -37,7 +37,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                            <children>
-                              <Button fx:id="btnApprove" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Post">
+                              <Button fx:id="btnPost" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Post">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -47,7 +47,7 @@
                                     <FontAwesomeIconView glyphName="BOOK" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnBrowse" contentDisplay="TOP" graphicTextGap="3.0" layoutX="10.0" layoutY="10.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
+                              <Button fx:id="btnRetrieve" contentDisplay="TOP" graphicTextGap="3.0" layoutX="10.0" layoutY="10.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="LIST" size="20" styleClass="FontIcon" />
                                  </graphic>

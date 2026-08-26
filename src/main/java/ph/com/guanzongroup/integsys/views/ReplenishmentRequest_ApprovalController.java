@@ -69,6 +69,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     private String psIndustryId = "";
     private String psCompanyId = "";
     private boolean pbEntered = false;
+    boolean tooltipShown = false;
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<Model_Cash_Fund_Ledger> checkedItems_cashFund = new ArrayList<>();
@@ -754,6 +755,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                             loadRecordSearch();
                             break;
                         case "tfSearchTransactionNo":
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", txtField);
+                                tooltipShown = true;
+                            }
                             retrieveReplenishment();
                             break;
                         case "tfFundDescription":
@@ -974,7 +979,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         switch (poController.getModel().getTransactionStatus()) {
             case ReplenishmentRequestStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(false, btnApprove);
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnUpdate);
                 break;
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
