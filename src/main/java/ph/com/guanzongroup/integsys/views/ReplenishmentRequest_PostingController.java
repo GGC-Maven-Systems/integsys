@@ -115,7 +115,6 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
             poJSON = new JSONObject();
             poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
             poController.initialize();// Initialize transaction
-//            poController.setRecordStatus("0123");
 
             initTextFields();
             clearTextFields();
@@ -245,7 +244,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
     public void retrieveReplenishment() {
         try {
             poJSON = new JSONObject();
-            poController.setRecordStatus(ReplenishmentRequestStatus.OPEN + "" + ReplenishmentRequestStatus.APPROVED);
+            poController.setRecordStatus(ReplenishmentRequestStatus.APPROVED + "" + ReplenishmentRequestStatus.POSTED);
             poJSON = poController.loadTransactionList(tfSearchFundDescription.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
