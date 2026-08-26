@@ -305,8 +305,9 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     clearTextFields();
                     loadTableDetail.reload();
                 }
-                if (lsButton.equals("btnRetrieve")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {
+                    loadTableDetail.reload();
                     loadRecordMaster();
                 }
                 initButton(pnEditMode);

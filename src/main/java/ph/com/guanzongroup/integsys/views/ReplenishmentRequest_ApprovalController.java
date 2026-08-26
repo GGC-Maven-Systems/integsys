@@ -318,8 +318,9 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     loadTableDetail.reload();
                 }
 
-                if (lsButton.equals("btnRetrieve")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {
+                    loadTableDetail.reload();
                     loadRecordMaster();
                 }
                 initButton(pnEditMode);

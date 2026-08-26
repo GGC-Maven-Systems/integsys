@@ -223,8 +223,9 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                     clearTextFields();
                     loadTableDetail.reload();
                 }
-                if (lsButton.equals("btnRetrieve")) {
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {
+                    loadTableDetail.reload();
                     loadRecordMaster();
                 }
                 initButton(pnEditMode);
