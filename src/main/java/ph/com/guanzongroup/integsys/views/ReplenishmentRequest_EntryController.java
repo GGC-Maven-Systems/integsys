@@ -132,6 +132,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             });
+            JFXUtil.initKeyClickObject(AnchorMain, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -171,7 +172,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 switch (lsButton) {
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster);
-
                         break;
                     case "btnHistory":
                         if (poController.getEditMode() != EditMode.READY && poController.getEditMode() != EditMode.UPDATE) {
