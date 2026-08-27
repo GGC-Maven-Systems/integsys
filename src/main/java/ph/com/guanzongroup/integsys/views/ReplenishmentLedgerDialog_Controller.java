@@ -341,51 +341,7 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                 });
     }
 
-    private void txtField_KeyPressed(KeyEvent event) {
-        try {
-            TextField txtField = (TextField) event.getSource();
-            String lsID = txtField.getId();
-            String lsValue = (txtField.getText() == null ? "" : txtField.getText());
-            poJSON = new JSONObject();
-
-            switch (event.getCode()) {
-                case TAB:
-                case ENTER:
-                    CommonUtils.SetNextFocus(txtField);
-                    event.consume();
-                    break;
-                case F3:
-                    switch (lsID) {
-                        case "tfSearchLedgerNo":
-//                            poController.load
-                            poJSON = poController.SearchFund(lsValue, false, true);
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                    }
-                    loadTableDetail.reload();
-                    break;
-            }
-        } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfSearchLedgerNo":
-                        if (lsValue.isEmpty()) {
-                        }
-                        break;
-                }
-            });
-
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchLedgerNo);
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetails);
         JFXUtil.adjustColumnForScrollbar(tblViewDetails);
     }
