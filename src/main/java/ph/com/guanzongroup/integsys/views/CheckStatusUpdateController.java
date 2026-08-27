@@ -225,7 +225,7 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
         }
     }
 
-    private void initAll() {
+    private void initAll() throws GuanzonException, SQLException {
         initButtonsClickActions();
         initTextAreaFields();
         initComboBox();
@@ -302,18 +302,19 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
                         case CheckStatus.STALED:
                         case CheckStatus.BOUNCED:
                             if(cbReplacement.isSelected()){
-                                poJSON = poCheckStatusUpdateController.ReplaceCheck(taRemarks.getText());
+                                poJSON = poCheckStatusUpdateController.ReplaceCheck(taRemarks.getText(),true);
                                 if (!"success".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                                     return;
                                 }
                             }else{
-                                poJSON = poCheckStatusUpdateController.ReturnTransaction("", taRemarks.getText());
+                                poJSON = poCheckStatusUpdateController.ReturnTransaction("", taRemarks.getText(),false);
                                 if (!"success".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                                     return;
                                 }
                             }
+
                             
                             JFXUtil.disableAllHighlightByColor(tblVwMain, "#A7C7E7", highlightedRowsMain);
 //                            JFXUtil.highlightByKey(tblVwMain, String.valueOf(pnMain + 1), "#FAA0A0", highlightedRowsMain);
@@ -923,7 +924,7 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
         }
     }
 
-    private void initButton(int fnEditMode) {
+    private void initButton(int fnEditMode) throws GuanzonException, SQLException {
         boolean lbShow = (fnEditMode == EditMode.UPDATE);
         JFXUtil.setButtonsVisibility(!lbShow, btnClose);
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
@@ -931,9 +932,14 @@ public class CheckStatusUpdateController implements Initializable, ScreenInterfa
         JFXUtil.setButtonsVisibility(fnEditMode != EditMode.UNKNOWN, btnHistory);
 
         if (fnEditMode == EditMode.READY) {
-            switch (poCheckStatusUpdateController.CheckPayments().getModel().getTransactionStatus()) {
+            System.out.println("Transaction Status: " + poCheckStatusUpdateController.CheckPayments().getModel().getTransactionStatus());
+            switch (poCheckStatusUpdateController.Master().CheckPayments().getTransactionStatus()) {
                 case CheckStatus.FLOAT:
+                    JFXUtil.setButtonsVisibility(true, btnUpdate);
+                    break;
                 case CheckStatus.OPEN:
+                    JFXUtil.setButtonsVisibility(true, btnUpdate);
+                    break;
                 case CheckStatus.STOP_PAYMENT:
                     JFXUtil.setButtonsVisibility(true, btnUpdate);
                     break;
