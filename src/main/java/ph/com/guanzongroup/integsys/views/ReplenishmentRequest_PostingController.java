@@ -902,6 +902,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
             case ReplenishmentRequestStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(true, btnPost);
                 break;
+            case ReplenishmentRequestStatus.POSTED:
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnPost);
