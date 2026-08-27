@@ -648,14 +648,14 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     boolean pbKeyPressed = false;
 
     private boolean isCashFund() {
-        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1");
     }
 
     private boolean isDetailCountMoreThanOne() {
         if (isCashFund()) {
-            return poController.getCashFundLedgerListCount() > 1 ? true : false;
+            return poController.getCashFundLedgerListCount() > 1;
         } else {
-            return poController.getPettyCashLedgerListCount() > 1 ? true : false;
+            return poController.getPettyCashLedgerListCount() > 1;
         }
     }
 

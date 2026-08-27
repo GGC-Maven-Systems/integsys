@@ -101,7 +101,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                 poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
                 loadRecordSearch();
-                poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
+                poController.setRecordStatus("01234");
                 try {
                     lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
@@ -163,7 +163,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                         }
                         break;
                     case "btnBrowse":
-                        poController.setRecordStatus("0134");
+                        poController.setRecordStatus("01234");
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -307,7 +307,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
     }
 
     private boolean isCashFund() {
-        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1") ? true : false;
+        return JFXUtil.isObjectEqualTo(poController.getModel().getFundType(), "1");
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
