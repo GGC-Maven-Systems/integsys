@@ -245,7 +245,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         try {
             poJSON = new JSONObject();
             poController.setRecordStatus(ReplenishmentRequestStatus.APPROVED + "" + ReplenishmentRequestStatus.POSTED);
-            poJSON = poController.loadTransactionList(tfSearchFundDescription.getText(), tfSearchTransactionNo.getText());
+            poJSON = poController.loadTransactionList(tfSearchFundDescription.getText(), tfSearchTransactionNo.getText(), true);
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
@@ -267,6 +267,10 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                 stageLedger = new JFXUtil.StageManager();
             }
             poController.loadLedger(true);
+            if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
+                ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
+                return;
+            }
             if (isCashFund()) {
                 if (poController.getLoadCashFundLedgerListCount() <= 0) {
                     ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");

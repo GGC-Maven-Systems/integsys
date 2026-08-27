@@ -571,6 +571,10 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 stageLedger = new JFXUtil.StageManager();
             }
             poController.loadLedger(true);
+            if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
+                ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
+                return;
+            }
             if (isCashFund()) {
                 if (poController.getLoadCashFundLedgerListCount() <= 0) {
                     ShowMessageFX.Warning(null, pxeModuleName, "No ledger to load.");
@@ -738,6 +742,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
 //                                }
                             }
                             if (lbProceed) { // uniquely inserted due to retrieval delay
+                                poController.resetTransaction();
                                 poController.getModel().setFundId("");
                                 loadRecordMaster();
                             }
