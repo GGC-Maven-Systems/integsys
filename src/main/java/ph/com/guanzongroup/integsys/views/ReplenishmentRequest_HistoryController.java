@@ -106,6 +106,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                     lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
         } catch (SQLException | GuanzonException ex) {
@@ -205,7 +206,6 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                     resetValues();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
-                    loadTableDetail.reload();
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {

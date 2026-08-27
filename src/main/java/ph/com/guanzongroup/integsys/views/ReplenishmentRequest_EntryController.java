@@ -301,8 +301,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     resetValues();
                     clearTextFields();
                     pnEditMode = EditMode.UNKNOWN;
-                    clearTextFields();
-                    loadTableDetail.reload();
                 }
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {
@@ -728,12 +726,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                 poController.getModel().setFundId("");
                                 loadRecordMaster();
                             }
-                        }
-                        break;
-                    case "tfTransactionAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                 }

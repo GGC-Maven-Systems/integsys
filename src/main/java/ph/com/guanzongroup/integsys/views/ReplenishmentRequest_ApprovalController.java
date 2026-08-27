@@ -137,6 +137,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
         } catch (SQLException | GuanzonException ex) {
@@ -249,6 +250,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 loadTableDetail.reload();
                                 return;
                             } else {
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                                 loadRecordMaster();
                             }
@@ -315,7 +317,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     resetValues();
                     pnEditMode = EditMode.UNKNOWN;
                     clearTextFields();
-                    loadTableDetail.reload();
                 }
 
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
@@ -454,10 +455,18 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     }
 
     private void resetValues() {
-        poController.resetTransaction();
-        poController.getModel().setFundId("");
-        poController.getModel().setRemarks("");
-        poController.getModel().setTransactionAmount(0.00);
+        try {
+            poController.resetTransaction();
+            poController.getModel().setTransactionNo("");
+            poController.getModel().setTransactionDate(SQLUtil.toDate(CustomCommonUtil.formatDateToShortString(oApp.getServerDate()), SQLUtil.FORMAT_SHORT_DATE));
+            poController.getModel().setFundId("");
+            poController.getModel().setFundType("0");
+            poController.getModel().setRemarks("");
+            poController.getModel().setTransactionAmount(0.00);
+        } catch (SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
     }
 
     @FXML
@@ -823,12 +832,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 poController.getModel().setFundId("");
                                 loadRecordMaster();
                             }
-                        }
-                        break;
-                    case "tfTransactionAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                 }
