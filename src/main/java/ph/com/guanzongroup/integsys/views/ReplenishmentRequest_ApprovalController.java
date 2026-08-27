@@ -193,24 +193,6 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
-                    case "btnBrowse":
-                        poController.setRecordStatus("01");
-                        poJSON = poController.searchRecord("", false);
-                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            return;
-                        } else {
-//                            poJSON = poController.populateDetail();
-                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                return;
-                            }
-                        }
-                        resetCheckboxSelection();
-                        detail_data.clear();
-                        JFXUtil.clearTextFields(apMaster);
-                        pnEditMode = poController.getEditMode();
-                        break;
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -707,6 +689,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
 
     private void loadRecordSearch() {
         tfSearchFundDescription.setText(poController.getfund());
+        JFXUtil.updateCaretPositions(apBrowse);
     }
 
     private void loadRecordMaster() {

@@ -592,6 +592,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
 
     private void loadRecordSearch() {
         tfSearchFundDescription.setText(poController.getfund());
+        JFXUtil.updateCaretPositions(apBrowse);
     }
 
     private void loadRecordMaster() {

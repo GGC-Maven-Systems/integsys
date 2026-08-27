@@ -164,7 +164,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
                         break;
                     case "btnBrowse":
                         poController.setRecordStatus("01234");
-                        poJSON = poController.searchRecord("", false);
+                        poJSON = poController.searchRecord(tfSearchFundDescription.getText(), false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
@@ -282,6 +282,7 @@ public class ReplenishmentRequest_HistoryController implements Initializable, Sc
 
     public void loadRecordSearch() {
         tfSearchFundDescription.setText(poController.getfund());
+        JFXUtil.updateCaretPositions(apBrowse);
     }
 
     private void loadRecordMaster() {
