@@ -396,7 +396,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                     stageLedger = null;
                     loadTableDetail.reload();
                 });
-                stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", false, false, false);
+                stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", true, false, false);
             } catch (IOException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -931,10 +931,17 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
             if (selected != null) {
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 String lsTransactionNo = selected.getIndex02();
-                stageLedger.closeDialog();
+                if (stageLedger != null) {
+                    stageLedger.closeDialog();
+                    stageLedger = new JFXUtil.StageManager();
+                } else {
+                    stageLedger = new JFXUtil.StageManager();
+                }
                 if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.getModel().getTransactionNo(), lsTransactionNo)) {
                     return;
                 }
+                resetValues();
+                clearTextFields();
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                 JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);

@@ -107,7 +107,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
             poJSON = new JSONObject();
             poController = new CashflowControllers(oApp, null).ReplenishmentRequest();
             poController.initialize();// Initialize transaction
-//            poController.setRecordStatus("0123");
 
             initTextFields();
             clearTextFields();
@@ -191,7 +190,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         }
                         break;
                     case "btnBrowse":
-                        poController.setRecordStatus("0134");
+                        poController.setRecordStatus("0");
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -590,7 +589,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                     stageLedger = null;
                     loadTableDetail.reload();
                 });
-                stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", false, false, false);
+                stageLedger.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/ReplenishmentLedger_Dialog.fxml"), controller, "Ledger Dialog", true, false, false);
             } catch (IOException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
