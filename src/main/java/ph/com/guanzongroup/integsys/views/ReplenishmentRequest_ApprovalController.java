@@ -803,6 +803,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
                                         resetValues();
+                                        poController.resetTransaction();
                                         clearTextFields();
                                         loadTableDetail.reload();
                                     } else {
@@ -839,6 +840,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                     if (!pbKeyPressed) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                            poController.resetTransaction();
                                             resetValues();
                                             clearTextFields();
                                             loadTableDetail.reload();

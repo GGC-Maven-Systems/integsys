@@ -680,6 +680,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                        poController.resetTransaction();
                                         resetValues();
                                         clearTextFields();
                                         loadTableDetail.reload();
@@ -716,6 +717,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
                                     if (!pbKeyPressed) {
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
+                                            poController.resetTransaction();
                                             resetValues();
                                             clearTextFields();
                                             loadTableDetail.reload();

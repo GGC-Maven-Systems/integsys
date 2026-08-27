@@ -723,6 +723,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                 "Are you sure you want to change the Fund Description?\nPlease note that this action will reset all details.\n\nDo you wish to proceed?") == true) {
                                             resetValues();
+                                            poController.resetTransaction();
                                             clearTextFields();
                                             loadTableDetail.reload();
                                         } else {
