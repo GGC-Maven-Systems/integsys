@@ -244,33 +244,35 @@ public class ReplenishmentLedgerDialog_Controller implements Initializable, Scre
                     switch (colIndex) {
                         case 0:
                             boolean lbisTrue = newVal;
-
+                            // Get the actual index from the original data
+                            int actualIndex = main_data.indexOf(row);
+                            if (actualIndex == -1) {
+                                break;
+                            }
                             if (lbisTrue) {
-
-                                // Check this row and all rows BEFORE it
-                                for (int i = 0; i <= rowIndex; i++) {
+                                for (int i = 0; i <= actualIndex; i++) {
                                     checkedItem.set(i, "1");
                                 }
-
                             } else {
-
-                                // Uncheck this row and all rows AFTER it
-                                for (int i = rowIndex; i < checkedItem.size(); i++) {
+                                for (int i = actualIndex; i < checkedItem.size(); i++) {
                                     checkedItem.set(i, "0");
                                 }
                             }
                             boolean allOnes = checkedItem.stream().allMatch("1"::equals);
                             chckSelectAll.setSelected(allOnes);
-                            //set external temporary data of index to save as reference
-                            // if detected unchecked then must update
-                            pnDetail = rowIndex;
+                            // Use actual index for your external reference
+                            pnDetail = actualIndex;
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
                                 JFXUtil.runWithDelay(0.50, () -> {
-                                    JFXUtil.selectAndFocusRow(tblViewDetails, rowIndex);
+                                    // Find the row's current position in the filtered list
+                                    int filteredIndex = filteredDataDetail.indexOf(row);
+                                    if (filteredIndex >= 0) {
+                                        tblViewDetails.getSelectionModel().select(filteredIndex);
+                                        tblViewDetails.getFocusModel().focus(filteredIndex);
+                                    }
                                 });
                             });
-
                             break;
                     }
                 },
