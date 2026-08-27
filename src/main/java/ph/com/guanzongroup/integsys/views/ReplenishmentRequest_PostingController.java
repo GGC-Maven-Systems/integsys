@@ -886,7 +886,7 @@ public class ReplenishmentRequest_PostingController implements Initializable, Sc
         }
         switch (poController.getModel().getTransactionStatus()) {
             case ReplenishmentRequestStatus.APPROVED:
-                JFXUtil.setButtonsVisibility(false, btnPost);
+                JFXUtil.setButtonsVisibility(true, btnPost);
                 break;
             case ReplenishmentRequestStatus.VOID:
             case ReplenishmentRequestStatus.CANCELLED:

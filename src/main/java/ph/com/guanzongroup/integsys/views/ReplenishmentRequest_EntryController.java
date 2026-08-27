@@ -256,6 +256,21 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+
+                                // Confirmation Prompt
+                                JSONObject loJSON = poController.OpenRecord(poController.getModel().getTransactionNo());
+                                if ("success".equals(loJSON.get("result"))) {
+                                    if (poController.getModel().getTransactionStatus().equals(ReplenishmentRequestStatus.OPEN)) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+                                            loJSON = poController.ApproveRecord();
+                                            if ("success".equals((String) loJSON.get("result"))) {
+                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+                                            } else {
+                                                ShowMessageFX.Warning((String) loJSON.get("message"), pxeModuleName, null);
+                                            }
+                                        }
+                                    }
+                                }
                                 loadRecordMaster();
                                 btnNew.fire();
                             }

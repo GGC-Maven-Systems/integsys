@@ -132,7 +132,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
                 poController.setWithUI(true);
-                poController.setRecordStatus("0134");
+                poController.setRecordStatus("01");
                 try {
                     lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
                 } catch (SQLException | GuanzonException ex) {
@@ -194,7 +194,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         }
                         break;
                     case "btnBrowse":
-                        poController.setRecordStatus("0134");
+                        poController.setRecordStatus("01");
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -250,14 +250,34 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                                 loadTableDetail.reload();
                                 return;
                             } else {
-                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                //reshow the highlight
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+
+                                // Confirmation Prompt
+                                JSONObject loJSON = poController.OpenRecord(poController.getModel().getTransactionNo());
+                                if ("success".equals(loJSON.get("result"))) {
+                                    if (poController.getModel().getTransactionStatus().equals(ReplenishmentRequestStatus.OPEN)) {
+                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to approve this transaction?")) {
+                                            loJSON = poController.ApproveRecord();
+                                            if ("success".equals((String) loJSON.get("result"))) {
+                                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
+                                                JFXUtil.highlightByKey(tblViewMainList, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);
+                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+                                            } else {
+                                                ShowMessageFX.Warning((String) loJSON.get("message"), pxeModuleName, null);
+                                            }
+                                        }
+                                    }
+                                }
+                                pnEditMode = poController.getEditMode();
+                                JFXUtil.disableAllHighlightByColor(tblViewMainList, "#A7C7E7", highlightedRowsMain);
                                 loadRecordMaster();
                             }
                         } else {
                             return;
                         }
                         break;
+
                     case "btnAddLedger":
                         showLedgerDialog();
                         break;
@@ -335,7 +355,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
     public void retrieveReplenishment() {
         try {
             poJSON = new JSONObject();
-            poController.setRecordStatus(ReplenishmentRequestStatus.OPEN + "" + ReplenishmentRequestStatus.APPROVED + "" + ReplenishmentRequestStatus.VOID);
+            poController.setRecordStatus(ReplenishmentRequestStatus.OPEN + "" + ReplenishmentRequestStatus.APPROVED);
             poJSON = poController.loadTransactionList(tfSearchFundDescription.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -527,10 +547,12 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbFundType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbFundType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbFundType);
+
     }
 
     private void initCheckboxes() {
-        JFXUtil.addCheckboxColumns(ModelReplenishment_Detail.class, tblViewDetails, disableRowCheckbox,
+        JFXUtil.addCheckboxColumns(ModelReplenishment_Detail.class,
+                tblViewDetails, disableRowCheckbox,
                 (row, rowIndex, colIndex, newVal) -> {
                     switch (colIndex) {
                         case 0:
@@ -709,8 +731,10 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                 btnVoid.setText("Cancel");
             } else {
                 btnVoid.setText("Void");
+
             }
-            JFXUtil.setStatusValue(lblStatus, ReplenishmentRequestStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getTransactionStatus());
+            JFXUtil.setStatusValue(lblStatus, ReplenishmentRequestStatus.class,
+                    pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getTransactionStatus());
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             dpTransactionDate.setValue(poController.getModel().getTransactionDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
             JFXUtil.setCmbValue(cmbFundType, !poController.getModel().getFundType().equals("") ? Integer.valueOf(poController.getModel().getFundType()) : -1);
@@ -800,6 +824,7 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+
         }
     }
 
@@ -835,9 +860,12 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         }
                         break;
                 }
-                JFXUtil.runWithDelay(.5, () -> {
-                    loadTableDetail.reload();
-                });
+                JFXUtil
+                        .runWithDelay(
+                                .5, () -> {
+                                    loadTableDetail.reload();
+                                }
+                        );
             });
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
             (lsID, lsValue) -> {
@@ -850,7 +878,8 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         break;
                 }
                 loadRecordMaster();
-            });
+            }
+    );
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -867,7 +896,8 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         }
                         break;
                 }
-            });
+            }
+    );
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
