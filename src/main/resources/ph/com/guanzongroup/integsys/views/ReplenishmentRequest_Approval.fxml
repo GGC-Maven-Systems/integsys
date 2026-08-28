@@ -79,7 +79,7 @@
                               </Button>
                               <Button fx:id="btnRetrieve" contentDisplay="TOP" graphicTextGap="3.0" layoutX="10.0" layoutY="10.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="LIST" size="20" styleClass="FontIcon" />
+                                    <FontAwesomeIconView glyphName="LIST_ALT" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
                               <Button fx:id="btnClose" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">

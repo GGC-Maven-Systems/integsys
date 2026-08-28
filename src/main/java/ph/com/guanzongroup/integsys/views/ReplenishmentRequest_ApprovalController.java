@@ -849,12 +849,9 @@ public class ReplenishmentRequest_ApprovalController implements Initializable, S
                         }
                         break;
                 }
-                JFXUtil
-                        .runWithDelay(
-                                .5, () -> {
-                                    loadTableDetail.reload();
-                                }
-                        );
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableDetail.reload();
+                });
             });
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
             (lsID, lsValue) -> {
