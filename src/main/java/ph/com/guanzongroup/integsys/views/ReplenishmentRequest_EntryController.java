@@ -126,11 +126,6 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                 loadRecordSearch();
                 poController.setRecordStatus(ReplenishmentRequestStatus.OPEN);
                 btnNew.fire();
-                try {
-                    lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
-                } catch (SQLException | GuanzonException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                }
             });
             JFXUtil.initKeyClickObject(AnchorMain, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
@@ -222,6 +217,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
+                        poController.setDefaultFund(poController.getModel().getFundType());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnUpdate":
@@ -452,6 +448,7 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.setDefaultFund(poController.getModel().getFundType());
                         loadRecordMaster();
                         break;
                 }
@@ -605,7 +602,11 @@ public class ReplenishmentRequest_EntryController implements Initializable, Scre
     }
 
     public void loadRecordSearch() {
-
+        try {
+            lblSource.setText(poController.getModel().Company().getCompanyName() + " - " + poController.getModel().Industry().getDescription());
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void loadRecordMaster() {
