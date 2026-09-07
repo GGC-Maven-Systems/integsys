@@ -255,10 +255,15 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
             return;
         }
 
+        boolean lbEditing = (poAppController.getEditMode() == EditMode.ADDNEW || poAppController.getEditMode() == EditMode.UPDATE);
+        if (!lbEditing) {
+            return;
+        }
         if (e.getClickCount() == 2 && !e.isConsumed()) {
 
             try {
                 e.consume();
+
                 if (!isJSONSuccess(poAppController.requestDetail(pnTransactionStock),
                         "Add Stock Request Detail. ")) {
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Selected Delivery is not yet Saved. Do you want to replace Transaction? ") == true) {
@@ -450,7 +455,7 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                                     "Initialize Search Trucking! ")) {
                                 return;
                             }
-                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                             break;
 
                     }
@@ -488,6 +493,10 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                         return;
                     }
                     if (!isJSONSuccess(poAppController.SaveTransaction(), "Initialize Save Transaction")) {
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+                        reloadTableDetailOther();
+                        pnEditMode = poAppController.getEditMode();
                         return;
                     }
                     if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
@@ -533,7 +542,6 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                         return;
                     }
                     break;
-
                 case "btnHistory":
                     if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                         ShowMessageFX.Warning("No transaction status history to load!", psFormName, null);
@@ -578,6 +586,11 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                         return;
                     }
                     if (!isJSONSuccess(poAppController.SaveTransactionDelivery(pnTransactionDetail), "Initialize Save Delivery Transaction")) {
+
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+                        reloadTableDetailOther();
+                        pnEditMode = poAppController.getEditMode();
                         return;
                     }
                     reloadTableDetail();
@@ -628,7 +641,6 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                         ShowMessageFX.Information("No Delivery Selected..", "Stock Request Issuance", "");
                         return;
                     }
-
                     if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().printRecordCluster(poAppController.getMaster().getTransactionNo()), "Initialize Print Delivery Transaction")) {
                         return;
                     }
@@ -726,7 +738,6 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
-//                    
                     case "tfClusterName":
                         if (lsValue.isEmpty()) {
                             poAppController.getMaster().setClusterID("");
@@ -820,13 +831,12 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                             break;
                         }
 
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
-
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
                         poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
@@ -954,7 +964,7 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
                                         "Initialize Search Trucking! ")) {
                                     return;
                                 }
-                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                                 break;
 
                         }
@@ -1092,7 +1102,7 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
         tfBranch.setText(tblColDelBranch.getCellData(fnRow - 1));
         lblDeliveryStatus.setText(tblColDelStatus.getCellData(fnRow - 1));
 
-        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().Project().getProjectDescription());
+        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getProjectCode());
 
         dpDeliveryDate.setValue(ParseDate(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getTransactionDate()));
         taDeliveryRemarks.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getRemarks());
@@ -1199,10 +1209,13 @@ public class InventoryStockIssuanceControllerMonarch_Food implements Initializab
         initButtonControls(!lbShow, "btnUpdateDelivery", "btnPrintDelivery", "btnCancelDelivery");
         initButtonControls(!lbShow && !lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
         initButtonControls(!lbShow && !lbisCancelled, "btnUpdateDelivery", "btnPrintDelivery", "btnCancelDelivery");
-        if (!lbisCancelled) {
+        if (!lbShow && !lbisCancelled) {
             initButtonControls(!lbisPosted & !lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
         }
 
+        dpDeliveryDate.setDisable(!lbShow);
+        tfProjectCode.setDisable(!lbShow);
+        taDeliveryRemarks.setDisable(!lbShow);
         apDetailDelivery.setDisable(fnEditMode != EditMode.READY && !lbShow);
     }
 

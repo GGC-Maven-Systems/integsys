@@ -97,7 +97,7 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnCancel" contentDisplay="TOP" ellipsisString="" layoutX="185.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Cancel">
+                              <Button fx:id="btnCancel" contentDisplay="TOP" ellipsisString="" layoutX="185.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Cancelled">
                                  <effect>
                                     <Blend />
                                  </effect>
@@ -279,7 +279,7 @@
                                                       <TableColumn fx:id="tblColROQ" editable="false" maxWidth="-1.0" minWidth="120.0" prefWidth="-1.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="ROQ" />
                                                       <TableColumn fx:id="tblColQOH" editable="false" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="QOH" />
                                                       <TableColumn fx:id="tblColRequestQty" editable="false" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Request Qty" />
-                                                      <TableColumn fx:id="tblColCancelQty" editable="false" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Canceled Qty" />
+                                                      <TableColumn fx:id="tblColCancelQty" editable="false" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Cancelled Qty" />
                                                       <TableColumn fx:id="tblColApprovedQty" editable="false" maxWidth="-1.0" minWidth="95.0" prefWidth="95.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Approved Qty" />
                                                   </columns>
                                                    <columnResizePolicy>

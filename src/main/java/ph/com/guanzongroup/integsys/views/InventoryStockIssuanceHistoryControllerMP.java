@@ -501,6 +501,8 @@ public class InventoryStockIssuanceHistoryControllerMP implements Initializable,
         tfBranch.setText(tblColDelBranch.getCellData(tblIndex));
         lblDeliveryStatus.setText(tblColDelStatus.getCellData(tblIndex));
 
+        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getProjectCode());
+
         dpDeliveryDate.setValue(ParseDate(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getTransactionDate()));
         taDeliveryRemarks.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getRemarks());
         initButtonDisplayDetail(fnRow, poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getEditMode());

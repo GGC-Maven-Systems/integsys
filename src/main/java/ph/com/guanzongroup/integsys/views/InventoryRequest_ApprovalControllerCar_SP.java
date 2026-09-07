@@ -273,6 +273,14 @@ public class InventoryRequest_ApprovalControllerCar_SP implements Initializable,
                     return;
                 }
 
+                if (poAppController.getEditMode() == EditMode.UPDATE) {
+                    if (!isValidApprovedQty(tfApprovedQty.getText())) {
+                        poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail + 1).getQuantity());
+                        reloadTableDetail();
+                        loadSelectedDetail(pnCTransactionDetail);
+                        return;
+                    }
+                }
                 event.consume();
                 loadSelectedDetail(pnCTransactionDetail);
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
@@ -490,6 +498,18 @@ public class InventoryRequest_ApprovalControllerCar_SP implements Initializable,
         return true;
     }
 
+    private boolean isValidApprovedQty(String fsVal) {
+        if (fsVal == null ? true : fsVal.isEmpty()) {
+            return false;
+        }
+
+        if (Double.parseDouble(fsVal) <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void initControlEvents() {
         List<Control> laControls = getAllSupportedControls();
 
@@ -560,6 +580,8 @@ public class InventoryRequest_ApprovalControllerCar_SP implements Initializable,
                     table.getItems().clear();
                 }
 
+            } else if (loControl instanceof TextArea) {
+                ((TextArea) loControl).clear();
             }
         }
         pnEditMode = poAppController.getEditMode();
