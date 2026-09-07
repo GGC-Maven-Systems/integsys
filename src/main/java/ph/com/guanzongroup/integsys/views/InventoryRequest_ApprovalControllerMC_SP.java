@@ -280,6 +280,14 @@ public class InventoryRequest_ApprovalControllerMC_SP implements Initializable, 
 
                 event.consume();
                 loadSelectedDetail(pnCTransactionDetail);
+                   if (poAppController.getEditMode() == EditMode.UPDATE) {
+                    if (!isValidApprovedQty(tfApprovedQty.getText())) {
+                        poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail+1).getQuantity());
+                        reloadTableDetail();
+                        loadSelectedDetail(pnCTransactionDetail);
+                        return;
+                    }
+                }
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(DeliverySchedule_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                 poLogWrapper.severe(psFormName + " :" + ex.getMessage());
@@ -494,7 +502,17 @@ public class InventoryRequest_ApprovalControllerMC_SP implements Initializable, 
 
         return true;
     }
+    private boolean isValidApprovedQty(String fsVal) {
+        if (fsVal == null ? true : fsVal.isEmpty()) {
+                    return false;
+        }
 
+        if (Double.parseDouble(fsVal) <= 0) {
+                return false;
+        }
+
+        return true;
+    }
     private void initControlEvents() {
         List<Control> laControls = getAllSupportedControls();
 
@@ -565,6 +583,8 @@ public class InventoryRequest_ApprovalControllerMC_SP implements Initializable, 
                     table.getItems().clear();
                 }
 
+            } else if (loControl instanceof TextArea) {
+                ((TextArea) loControl).clear();
             }
         }
         pnEditMode = poAppController.getEditMode();

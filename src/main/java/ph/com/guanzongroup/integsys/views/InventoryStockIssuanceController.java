@@ -455,7 +455,7 @@ public class InventoryStockIssuanceController implements Initializable, ScreenIn
                                     "Initialize Search Trucking! ")) {
                                 return;
                             }
-                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                             break;
 
                     }
@@ -771,7 +771,10 @@ public class InventoryStockIssuanceController implements Initializable, ScreenIn
                     case "tfProjectCode":
                         if (lsValue.isEmpty()) {
                             poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().setProjectCode("");
+                            return;
                         }
+                        poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().setProjectCode(lsValue);
+
                         return;
                     case "tfIssuedQty":
                         if (poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).getStockId() == null
@@ -964,7 +967,7 @@ public class InventoryStockIssuanceController implements Initializable, ScreenIn
                                         "Initialize Search Trucking! ")) {
                                     return;
                                 }
-                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                                 break;
 
                         }
@@ -1102,7 +1105,7 @@ public class InventoryStockIssuanceController implements Initializable, ScreenIn
         tfBranch.setText(tblColDelBranch.getCellData(fnRow - 1));
         lblDeliveryStatus.setText(tblColDelStatus.getCellData(fnRow - 1));
 
-        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().Project().getProjectDescription());
+        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getProjectCode());
 
         dpDeliveryDate.setValue(ParseDate(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getTransactionDate()));
         taDeliveryRemarks.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getRemarks());

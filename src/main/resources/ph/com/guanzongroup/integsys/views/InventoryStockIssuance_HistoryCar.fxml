@@ -358,7 +358,7 @@
                                                                                                                   </VBox>
                                                                                                                </children>
                                                                                                             </AnchorPane>
-                                                                                                            <Label text="Project Code" GridPane.rowIndex="4">
+                                                                                                            <Label text="Refer No." GridPane.rowIndex="4">
                                                                                                                <font>
                                                                                                                   <Font size="12.0" />
                                                                                                                </font>

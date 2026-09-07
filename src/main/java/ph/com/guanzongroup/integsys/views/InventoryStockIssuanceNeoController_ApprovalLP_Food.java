@@ -64,6 +64,7 @@ import org.guanzon.cas.inv.warehouse.status.DeliveryIssuanceType;
 import org.guanzon.cas.inv.warehouse.status.InventoryStockIssuanceStatus;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Detail;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Master;
+import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
 import ph.com.guanzongroup.cas.cashflow.status.JournalStatus;
 import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
@@ -78,16 +79,16 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
 
     private GRiderCAS poApp;
     private LogWrapper poLogWrapper;
-    private String psFormName = "Issuance Approval LP Food";
+    private String psFormName = "Issuance Approval";
     private String psIndustryID, psCompanyID, psCategoryID;
     private Control lastFocusedControl;
     private InventoryStockIssuanceNeo poAppController;
     private ObservableList<Model_Inventory_Transfer_Master> laTransactionMaster;
     private ObservableList<Model_Inventory_Transfer_Detail> laTransactionDetail;
-    private int pnSelectMaster, pnEditMode, pnTransactionDetail;
+    private int pnSelectMaster, pnEditMode, pnTransactionDetail, pnTransactionStock;
 
     @FXML
-    AnchorPane apMainAnchor, apMaster, apDetail, apDelivery;
+    AnchorPane apMainAnchor, apMaster, apDetail, apDelivery, apStockMaster;
 
     @FXML
     TextField tfSearchSourceno, tfSearchTransNo, tfTransNo, tfClusterName, tfTrucking, tfDiscountRate, tfDiscountAmount, tfTotal;
@@ -103,7 +104,7 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
 
     @FXML
     TextField tfSearchSerial, tfSearchBarcode, tfSearchDescription, tfSupersede, tfBrand, tfModel, tfColor,
-            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty, tfProjectCode, tfQOH;
+            tfVariant, tfMeasure, tfInvType, tfCost, tfIssuedQty, tfProjectCode, tfQOH, tfOrderNo;
 
     @FXML
     Button btnSearch, btnBrowse, btnUpdate, btnPrint, btnApprove, btnVoid, btnSave, btnCancel, btnHistory, btnRetrieve, btnClose;
@@ -175,6 +176,12 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
             tblJournalAccountCode, tblJournalAccountDescription, tblJournalDebitAmount, tblJournalCreditAmount;
     @FXML
     Tab tabJournal;
+
+    @FXML
+    private TableView<Model_Inv_Stock_Request_Master> tblViewStockMaster;
+
+    @FXML
+    private TableColumn<Model_Inv_Stock_Request_Master, String> tblColReqNo, tblColReqTransNo, tblColReqTransDate, tblColReqBranch, tblColReqNoItem;
 
     /**
      * Initializes the controller class.
@@ -342,7 +349,7 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
                                     "Initialize Search Trucking! ")) {
                                 return;
                             }
-                            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+                            tfProjectCode.setText(poAppController.getMaster().getProjectCode());
                             break;
                         case "tfSearchSerial":
                             if (pnTransactionDetail > 0) {
@@ -451,6 +458,12 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
                     if (!isJSONSuccess(poAppController.UpdateTransaction(), "Initialize UPdate Transaction")) {
                         return;
                     }
+                    if (!poAppController.getMaster().getOrderNo().trim().isEmpty()) {
+                        if (!isJSONSuccess(poAppController.retrieveDetail(), "Initialize retrieve Transaction")) {
+                            return;
+                        }
+                    }
+
                     getLoadedTransaction();
                     pnEditMode = poAppController.getEditMode();
                     break;
@@ -612,6 +625,7 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
 
                             loadTransactionMasterList(tfSearchSourceno.getText(), "e.sBranchNm");
 //                            getLoadedTransaction();
+                            loadTransactionStockMasterList();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
                         case "tfSearchTransNo":
@@ -620,9 +634,15 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
 //                            getLoadedTransaction();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
+                        case "tfOrderNo":
+                            loadTransactionStockMasterList();
+//                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
                         default:
                             loadTransactionMasterList(tfSearchSourceno.getText(), "e.sBranchNm");
 //                            getLoadedTransaction();
+                            loadTransactionStockMasterList();
                             initButtonDisplay(poAppController.getEditMode());
                             break;
                     }
@@ -954,6 +974,24 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
                                     loadSelectedTransactionDetail(pnTransactionDetail);
                                 }
                                 break;
+                            case "tfOrderNo":
+                                if (!isJSONSuccess(poAppController.searchTransctionOrderNo(tfOrderNo.getText(), true),
+                                        "Initialize Search Stock Request")) {
+                                    return;
+                                }
+                                reloadTableDetail();
+                                loadSelectedTransactionDetail(poAppController.getDetailCount() - 1);
+                                loadTransactionMaster();
+                                break;
+                            case "tfProjectCode":
+                                if (lsValue.isEmpty()) {
+                                    poAppController.getMaster().setProjectCode("");
+                                    return;
+                                }
+                                poAppController.getMaster().setProjectCode(lsValue);
+
+                                return;
+
                         }
                         break;
                 }
@@ -1061,7 +1099,8 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
             tfDiscountAmount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
             tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
             taRemarks.setText(poAppController.getMaster().getRemarks());
-            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+            tfProjectCode.setText(poAppController.getMaster().getProjectCode());
+            tfOrderNo.setText(poAppController.getMaster().getOrderNo());
 
             computeTotal();
             cbDelType.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getDeliveryType()));
@@ -1071,7 +1110,7 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
             } else {
                 btnVoid.setText("Void");
             }
-            if (tfTransNo.getText().trim().isEmpty()) {
+            if (tfTransNo.getText() == null || tfTransNo.getText().trim().isEmpty()) {
                 lblStatus.setText("UNKNOWN");
             }
         } catch (SQLException | GuanzonException e) {
@@ -1097,11 +1136,12 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
 
 //        taNote.setText(poAppController.getDetail(fnRow).getNote());
-        tfSupersede.setText(poAppController.getDetail(fnRow).InventorySupersede().getBarCode());
-        tfModel.setText(poAppController.getDetail(fnRow).Inventory().Model().getDescription());
-        tfColor.setText(poAppController.getDetail(fnRow).Inventory().Color().getDescription());
-        tfMeasure.setText(poAppController.getDetail(fnRow).Inventory().Measure().getDescription());
-        tfInvType.setText(poAppController.getDetail(fnRow).Inventory().InventoryType().getDescription());
+        boolean lbHasBarcode = tfSearchBarcode.getText() != null && !tfSearchBarcode.getText().isEmpty();
+        tfSupersede.setText(!lbHasBarcode ? "" : poAppController.getDetail(fnRow).InventorySupersede().getBarCode());
+        tfModel.setText(!lbHasBarcode ? "" : poAppController.getDetail(fnRow).Inventory().Model().getDescription());
+        tfColor.setText(!lbHasBarcode ? "" : poAppController.getDetail(fnRow).Inventory().Color().getDescription());
+        tfMeasure.setText(!lbHasBarcode ? "" : poAppController.getDetail(fnRow).Inventory().Measure().getDescription());
+        tfInvType.setText(!lbHasBarcode ? "" : poAppController.getDetail(fnRow).Inventory().InventoryType().getDescription());
 
     }
 
@@ -1389,6 +1429,9 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
         tblViewDetails.getSelectionModel().select(indexToSelect);
 
         pnTransactionDetail = tblViewDetails.getSelectionModel().getSelectedIndex() + 1; // Not focusedIndex
+        if (pnTransactionDetail <= 0) {
+            pnTransactionDetail = 1;
+        }
         tblViewDetails.refresh();
         computeTotal();
     }
@@ -1697,5 +1740,118 @@ public class InventoryStockIssuanceNeoController_ApprovalLP_Food implements Init
                         poLogWrapper.severe(psFormName + " :" + ex.getMessage());
                     }
                 }));
+    }
+
+    ///////////////Added Stock Request Fucntion  08/28/2026
+    @FXML
+    void ontblMasterRequestClicked(MouseEvent e) {
+        pnTransactionStock = tblViewStockMaster.getSelectionModel().getSelectedIndex();
+        if (pnTransactionStock < 0) {
+            return;
+        }
+
+        boolean lbEditing = (poAppController.getEditMode() == EditMode.ADDNEW || poAppController.getEditMode() == EditMode.UPDATE);
+        if (!lbEditing) {
+            return;
+        }
+        if (e.getClickCount() == 2 && !e.isConsumed()) {
+
+            try {
+                e.consume();
+
+                if (!isJSONSuccess(poAppController.requestDetail(pnTransactionStock),
+                        "Add Stock Request Detail. ")) {
+                    if (ShowMessageFX.OkayCancel(null, psFormName, "Selected Delivery is not yet Saved. Do you want to replace Transaction? ") == true) {
+                        if (!isJSONSuccess(poAppController.replaceDetail(pnTransactionDetail, pnTransactionStock),
+                                "Replace Stock Request Detail. ")) {
+                            return;
+                        }
+                    }
+                }
+                reloadTableDetail();
+                loadSelectedTransactionDetail(poAppController.getDetailCount());
+                loadTransactionMaster();
+            } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+
+                poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+
+            }
+
+        }
+        return;
+    }
+
+    private void loadTransactionStockMasterList() {
+        StackPane overlay = getOverlayProgress(apStockMaster);
+        ProgressIndicator pi = (ProgressIndicator) overlay.getChildren().get(0);
+        overlay.setVisible(true);
+        pi.setVisible(true);
+
+        Task<ObservableList<Model_Inv_Stock_Request_Master>> loadStockTransaction = new Task<ObservableList<Model_Inv_Stock_Request_Master>>() {
+            @Override
+            protected ObservableList<Model_Inv_Stock_Request_Master> call() throws Exception {
+                if (!isJSONSuccess(poAppController.loadStockTransactionList(),
+                        "Initialize : Load of Transaction List")) {
+                    return null;
+                }
+
+                List<Model_Inv_Stock_Request_Master> rawList = poAppController.getStockMasterList();
+                System.out.print("The size of list is " + rawList.size());
+                return FXCollections.observableArrayList(new ArrayList<>(rawList));
+            }
+
+            @Override
+            protected void succeeded() {
+                ObservableList<Model_Inv_Stock_Request_Master> laMasterList = getValue();
+                tblViewStockMaster.setItems(laMasterList);
+
+                tblColReqNo.setCellValueFactory(loModel -> {
+                    int index = tblViewStockMaster.getItems().indexOf(loModel.getValue()) + 1;
+                    return new SimpleStringProperty(String.valueOf(index));
+                });
+                tblColReqTransNo.setCellValueFactory(loModel -> {
+                    return new SimpleStringProperty(String.valueOf(loModel.getValue().getTransactionNo()));
+                });
+                tblColReqTransDate.setCellValueFactory(loModel -> {
+                    return new SimpleStringProperty(String.valueOf(loModel.getValue().getTransactionDate()));
+                });
+                tblColReqBranch.setCellValueFactory(loModel -> {
+                    try {
+                        return new SimpleStringProperty(String.valueOf(loModel.getValue().Branch().getBranchName()));
+                    } catch (Exception e) {
+                        poLogWrapper.severe(psFormName, e.getMessage());
+                        return new SimpleStringProperty("");
+                    }
+                });
+                tblColReqNoItem.setCellValueFactory(loModel -> {
+                    return new SimpleStringProperty(String.valueOf(loModel.getValue().getEntryNo()));
+                });
+
+                overlay.setVisible(false);
+                pi.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                overlay.setVisible(false);
+                pi.setVisible(false);
+                Throwable ex = getException();
+                Logger
+                        .getLogger(DeliverySchedule_EntryController.class
+                                .getName()).log(Level.SEVERE, null, ex);
+                poLogWrapper.severe(psFormName + " : " + ex.getMessage());
+            }
+
+            @Override
+            protected void cancelled() {
+                overlay.setVisible(false);
+                pi.setVisible(false);
+            }
+        };
+        Thread thread = new Thread(loadStockTransaction);
+        thread.setDaemon(true);
+        thread.start();
     }
 }

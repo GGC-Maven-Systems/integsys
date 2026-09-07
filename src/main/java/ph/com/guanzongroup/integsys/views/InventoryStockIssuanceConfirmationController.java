@@ -439,7 +439,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                                     "Initialize Search Trucking! ")) {
                                 return;
                             }
-                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                             break;
                     }
                     break;
@@ -974,7 +974,7 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
                                         "Initialize Search Trucking! ")) {
                                     return;
                                 }
-                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                                 break;
                         }
                 }
@@ -1113,8 +1113,8 @@ public class InventoryStockIssuanceConfirmationController implements Initializab
         tfDelilveryTransNo.setText(tblColDelTransNo.getCellData(tblIndex));
         tfBranch.setText(tblColDelBranch.getCellData(tblIndex));
         lblDeliveryStatus.setText(tblColDelStatus.getCellData(tblIndex));
-
         dpDeliveryDate.setValue(ParseDate(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getTransactionDate()));
+        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getProjectCode());
         taDeliveryRemarks.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getRemarks());
         initButtonDisplayDetail(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getEditMode());
     }

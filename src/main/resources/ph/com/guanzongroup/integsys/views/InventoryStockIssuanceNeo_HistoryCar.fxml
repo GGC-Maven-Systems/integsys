@@ -190,6 +190,7 @@
                                                                     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="28.0" minHeight="28.0" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                         <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                         <RowConstraints maxHeight="45.0" minHeight="45.0" prefHeight="45.0" vgrow="SOMETIMES" />
                                                                 </rowConstraints>
@@ -215,7 +216,7 @@
                                                                               <Font size="12.0" />
                                                                            </font>
                                                                         </Label>
-                                                                    <Label text="Remarks" GridPane.rowIndex="7">
+                                                                    <Label text="Remarks" GridPane.rowIndex="8">
                                                                            <font>
                                                                               <Font size="12.0" />
                                                                            </font>
@@ -235,7 +236,7 @@
                                                                               <Font size="12.0" />
                                                                            </font>
                                                                         </Label>
-                                                                        <Label layoutX="31.0" layoutY="14.0" text="Total" GridPane.columnIndex="10" GridPane.rowIndex="7">
+                                                                        <Label layoutX="31.0" layoutY="14.0" text="Total" GridPane.columnIndex="10" GridPane.rowIndex="8">
                                                                            <font>
                                                                               <Font name="System Bold" size="15.0" />
                                                                            </font>
@@ -246,8 +247,8 @@
                                                                     <TextField fx:id="tfTrucking" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="5" />
                                                                         <TextField fx:id="tfDiscountRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="12" GridPane.rowIndex="3" />
                                                                         <TextField fx:id="tfDiscountAmount" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="12" GridPane.rowIndex="4" />
-                                                                        <TextField fx:id="tfTotal" alignment="CENTER_RIGHT" disable="true" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="12" GridPane.rowIndex="7" />
-                                                <TextArea fx:id="taRemarks" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="7">
+                                                                        <TextField fx:id="tfTotal" alignment="CENTER_RIGHT" disable="true" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="12" GridPane.rowIndex="8" />
+                                                <TextArea fx:id="taRemarks" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="8">
                                                    <GridPane.margin>
                                                       <Insets top="1.0" />
                                                    </GridPane.margin>
@@ -258,12 +259,18 @@
                                                                               <Font size="12.0" />
                                                                            </font>
                                                                         </Label>
-                                                                        <Label text="Project Code" GridPane.rowIndex="6">
+                                                                        <Label text="Refer No" GridPane.rowIndex="7">
                                                                            <font>
                                                                               <Font size="12.0" />
                                                                            </font>
                                                                         </Label>
-                                                                        <TextField fx:id="tfProjectCode" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="6" />
+                                                                        <TextField fx:id="tfProjectCode" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+                                                                        <Label text="Order No" GridPane.rowIndex="6">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <TextField fx:id="tfOrderNo" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6" />
                                                                 </children>
                                                             </GridPane>
                                                         </children>
