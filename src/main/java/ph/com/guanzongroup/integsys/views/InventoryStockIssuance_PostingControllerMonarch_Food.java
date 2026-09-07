@@ -808,8 +808,8 @@ public class InventoryStockIssuance_PostingControllerMonarch_Food implements Ini
         tfDiscount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
         tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
         dpTransactionDate.setValue(ParseDate(poAppController.getMaster().getTransactionDate()));
+        tfProjectCode.setText(poAppController.getMaster().getProjectCode());
 
-        tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
         dpReceivedDate.setValue(
                 poAppController.getMaster().getReceivedDate() != null ? ParseDate(poAppController.getMaster().getReceivedDate()) : LocalDate.now());
         if (poAppController.getMaster().getReceivedDate() == null) {

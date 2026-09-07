@@ -439,7 +439,7 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
                                     "Initialize Search Trucking! ")) {
                                 return;
                             }
-                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                            tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                             break;
                     }
                     break;
@@ -578,6 +578,7 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
                         return;
                     }
                     break;
+
                 case "btnHistory":
                     if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
                         ShowMessageFX.Warning("No transaction status history to load!", psFormName, null);
@@ -840,12 +841,12 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
                             break;
                         }
 
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
                         poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getDetail(pnTransactionDetailOther).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
@@ -973,7 +974,7 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
                                         "Initialize Search Trucking! ")) {
                                     return;
                                 }
-                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().Project().getProjectDescription());
+                                tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
                                 break;
                         }
                 }
@@ -1112,8 +1113,8 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
         tfDelilveryTransNo.setText(tblColDelTransNo.getCellData(tblIndex));
         tfBranch.setText(tblColDelBranch.getCellData(tblIndex));
         lblDeliveryStatus.setText(tblColDelStatus.getCellData(tblIndex));
-
         dpDeliveryDate.setValue(ParseDate(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getTransactionDate()));
+        tfProjectCode.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getProjectCode());
         taDeliveryRemarks.setText(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getRemarks());
         initButtonDisplayDetail(poAppController.getDetail(fnRow).InventoryTransfer().getMaster().getEditMode());
     }
@@ -1222,7 +1223,6 @@ public class InventoryStockIssuanceConfirmationControllerCar implements Initiali
         if (!lbisCancelled) {
             initButtonControls(!lbisPosted & !lbisConfirmed, "btnUpdateDelivery", "btnCancelDelivery");
         }
-
         dpDeliveryDate.setDisable(!lbShow);
         tfProjectCode.setDisable(!lbShow);
         taDeliveryRemarks.setDisable(!lbShow);

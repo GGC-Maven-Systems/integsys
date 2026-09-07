@@ -808,7 +808,7 @@ public class InventoryStockIssuance_PostingController implements Initializable, 
         tfDiscount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
         tfTotal.setText(String.valueOf(poAppController.getMaster().getTransactionTotal()));
         dpTransactionDate.setValue(ParseDate(poAppController.getMaster().getTransactionDate()));
-        tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+        tfProjectCode.setText(poAppController.getMaster().getProjectCode());
 
         dpReceivedDate.setValue(
                 poAppController.getMaster().getReceivedDate() != null ? ParseDate(poAppController.getMaster().getReceivedDate()) : LocalDate.now());

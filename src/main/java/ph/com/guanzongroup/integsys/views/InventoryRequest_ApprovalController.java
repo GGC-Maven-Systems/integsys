@@ -81,7 +81,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
     @FXML
     private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfModel, tfVariant, tfRequestQty,
             tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty, tfSourceNo;
-    
+
     @FXML
     private TextArea taRemarks;
 
@@ -275,6 +275,14 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
 
                 event.consume();
                 loadSelectedDetail(pnCTransactionDetail);
+                if (poAppController.getEditMode() == EditMode.UPDATE) {
+                    if (!isValidApprovedQty(tfApprovedQty.getText())) {
+                        poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail + 1).getQuantity());
+                        reloadTableDetail();
+                        loadSelectedDetail(pnCTransactionDetail);
+                        return;
+                    }
+                }
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(DeliverySchedule_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                 poLogWrapper.severe(psFormName + " :" + ex.getMessage());
@@ -490,6 +498,18 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         return true;
     }
 
+    private boolean isValidApprovedQty(String fsVal) {
+        if (fsVal == null ? true : fsVal.isEmpty()) {
+            return false;
+        }
+
+        if (Double.parseDouble(fsVal) <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void initControlEvents() {
         List<Control> laControls = getAllSupportedControls();
 
@@ -557,6 +577,8 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                     table.getItems().clear();
                 }
 
+            } else if (loControl instanceof TextArea) {
+                ((TextArea) loControl).clear();
             }
         }
         pnEditMode = poAppController.getEditMode();
@@ -797,8 +819,6 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         tfRequestQty.setText(tblColRequestQty.getCellData(fnRow));
         tfCancelQty.setText(tblColCancelQty.getCellData(fnRow));
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
-        taRemarks.setText(poAppController.getMaster().getRemarks());
-        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
 
     }
 
@@ -808,6 +828,8 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         lblSource.setText((poAppController.getMaster().Company().getCompanyName() == null ? "" : (poAppController.getMaster().Company().getCompanyName() + " - "))
                 + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
 
+        taRemarks.setText(poAppController.getMaster().getRemarks());
+        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
         reloadTableDetail();
         loadSelectedDetail(pnCTransactionDetail);
     }
@@ -826,5 +848,31 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex(); // Not focusedIndex
 
         tblRequestDetail.refresh();
+    }
+
+    public void retrieveBySystemMonitor(String transNo) {
+
+        try {
+            if (!isJSONSuccess(poAppController.RetrieveRecord(transNo),
+                    "Initialize Retrieve Transaction")) {
+                return;
+            }
+
+            if (!isJSONSuccess(poAppController.OpenTransaction(transNo),
+                    "Initialize Open Transaction")) {
+                return;
+            }
+
+            if (poAppController.getBranchCluster().getClusterDescription() != null && !poAppController.getBranchCluster().getClusterDescription().isEmpty()) {
+                loadSelectedBranchClusterDelivery();
+            }
+            
+
+            getLoadedTransaction();
+            
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+            Logger.getLogger(InventoryRequest_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

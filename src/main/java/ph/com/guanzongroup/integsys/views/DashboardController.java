@@ -1605,7 +1605,7 @@ public class DashboardController implements Initializable {
             this.controllerClass = entry.getValue();
         }
     }
-    
+
     //Utility for Transaction Attachment F5
     ControllerBinding[] controllerArray = new ControllerBinding[]{
         new ControllerBinding(SIPosting_Controller.class),
@@ -2206,18 +2206,19 @@ public class DashboardController implements Initializable {
             if (tabIndex == -1) {
                 if (!node.getFxmlPath().isEmpty() && node.getFxmlPath().contains(".fxml")) {
                     setScene2(loadAnimate(node));
-                    poController = tabpane.getUserData();
+                    tabIndex = checktabs(node.getDescription());
+                    tabpane.getSelectionModel().select(tabIndex);
+                    poController = tabpane.getSelectionModel().getSelectedItem().getUserData();
                 } else {
                     if (Platform.isFxApplicationThread()) {
                         ShowMessageFX.Warning(null, psFormName, "Invalid FXML path detected. Please inform MIS to configure the correct path.");
                     } else {
                         Platform.runLater(() -> ShowMessageFX.Warning(null, psFormName, "Invalid FXML path detected. Please inform MIS to configure the correct path."));
                     }
-
                 }
             } else {
                 tabpane.getSelectionModel().select(tabIndex);
-                poController = tabpane.getUserData();
+                poController = tabpane.getSelectionModel().getSelectedItem().getUserData();
             }
 
             setAnchorPaneVisibleManage(false, anchorLeftSideBarMenu);
@@ -2357,10 +2358,15 @@ public class DashboardController implements Initializable {
         return () -> {
             try {
 
-                if (node.getFxmlPath() != null) {
-                    openMonitorForm(node);
-                } else {
-                    runJavaCommand(node.getCommand());
+                switch (node.getMenuCode()) {
+                    case "2500000088": //PRM APM
+                    case "2500000039": //PRF PUR
+                        if (node.getFxmlPath() != null) {
+                            openMonitorForm(node);
+                        } else {
+                            runJavaCommand(node.getCommand());
+                        }
+                        break;
                 }
 
                 String menuCode = node.getMenuCode();
@@ -2385,6 +2391,14 @@ public class DashboardController implements Initializable {
                         Method retrieveMethod = poController.getClass().getMethod("retrieveBySystemMonitor", String.class);
                         retrieveMethod.invoke(poController, node.getSystemId());
                         System.out.println("Transaction no. " + node.getSystemId());
+
+                        setAnchorPaneVisibleManage(false, anchorRightSideBarMenu);
+                        animator.expandContract(true, () -> {
+                        });
+                        for (ToggleButton navButton : toggleBtnRightSideBar) {
+                            navButton.setSelected(false);
+                        }
+
                     } else {
                         System.err.println("Controller not found for sidebar: " + key);
                     }
@@ -2406,7 +2420,7 @@ public class DashboardController implements Initializable {
                 if (node.getFxmlPath() != null && !"".equals(node.getFxmlPath())) {
                     if (node.getFxmlPath().contains(".fxml")) {
                         setScene2(loadAnimate(node));
-                        poController = tabpane.getUserData();
+                        poController = tabpane.getSelectionModel().getSelectedItem().getUserData();
                     } else {
                         lbError = true;
                     }

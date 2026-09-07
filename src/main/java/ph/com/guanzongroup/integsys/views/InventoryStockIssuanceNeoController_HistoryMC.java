@@ -90,7 +90,8 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
     AnchorPane apMainAnchor, apMaster, apDetail, apDelivery;
 
     @FXML
-    TextField tfSearchSourceno, tfSearchTransNo, tfTransNo, tfClusterName, tfTrucking, tfDiscountRate, tfDiscountAmount, tfTotal;
+    TextField tfSearchSourceno, tfSearchTransNo, tfTransNo,
+            tfClusterName, tfTrucking, tfDiscountRate, tfDiscountAmount, tfTotal, tfOrderNo;
 
     @FXML
     DatePicker dpTransactionDate, dpDelDate;
@@ -294,6 +295,7 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
                         break;
 
                     }
+
                     switch (lastFocusedControl.getId()) {
 
                         case "tfSearchSourceno":
@@ -588,7 +590,8 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
             tfDiscountAmount.setText(String.valueOf(poAppController.getMaster().getDiscount()));
             tfTotal.setText(CommonUtils.NumberFormat(poAppController.getMaster().getTransactionTotal(), "###,###,##0.00"));
             taRemarks.setText(poAppController.getMaster().getRemarks());
-            tfProjectCode.setText(poAppController.getMaster().Project().getProjectDescription());
+            tfProjectCode.setText(poAppController.getMaster().getProjectCode());
+            tfOrderNo.setText(poAppController.getMaster().getOrderNo());
 
             cbDelType.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getDeliveryType()));
 
@@ -1020,7 +1023,7 @@ public class InventoryStockIssuanceNeoController_HistoryMC implements Initializa
 
                             if (poAppController.existJournal().isEmpty()) {
                                 JFXUtil.clickTabByTitleText(tabPaneMain, "Stock Issuance");
-                                ShowMessageFX.Warning(null, psFormName, "No Journal Record Detected!");
+                                ShowMessageFX.Warning(null, psFormName, "No Journal Transaction Detected!");
                                 return;
                             }
 

@@ -272,7 +272,14 @@ public class InventoryRequest_ApprovalControllerMC implements Initializable, Scr
                         return;
                     }
                 }
-
+                if (poAppController.getEditMode() == EditMode.UPDATE) {
+                    if (!isValidApprovedQty(tfApprovedQty.getText())) {
+                        poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail + 1).getQuantity());
+                        reloadTableDetail();
+                        loadSelectedDetail(pnCTransactionDetail);
+                        return;
+                    }
+                }
                 pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex();
                 if (pnCTransactionDetail < 0) {
                     return;
@@ -500,6 +507,18 @@ public class InventoryRequest_ApprovalControllerMC implements Initializable, Scr
         return true;
     }
 
+    private boolean isValidApprovedQty(String fsVal) {
+        if (fsVal == null ? true : fsVal.isEmpty()) {
+            return false;
+        }
+
+        if (Double.parseDouble(fsVal) <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void initControlEvents() {
         List<Control> laControls = getAllSupportedControls();
 
@@ -567,6 +586,8 @@ public class InventoryRequest_ApprovalControllerMC implements Initializable, Scr
                     table.getItems().clear();
                 }
 
+            } else if (loControl instanceof TextArea) {
+                ((TextArea) loControl).clear();
             }
         }
         pnEditMode = poAppController.getEditMode();

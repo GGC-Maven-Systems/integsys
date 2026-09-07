@@ -274,7 +274,14 @@ public class InventoryRequest_ApprovalControllerLP_Food implements Initializable
                         return;
                     }
                 }
-
+                if (poAppController.getEditMode() == EditMode.UPDATE) {
+                    if (!isValidApprovedQty(tfApprovedQty.getText())) {
+                        poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail + 1).getQuantity());
+                        reloadTableDetail();
+                        loadSelectedDetail(pnCTransactionDetail);
+                        return;
+                    }
+                }
                 pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex();
                 if (pnCTransactionDetail < 0) {
                     return;
@@ -497,6 +504,18 @@ public class InventoryRequest_ApprovalControllerLP_Food implements Initializable
         return true;
     }
 
+    private boolean isValidApprovedQty(String fsVal) {
+        if (fsVal == null ? true : fsVal.isEmpty()) {
+            return false;
+        }
+
+        if (Double.parseDouble(fsVal) <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void initControlEvents() {
         List<Control> laControls = getAllSupportedControls();
 
@@ -567,6 +586,8 @@ public class InventoryRequest_ApprovalControllerLP_Food implements Initializable
                     table.getItems().clear();
                 }
 
+            } else if (loControl instanceof TextArea) {
+                ((TextArea) loControl).clear();
             }
         }
         pnEditMode = poAppController.getEditMode();
@@ -813,7 +834,7 @@ public class InventoryRequest_ApprovalControllerLP_Food implements Initializable
     private void getLoadedTransaction() throws CloneNotSupportedException, SQLException, GuanzonException {
         tfClusterName.setText(poAppController.getBranchCluster().getClusterDescription());
         lblSource.setText((poAppController.getMaster().Company().getCompanyName() == null ? "" : (poAppController.getMaster().Company().getCompanyName() + " - "))
-                    + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
+                + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
 
         reloadTableDetail();
         loadSelectedDetail(pnCTransactionDetail);
