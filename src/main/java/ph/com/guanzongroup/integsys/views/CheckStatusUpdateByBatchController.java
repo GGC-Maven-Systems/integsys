@@ -272,7 +272,7 @@ public class CheckStatusUpdateByBatchController implements Initializable, Screen
                         switch (lsID) {
                             case "tfSearchBankName":
                                 poCheckStatusUpdateController.setCheckpayment();
-                                poJSON = poCheckStatusUpdateController.SearchBanks(lsValue, true);
+                                poJSON = poCheckStatusUpdateController.SearchBanks(lsValue, false);
                                 if ("error".equals((String) poJSON.get("result"))) {
                                     ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                                     return;

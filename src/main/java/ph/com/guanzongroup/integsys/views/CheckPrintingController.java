@@ -349,6 +349,8 @@ public class CheckPrintingController implements Initializable, ScreenInterface {
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                         }
+
+
                         chckSelectAll.setSelected(false);
                         checkedItem.clear();
                     }
