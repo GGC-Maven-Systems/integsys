@@ -79,7 +79,7 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
 
     private GRiderCAS poApp;
     private LogWrapper poLogWrapper;
-    private String psFormName = "Issuance Approval Car SP";
+    private String psFormName = "Issuance Approval";
     private String psIndustryID, psCompanyID, psCategoryID;
     private Control lastFocusedControl;
     private InventoryStockIssuanceNeo poAppController;
@@ -346,7 +346,7 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
                             break;
                         case "tfProjectCode":
                             if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
-                                    "Initialize Search Trucking! ")) {
+                                    "Initialize Search Project Code! ")) {
                                 return;
                             }
                             tfProjectCode.setText(poAppController.getMaster().getProjectCode());
@@ -458,7 +458,7 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
                     if (!isJSONSuccess(poAppController.UpdateTransaction(), "Initialize UPdate Transaction")) {
                         return;
                     }
-                    if (!poAppController.getMaster().getOrderNo().trim().isEmpty()) {
+                    if (poAppController.getMaster().getOrderNo() != null && !poAppController.getMaster().getOrderNo().trim().isEmpty()) {
                         if (!isJSONSuccess(poAppController.retrieveDetail(), "Initialize retrieve Transaction")) {
                             return;
                         }
@@ -696,6 +696,27 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    case "tfProjectCode":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        poAppController.getMaster().setProjectCode(lsValue);
+                        loadTransactionMaster();
+
+                        break;
+                    case "tfOrderNo":
+                        if (lsValue.isEmpty()) {
+                            if (poAppController.getEditMode() == EditMode.ADDNEW) {
+                                if (!isJSONSuccess(poAppController.clearOrder(), "Initialize Clear Detail/Order")) {
+                                    return;
+                                }
+                                getLoadedTransaction();
+                            }
+
+                            return;
+                        }
+                        break;
                     case "tfDiscountRate":
                         if (lsValue.isEmpty()) {
                             ShowMessageFX.Information("Imvalid freight amount", psFormName, null);
@@ -984,14 +1005,12 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
                                 loadTransactionMaster();
                                 break;
                             case "tfProjectCode":
-                                if (lsValue.isEmpty()) {
-                                    poAppController.getMaster().setProjectCode("");
+                                if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
+                                        "Initialize Search Project Code! ")) {
                                     return;
                                 }
-                                poAppController.getMaster().setProjectCode(lsValue);
-
-                                return;
-
+                                tfProjectCode.setText(poAppController.getMaster().getProjectCode());
+                                break;
                         }
                         break;
                 }
@@ -1278,6 +1297,8 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
         boolean lbIsApproved = lbHasTransaction
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
 
+        String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
+        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus);
         // Always visible
         initButtonControls(true, "btnRetrieve", "btnClose");
 
@@ -1288,7 +1309,7 @@ public class InventoryStockIssuanceNeoController_ApprovalCar_SP implements Initi
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnVoid", "btnHistory", "btnPrint");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate", "btnApprove");
-
+        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate", "btnVoid");
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
         apDetail.setDisable(!lbEditing);

@@ -26,6 +26,8 @@ public class ModelInvOrderDetail {
     public StringProperty index11;
     public StringProperty index12;
     public StringProperty index13;
+    public StringProperty index14;
+    public StringProperty index15;
 
     public ModelInvOrderDetail(String index01,
             String index02,
@@ -86,6 +88,42 @@ public class ModelInvOrderDetail {
         this.index12 = new SimpleStringProperty(index12);
 
     }
+
+    public ModelInvOrderDetail(String index01,
+            String index02,
+            String index03,
+            String index04,
+            String index05,
+            String index06,
+            String index07,
+            String index08,
+            String index09,
+            String index10,
+            String index11,
+            String index12,
+            String index13,
+            String index14,
+            String index15
+    ) {
+
+        this.index01 = new SimpleStringProperty(index01);
+        this.index02 = new SimpleStringProperty(index02);
+        this.index03 = new SimpleStringProperty(index03);
+        this.index04 = new SimpleStringProperty(index04);
+        this.index05 = new SimpleStringProperty(index05);
+        this.index06 = new SimpleStringProperty(index06);
+        this.index07 = new SimpleStringProperty(index07);
+        this.index08 = new SimpleStringProperty(index08);
+        this.index09 = new SimpleStringProperty(index09);
+        this.index10 = new SimpleStringProperty(index10);
+        this.index11 = new SimpleStringProperty(index11);
+        this.index12 = new SimpleStringProperty(index12);
+        this.index13 = new SimpleStringProperty(index13);
+        this.index14 = new SimpleStringProperty(index14);
+        this.index15 = new SimpleStringProperty(index15);
+
+    }
+
     public String getIndex01() {
         return index01.get();
     }
@@ -186,7 +224,24 @@ public class ModelInvOrderDetail {
         return index13.get();
     }
 
-    public void setIndex13(String index03) {
-        this.index13.set(index03);
+    public void setIndex13(String index13) {
+        this.index13.set(index13);
     }
+
+    public String getIndex14() {
+        return index14.get();
+    }
+
+    public void setIndex14(String index14) {
+        this.index14.set(index14);
+    }
+
+    public String getIndex15() {
+        return index15.get();
+    }
+
+    public void setIndex15(String index15) {
+        this.index15.set(index15);
+    }
+
 }

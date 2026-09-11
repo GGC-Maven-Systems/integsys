@@ -46,9 +46,6 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.constant.EditMode;
 import javafx.concurrent.Task;
-import static javafx.scene.input.KeyCode.ENTER;
-import static javafx.scene.input.KeyCode.F3;
-import static javafx.scene.input.KeyCode.TAB;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -310,7 +307,7 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
                             break;
                         case "tfProjectCode":
                             if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
-                                    "Initialize Search Trucking! ")) {
+                                    "Initialize Search Project Code! ")) {
                                 return;
                             }
                             tfProjectCode.setText(poAppController.getMaster().getProjectCode());
@@ -391,7 +388,7 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
                     if (!isJSONSuccess(poAppController.UpdateTransaction(), "Initialize UPdate Transaction")) {
                         return;
                     }
-                    if (!poAppController.getMaster().getOrderNo().trim().isEmpty()) {
+                    if (poAppController.getMaster().getOrderNo() != null && !poAppController.getMaster().getOrderNo().trim().isEmpty()) {
                         if (!isJSONSuccess(poAppController.retrieveDetail(), "Initialize retrieve Transaction")) {
                             return;
                         }
@@ -585,6 +582,27 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    case "tfProjectCode":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        poAppController.getMaster().setProjectCode(lsValue);
+                        loadTransactionMaster();
+
+                        break;
+                    case "tfOrderNo":
+                        if (lsValue.isEmpty()) {
+                            if (poAppController.getEditMode() == EditMode.ADDNEW) {
+                                if (!isJSONSuccess(poAppController.clearOrder(), "Initialize Clear Detail/Order")) {
+                                    return;
+                                }
+                                getLoadedTransaction();
+                            }
+
+                            return;
+                        }
+                        break;
                     case "tfDiscountRate":
                         if (lsValue.isEmpty()) {
                             ShowMessageFX.Information("Invalid freight amount", psFormName, null);
@@ -792,13 +810,12 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
                                 loadTransactionMaster();
                                 break;
                             case "tfProjectCode":
-                                if (lsValue.isEmpty()) {
-                                    poAppController.getMaster().setProjectCode("");
+                                if (!isJSONSuccess(poAppController.searchTransactionProject(tfProjectCode.getText(), false),
+                                        "Initialize Search Project Code! ")) {
                                     return;
                                 }
-                                poAppController.getMaster().setProjectCode(lsValue);
-
-                                return;
+                                tfProjectCode.setText(poAppController.getMaster().getProjectCode());
+                                break;
 
                             case "tfSearchSerial":
                                 if (pnTransactionDetail > 0) {
@@ -1123,6 +1140,8 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
         boolean lbHasTransaction = lsTransNo != null && !lsTransNo.isEmpty();
         boolean lbIsApproved = lbHasTransaction
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
+        String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
+        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus);
 
         // Always visible
         initButtonControls(true, "btnRetrieve", "btnClose");
@@ -1134,6 +1153,7 @@ public class InventoryStockIssuanceNeoControllerLP_Food implements Initializable
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnHistory", "btnPrint");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate", "btnVoid");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);

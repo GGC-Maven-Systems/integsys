@@ -22,7 +22,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane id="AnchorPane" fx:id="AnchorMain" prefHeight="789.0" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -299,6 +299,9 @@
                                                       <TableColumn fx:id="tblClassificationDetail" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" text="Class" />
                                                       <TableColumn fx:id="tblQOHDetail" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" text="QOH" />
                                                       <TableColumn fx:id="tblReservationQtyDetail" maxWidth="105.0" minWidth="8.0" prefWidth="103.0" resizable="false" text="Reservation Qty" />
+                                                      <TableColumn fx:id="tblApprovedQtyDetail" maxWidth="105.0" minWidth="8.0" prefWidth="103.0" resizable="false" text="Approved Qty" />
+                                                      <TableColumn fx:id="tblCancelledQtyDetail" maxWidth="105.0" minWidth="8.0" prefWidth="103.0" resizable="false" text="Cancelled Qty" />
+                                                      <TableColumn fx:id="tblIssuedQtyDetail" maxWidth="105.0" minWidth="8.0" prefWidth="103.0" resizable="false" text="Issued Qty" />
                                                       <TableColumn fx:id="tblOrderQuantityDetail" maxWidth="80.0" minWidth="8.0" prefWidth="57.0" resizable="false" text="Quantity" />
                                                    </columns>
                                                 </TableView>
