@@ -671,6 +671,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                     }
                     poJSON = invRequestController.SaveTransaction();
                     if (!"success".equals((String) poJSON.get("result"))) {
+
                         ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
                         loadTableInvDetail();
                         return;
@@ -741,7 +742,9 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                         });
 
                     } else {
-                        ShowMessageFX.Warning((String) loJSON.get("message"), "Warning", null);
+                        if (loJSON.get("message") != null && !loJSON.get("message").equals("")) {
+                            ShowMessageFX.Warning((String) loJSON.get("message"), "Warning", null);
+                        }
                     }
                     break;
 
@@ -1013,7 +1016,7 @@ public class InvRequest_EntryController implements Initializable, ScreenInterfac
                     try {
                     if (lsValue.isEmpty()) {
                         invRequestController.Master().setReferenceNo(lsValue);
-                    } else {                      
+                    } else {
                         poJSON = invRequestController.checkProjectCode(lsValue);
                         if (JFXUtil.isJSONSuccess(poJSON)) {
                             invRequestController.Master().setReferenceNo(lsValue);

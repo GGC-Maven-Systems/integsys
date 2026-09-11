@@ -90,7 +90,10 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
     private TextField tfReservationQTY, tfOrderQuantity, tfCancelledQTY, tfTransactionNo,
             tfSearchTransNo, tfSearchReferenceNo, tfBarCode, tfDescription, tfMeasure;
     @FXML
-    private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail, tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail, tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail;
+    private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblBarCodeDetail, tblDescriptionDetail,
+            tblModelDetail, tblVariantDetail, tblColorDetail, tblInvTypeDetail,
+            tblROQDetail, tblClassificationDetail, tblQOHDetail, tblReservationQtyDetail, tblOrderQuantityDetail,
+            tblApprovedQtyDetail, tblCancelledQtyDetail, tblIssuedQtyDetail;
     @FXML
     private TextField tfBrand, tfModel, tfInvType,
             tfVariant, tfColor, tfROQ, tfClassification, tfQOH, tfSourceNo;
@@ -619,7 +622,10 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
                                 detail.getClassification(),
                                 String.valueOf(detail.getQuantityOnHand()),
                                 String.valueOf(detail.getReservedOrder()),
-                                String.valueOf(detail.getQuantity())
+                                String.valueOf(detail.getQuantity()),
+                                String.valueOf(detail.getApproved()),
+                                String.valueOf(detail.getCancelled()),
+                                String.valueOf(detail.getIssued())
                         ));
                     }
 
@@ -898,6 +904,9 @@ public class InvRequest_HistoryController implements Initializable, ScreenInterf
         tblQOHDetail.setCellValueFactory(new PropertyValueFactory<>("index10"));
         tblReservationQtyDetail.setCellValueFactory(new PropertyValueFactory<>("index11"));
         tblOrderQuantityDetail.setCellValueFactory(new PropertyValueFactory<>("index12"));
+        tblApprovedQtyDetail.setCellValueFactory(new PropertyValueFactory<>("index13"));
+        tblCancelledQtyDetail.setCellValueFactory(new PropertyValueFactory<>("index14"));
+        tblIssuedQtyDetail.setCellValueFactory(new PropertyValueFactory<>("index15"));
         // Prevent column reordering
         tblViewOrderDetails.widthProperty().addListener((ObservableValue<? extends Number> source, Number oldWidth, Number newWidth) -> {
             TableHeaderRow header = (TableHeaderRow) tblViewOrderDetails.lookup("TableHeaderRow");

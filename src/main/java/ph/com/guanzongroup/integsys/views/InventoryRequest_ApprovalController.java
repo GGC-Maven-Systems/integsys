@@ -196,7 +196,15 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
 
                 case "btnCancel":
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") == true) {
+                        if (poAppController.getEditMode() != EditMode.ADDNEW) {
+                            if (!isJSONSuccess(poAppController.OpenTransaction(poAppController.getMaster().getTransactionNo()),
+                                    "Initialize Open Transaction")) {
 
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        }
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
                             appUnload.unloadForm(apMainAnchor, poApp, psFormName);
@@ -208,7 +216,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                             poAppController.setIndustryID(psIndustryID);
                             poAppController.setCompanyID(psCompanyID);
                             poAppController.setCategoryID(psCategoryID);
-                            clearAllInputs();
+//                            clearAllInputs();
                         });
                         pnEditMode = poAppController.getEditMode();
                         break;
@@ -866,10 +874,9 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
             if (poAppController.getBranchCluster().getClusterDescription() != null && !poAppController.getBranchCluster().getClusterDescription().isEmpty()) {
                 loadSelectedBranchClusterDelivery();
             }
-            
 
             getLoadedTransaction();
-            
+
         } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(InventoryRequest_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
         }

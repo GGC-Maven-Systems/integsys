@@ -63,7 +63,7 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
     private GRiderCAS poApp;
     private LogWrapper poLogWrapper;
     private InventoryRequestApproval poAppController;
-    private String psFormName = "Stock Request Approval Monarch Food";
+    private String psFormName = "Stock Request Approval";
     private String psIndustryID, psCompanyID, psCategoryID;
     private Control lastFocusedControl;
     private ObservableList<Model_Inv_Stock_Request_Detail> laTransactionDetail;
@@ -76,12 +76,14 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
     private Label lblSource;
 
     @FXML
-    private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfMeasure, tfInventoryType, tfRequestQty, tfSourceNo,
-            tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty;
+    private Button btnSearch, btnUpdate, btnSave, btnCancel, btnPrint, btnClose;
+
+    @FXML
+    private TextField tfClusterName, tfBranchName, tfBrand, tfBarcode, tfDescription, tfModel, tfVariant, tfRequestQty,
+            tfApprovedQty, tfQOH, tfClassification, tfROQ, tfCancelQty, tfSourceNo;
+
     @FXML
     private TextArea taRemarks;
-    @FXML
-    private Button btnSearch, btnUpdate, btnSave, btnCancel, btnPrint, btnClose;
 
     @FXML
     private TableView<Model_Inv_Stock_Request_Master> tblTransaction;
@@ -93,8 +95,8 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
     private TableColumn<Model_Inv_Stock_Request_Master, String> tblColStockRequestNo, tblColBranch, tblColTransaction, tblColTransactionDate;
 
     @FXML
-    private TableColumn<Model_Inv_Stock_Request_Detail, String> tblColBrand, tblColBarcode, tblColNo, tblColDescription, tblColMeasure, tblColInventoryType, tblColQOH,
-            tblColClassification, tblColROQ, tblColRequestQty, tblColCancelQty, tblColApprovedQty;
+    private TableColumn<Model_Inv_Stock_Request_Detail, String> tblColBrand, tblColBarcode, tblColNo, tblColDescription, tblColModel, tblColVariant, tblColROQ, tblColQOH,
+            tblColClassification, tblColRequestQty, tblColCancelQty, tblColApprovedQty;
 
     @FXML
     void cmdButton_Click(ActionEvent event) {
@@ -174,6 +176,7 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
                         ShowMessageFX.Information("Please load transaction before proceeding..", "Stock Request Approval", "");
                         break;
                     }
+
                     if (ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to save transaction?") != true) {
                         return;
                     }
@@ -193,7 +196,15 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
 
                 case "btnCancel":
                     if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") == true) {
+                        if (poAppController.getEditMode() != EditMode.ADDNEW) {
+                            if (!isJSONSuccess(poAppController.OpenTransaction(poAppController.getMaster().getTransactionNo()),
+                                    "Initialize Open Transaction")) {
 
+                            }
+                            getLoadedTransaction();
+                            initButtonDisplay(poAppController.getEditMode());
+                            break;
+                        }
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
                             appUnload.unloadForm(apMainAnchor, poApp, psFormName);
@@ -205,7 +216,7 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
                             poAppController.setIndustryID(psIndustryID);
                             poAppController.setCompanyID(psCompanyID);
                             poAppController.setCategoryID(psCategoryID);
-                            clearAllInputs();
+//                            clearAllInputs();
                         });
                         pnEditMode = poAppController.getEditMode();
                         break;
@@ -229,7 +240,6 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
 
     @FXML
     void tblTransaction_MouseClicked(MouseEvent event) {
-
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             return;
         }
@@ -249,6 +259,7 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
                     return;
 
                 }
+//                clearAllInputs();
                 getLoadedTransaction();
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(DeliverySchedule_EntryController.class.getName()).log(Level.SEVERE, null, ex);
@@ -265,17 +276,13 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
         if (event.getClickCount() == 1 && !event.isConsumed()) {
 
             try {
-
-                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                    if (ShowMessageFX.OkayCancel(null, psFormName, "Do you want to disregard changes?") != true) {
-                        return;
-                    }
-                }
-
                 pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex();
                 if (pnCTransactionDetail < 0) {
                     return;
                 }
+
+                event.consume();
+                loadSelectedDetail(pnCTransactionDetail);
                 if (poAppController.getEditMode() == EditMode.UPDATE) {
                     if (!isValidApprovedQty(tfApprovedQty.getText())) {
                         poAppController.getDetail(pnCTransactionDetail + 1).setApproved(poAppController.getDetail(pnCTransactionDetail + 1).getQuantity());
@@ -284,8 +291,6 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
                         return;
                     }
                 }
-                event.consume();
-                loadSelectedDetail(pnCTransactionDetail);
             } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                 Logger.getLogger(DeliverySchedule_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                 poLogWrapper.severe(psFormName + " :" + ex.getMessage());
@@ -537,9 +542,6 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
         // Always show these buttons
         initButtonControls(true, "btnSearch", "btnClose");
 
-        System.out.print(!lbShow);
-        System.out.print(!lbShow);
-
         // Show-only based on mode
         initButtonControls(lbShow, "btnSave", "btnCancel");
         initButtonControls(!lbShow, "btnPrint", "btnUpdate");
@@ -765,18 +767,18 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
                 }
             });
 
-            tblColMeasure.setCellValueFactory(loModel -> {
+            tblColModel.setCellValueFactory(loModel -> {
                 try {
-                    return new SimpleStringProperty(loModel.getValue().Inventory().Measure().getDescription());
+                    return new SimpleStringProperty(loModel.getValue().Inventory().Model().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(InventoryRequest_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
                     return new SimpleStringProperty("");
                 }
             });
 
-            tblColInventoryType.setCellValueFactory(loModel -> {
+            tblColVariant.setCellValueFactory(loModel -> {
                 try {
-                    return new SimpleStringProperty(loModel.getValue().Inventory().InventoryType().getDescription());
+                    return new SimpleStringProperty(loModel.getValue().Inventory().Variant().getDescription());
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(InventoryRequest_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
                     return new SimpleStringProperty("");
@@ -816,23 +818,26 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
         tfBrand.setText(tblColBrand.getCellData(fnRow));
         tfBarcode.setText(tblColBarcode.getCellData(fnRow));
         tfDescription.setText(tblColDescription.getCellData(fnRow));
-        tfInventoryType.setText(tblColInventoryType.getCellData(fnRow));
+        tfModel.setText(tblColModel.getCellData(fnRow));
+        tfVariant.setText(tblColVariant.getCellData(fnRow));
         tfClassification.setText(tblColClassification.getCellData(fnRow));
         tfROQ.setText(String.valueOf(tblColROQ.getCellData(fnRow)));
-        tfMeasure.setText(tblColMeasure.getCellData(fnRow));
+
         tfQOH.setText(tblColQOH.getCellData(fnRow));
         tfRequestQty.setText(tblColRequestQty.getCellData(fnRow));
         tfCancelQty.setText(tblColCancelQty.getCellData(fnRow));
         tfApprovedQty.setText(tblColApprovedQty.getCellData(fnRow));
-        taRemarks.setText(poAppController.getMaster().getRemarks());
-        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
+
     }
 
     private void getLoadedTransaction() throws CloneNotSupportedException, SQLException, GuanzonException {
         tfClusterName.setText(poAppController.getBranchCluster().getClusterDescription());
+        tfClusterName.setText(poAppController.getBranchCluster().getClusterDescription());
         lblSource.setText((poAppController.getMaster().Company().getCompanyName() == null ? "" : (poAppController.getMaster().Company().getCompanyName() + " - "))
                 + (poAppController.getMaster().Industry().getDescription() == null ? "" : poAppController.getMaster().Industry().getDescription()));
 
+        taRemarks.setText(poAppController.getMaster().getRemarks());
+        tfSourceNo.setText(poAppController.getMaster().getReferenceNo());
         reloadTableDetail();
         loadSelectedDetail(pnCTransactionDetail);
     }
@@ -851,5 +856,30 @@ public class InventoryRequest_ApprovalControllerMonarch_Food implements Initiali
         pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex(); // Not focusedIndex
 
         tblRequestDetail.refresh();
+    }
+
+    public void retrieveBySystemMonitor(String transNo) {
+
+        try {
+            if (!isJSONSuccess(poAppController.RetrieveRecord(transNo),
+                    "Initialize Retrieve Transaction")) {
+                return;
+            }
+
+            if (!isJSONSuccess(poAppController.OpenTransaction(transNo),
+                    "Initialize Open Transaction")) {
+                return;
+            }
+
+            if (poAppController.getBranchCluster().getClusterDescription() != null && !poAppController.getBranchCluster().getClusterDescription().isEmpty()) {
+                loadSelectedBranchClusterDelivery();
+            }
+
+            getLoadedTransaction();
+
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+            Logger.getLogger(InventoryRequest_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

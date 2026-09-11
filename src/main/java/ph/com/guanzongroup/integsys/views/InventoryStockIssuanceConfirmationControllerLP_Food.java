@@ -436,7 +436,7 @@ public class InventoryStockIssuanceConfirmationControllerLP_Food implements Init
                             }
                         case "tfProjectCode":
                             if (!isJSONSuccess(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().searchTransactionProject(tfProjectCode.getText(), false),
-                                    "Initialize Search Trucking! ")) {
+                                    "Initialize Search Project Code! ")) {
                                 return;
                             }
                             tfProjectCode.setText(poAppController.getDetail(pnTransactionDetail).InventoryTransfer().getMaster().getProjectCode());
@@ -622,7 +622,7 @@ public class InventoryStockIssuanceConfirmationControllerLP_Food implements Init
                     if (ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to save transaction?") != true) {
                         return;
                     }
-                    if (!isJSONSuccess(poAppController.SaveTransactionDelivery(pnTransactionDetail), "Initialize Save Delivery Transaction")) {
+                    if (!isJSONSuccess(poAppController.SaveTransactionDelivery(pnTransactionDetail, true), "Initialize Save Delivery Transaction")) {
                         return;
                     }
                     reloadTableDetail();
@@ -1211,7 +1211,7 @@ public class InventoryStockIssuanceConfirmationControllerLP_Food implements Init
 
     private void initButtonDisplayDetail(int fnEditMode) {
         boolean lbisConfirmed = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(1)) || lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(2)));
-        boolean lbisCancelled = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(3)));
+        boolean lbisCancelled = (lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(3)) || lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(4)));
         boolean lbisPosted = lblDeliveryStatus.getText().equals(InventoryStockIssuanceStatus.STATUS.get(2));
 
         boolean lbShow = (fnEditMode == EditMode.ADDNEW || fnEditMode == EditMode.UPDATE);
