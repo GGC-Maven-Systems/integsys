@@ -65,7 +65,7 @@
                             <children>
                                 <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                              <Button fx:id="btnHistory1" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Export">
+                              <Button fx:id="btnExport" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Export">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="DOWNLOAD" size="20" />
                                  </graphic>
@@ -103,15 +103,13 @@
                      <children>
                         <AnchorPane fx:id="apTransactionInfo" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                             <children>
-                                
                                           <HBox fx:id="hboxid" prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                
                                                 <VBox maxWidth="1500.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
                                           <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
                                             <tabs>
-                                                <Tab style="-fx-font-weight: bold;" text="Financing All-in Bundle">
+                                                <Tab fx:id="tabFinancing" style="-fx-font-weight: bold;" text="Financing All-in Bundle">
                                                    <content>
                                                       <VBox spacing="5.0">
                                                          <children>
@@ -125,21 +123,21 @@
                                                                         <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
                                                                      </rowConstraints>
                                                                      <children>
-                                                                        <TableView GridPane.vgrow="ALWAYS">
+                                                                        <TableView fx:id="tblViewFinancingAllIn" GridPane.vgrow="ALWAYS">
                                                                            <columns>
-                                                                              <TableColumn maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
-                                                                              <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                                              <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="DP Rate" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Reservation Amount" />
-                                                                              <TableColumn prefWidth="218.0" text="Monthly Amortization">
+                                                                              <TableColumn fx:id="tblNoFinancingAllIn" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
+                                                                              <TableColumn fx:id="tblBrandFinancingAllIn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
+                                                                              <TableColumn fx:id="tblModelFinancingAllIn" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
+                                                                              <TableColumn fx:id="tblVariantFinancingAllIn" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
+                                                                              <TableColumn fx:id="tblColorFinancingAllIn" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
+                                                                              <TableColumn fx:id="tblSRPFinancingAllIn" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
+                                                                              <TableColumn fx:id="tblDPRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="DP Rate" />
+                                                                              <TableColumn fx:id="tblReservationAmount" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Reservation Amount" />
+                                                                              <TableColumn fx:id="tblMonthlyAmortization" maxWidth="218.0" minWidth="218.0" prefWidth="218.0" text="Monthly Amortization">
                                                                                  <columns>
-                                                                                    <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="36" />
-                                                                                    <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="48" />
-                                                                                    <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="60" />
+                                                                                    <TableColumn fx:id="tbl36" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="36" />
+                                                                                    <TableColumn fx:id="tbl48" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="48" />
+                                                                                    <TableColumn fx:id="tbl60" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="60" />
                                                                                  </columns>
                                                                               </TableColumn>
                                                                            </columns>
@@ -155,7 +153,7 @@
                                                       </VBox>
                                                    </content>
                                                 </Tab>
-                                                <Tab style="-fx-font-weight: bold;" text="Lock-In Insurance">
+                                                <Tab fx:id="tabLockIn" style="-fx-font-weight: bold;" text="Lock-In Insurance">
                                                    <content>
                                                       <VBox spacing="5.0">
                                                          <children>
@@ -169,19 +167,19 @@
                                                                         <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
                                                                      </rowConstraints>
                                                                      <children>
-                                                                        <TableView GridPane.vgrow="ALWAYS">
+                                                                        <TableView fx:id="tblViewLockIn" GridPane.vgrow="ALWAYS">
                                                                            <columns>
-                                                                              <TableColumn maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
-                                                                              <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                                              <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="1st Year" />
-                                                                              <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="2nd Year" />
-                                                                              <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="3rd Year" />
-                                                                              <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="4th Year" />
-                                                                              <TableColumn maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="5th Year" />
+                                                                              <TableColumn fx:id="tblNoLockIn" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
+                                                                              <TableColumn fx:id="tblBrandLockIn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
+                                                                              <TableColumn fx:id="tblModelLockIn" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
+                                                                              <TableColumn fx:id="tblVariantLockIn" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
+                                                                              <TableColumn fx:id="tblColorLockIn" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
+                                                                              <TableColumn fx:id="tblSRPLockIn" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
+                                                                              <TableColumn fx:id="tbl1stYear" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="1st Year" />
+                                                                              <TableColumn fx:id="tbl2ndYear" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="2nd Year" />
+                                                                              <TableColumn fx:id="tbl3rdYear" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="3rd Year" />
+                                                                              <TableColumn fx:id="tbl4thYear" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="4th Year" />
+                                                                              <TableColumn fx:id="tbl5thYear" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="5th Year" />
                                                                            </columns>
                                                                         </TableView>
                                                                      </children>
@@ -195,7 +193,7 @@
                                                       </VBox>
                                                    </content>
                                                 </Tab>
-                                                <Tab style="-fx-font-weight: bold;" text="Add-Ons">
+                                                <Tab fx:id="tabAddOns" style="-fx-font-weight: bold;" text="Add-Ons">
                                                    <content>
                                                       <VBox spacing="5.0">
                                                          <children>
@@ -209,17 +207,17 @@
                                                                         <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
                                                                      </rowConstraints>
                                                                      <children>
-                                                                        <TableView GridPane.vgrow="ALWAYS">
+                                                                        <TableView fx:id="tblViewAddOns" GridPane.vgrow="ALWAYS">
                                                                            <columns>
-                                                                              <TableColumn maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
-                                                                              <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
-                                                                              <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Rustproof" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Permashine" />
-                                                                              <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Ceramic Coating" />
+                                                                              <TableColumn fx:id="tblNoAddOns" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
+                                                                              <TableColumn fx:id="tblBrandAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
+                                                                              <TableColumn fx:id="tblModelAddOns" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
+                                                                              <TableColumn fx:id="tblVariantAddOns" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
+                                                                              <TableColumn fx:id="tblColorAddOns" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
+                                                                              <TableColumn fx:id="tblSRPAddOns" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
+                                                                              <TableColumn fx:id="tblRustproof" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Rustproof" />
+                                                                              <TableColumn fx:id="tblPermashine" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Permashine" />
+                                                                              <TableColumn fx:id="tblCeramicCoating" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Ceramic Coating" />
                                                                            </columns>
                                                                         </TableView>
                                                                      </children>

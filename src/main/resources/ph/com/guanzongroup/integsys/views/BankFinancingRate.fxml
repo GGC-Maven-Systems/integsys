@@ -47,18 +47,18 @@
                                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label fx:id="lblSource" layoutX="367.0" layoutY="14.0" text="Company" GridPane.columnIndex="9">
+                                 <Label text="Bank">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Bank">
+                                                <Label fx:id="lblSource" layoutX="367.0" layoutY="14.0" text="Company" GridPane.columnIndex="9">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="tfBrand1" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
-                                 </children>
+                                                <TextField fx:id="tfSearchBank" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                            </children>
                               </GridPane>
                            </children>
                            </AnchorPane>
@@ -70,17 +70,6 @@
                             <children>
                                 <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                                        <Button fx:id="btnBrowse" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Browse">
-                                            <effect>
-                                                <Blend />
-                                            </effect>
-                                            <graphic>
-                                                <FontAwesomeIconView glyphName="FOLDER_OPEN" size="20" />
-                                            </graphic>
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                                        </Button>
                               <Button fx:id="btnNew" contentDisplay="TOP" ellipsisString="" layoutX="100.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="New">
                                  <effect>
                                     <Blend />
@@ -207,10 +196,8 @@
                      <children>
                         <AnchorPane fx:id="apTransactionInfo" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                             <children>
-                                
                                           <HBox fx:id="hboxid" prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                
                                                 <VBox maxWidth="885.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
                                           <AnchorPane VBox.vgrow="ALWAYS">
@@ -239,49 +226,52 @@
                                                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                       </rowConstraints>
                                                                       <children>
-                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="6">
+                                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="6">
                                                                      <children>
                                                                                   <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                       <font>
                                                                                           <Font name="System Bold" size="14.0" />
                                                                                       </font>
                                                                                   </Label>
-                                                                     </children></AnchorPane>
-                                                                          <Label text="Rate ID">
+                                                                     </children>
+                                                                                        </AnchorPane>
+                                                                                        <Label text="Rate ID">
                                                                               <font>
                                                                                   <Font name="System Bold" size="14.0" />
                                                                               </font>
                                                                           </Label>
-                                                      <Label text="Duration" GridPane.rowIndex="3">
+                                                                                        <Label layoutX="18.0" layoutY="82.0" text="Bank" GridPane.rowIndex="2">
+                                                                     <font>
+                                                                        <Font size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                                        <Label text="Duration" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                              <Label text="DI Rate (%)" GridPane.rowIndex="4">
+                                                                                 </font>
+                                                                                        </Label>
+                                                                                        <Label text="DI Rate (%)" GridPane.rowIndex="4">
                                                                                  <font>
                                                                                     <Font size="12.0" />
-                                                                                 </font></Label>
-                                                                  <Label layoutX="18.0" layoutY="82.0" text="Bank" GridPane.rowIndex="2">
+                                                                                 </font>
+                                                                                        </Label>
+                                                                                        <Label layoutX="73.0" layoutY="110.0" text="Interest Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
                                                                      <font>
                                                                         <Font size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                          <TextField fx:id="tfGiveawaycode" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                          <TextField fx:id="tfDescription" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
-                                                                  <TextField fx:id="tfCategory" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                  <Label layoutX="73.0" layoutY="110.0" text="Interest Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                                                        <Label layoutX="81.0" layoutY="138.0" text="SI Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="4">
                                                                      <font>
                                                                         <Font size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <TextField fx:id="tfCategory1" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-                                                                  <TextField fx:id="tfCategory11" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                                  <Label layoutX="81.0" layoutY="138.0" text="SI Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="4">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <TextField fx:id="tfCategory111" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="134.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-                                                                      </children>
+                                                                                        <TextField fx:id="tfRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
+                                                                                        <TextField fx:id="tfBank" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                                                        <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                                        <TextField fx:id="tfDIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                                                        <TextField fx:id="tfInterestRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                                                                                        <TextField fx:id="tfSIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="134.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                                                                                    </children>
                                                                   </GridPane>
                                                               </children>
                                                           </AnchorPane>
@@ -300,15 +290,15 @@
                                                                   <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="30.0" vgrow="ALWAYS" />
                                                                </rowConstraints>
                                                                <children>
-                                                                  <TableView GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="2">
+                                                                  <TableView fx:id="tblViewDetail" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="2">
                                                                      <columns>
-                                                                        <TableColumn maxWidth="242.0" minWidth="83.0" prefWidth="105.0" text="Rate ID" />
-                                                                        <TableColumn maxWidth="300.0" minWidth="272.0" prefWidth="278.0" text="Bank" />
-                                                                        <TableColumn prefWidth="60.0" text="Duration" />
-                                                                        <TableColumn prefWidth="74.0" text="Rate" />
-                                                                        <TableColumn prefWidth="82.0" text="DI Rate" />
-                                                                        <TableColumn prefWidth="71.0" text="SI Rate" />
-                                                                        <TableColumn prefWidth="71.0" text="Status" />
+                                                                        <TableColumn fx:id="tblRateID" maxWidth="105.0" minWidth="105.0" prefWidth="105.0" text="Rate ID" />
+                                                                        <TableColumn fx:id="tblBank" maxWidth="278.0" minWidth="278.0" prefWidth="278.0" text="Bank" />
+                                                                        <TableColumn fx:id="tblDuration" maxWidth="60.0" minWidth="60.0" prefWidth="60.0" text="Duration" />
+                                                                        <TableColumn fx:id="tblRate" maxWidth="74.0" minWidth="74.0" prefWidth="74.0" text="Rate" />
+                                                                        <TableColumn fx:id="tblDIRate" maxWidth="82.0" minWidth="82.0" prefWidth="82.0" text="DI Rate" />
+                                                                        <TableColumn fx:id="tblSIRate" maxWidth="71.0" minWidth="71.0" prefWidth="71.0" text="SI Rate" />
+                                                                        <TableColumn fx:id="tblStatus" maxWidth="71.0" minWidth="71.0" prefWidth="71.0" text="Status" />
                                                                      </columns>
                                                                   </TableView>
                                                                </children>
