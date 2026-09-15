@@ -204,77 +204,120 @@
                                               <children>
                                                   <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                       <children>
-                                                          <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
-                                                              <children>
-                                                                  <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-                                                                      <columnConstraints>
-                                                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
-                                                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" />
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="100.0" />
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="170.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                  <ColumnConstraints />
-                                                                      </columnConstraints>
-                                                                      <rowConstraints>
-                                                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
-                                                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                      </rowConstraints>
-                                                                      <children>
-                                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="6">
+                                                      <HBox spacing="5.0">
+                                                         <children>
+                                                                <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
+                                                                    <children>
+                                                                        <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                            <columnConstraints>
+                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
+                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="170.0" />
+                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints />
+                                                                            </columnConstraints>
+                                                                            <rowConstraints>
+                                                                                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
+                                                                                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                            </rowConstraints>
+                                                                            <children>
+                                                                            <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5">
+                                                                           <children>
+                                                                                        <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                            <font>
+                                                                                                <Font name="System Bold" size="14.0" />
+                                                                                            </font>
+                                                                                        </Label>
+                                                                           </children>
+                                                                                              </AnchorPane>
+                                                                                              <Label text="Rate ID">
+                                                                                    <font>
+                                                                                        <Font name="System Bold" size="14.0" />
+                                                                                    </font>
+                                                                                </Label>
+                                                                                              <Label layoutX="18.0" layoutY="82.0" text="Bank" GridPane.rowIndex="2">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                              <Label text="Duration" GridPane.rowIndex="3">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                              </Label>
+                                                                                              <Label text="DI Rate (%)" GridPane.rowIndex="4">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                              </Label>
+                                                                                              <Label layoutX="73.0" layoutY="110.0" text="Interest Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                              <Label layoutX="81.0" layoutY="138.0" text="SI Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                              <TextField fx:id="tfRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
+                                                                                              <TextField fx:id="tfBank" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                                                              <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                                              <TextField fx:id="tfDIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                                                              <TextField fx:id="tfInterestRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                                                                                              <TextField fx:id="tfSIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="134.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                                                                                          </children>
+                                                                        </GridPane>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            <AnchorPane fx:id="apMaster2" style="-fx-border-color: FF8201;">
+                                                               <children>
+                                                                  <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" />
+                                                                        <ColumnConstraints />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" valignment="TOP" vgrow="SOMETIMES" />
+                                                                        <RowConstraints minHeight="-Infinity" prefHeight="28.0" vgrow="ALWAYS" />
+                                                                        <RowConstraints minHeight="-Infinity" prefHeight="70.0" vgrow="ALWAYS" />
+                                                                     </rowConstraints>
                                                                      <children>
-                                                                                  <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                      <font>
-                                                                                          <Font name="System Bold" size="14.0" />
-                                                                                      </font>
-                                                                                  </Label>
+                                                                        <Label text="Standard Financing Rates" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+                                                                           <font>
+                                                                              <Font name="System Bold" size="14.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <TableView fx:id="tblViewFinancingTerms" GridPane.columnSpan="7" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                                                                           <columns>
+                                                                              <TableColumn fx:id="tblType" maxWidth="213.0" minWidth="145.0" prefWidth="213.0" text="Type" />
+                                                                              <TableColumn fx:id="tblDuration1" maxWidth="136.0" minWidth="68.0" prefWidth="70.0" text="Duration" />
+                                                                              <TableColumn fx:id="tblRate1" maxWidth="240.0" minWidth="99.0" prefWidth="104.0" text="Rate" />
+                                                                           </columns>
+                                                                        </TableView>
+                                                                        <Button mnemonicParsing="false" GridPane.columnIndex="6">
+                                                                           <graphic>
+                                                                              <FontAwesomeIconView glyphName="PLUS" />
+                                                                           </graphic>
+                                                                        </Button>
                                                                      </children>
-                                                                                        </AnchorPane>
-                                                                                        <Label text="Rate ID">
-                                                                              <font>
-                                                                                  <Font name="System Bold" size="14.0" />
-                                                                              </font>
-                                                                          </Label>
-                                                                                        <Label layoutX="18.0" layoutY="82.0" text="Bank" GridPane.rowIndex="2">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label text="Duration" GridPane.rowIndex="3">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font>
-                                                                                        </Label>
-                                                                                        <Label text="DI Rate (%)" GridPane.rowIndex="4">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font>
-                                                                                        </Label>
-                                                                                        <Label layoutX="73.0" layoutY="110.0" text="Interest Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="3">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label layoutX="81.0" layoutY="138.0" text="SI Rate (%)" GridPane.columnIndex="3" GridPane.rowIndex="4">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <TextField fx:id="tfRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                                        <TextField fx:id="tfBank" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
-                                                                                        <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                                        <TextField fx:id="tfDIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                                                        <TextField fx:id="tfInterestRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="106.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-                                                                                        <TextField fx:id="tfSIRate" alignment="CENTER_RIGHT" layoutX="125.0" layoutY="134.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-                                                                                    </children>
                                                                   </GridPane>
-                                                              </children>
-                                                          </AnchorPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </HBox>
                                                       <AnchorPane fx:id="apMaster1" layoutX="10.0" layoutY="10.0" style="-fx-border-color: FF8201;" VBox.vgrow="ALWAYS">
                                                          <children>
                                                             <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
@@ -293,11 +336,11 @@
                                                                   <TableView fx:id="tblViewDetail" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="2">
                                                                      <columns>
                                                                         <TableColumn fx:id="tblRateID" maxWidth="105.0" minWidth="105.0" prefWidth="105.0" text="Rate ID" />
-                                                                        <TableColumn fx:id="tblBank" maxWidth="278.0" minWidth="278.0" prefWidth="278.0" text="Bank" />
-                                                                        <TableColumn fx:id="tblDuration" maxWidth="60.0" minWidth="60.0" prefWidth="60.0" text="Duration" />
-                                                                        <TableColumn fx:id="tblRate" maxWidth="74.0" minWidth="74.0" prefWidth="74.0" text="Rate" />
-                                                                        <TableColumn fx:id="tblDIRate" maxWidth="82.0" minWidth="82.0" prefWidth="82.0" text="DI Rate" />
-                                                                        <TableColumn fx:id="tblSIRate" maxWidth="71.0" minWidth="71.0" prefWidth="71.0" text="SI Rate" />
+                                                                        <TableColumn fx:id="tblBank" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" text="Bank" />
+                                                                        <TableColumn fx:id="tblDuration" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Duration" />
+                                                                        <TableColumn fx:id="tblRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Rate" />
+                                                                        <TableColumn fx:id="tblDIRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="DI Rate" />
+                                                                        <TableColumn fx:id="tblSIRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="SI Rate" />
                                                                         <TableColumn fx:id="tblStatus" maxWidth="71.0" minWidth="71.0" prefWidth="71.0" text="Status" />
                                                                      </columns>
                                                                   </TableView>
