@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.constant.UserRight;
+import org.guanzon.cas.parameter.services.ParamControllers;
 import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -38,6 +39,7 @@ public class ParticularController implements Initializable, ScreenInterface {
     private final String pxeModuleName = "Particular";
     private int pnEditMode;
     private CashflowControllers oParameters;
+    private ParamControllers oParamControllers;
     private boolean state = false;
     private boolean pbLoaded = false;
     private String psPrimary = "";
@@ -107,6 +109,7 @@ public class ParticularController implements Initializable, ScreenInterface {
         try {
             LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
             oParameters = new CashflowControllers(oApp, logwrapr);
+            oParamControllers = new ParamControllers(oApp, logwrapr);
             oParameters.Particular().setRecordStatus("0123");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(ParticularController.class.getName()).log(Level.SEVERE, null, ex);
@@ -324,12 +327,12 @@ public class ParticularController implements Initializable, ScreenInterface {
                 case F3:
                     switch (lnIndex) {
                         case 03:
-                            poJson = oParameters.AccountChart().searchRecordByIndustry(lsValue, false);
+                            poJson = oParamControllers.AccountChart().searchRecordByIndustry(lsValue, false);
                             if ("error".equalsIgnoreCase(poJson.get("result").toString())) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                             }
-                            oParameters.Particular().getModel().setAccountCode(oParameters.AccountChart().getModel().getAccountCode());
-                            txtField03.setText((String) oParameters.AccountChart().getModel().getDescription());
+                            oParameters.Particular().getModel().setAccountCode(oParamControllers.AccountChart().getModel().getAccountCode());
+                            txtField03.setText((String) oParamControllers.AccountChart().getModel().getDescription());
                             break;
                     }
                 case ENTER:

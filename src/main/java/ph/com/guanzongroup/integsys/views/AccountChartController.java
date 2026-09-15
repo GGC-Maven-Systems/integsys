@@ -34,7 +34,7 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.cas.client.services.ClientControllers;
 import org.json.simple.parser.ParseException;
-import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
+import org.guanzon.cas.parameter.services.ParamControllers;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 
 public class AccountChartController implements Initializable, ScreenInterface {
@@ -43,7 +43,7 @@ public class AccountChartController implements Initializable, ScreenInterface {
     private JSONObject poJSON;
     private final String pxeModuleName = "Account Chart";
     private int pnEditMode;
-    private CashflowControllers oParameters;
+    private ParamControllers oParameters;
     private boolean state = false;
     private boolean pbLoaded = false;
     private String psPrimary = "";
@@ -121,7 +121,7 @@ public class AccountChartController implements Initializable, ScreenInterface {
     private void initializeObject() {
         try {
             LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new CashflowControllers(oApp, logwrapr);
+            oParameters = new ParamControllers(oApp, logwrapr);
             oParameters.AccountChart().setRecordStatus("0123");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(AccountChartController.class.getName()).log(Level.SEVERE, null, ex);
