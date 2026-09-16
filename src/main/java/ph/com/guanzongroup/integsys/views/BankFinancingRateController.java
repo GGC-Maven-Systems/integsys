@@ -451,6 +451,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 switch (lsID) {
                     case "tfSearchBank":
                         if (lsValue.isEmpty()) {
+                            poController.setSearchBank("");
                             loadTableDetail.reload();
                         }
                         break;
@@ -678,7 +679,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         }
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate,btnVoid);
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate, btnVoid);
                 break;
             case FinancingRateStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
