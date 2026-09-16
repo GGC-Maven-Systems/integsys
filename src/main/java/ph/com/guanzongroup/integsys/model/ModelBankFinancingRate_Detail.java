@@ -32,7 +32,8 @@ public class ModelBankFinancingRate_Detail {
             String index04,
             String index05,
             String index06,
-            String index07
+            String index07,
+            String index08
     ) {
 
         this.index01 = new SimpleStringProperty(index01);
@@ -42,6 +43,7 @@ public class ModelBankFinancingRate_Detail {
         this.index05 = new SimpleStringProperty(index05);
         this.index06 = new SimpleStringProperty(index06);
         this.index07 = new SimpleStringProperty(index07);
+        this.index08 = new SimpleStringProperty(index08);
     }
 
     public String getIndex01() {
