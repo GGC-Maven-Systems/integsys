@@ -4,7 +4,6 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
-import ph.com.guanzongroup.integsys.model.ModelBankFinancing_Detail;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -82,8 +81,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
     private ObservableList<ModelBankFinancingRate_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelBankFinancingRate_Standard> financingterms_data = FXCollections.observableArrayList();
-    private FilteredList<ModelDeliveryAcceptance_Main> filteredData;
-    private FilteredList<ModelBankFinancing_Detail> filteredDataDetail;
+    private FilteredList<ModelBankFinancingRate_Detail> filteredDataDetail;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
 
