@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import ph.com.guanzongroup.cas.sales.FinancingRates;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus;
+import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus.StandardRateType;
 import ph.com.guanzongroup.integsys.model.ModelBankFinancingRate_Detail;
 import ph.com.guanzongroup.integsys.model.ModelBankFinancingRate_Standard;
 
@@ -500,10 +501,14 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.inputDecimalOnly(tfDIRate, tfInterestRate, tfSIRate);
-
+        JFXUtil.inputIntegersOnly(tfDuration);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewFinancingTerms, tblViewDetail);
 
         JFXUtil.adjustColumnForScrollbar(tblViewFinancingTerms, tblViewDetail);
+    }
+
+    private String getStandardType(String lsValue) {
+        return JFXUtil.setStatusValue(null, StandardRateType.class, lsValue);
     }
 
     public void initLoadTable() {
@@ -569,7 +574,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
                             for (lnCtr = 0; lnCtr < poController.getStandardRateListCount(); lnCtr++) {
                                 financingterms_data.add(
-                                        new ModelBankFinancingRate_Standard(String.valueOf(poController.StandardRateList(lnCtr).getRateType()),
+                                        new ModelBankFinancingRate_Standard(getStandardType(poController.StandardRateList(lnCtr).getRateType()),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getDuration(), false),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getRate(), false)
                                         ));
@@ -635,7 +640,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
             tfRateID.setText(poController.getModel().getRateId());
             tfBank.setText(poController.getModel().Bank().getBankName());
-            tfDuration.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getDuration(), false));
+            tfDuration.setText(String.valueOf(poController.getModel().getDuration()));
             tfDIRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getDIRate(), false));
             tfInterestRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate(), false));
             tfSIRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getSIRate(), false));
