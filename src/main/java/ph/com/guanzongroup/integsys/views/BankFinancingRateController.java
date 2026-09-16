@@ -139,7 +139,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 poController.setCompanyId(psCompanyId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-                btnNew.fire();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
 
@@ -199,7 +198,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 //                        poController.resetMaster();
 //                        poController.resetOthers();
 //                        poController.Detail().clear();
-                        poController.initialize();
                         clearTextFields();
 
                         poJSON = poController.newRecord();
@@ -207,8 +205,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-
-//                        poController.initialize();
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnUpdate":
@@ -264,32 +260,14 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             poJSON = poController.saveRecord();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                poController.AddDetail();
                                 loadTableDetail.reload();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-//                                psSupplierId = poController.Master().getSupplierId();
-
-                                // Confirmation Prompt
-//                                JSONObject loJSON = poController.openRecord(poController.getModel().getRateId());
-//                                if ("success".equals(loJSON.get("result"))) {
-//                                    if (poController.Master().getTransactionStatus().equals(FinancingRateStatus.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-//                                            loJSON = poController.ConfirmTransaction("");
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
                                 // Print Transaction Prompt
                                 lsIsSaved = false;
-                                poController.openRecord(poController.getModel().getRateId());
-//                                poController.loadAttachments();
-                                loadRecordDetail();
+                                poController.initialize();
+                                pnEditMode = poController.getEditMode();
                             }
                         } else {
                             return;
@@ -327,9 +305,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                     loadTableDetail.reload();
                 }
                 initButton(pnEditMode);
-                if (lsButton.equals("btnUpdate")) {
-                    moveNext(false, false);
-                }
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -406,6 +381,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                         break;
                 }
+                loadRecordDetail();
             });
 
     public void moveNext(boolean isUp, boolean continueNext) {
@@ -662,6 +638,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         try {
                             stageRateDialog.closeDialog();
                             poController.openRecord(selected.getIndex01());
+                            pnEditMode = poController.getEditMode();
+                            initButton(pnEditMode);
                             loadRecordDetail();
 //                            moveNext(false, false);
                         } catch (SQLException | GuanzonException ex) {
@@ -694,17 +672,18 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
         JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid, btnDeactivate);
+        JFXUtil.setDisabled(!lbShow, apMaster);
         if (fnValue != EditMode.READY) {
             return;
         }
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnVoid, btnDeactivate);
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate);
+                JFXUtil.setButtonsVisibility(false, btnVoid);
                 break;
             case FinancingRateStatus.ACTIVE:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
-                JFXUtil.setButtonsVisibility(true, btnVoid, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnActivate);
+                JFXUtil.setButtonsVisibility(true, btnDeactivate);
+                JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid);
                 break;
             case FinancingRateStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
