@@ -678,8 +678,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         }
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnVoid);
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate,btnVoid);
                 break;
             case FinancingRateStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
