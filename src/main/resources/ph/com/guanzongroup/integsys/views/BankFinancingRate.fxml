@@ -302,12 +302,12 @@
                                                                         </Label>
                                                                         <TableView fx:id="tblViewFinancingTerms" GridPane.columnSpan="7" GridPane.rowIndex="1" GridPane.rowSpan="2">
                                                                            <columns>
-                                                                              <TableColumn fx:id="tblType" maxWidth="213.0" minWidth="145.0" prefWidth="213.0" text="Type" />
-                                                                              <TableColumn fx:id="tblDuration1" maxWidth="136.0" minWidth="68.0" prefWidth="70.0" text="Duration" />
-                                                                              <TableColumn fx:id="tblRate1" maxWidth="240.0" minWidth="99.0" prefWidth="104.0" text="Rate" />
+                                                                              <TableColumn fx:id="tblType" maxWidth="213.0" minWidth="213.0" prefWidth="213.0" text="Type" />
+                                                                              <TableColumn fx:id="tblDurationFinancingTerms" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" text="Duration" />
+                                                                              <TableColumn fx:id="tblRateFinancingTerms" maxWidth="104.0" minWidth="104.0" prefWidth="104.0" text="Rate" />
                                                                            </columns>
                                                                         </TableView>
-                                                                        <Button mnemonicParsing="false" GridPane.columnIndex="6">
+                                                                        <Button fx:id="btnStandardFinancingRates" mnemonicParsing="false" onAction="#cmdButton_Click" GridPane.columnIndex="6">
                                                                            <graphic>
                                                                               <FontAwesomeIconView glyphName="PLUS" />
                                                                            </graphic>
@@ -337,8 +337,8 @@
                                                                      <columns>
                                                                         <TableColumn fx:id="tblRateID" maxWidth="105.0" minWidth="105.0" prefWidth="105.0" text="Rate ID" />
                                                                         <TableColumn fx:id="tblBank" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" text="Bank" />
-                                                                        <TableColumn fx:id="tblDuration" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Duration" />
-                                                                        <TableColumn fx:id="tblRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Rate" />
+                                                                        <TableColumn fx:id="tblDurationViewDetail" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Duration" />
+                                                                        <TableColumn fx:id="tblRateViewDetail" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Rate" />
                                                                         <TableColumn fx:id="tblDIRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="DI Rate" />
                                                                         <TableColumn fx:id="tblSIRate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="SI Rate" />
                                                                         <TableColumn fx:id="tblStatus" maxWidth="71.0" minWidth="71.0" prefWidth="71.0" text="Status" />
