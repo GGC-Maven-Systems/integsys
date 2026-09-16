@@ -509,7 +509,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.RecordList(lnCtr).getRate(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.RecordList(lnCtr).getDIRate(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.RecordList(lnCtr).getSIRate(), false)),
-                                                String.valueOf(poController.RecordList(lnCtr).getRecordStatus()),
+                                                String.valueOf(poController.getStatus(poController.RecordList(lnCtr).getRecordStatus())),
                                                 String.valueOf(lnCtr + 1)
                                         ));
                             }
