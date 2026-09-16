@@ -152,6 +152,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             }
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -290,7 +291,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                                 poController.openRecord(poController.getModel().getRateId());
 //                                poController.loadAttachments();
                                 loadRecordDetail();
-
                             }
                         } else {
                             return;
@@ -470,7 +470,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -505,7 +504,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewFinancingTerms, tblViewDetail);
 
         JFXUtil.adjustColumnForScrollbar(tblViewFinancingTerms, tblViewDetail);
-
     }
 
     public void initLoadTable() {
@@ -553,7 +551,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-
                     });
                 });
 
@@ -571,7 +568,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             poController.loadStandardRates();
 
                             for (lnCtr = 0; lnCtr < poController.getStandardRateListCount(); lnCtr++) {
-
                                 financingterms_data.add(
                                         new ModelBankFinancingRate_Standard(String.valueOf(poController.StandardRateList(lnCtr).getRateType()),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getDuration(), false),
@@ -601,7 +597,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                     });
                 });
-
     }
 
     private void initFinancingTerms() {
@@ -645,12 +640,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             tfInterestRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate(), false));
             tfSIRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getSIRate(), false));
             JFXUtil.updateCaretPositions(apMaster);
-        } catch (SQLException ex) {
-            Logger.getLogger(BankFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(BankFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-
     }
 
     public void initTableOnClick() {
