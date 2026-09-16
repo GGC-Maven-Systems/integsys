@@ -443,6 +443,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordSearch();
                             loadTableDetail.reload();
                             break;
                         case "tfBank":
@@ -515,7 +516,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         int lnCtr;
                         details_data.clear();
                         try {
-                            poController.loadRecord(poController.getModel().Bank().getBankName());
+                            poController.loadRecord(tfSearchBank.getText());
                             for (lnCtr = 0; lnCtr < poController.getRecordListCount(); lnCtr++) {
                                 details_data.add(
                                         new ModelBankFinancingRate_Detail(String.valueOf(poController.RecordList(lnCtr).getRateId()),
@@ -630,6 +631,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+        tfSearchBank.setText("");
     }
 
     public void loadRecordDetail() {
