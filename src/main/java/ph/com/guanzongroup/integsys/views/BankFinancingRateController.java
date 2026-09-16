@@ -140,14 +140,18 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 poController.setCompanyId(psCompanyId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-                loadRecordSearch();
                 btnNew.fire();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
-        } catch (SQLException ex) {
-            Logger.getLogger(BankFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(BankFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
+
+            try {
+                lblSource.setText(poController.getModel().Company().getCompanyName());
+            } catch (SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+            }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -625,13 +629,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     }
 
     public void loadRecordSearch() {
-        try {
-            lblSource.setText(poController.getModel().Company().getCompanyName());
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-        tfSearchBank.setText("");
+        tfSearchBank.setText(poController.getSearchBank());
     }
 
     public void loadRecordDetail() {
