@@ -4,7 +4,6 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
-import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Detail;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -50,7 +49,6 @@ import java.util.List;
 import javafx.util.Pair;
 import org.json.simple.parser.ParseException;
 import java.util.concurrent.atomic.AtomicReference;
-import javafx.stage.Stage;
 import ph.com.guanzongroup.cas.sales.FinancingRates;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus;
@@ -123,13 +121,9 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             poController = new SalesControllers(oApp, null).FinancingRates();
             poJSON = new JSONObject();
             poController.initialize(); // Initialize transaction
-            if (!"success".equals((String) poJSON.get("result"))) {
-
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            }
+            initDetailsGrid();
             initLoadTable();
             initTextFields();
-            initDetailsGrid();
             initFinancingTerms();
             initTableOnClick();
             clearTextFields();
@@ -146,7 +140,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 poController.setCompanyId(psCompanyId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-//            poController.setPurpose(FinancingRateStatus.Purpose.REPLACEMENT);
                 loadRecordSearch();
                 btnNew.fire();
             });
@@ -202,6 +195,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 //                        poController.resetMaster();
 //                        poController.resetOthers();
 //                        poController.Detail().clear();
+                        poController.initialize();
                         clearTextFields();
 
                         poJSON = poController.newRecord();
@@ -210,20 +204,15 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             return;
                         }
 
-                        poController.initialize();
+//                        poController.initialize();
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnUpdate":
-//                        poJSON = poController.updateRecord(poController.Master().getTransactionNo());
                         poJSON = poController.updateRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-
-//                        for (int lnCtr = 0; lnCtr <= poController.getDetailCount() - 1; lnCtr++) {
-//                            poController.getPurchaseOrderReceivingSerial(poController.Detail(lnCtr).getEntryNo());
-//                        }
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnSearch":
@@ -237,13 +226,13 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 //                            poController.resetMaster();
 //                            poController.resetOthers();
 //                            poController.Detail().clear();
+                            poController.initialize();
                             clearTextFields();
 
 //                            poController.Master().setIndustryId(psIndustryId);
 //                            poController.Master().setCompanyId(psCompanyId);
 //                            poController.Master().setSupplierId(psSupplierId);
                             pnEditMode = EditMode.UNKNOWN;
-
                             break;
                         } else {
                             return;
@@ -345,37 +334,37 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         }
     }
 
-    public void showLedgerDialog() {
-//        try {
-        poJSON = new JSONObject();
-        if (stageRateDialog != null) {
-            stageRateDialog.closeDialog();
-            stageRateDialog = new JFXUtil.StageManager();
-        } else {
-            stageRateDialog = new JFXUtil.StageManager();
-        }
-//        poController.loadLedger(true);
-//        if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
-//            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
-//            return;
+    public void stageRateDialog() {
+////        try {
+//        poJSON = new JSONObject();
+//        if (stageRateDialog != null) {
+//            stageRateDialog.closeDialog();
+//            stageRateDialog = new JFXUtil.StageManager();
+//        } else {
+//            stageRateDialog = new JFXUtil.StageManager();
 //        }
-
-        StandardFinancingRateDialog_Controller controller = new StandardFinancingRateDialog_Controller();
-//        controller.addController(poController);
-        try {
-            stageRateDialog.setOnHidden(event -> {
-                stageRateDialog = null;
-                loadTableDetail.reload();
-            });
-            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRateDialog_Controller.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
-        } catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-//        } catch (SQLException | GuanzonException ex) {
+////        poController.loadLedger(true);
+////        if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
+////            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
+////            return;
+////        }
+//
+//        StandardFinancingRateDialog_Controller controller = new StandardFinancingRateDialog_Controller();
+////        controller.addController(poController);
+//        try {
+//            stageRateDialog.setOnHidden(event -> {
+//                stageRateDialog = null;
+//                loadTableDetail.reload();
+//            });
+//            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRateDialog_Controller.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
+//        } catch (IOException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //        }
+////        } catch (SQLException | GuanzonException ex) {
+////            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+////            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+////        }
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
@@ -454,34 +443,20 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadTableDetail.reload();
                             break;
                         case "tfBank":
                             poJSON = poController.SearchBank(lsValue, false, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadTableDetail.reload();
                             break;
                     }
                     break;
                 case UP:
-//                    switch (lsID) {
-//                        case "tfBarcode":
-//                        case "tfReceiveQuantity":
-//                            moveNext(true, true);
-//                            event.consume();
-//                            break;
-//                    }
                     break;
                 case DOWN:
-//                    switch (lsID) {
-//                        case "tfBarcode":
-//                        case "tfReceiveQuantity":
-//                            moveNext(false, true);
-//                            event.consume();
-//                            break;
-//                        default:
-//                            break;
-//                    }
                     break;
                 default:
                     break;
@@ -539,9 +514,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                     Platform.runLater(() -> {
                         int lnCtr;
                         details_data.clear();
-                        plOrderNoPartial.clear();
                         try {
-                            double lnTotal = 0.0;
+                            poController.loadRecord(poController.getModel().Bank().getBankName());
                             for (lnCtr = 0; lnCtr < poController.getRecordListCount(); lnCtr++) {
                                 details_data.add(
                                         new ModelBankFinancingRate_Detail(String.valueOf(poController.RecordList(lnCtr).getRateId()),
@@ -588,37 +562,38 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                     Platform.runLater(() -> {
                         int lnCtr;
                         financingterms_data.clear();
-//                        try {
-                        double lnTotal = 0.0;
-                        for (lnCtr = 0; lnCtr < poController.getStandardRateListCount(); lnCtr++) {
+                        try {
+                            poController.loadStandardRates();
 
-                            financingterms_data.add(
-                                    new ModelBankFinancingRate_Standard(String.valueOf(poController.StandardRateList(lnCtr).getRateType()),
-                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getDuration(), false),
-                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getRate(), false)
-                                    ));
-                        }
+                            for (lnCtr = 0; lnCtr < poController.getStandardRateListCount(); lnCtr++) {
 
-                        if (pnFinancingTerms < 0 || pnFinancingTerms
-                                >= financingterms_data.size()) {
-                            if (!financingterms_data.isEmpty()) {
-                                /* FOCUS ON FIRST ROW */
-                                tblViewFinancingTerms.getSelectionModel().select(0);
-                                tblViewFinancingTerms.getFocusModel().focus(0);
-                                pnDetail = tblViewFinancingTerms.getSelectionModel().getSelectedIndex();
+                                financingterms_data.add(
+                                        new ModelBankFinancingRate_Standard(String.valueOf(poController.StandardRateList(lnCtr).getRateType()),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getDuration(), false),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getRate(), false)
+                                        ));
+                            }
+
+                            if (pnFinancingTerms < 0 || pnFinancingTerms
+                                    >= financingterms_data.size()) {
+                                if (!financingterms_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    tblViewFinancingTerms.getSelectionModel().select(0);
+                                    tblViewFinancingTerms.getFocusModel().focus(0);
+                                    pnDetail = tblViewFinancingTerms.getSelectionModel().getSelectedIndex();
+                                    loadRecordDetail();
+                                }
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                tblViewFinancingTerms.getSelectionModel().select(pnFinancingTerms);
+                                tblViewFinancingTerms.getFocusModel().focus(pnFinancingTerms);
                                 loadRecordDetail();
                             }
-                        } else {
-                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                            tblViewFinancingTerms.getSelectionModel().select(pnFinancingTerms);
-                            tblViewFinancingTerms.getFocusModel().focus(pnFinancingTerms);
                             loadRecordDetail();
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-                        loadRecordDetail();
-//                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        }
                     });
                 });
 
@@ -704,15 +679,28 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-
+        JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid, btnDeactivate);
+        if (fnValue != EditMode.READY) {
+            return;
+        }
         switch (poController.getModel().getRecordStatus()) {
+            case FinancingRateStatus.OPEN:
+                JFXUtil.setButtonsVisibility(true, btnActivate, btnVoid, btnDeactivate);
+                break;
             case FinancingRateStatus.ACTIVE:
+                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(true, btnVoid, btnDeactivate);
+                JFXUtil.setButtonsVisibility(false, btnActivate);
+                break;
             case FinancingRateStatus.DEACTIVATE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
+                JFXUtil.setButtonsVisibility(true, btnActivate);
                 break;
             case FinancingRateStatus.VOID:
-            case FinancingRateStatus.OPEN:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
+                JFXUtil.setButtonsVisibility(false, btnActivate);
                 break;
         }
     }
