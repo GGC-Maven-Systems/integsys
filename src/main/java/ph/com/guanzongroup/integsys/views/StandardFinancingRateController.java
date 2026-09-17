@@ -103,7 +103,9 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 if (isForUpdate()) {
                     try {
                         poController.openRecord(lsStandardRateID);
-                        btnUpdate.fire();
+                        loadRecordMaster();
+                        pnEditMode = poController.getEditMode();
+                        initButton(pnEditMode);
                     } catch (SQLException | GuanzonException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
