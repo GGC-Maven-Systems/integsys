@@ -106,6 +106,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         btnUpdate.fire();
                     } catch (SQLException | GuanzonException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                     }
                 } else {
                     btnNew.fire();
@@ -114,6 +115,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             poController.setRecordStatus("01234");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -281,7 +283,6 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
-
         }
     }
 
@@ -377,7 +378,6 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
-
             });
 
     public void initTextFields() {
@@ -509,5 +509,4 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 break;
         }
     }
-
 }
