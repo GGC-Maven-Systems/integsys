@@ -139,6 +139,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 poController.setCompanyId(psCompanyId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
+                btnNew.fire();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
 
@@ -274,18 +275,27 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                         break;
                     case "btnActivate":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to activate the transaction?") == false) {
+                            return;
+                        }
                         poJSON = poController.ActivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "btnVoid":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void the transaction?") == false) {
+                            return;
+                        }
                         poJSON = poController.VoidRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "btnDeactivate":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to deactivate the transaction?") == false) {
+                            return;
+                        }
                         poJSON = poController.DeactivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -383,20 +393,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 }
                 loadRecordDetail();
             });
-
-    public void moveNext(boolean isUp, boolean continueNext) {
-//        if (details_data.size() <= 0) {
-//            return;
-//        }
-//
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//
-//            pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetail) : JFXUtil.moveToNextRow(tblViewDetail);
-//        }
-//        loadRecordDetail();
-//        tfReceiveQuantity.requestFocus();
-    }
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
@@ -613,6 +609,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
     public void loadRecordDetail() {
         try {
+            JFXUtil.setDisabled(pnEditMode == EditMode.UPDATE, tfBank);
+
             JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
             boolean lbPrintStat = pnEditMode == EditMode.READY && poController.getModel().getRecordStatus() != FinancingRateStatus.VOID;
@@ -633,8 +631,9 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
-                if (event.getClickCount() == 2) {  // Detect single click (or use another condition for double click)
-                    ModelBankFinancingRate_Detail selected = (ModelBankFinancingRate_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                ModelBankFinancingRate_Detail selected = (ModelBankFinancingRate_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                pnDetail = Integer.parseInt(selected.getIndex08()) - 1;
+                if (event.getClickCount() == 2) {
                     if (selected != null) {
                         try {
                             stageRateDialog.closeDialog();
@@ -642,7 +641,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             pnEditMode = poController.getEditMode();
                             initButton(pnEditMode);
                             loadRecordDetail();
-//                            moveNext(false, false);
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
@@ -680,12 +678,13 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
             case FinancingRateStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid);
                 break;
-            case FinancingRateStatus.DEACTIVATE:
+            case FinancingRateStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 JFXUtil.setButtonsVisibility(true, btnActivate);
