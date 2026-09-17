@@ -162,9 +162,9 @@
                                           </Separator>
                                                         <TextField fx:id="tfStandardRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
                                                         <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                        <DatePicker fx:id="dpTo" layoutX="115.0" layoutY="12.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                                                         <ComboBox fx:id="cmbType" prefHeight="27.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="4" />
                                                         <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                                                        <DatePicker fx:id="dpTo" layoutX="115.0" layoutY="12.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                                                         <TextField fx:id="tfRate" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="6" />
                                           <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                              <children>
