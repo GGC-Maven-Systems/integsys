@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -48,6 +49,7 @@ import java.util.List;
 import javafx.util.Pair;
 import org.json.simple.parser.ParseException;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.stage.Stage;
 import ph.com.guanzongroup.cas.sales.FinancingRates;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus;
@@ -195,10 +197,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                         break;
                     case "btnNew":
-                        //Clear data
-//                        poController.resetMaster();
-//                        poController.resetOthers();
-//                        poController.Detail().clear();
                         clearTextFields();
 
                         poJSON = poController.newRecord();
@@ -221,18 +219,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
-//                            psSupplierId = poController.Master().getSupplierId();
-
-                            //Clear data
-//                            poController.resetMaster();
-//                            poController.resetOthers();
-//                            poController.Detail().clear();
                             poController.initialize();
                             clearTextFields();
-
-//                            poController.Master().setIndustryId(psIndustryId);
-//                            poController.Master().setCompanyId(psCompanyId);
-//                            poController.Master().setSupplierId(psSupplierId);
                             pnEditMode = EditMode.UNKNOWN;
                             break;
                         } else {
@@ -302,7 +290,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                         break;
                     case "btnStandardFinancingRates":
-                        //triggers popup
+                        //will add
+                        stageRateDialog();
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -323,36 +312,35 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     }
 
     public void stageRateDialog() {
-////        try {
-//        poJSON = new JSONObject();
-//        if (stageRateDialog != null) {
-//            stageRateDialog.closeDialog();
-//            stageRateDialog = new JFXUtil.StageManager();
-//        } else {
-//            stageRateDialog = new JFXUtil.StageManager();
-//        }
-////        poController.loadLedger(true);
-////        if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
-////            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
-////            return;
-////        }
-//
-//        StandardFinancingRateDialog_Controller controller = new StandardFinancingRateDialog_Controller();
-////        controller.addController(poController);
 //        try {
-//            stageRateDialog.setOnHidden(event -> {
-//                stageRateDialog = null;
-//                loadTableDetail.reload();
-//            });
-//            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRateDialog_Controller.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
-//        } catch (IOException ex) {
+        poJSON = new JSONObject();
+        if (stageRateDialog != null) {
+            stageRateDialog.closeDialog();
+            stageRateDialog = new JFXUtil.StageManager();
+        } else {
+            stageRateDialog = new JFXUtil.StageManager();
+        }
+//        poController.loadLedger(true);
+//        if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
+//            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
+//            return;
+//        }
+        StandardFinancingRateDialog_Controller controller = new StandardFinancingRateDialog_Controller();
+//        controller.addController(poController);
+        try {
+            stageRateDialog.setOnHidden(event -> {
+                stageRateDialog = null;
+                loadTableDetail.reload();
+            });
+            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRateDialog_Controller.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+//        } catch (SQLException | GuanzonException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //        }
-////        } catch (SQLException | GuanzonException ex) {
-////            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-////            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-////        }
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
@@ -610,10 +598,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     public void loadRecordDetail() {
         try {
             JFXUtil.setDisabled(pnEditMode == EditMode.UPDATE, tfBank);
-
             JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
-            boolean lbPrintStat = pnEditMode == EditMode.READY && poController.getModel().getRecordStatus() != FinancingRateStatus.VOID;
 
             tfRateID.setText(poController.getModel().getRateId());
             tfBank.setText(poController.getModel().Bank().getBankName());
@@ -650,11 +636,12 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         });
         tblViewFinancingTerms.setOnMouseClicked(event -> {
             if (financingterms_data.size() > 0) {
-                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelBankFinancingRate_Standard selected = (ModelBankFinancingRate_Standard) tblViewFinancingTerms.getSelectionModel().getSelectedItem();
-                    if (selected != null) {
-                        pnFinancingTerms = Integer.parseInt(selected.getIndex04()) - 1;
-                    }
+                ModelBankFinancingRate_Standard selected = (ModelBankFinancingRate_Standard) tblViewFinancingTerms.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    pnFinancingTerms = Integer.parseInt(selected.getIndex04()) - 1;
+                }
+                if (event.getClickCount() == 2) {  
+                    //if double clicked will update stage dialog
                 }
             }
         });

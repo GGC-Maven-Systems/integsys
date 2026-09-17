@@ -37,7 +37,7 @@
                                     <FontAwesomeIconView glyphName="FOLDER_OPEN" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnActivate111" contentDisplay="TOP" graphicTextGap="3.0" layoutX="386.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="New">
+                              <Button fx:id="btnNew" contentDisplay="TOP" graphicTextGap="3.0" layoutX="386.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="New">
                                  <graphic>
                                     <FontAwesomeIconView fx:id="faActivate111" glyphName="PLUS" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -62,12 +62,12 @@
                                     <FontAwesomeIconView fx:id="faActivate" glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnActivate1" contentDisplay="TOP" graphicTextGap="3.0" layoutX="320.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
+                              <Button fx:id="btnVoid" contentDisplay="TOP" graphicTextGap="3.0" layoutX="320.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
                                  <graphic>
                                     <FontAwesomeIconView fx:id="faActivate1" glyphName="TIMES" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnActivate11" contentDisplay="TOP" graphicTextGap="3.0" layoutX="363.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Deactivate">
+                              <Button fx:id="btnDeactivate" contentDisplay="TOP" graphicTextGap="3.0" layoutX="363.0" layoutY="23.0" maxHeight="70.0" minWidth="75.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Deactivate">
                                  <graphic>
                                     <FontAwesomeIconView fx:id="faActivate11" glyphName="TIMES" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -205,7 +205,7 @@
                                                         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                     </rowConstraints>
                                        <children>
-                                          <Label styleClass="label-header" text="Standard Financing Rate" textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                                          <Label fx:id="lblParameterLabel" styleClass="label-header" text="Standard Financing Rate" textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
