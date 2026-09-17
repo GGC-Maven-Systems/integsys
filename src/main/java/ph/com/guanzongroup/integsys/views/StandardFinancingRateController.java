@@ -11,7 +11,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,7 +38,6 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.StandardFinancingRates;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus;
-import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -48,7 +46,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  * @author Team 1
  */
 public class StandardFinancingRateController implements Initializable, ScreenInterface {
-
+    
     private GRiderCAS oApp;
     static StandardFinancingRates poController;
     private JSONObject poJSON;
@@ -77,11 +75,8 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     private ComboBox cmbType;
     @FXML
     private Label lblStatus, lblParameterLabel;
-
-    private ChangeListener<String> detailSearchListener;
-    private FilteredList<ModelReplenishmentLedger> filteredDataDetail;
     ObservableList<String> comboboxlist = FXCollections.observableArrayList("Interest rate", "Downpayment rate");
-
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
@@ -98,6 +93,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             clearTextFields();
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
+            poController.setWithUI(true);
             Platform.runLater(() -> {
                 loadRecordMaster();
                 if (isForUpdate()) {
@@ -120,32 +116,32 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     public void initializeDialog(GRiderCAS oApp1) {
         poController = new SalesControllers(oApp1, null).StandardFinancingRates();
     }
-
+    
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-
+    
     @Override
     public void setIndustryID(String fsValue) {
         System.out.println(fsValue);
         this.psIndustryId = fsValue;
     }
-
+    
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-
+    
     @Override
     public void setCategoryID(String fsValue) {
         //No category
     }
-
+    
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -175,7 +171,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         break;
                     case "btnNew":
                         clearTextFields();
-
+                        
                         poJSON = poController.NewRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -205,7 +201,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
-
+                        
                         try {
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
@@ -274,7 +270,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                             CommonUtils.closeStage(btnClose);
                         }
                         break;
-
+                    
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -287,7 +283,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             }
         }
     }
-
+    
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -308,7 +304,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 }
                 loadRecordMaster();
             });
-
+    
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -321,7 +317,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 }
                 loadRecordMaster();
             });
-
+    
     boolean pbSuccess = true;
     EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
@@ -381,33 +377,33 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
-
+    
     public void initTextFields() {
         JFXUtil.setFocusListener(txtMaster_Focus, tfDuration, tfRate);
-
+        
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
         JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.inputIntegersOnly(tfDuration);
     }
-
+    
     private void initDatepickers() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpValidFrom, dpTo);
         JFXUtil.setActionListener(datepicker_Action, dpValidFrom, dpTo);
     }
-
+    
     private void initComboboxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbType);
     }
-
+    
     private void txtField_KeyPressed(KeyEvent event) {
         TextField txtField = (TextField) event.getSource();
         String lsID = (((TextField) event.getSource()).getId());
         String lsValue = (txtField.getText() == null ? "" : txtField.getText());
         poJSON = new JSONObject();
         int lnRow = pnDetail;
-
+        
         switch (event.getCode()) {
             case TAB:
             case ENTER:
@@ -421,48 +417,48 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 break;
         }
     }
-
+    
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster);
     }
-
+    
     public void ForDialog(boolean lbisForDialog) {
         JFXUtil.setVisibility(!lbisForDialog, lblParameterLabel);
         isForDialog = lbisForDialog;
     }
-
+    
     public boolean isForDialog() {
         return isForDialog;
     }
-
+    
     public void openRecordForAdd() {
         btnNew.fire();
     }
-
+    
     public void isForUpdate(boolean lbisForUpdate) {
         isForUpdate = lbisForUpdate;
     }
-
+    
     private boolean isForUpdate() {
         return isForUpdate;
     }
-
+    
     public void openRecordForUpdate(String lsValue) {
         lsStandardRateID = lsValue;
     }
-
+    
     private void loadRecordMaster() {
         JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         tfStandardRateID.setText(poController.getModel().getStandardRateId());
         dpValidFrom.setValue(poController.getModel().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-
+        
         if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "", null)) {
             poController.getModel().setRateType("0");
             JFXUtil.setCmbValue(cmbType, !poController.getModel().getRateType().equals("") ? Integer.valueOf(poController.getModel().getRateType()) : -1);
         } else {
             JFXUtil.setCmbValue(cmbType, !poController.getModel().getRateType().equals("") ? Integer.valueOf(poController.getModel().getRateType()) : -1);
         }
-
+        
         if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "1")) {
             JFXUtil.setDisabled(true, tfDuration);
             poController.getModel().setDuration(0);
@@ -473,7 +469,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         dpTo.setValue(poController.getModel().getThruDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
         tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate().doubleValue(), false));
     }
-
+    
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;

@@ -5,7 +5,6 @@
 package ph.com.guanzongroup.integsys.views;
 
 import java.io.IOException;
-import ph.com.guanzongroup.integsys.model.ModelDeliveryAcceptance_Main;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
