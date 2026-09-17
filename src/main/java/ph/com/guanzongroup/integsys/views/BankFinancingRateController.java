@@ -63,7 +63,7 @@ import ph.com.guanzongroup.integsys.model.ModelBankFinancingRate_Standard;
  * @author User
  */
 public class BankFinancingRateController implements Initializable, ScreenInterface {
-
+    
     private GRiderCAS oApp;
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
@@ -73,31 +73,31 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass(), "PO");
     static FinancingRates poController;
     public int pnEditMode;
-
+    
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
     private String psSupplierId = "";
     boolean pbEntered = false;
     boolean pbKeyPressed = false;
-
+    
     private ObservableList<ModelBankFinancingRate_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelBankFinancingRate_Standard> financingterms_data = FXCollections.observableArrayList();
     private FilteredList<ModelBankFinancingRate_Detail> filteredDataDetail;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
-
+    
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     private final Map<String, List<String>> highlightedRowsDetail = new HashMap<>();
-
+    
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-
+    
     private ChangeListener<String> detailSearchListener;
     private ChangeListener<String> mainSearchListener;
     JFXUtil.ReloadableTableTask loadTableDetail, loadTableFinancingTerms;
     JFXUtil.StageManager stageRateDialog = new JFXUtil.StageManager();
-
+    
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apMaster2, apMaster1;
     @FXML
@@ -132,7 +132,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             loadTableDetail.reload();
             pnEditMode = poController.getEditMode();
             initButton(pnEditMode);
-
+            
             Platform.runLater(() -> {
 //            psIndustryId = "";
 //            poController.Master().setIndustryId(psIndustryId);
@@ -156,31 +156,31 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-
+    
     @Override
     public void setIndustryID(String fsValue) {
         psIndustryId = fsValue;
     }
-
+    
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-
+    
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
     }
-
+    
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
-
+        
         try {
             Object source = event.getSource();
             if (source instanceof Button) {
@@ -198,7 +198,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "btnNew":
                         clearTextFields();
-
+                        
                         poJSON = poController.newRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -231,7 +231,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
-
+                        
                         try {
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
@@ -297,7 +297,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-
+                
                 if (lsButton.equals("btnPrint")) { //|| lsButton.equals("btnCancel")
                 } else {
                     loadRecordDetail();
@@ -310,7 +310,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     public void stageRateDialog(boolean isForUpdate, String lsId) {
 //        try {
         poJSON = new JSONObject();
@@ -328,13 +328,14 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         StandardFinancingRateController controller = new StandardFinancingRateController();
         controller.ForDialog(true);
         if (isForUpdate) {
+            controller.isForUpdate(true);
             controller.openRecordForUpdate(lsId);
         }
         controller.initializeDialog(oApp);
         try {
             stageRateDialog.setOnHidden(event -> {
                 stageRateDialog = null;
-                loadTableDetail.reload();
+                loadTableFinancingTerms.reload();
             });
             stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRate.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
         } catch (IOException ex) {
@@ -346,7 +347,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //        }
     }
-
+    
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -385,7 +386,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 }
                 loadRecordDetail();
             });
-
+    
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -395,7 +396,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             int lnRow = pnDetail;
             TableView<?> currentTable = tblViewDetail;
             TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-
+            
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
@@ -459,23 +460,23 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             }
         }
     };
-
+    
     public void initTextFields() {
         JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchBank);
         JFXUtil.setFocusListener(txtMaster_Focus, tfBank, tfDuration, tfDIRate, tfInterestRate, tfSIRate);
-
+        
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.inputDecimalOnly(tfDIRate, tfInterestRate, tfSIRate);
         JFXUtil.inputIntegersOnly(tfDuration);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewFinancingTerms, tblViewDetail);
-
+        
         JFXUtil.adjustColumnForScrollbar(tblViewFinancingTerms, tblViewDetail);
     }
-
+    
     private String getStandardType(String lsValue) {
         return JFXUtil.setStatusValue(null, StandardRateType.class, lsValue);
     }
-
+    
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -501,7 +502,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                                                 String.valueOf(lnCtr + 1)
                                         ));
                             }
-
+                            
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -524,7 +525,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         }
                     });
                 });
-
+        
         loadTableFinancingTerms = new JFXUtil.ReloadableTableTask(
                 tblViewFinancingTerms,
                 financingterms_data,
@@ -537,7 +538,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         financingterms_data.clear();
                         try {
                             poController.loadStandardRates();
-
+                            
                             for (lnCtr = 0; lnCtr < poController.getStandardRateListCount(); lnCtr++) {
                                 financingterms_data.add(
                                         new ModelBankFinancingRate_Standard(getStandardType(poController.StandardRateList(lnCtr).getRateType()),
@@ -547,7 +548,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                                                 String.valueOf(lnCtr + 1)
                                         ));
                             }
-
+                            
                             if (pnFinancingTerms < 0 || pnFinancingTerms
                                     >= financingterms_data.size()) {
                                 if (!financingterms_data.isEmpty()) {
@@ -571,14 +572,14 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                     });
                 });
     }
-
+    
     private void initFinancingTerms() {
         JFXUtil.setColumnLeft(tblType);
         JFXUtil.setColumnRight(tblDurationFinancingTerms, tblRateFinancingTerms);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewFinancingTerms);
         tblViewFinancingTerms.setItems(financingterms_data);
     }
-
+    
     public void initDetailsGrid() {
         JFXUtil.setColumnCenter(tblRateID);
         JFXUtil.setColumnLeft(tblBank, tblStatus);
@@ -586,26 +587,26 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
-
+    
     public void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster);
-
+        
         loadRecordDetail();
         loadTableDetail.reload();
         loadTableFinancingTerms.reload();
     }
-
+    
     public void loadRecordSearch() {
         tfSearchBank.setText(poController.getSearchBank());
     }
-
+    
     public void loadRecordDetail() {
         try {
             JFXUtil.setDisabled(pnEditMode == EditMode.UPDATE, tfBank);
             JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class,
                     pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
-
+            
             tfRateID.setText(poController.getModel().getRateId());
             tfBank.setText(poController.getModel().Bank().getBankName());
             tfDuration.setText(String.valueOf(poController.getModel().getDuration()));
@@ -618,7 +619,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
@@ -652,7 +653,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             }
         });
     }
-
+    
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;

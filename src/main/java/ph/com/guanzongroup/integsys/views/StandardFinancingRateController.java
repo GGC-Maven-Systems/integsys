@@ -59,6 +59,8 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     private boolean pbEntered = false;
     private int pnDetail = 0;
     private boolean isForDialog = false;
+    private boolean isForUpdate = false;
+    private String lsStandardRateID = "";
     @FXML
     private AnchorPane AnchorMain, AnchorInputs, apMaster;
     @FXML
@@ -85,6 +87,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         try {
             if (isForDialog()) {
             } else {
+                JFXUtil.setVisibility(false, lblParameterLabel);
                 poController = new SalesControllers(oApp, null).StandardFinancingRates();
             }
             poController.initialize();
@@ -97,7 +100,16 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             initButton(pnEditMode);
             Platform.runLater(() -> {
                 loadRecordMaster();
-                btnNew.fire();
+                if (isForUpdate()) {
+                    try {
+                        poController.openRecord(lsStandardRateID);
+                        btnUpdate.fire();
+                    } catch (SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    btnNew.fire();
+                }
             });
             poController.setRecordStatus("01234");
         } catch (SQLException | GuanzonException ex) {
@@ -425,14 +437,16 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         btnNew.fire();
     }
 
+    public void isForUpdate(boolean lbisForUpdate) {
+        isForUpdate = lbisForUpdate;
+    }
+
+    private boolean isForUpdate() {
+        return isForUpdate;
+    }
+
     public void openRecordForUpdate(String lsValue) {
-        try {
-            //opens record for updating value
-            poController.openRecord(lsValue);
-            btnUpdate.fire();
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(StandardFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        lsStandardRateID = lsValue;
     }
 
     private void loadRecordMaster() {
