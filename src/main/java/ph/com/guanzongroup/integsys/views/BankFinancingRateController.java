@@ -192,8 +192,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                             if (stageRateDialog != null) {
                                 stageRateDialog.closeDialog();
                                 stageRateDialog = new JFXUtil.StageManager();
-                            } else {
-                                stageRateDialog = new JFXUtil.StageManager();
                             }
                             appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
                         } else {
@@ -634,8 +632,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         try {
                             if (stageRateDialog != null) {
                                 stageRateDialog.closeDialog();
-                                stageRateDialog = new JFXUtil.StageManager();
-                            } else {
                                 stageRateDialog = new JFXUtil.StageManager();
                             }
                             poController.openRecord(selected.getIndex01());
