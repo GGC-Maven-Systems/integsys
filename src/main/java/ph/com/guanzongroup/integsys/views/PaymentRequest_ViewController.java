@@ -77,7 +77,7 @@ public class PaymentRequest_ViewController implements Initializable {
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnHistory, btnPOHistory, btnClose;
+    private Button btnHistory, btnPOHistory, btnPOAppHistory, btnClose;
     @FXML
     private TextField tfTransactionNo, tfBranch, tfDepartment, tfPayee, tfSeriesNo, tfTotalAmount, tfDiscountAmount, tfNetAmount, tfSourceNo, tfAdvances, tfSourceTranTotal, tfRecurringNo, tfBranchDetail, tfAccountNo, tfEmployee, tfParticular, tfAmount, tfDiscRate, tfDiscAmountDetail, tfAmountDetail;
     @FXML
@@ -126,7 +126,7 @@ public class PaymentRequest_ViewController implements Initializable {
                     pnEditMode = poController.getEditMode();
                     loadRecordSearch();
                     loadTableDetail();
-                    JFXUtil.setButtonsVisibility(InvTransCons.PURCHASE_ORDER.equals(poController.Master().getSourceCode()), btnPOHistory);
+                    JFXUtil.setButtonsVisibility(InvTransCons.PURCHASE_ORDER.equals(poController.Master().getSourceCode()), btnPOHistory,btnPOAppHistory);
                 } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                 }
@@ -222,7 +222,7 @@ public class PaymentRequest_ViewController implements Initializable {
     }
 
     private void initButtonsClickActions() {
-        List<Button> buttons = Arrays.asList(btnHistory, btnPOHistory,btnClose);
+        List<Button> buttons = Arrays.asList(btnHistory, btnPOHistory,btnPOAppHistory,btnClose);
         buttons.forEach(button -> button.setOnAction(this::handleButtonAction));
     }
 
@@ -239,6 +239,39 @@ public class PaymentRequest_ViewController implements Initializable {
                     break;
                 case "btnHistory":
                     poController.ShowStatusHistory();
+                    return;
+                case "btnPOAppHistory":
+                    if (InvTransCons.PURCHASE_ORDER.equals(poController.Master().getSourceCode())) {
+                        try {
+                            //load order history
+                            PurchaseOrder loPOController = new PurchaseOrderControllers(poApp, null).PurchaseOrder();
+                            poJSON = loPOController.InitTransaction(); // Initialize transaction
+                            if (!"success".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                CommonUtils.closeStage(btnClose);
+                            }
+                            poJSON = loPOController.OpenTransaction(poController.Master().getSourceNo());
+                            if (!"success".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                return;
+                            }
+                            try {
+                                loPOController.ShowApprovalHistory();
+                            } catch (NullPointerException npe) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                                ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                            } catch (Exception ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                            }
+
+                        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        }
+                    } else {
+                        ShowMessageFX.Warning("No transaction source history to load.", pxeModuleName, null);
+                    }
                     return;
                 case "btnPOHistory":
                     if (InvTransCons.PURCHASE_ORDER.equals(poController.Master().getSourceCode())) {
