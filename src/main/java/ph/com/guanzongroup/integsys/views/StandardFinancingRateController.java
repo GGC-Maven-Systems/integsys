@@ -37,6 +37,7 @@ import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.StandardFinancingRates;
+import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.FinancingRateStatus;
 import ph.com.guanzongroup.integsys.model.ModelReplenishmentLedger;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -46,7 +47,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  *
  * @author Team 1
  */
-public class StandardFinancingRateDialog_Controller implements Initializable, ScreenInterface {
+public class StandardFinancingRateController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
     static StandardFinancingRates poController;
@@ -81,17 +82,31 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        poJSON = new JSONObject();
-        initTextFields();
-        initDatepickers();
-        initComboboxes();
-        clearTextFields();
-        pnEditMode = EditMode.UNKNOWN;
-        initButton(pnEditMode);
-        Platform.runLater(() -> {
-            loadRecordMaster();
-        });
-        poController.setRecordStatus("01234");
+        try {
+            if (isForDialog()) {
+            } else {
+                poController = new SalesControllers(oApp, null).StandardFinancingRates();
+            }
+            poController.initialize();
+            poJSON = new JSONObject();
+            initTextFields();
+            initDatepickers();
+            initComboboxes();
+            clearTextFields();
+            pnEditMode = EditMode.UNKNOWN;
+            initButton(pnEditMode);
+            Platform.runLater(() -> {
+                loadRecordMaster();
+                btnNew.fire();
+            });
+            poController.setRecordStatus("01234");
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void initializeDialog(GRiderCAS oApp1) {
+        poController = new SalesControllers(oApp1, null).StandardFinancingRates();
     }
 
     @Override
@@ -136,27 +151,16 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
                         break;
                     case "btnClose":
                         //define for standalone and for parameter
-                        unloadForm appUnload = new unloadForm();
-                        if (!isForDialog) {
-                            if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                                CommonUtils.closeStage(btnClose);
-                            } else {
-                                return;
-                            }
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                            CommonUtils.closeStage(btnClose);
                         } else {
-                            if (ShowMessageFX.YesNo("Are you sure you want to close this form?", pxeModuleName, null)) {
-                                if (appUnload != null) {
-                                    appUnload.unloadForm(apMaster, oApp, pxeModuleName);
-                                } else {
-                                    ShowMessageFX.Warning("Please notify the system administrator to configure the null value at the close button.", "Warning", null);
-                                }
-                            }
+                            return;
                         }
                         break;
                     case "btnNew":
                         clearTextFields();
 
-                        poJSON = poController.newRecord();
+                        poJSON = poController.NewRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
@@ -214,6 +218,9 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
                         } else {
                             return;
                         }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        }
                         break;
                     case "btnActivate":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to activate the transaction?") == false) {
@@ -222,6 +229,9 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
                         poJSON = poController.ActivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
                         }
                         break;
                     case "btnVoid":
@@ -232,6 +242,9 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        }
                         break;
                     case "btnDeactivate":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to deactivate the transaction?") == false) {
@@ -240,6 +253,9 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
                         poJSON = poController.DeactivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
                         }
                         break;
 
@@ -405,13 +421,17 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
         return isForDialog;
     }
 
+    public void openRecordForAdd() {
+        btnNew.fire();
+    }
+
     public void openRecordForUpdate(String lsValue) {
         try {
             //opens record for updating value
             poController.openRecord(lsValue);
             btnUpdate.fire();
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(StandardFinancingRateDialog_Controller.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StandardFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -419,10 +439,23 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
         JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         tfStandardRateID.setText(poController.getModel().getStandardRateId());
         dpValidFrom.setValue(poController.getModel().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-        JFXUtil.setCmbValue(cmbType, !poController.getModel().getRateType().equals("") ? Integer.valueOf(poController.getModel().getRateType()) : -1);
+
+        if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "", null)) {
+            poController.getModel().setRateType("0");
+            JFXUtil.setCmbValue(cmbType, !poController.getModel().getRateType().equals("") ? Integer.valueOf(poController.getModel().getRateType()) : -1);
+        } else {
+            JFXUtil.setCmbValue(cmbType, !poController.getModel().getRateType().equals("") ? Integer.valueOf(poController.getModel().getRateType()) : -1);
+        }
+
+        if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "1")) {
+            JFXUtil.setDisabled(true, tfDuration);
+            poController.getModel().setDuration(0);
+        } else {
+            JFXUtil.setDisabled(false, tfDuration);
+        }
         tfDuration.setText(String.valueOf(poController.getModel().getDuration()));
         dpTo.setValue(poController.getModel().getThruDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
-        tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate().doubleValue(), true));
+        tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate().doubleValue(), false));
     }
 
     private void initButton(int fnValue) {
@@ -431,7 +464,7 @@ public class StandardFinancingRateDialog_Controller implements Initializable, Sc
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(!lbShow, btnNew);
+        JFXUtil.setButtonsVisibility(!lbShow, btnNew, btnBrowse);
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);

@@ -291,7 +291,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "btnStandardFinancingRates":
                         //will add
-                        stageRateDialog();
+                        stageRateDialog(false, "");
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -311,7 +311,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         }
     }
 
-    public void stageRateDialog() {
+    public void stageRateDialog(boolean isForUpdate, String lsId) {
 //        try {
         poJSON = new JSONObject();
         if (stageRateDialog != null) {
@@ -325,14 +325,18 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 //            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
 //            return;
 //        }
-        StandardFinancingRateDialog_Controller controller = new StandardFinancingRateDialog_Controller();
-//        controller.addController(poController);
+        StandardFinancingRateController controller = new StandardFinancingRateController();
+        controller.ForDialog(true);
+        if (isForUpdate) {
+            controller.openRecordForUpdate(lsId);
+        }
+        controller.initializeDialog(oApp);
         try {
             stageRateDialog.setOnHidden(event -> {
                 stageRateDialog = null;
                 loadTableDetail.reload();
             });
-            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRateDialog_Controller.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
+            stageRateDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRate.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
         } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -539,6 +543,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                                         new ModelBankFinancingRate_Standard(getStandardType(poController.StandardRateList(lnCtr).getRateType()),
                                                 String.valueOf(poController.StandardRateList(lnCtr).getDuration()),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.StandardRateList(lnCtr).getRate(), false),
+                                                poController.StandardRateList(lnCtr).getStandardRateId(),
                                                 String.valueOf(lnCtr + 1)
                                         ));
                             }
@@ -638,10 +643,11 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             if (financingterms_data.size() > 0) {
                 ModelBankFinancingRate_Standard selected = (ModelBankFinancingRate_Standard) tblViewFinancingTerms.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    pnFinancingTerms = Integer.parseInt(selected.getIndex04()) - 1;
+                    pnFinancingTerms = Integer.parseInt(selected.getIndex05()) - 1;
                 }
-                if (event.getClickCount() == 2) {  
+                if (event.getClickCount() == 2) {
                     //if double clicked will update stage dialog
+                    stageRateDialog(true, selected.getIndex04());
                 }
             }
         });

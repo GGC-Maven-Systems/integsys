@@ -28,12 +28,14 @@ public class ModelBankFinancingRate_Standard {
     public ModelBankFinancingRate_Standard(String index01,
             String index02,
             String index03,
-            String index04) {
+            String index04,
+            String index05) {
 
         this.index01 = new SimpleStringProperty(index01);
         this.index02 = new SimpleStringProperty(index02);
         this.index03 = new SimpleStringProperty(index03);
         this.index04 = new SimpleStringProperty(index04);
+        this.index05 = new SimpleStringProperty(index05);
     }
 
     public String getIndex01() {
