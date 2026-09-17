@@ -189,7 +189,12 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            stageRateDialog.closeDialog();
+                            if (stageRateDialog != null) {
+                                stageRateDialog.closeDialog();
+                                stageRateDialog = new JFXUtil.StageManager();
+                            } else {
+                                stageRateDialog = new JFXUtil.StageManager();
+                            }
                             appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
                         } else {
                             return;
@@ -627,7 +632,12 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                 if (event.getClickCount() == 2) {
                     if (selected != null) {
                         try {
-                            stageRateDialog.closeDialog();
+                            if (stageRateDialog != null) {
+                                stageRateDialog.closeDialog();
+                                stageRateDialog = new JFXUtil.StageManager();
+                            } else {
+                                stageRateDialog = new JFXUtil.StageManager();
+                            }
                             poController.openRecord(selected.getIndex01());
                             pnEditMode = poController.getEditMode();
                             initButton(pnEditMode);
