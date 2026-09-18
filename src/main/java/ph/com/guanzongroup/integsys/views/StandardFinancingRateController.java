@@ -120,6 +120,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     }
 
     public void initializeDialog(GRiderCAS oApp1) {
+        oApp = oApp1;
         poController = new SalesControllers(oApp1, null).StandardFinancingRates();
     }
 
