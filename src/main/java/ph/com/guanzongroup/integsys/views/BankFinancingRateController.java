@@ -271,7 +271,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         poJSON = poController.ActivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         break;
                     case "btnVoid":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void the transaction?") == false) {
@@ -280,7 +283,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         poJSON = poController.VoidRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         break;
                     case "btnDeactivate":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to deactivate the transaction?") == false) {
@@ -289,12 +295,15 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         poJSON = poController.DeactivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         break;
                     case "btnStandardFinancingRates":
                         //will add
                         stageRateDialog(false, "");
-                        break;
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -302,6 +311,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
 
                 if (lsButton.equals("btnPrint")) { //|| lsButton.equals("btnCancel")
                 } else {
+                    clearTextFields();
                     loadRecordDetail();
                     loadTableDetail.reload();
                 }
@@ -314,7 +324,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     }
 
     public void stageRateDialog(boolean isForUpdate, String lsId) {
-//        try {
         poJSON = new JSONObject();
         if (stageRateDialog != null) {
             stageRateDialog.closeDialog();
@@ -322,11 +331,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         } else {
             stageRateDialog = new JFXUtil.StageManager();
         }
-//        poController.loadLedger(true);
-//        if (JFXUtil.isObjectEqualTo(poController.getModel().getFundId(), null, "")) {
-//            ShowMessageFX.Warning(null, pxeModuleName, "Fund Description must have a value.");
-//            return;
-//        }
         StandardFinancingRateController controller = new StandardFinancingRateController();
         controller.ForDialog(true);
         if (isForUpdate) {
@@ -344,10 +348,6 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
@@ -366,6 +366,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "tfDIRate":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        if (Double.valueOf(lsValue) > 100.00) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "DI Rate must not be greater than 100.00");
+                            break;
+                        }
                         poJSON = poController.getModel().setDIRate(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -373,6 +377,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "tfInterestRate":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        if (Double.valueOf(lsValue) > 100.00) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Interest Rate must not be greater than 100.00");
+                            break;
+                        }
                         poJSON = poController.getModel().setRate(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -380,6 +388,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         break;
                     case "tfSIRate":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        if (Double.valueOf(lsValue) > 100.00) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "SI Rate must not be greater than 100.00");
+                            break;
+                        }
                         poJSON = poController.getModel().setSIRate(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -675,6 +687,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         if (fnValue != EditMode.READY) {
             return;
         }
+
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnActivate, btnDeactivate, btnVoid);

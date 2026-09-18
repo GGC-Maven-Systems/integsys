@@ -243,7 +243,10 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         poJSON = poController.ActivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);
                         }
@@ -255,7 +258,10 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         poJSON = poController.VoidRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);
                         }
@@ -267,12 +273,14 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         poJSON = poController.DeactivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);
                         }
                         break;
-
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -298,6 +306,10 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         break;
                     case "tfRate":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        if (Double.valueOf(lsValue) > 100.00) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Rate must not be greater than 100.00");
+                            break;
+                        }
                         poJSON = poController.getModel().setRate(Double.valueOf(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -475,7 +487,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     private void btnActivateVisibility() {
         try {
             if (JFXUtil.isObjectEqualTo(poController.getModel().getThruDate(), null, "")) {
-                JFXUtil.setVisibility(true, btnActivate);
+                JFXUtil.setButtonsVisibility(true, btnActivate);
             }
             SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
             String lsServerDate = sdfFormat.format(oApp.getServerDate());
@@ -484,7 +496,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             if (currentDate.isBefore(selectedDate) || currentDate.isEqual(selectedDate)) {
                 //if valid thru is before current date or today
                 //also if null show btnactivate
-                JFXUtil.setVisibility(true, btnActivate);
+                JFXUtil.setButtonsVisibility(true, btnActivate);
             }
         } catch (SQLException ex) {
             Logger.getLogger(StandardFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
@@ -509,7 +521,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
             case FinancingRateStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnDeactivate, btnVoid);
+                JFXUtil.setButtonsVisibility(true, btnVoid);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 btnActivateVisibility();
                 break;
