@@ -500,6 +500,13 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                 //if valid thru is before current date or today
                 //also if null show btnactivate
                 JFXUtil.setButtonsVisibility(true, btnActivate);
+            } else {
+                switch (poController.getModel().getRecordStatus()) {
+                    case FinancingRateStatus.INACTIVE:
+                        //disable update when thru date has achieved
+                        JFXUtil.setButtonsVisibility(true, btnUpdate);
+                        break;
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(StandardFinancingRateController.class.getName()).log(Level.SEVERE, null, ex);
