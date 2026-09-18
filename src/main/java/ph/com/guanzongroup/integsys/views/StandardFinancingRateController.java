@@ -246,6 +246,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getStandardRateId());
                         pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);
@@ -261,6 +262,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getStandardRateId());
                         pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);
@@ -276,6 +278,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getStandardRateId());
                         pnEditMode = poController.getEditMode();
                         if (isForDialog()) {
                             CommonUtils.closeStage(btnClose);

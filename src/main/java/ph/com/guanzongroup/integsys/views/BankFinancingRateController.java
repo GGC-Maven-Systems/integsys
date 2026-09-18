@@ -274,6 +274,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getRateId());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnVoid":
@@ -286,6 +287,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getRateId());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnDeactivate":
@@ -298,6 +300,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        poController.openRecord(poController.getModel().getRateId());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnStandardFinancingRates":
