@@ -208,7 +208,7 @@
                                              <children>
                                                 <VBox maxWidth="1500.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                                          <AnchorPane fx:id="apMaster1" maxWidth="1261.0" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apMaster" maxWidth="1261.0" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -267,7 +267,7 @@
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="apMaster3" maxWidth="1261.0" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apDetail" maxWidth="1261.0" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -327,7 +327,7 @@
                                                                             <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="14" GridPane.halignment="RIGHT" />
                                                                             <TextField fx:id="tfReservationAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="2" />
                                                                             <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                                      <ComboBox prefWidth="150.0" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                                      <ComboBox fx:id="cmbDownPaymentRate" prefWidth="150.0" GridPane.columnIndex="11" GridPane.rowIndex="2" />
                                                                         </children>
                                                 </GridPane>
                                              </children>
@@ -356,11 +356,8 @@
                                                                   <TableColumn fx:id="tblReservationAmount" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Reservation Amount" />
                                                                   <TableColumn fx:id="tblMonthlyAmortization" maxWidth="218.0" minWidth="218.0" prefWidth="218.0" text="Monthly Amortization">
                                                                      <columns>
-                                                                        <TableColumn fx:id="tbl36" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="36" />
-                                                                        <TableColumn fx:id="tbl48" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="48" />
-                                                                        <TableColumn fx:id="tbl60" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="60" />
-                                                                     </columns>
-                                                                  </TableColumn>
+                                                                        <TableColumn fx:id="tblsamp" prefWidth="75.0" text="x" />
+                                                                     </columns></TableColumn>
                                                                </columns>
                                                             </TableView>
                                                          </children>
