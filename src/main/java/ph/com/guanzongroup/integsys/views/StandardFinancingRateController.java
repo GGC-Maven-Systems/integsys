@@ -519,7 +519,11 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             if (JFXUtil.isObjectEqualTo(poController.getModel().getThruDate(), null, "")) {
                 if (!isActive()) {
                     JFXUtil.setButtonsVisibility(true, btnActivate);
+                    JFXUtil.setButtonsVisibility(false, btnUpdate);
+                } else {
+                    JFXUtil.setButtonsVisibility(true, btnUpdate);
                 }
+                return;
             }
             SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
             String lsServerDate = sdfFormat.format(oApp.getServerDate());
