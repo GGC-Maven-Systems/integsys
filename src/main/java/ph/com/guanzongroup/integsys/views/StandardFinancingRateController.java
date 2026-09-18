@@ -406,6 +406,24 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     private void initDatepickers() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpValidFrom, dpTo);
         JFXUtil.setActionListener(datepicker_Action, dpValidFrom, dpTo);
+
+        dpTo.getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                // Lost focus
+                if (JFXUtil.isObjectEqualTo(dpTo.getEditor().getText(), null, "")) {
+                    if (pbSuccess) {
+                        poJSON = poController.getModel().setThruDate(null);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        dpTo.setValue(null);
+                    }
+                    pbSuccess = false;
+                    loadRecordMaster();
+                    pbSuccess = true;
+                }
+            }
+        });
     }
 
     private void initComboboxes() {
@@ -487,10 +505,20 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate().doubleValue(), false));
     }
 
+    private boolean isActive() {
+        switch (poController.getModel().getRecordStatus()) {
+            case FinancingRateStatus.ACTIVE:
+                return true;
+        }
+        return false;
+    }
+
     private void btnActivateVisibility() {
         try {
             if (JFXUtil.isObjectEqualTo(poController.getModel().getThruDate(), null, "")) {
-                JFXUtil.setButtonsVisibility(true, btnActivate);
+                if (!isActive()) {
+                    JFXUtil.setButtonsVisibility(true, btnActivate);
+                }
             }
             SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
             String lsServerDate = sdfFormat.format(oApp.getServerDate());
@@ -499,13 +527,12 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             if (currentDate.isBefore(selectedDate) || currentDate.isEqual(selectedDate)) {
                 //if valid thru is before current date or today
                 //also if null show btnactivate
-                JFXUtil.setButtonsVisibility(true, btnActivate);
+                if (!isActive()) {
+                    JFXUtil.setButtonsVisibility(true, btnActivate);
+                }
             } else {
-                switch (poController.getModel().getRecordStatus()) {
-                    case FinancingRateStatus.INACTIVE:
-                        //disable update when thru date has achieved
-                        JFXUtil.setButtonsVisibility(true, btnUpdate);
-                        break;
+                if (isActive()) {
+                    JFXUtil.setButtonsVisibility(false, btnUpdate);
                 }
             }
         } catch (SQLException ex) {
@@ -538,6 +565,7 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             case FinancingRateStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid);
+                btnActivateVisibility();
                 break;
             case FinancingRateStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
