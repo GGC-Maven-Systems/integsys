@@ -93,6 +93,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     JFXUtil.ReloadableTableTask loadTableDetail;
     JFXUtil.StageManager stageSerialDialog = new JFXUtil.StageManager();
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
+    ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML
@@ -317,15 +318,12 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) { //|| lsButton.equals("btnCancel")
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
                 } else {
                     loadRecordDetail();
                     loadTableDetail.reload();
                 }
                 initButton(pnEditMode);
-                if (lsButton.equals("btnUpdate")) {
-                    moveNext(false, false);
-                }
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -336,20 +334,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         }
     }
 
-    public void moveNext(boolean isUp, boolean continueNext) {
-//        if (details_data.size() <= 0) {
-//            return;
-//        }
-//
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//
-//            pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetail) : JFXUtil.moveToNextRow(tblViewDetail);
-//        }
-//        loadRecordDetail();
-//        tfReceiveQuantity.requestFocus();
-    }
-
     private void txtField_KeyPressed(KeyEvent event) {
         TextField txtField = (TextField) event.getSource();
         String lsID = (((TextField) event.getSource()).getId());
@@ -358,7 +342,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         int lnRow = pnDetail;
         TableView<?> currentTable = tblViewDetail;
         TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-
         switch (event.getCode()) {
             case TAB:
             case ENTER:
@@ -374,7 +357,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 switch (lsID) {
                     case "tfBarcode":
                     case "tfReceiveQuantity":
-                        moveNext(true, true);
                         event.consume();
                         break;
                 }
@@ -383,7 +365,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 switch (lsID) {
                     case "tfBarcode":
                     case "tfReceiveQuantity":
-                        moveNext(false, true);
                         event.consume();
                         break;
                     default:
@@ -462,33 +443,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         break;
                 }
             });
-    private String detailSearchText = "";
-    private String detailComboFilter = "All";
-
-    private void applyDetailFilter() {
-        filteredDataDetail.setPredicate(orders -> {
-            // ComboBox filter
-            if (detailComboFilter != null
-                    && !detailComboFilter.isEmpty()
-                    && !detailComboFilter.equalsIgnoreCase("All")) {
-                if (orders.getIndex07() == null
-                        || !orders.getIndex07().equalsIgnoreCase(detailComboFilter)) {
-                    return false;
-                }
-            }
-
-            // TextField filter
-            if (detailSearchText != null
-                    && !detailSearchText.isEmpty()) {
-                if (orders.getIndex07() == null
-                        || !orders.getIndex07().toLowerCase().contains(detailSearchText)) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-    }
 
     private void loadRecordMaster() {
         tfValidityID.setText(poController.Master().getValidityId());
@@ -516,7 +470,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-// CheckBox handler
 
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
@@ -637,10 +590,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         });
     }
 
-    private void addChildColumns(
-            TableView<?> tableView,
-            TableColumn parentColumn,
-            JSONArray jsonArray) {
+    private void addChildColumns(TableView<?> tableView, TableColumn parentColumn, JSONArray jsonArray) {
         for (int lnRow = 0; lnRow < jsonArray.size(); lnRow++) {
             JSONObject loJSONObject = (JSONObject) jsonArray.get(lnRow);
 
@@ -671,26 +621,19 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     public void initTextFields() {
         JFXUtil.setFocusListener(txtMaster_Focus, tfValidityPeriod);
         JFXUtil.setFocusListener(txtDetail_Focus, tfDescription, tfReservationAmount);
-
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
         JFXUtil.setCommaFormatter(tfReservationAmount);
-
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
-
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
-    ArrayList<ArrayList<ArrayList<String>>> array
-            = new ArrayList<ArrayList<ArrayList<String>>>();
 
     private ArrayList<String> getCell(int row, int column) {
         while (array.size() <= row) {
             array.add(new ArrayList<ArrayList<String>>());
         }
-
         while (array.get(row).size() <= column) {
             array.get(row).add(new ArrayList<String>());
         }
-
         return array.get(row).get(column);
     }
 
@@ -698,11 +641,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         if (row >= array.size()) {
             return "";
         }
-
         if (column >= array.get(row).size()) {
             return "";
         }
-
         return String.join(", ", array.get(row).get(column));
     }
 
@@ -897,7 +838,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         stageSerialDialog.closeDialog();
                         pnDetail = Integer.parseInt(selected.getIndex01()) - 1;
                         loadRecordDetail();
-                        moveNext(false, false);
                     }
                 }
             }
