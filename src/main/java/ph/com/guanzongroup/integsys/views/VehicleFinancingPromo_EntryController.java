@@ -210,7 +210,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        poController.populateVehicleList();
+                        poJSON = poController.populateVehicleList();
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         poController.initFields();
                         pnEditMode = poController.getEditMode();
                         break;
@@ -361,7 +364,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ParseException ex) {
-            Logger.getLogger(VehicleFinancingPromo_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -495,14 +499,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     private String detailComboFilter = "All";
 
     private void applyDetailFilter() {
-
         filteredDataDetail.setPredicate(orders -> {
-
             // ComboBox filter
             if (detailComboFilter != null
                     && !detailComboFilter.isEmpty()
                     && !detailComboFilter.equalsIgnoreCase("All")) {
-
                 if (orders.getIndex07() == null
                         || !orders.getIndex07().equalsIgnoreCase(detailComboFilter)) {
                     return false;
@@ -512,7 +513,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             // TextField filter
             if (detailSearchText != null
                     && !detailSearchText.isEmpty()) {
-
                 if (orders.getIndex07() == null
                         || !orders.getIndex07().toLowerCase().contains(detailSearchText)) {
                     return false;
@@ -597,6 +597,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
+                            poJSON = poController.populateVehicleList();
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
                             pbSuccess = false;
                             loadRecordMaster();
                             pbSuccess = true;
@@ -616,6 +620,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
+                            poJSON = poController.populateVehicleList();
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
                             pbSuccess = false;
                             loadRecordMaster();
                             pbSuccess = true;
@@ -623,8 +631,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         default:
                             break;
                     }
-                } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
@@ -633,15 +641,40 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         // DatePicker setup
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpValidFrom, dpTo);
         JFXUtil.setActionListener(datepicker_Action, dpValidFrom, dpTo);
+
+        dpTo.getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                // Lost focus
+                if (JFXUtil.isObjectEqualTo(dpTo.getEditor().getText(), null, "")) {
+                    try {
+                        if (pbSuccess) {
+                            poJSON = poController.Master().setThruDate(null);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            dpTo.setValue(null);
+                        }
+                        poJSON = poController.populateVehicleList();
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        pbSuccess = false;
+                        loadRecordMaster();
+                        pbSuccess = true;
+                    } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                }
+            }
+        });
     }
 
     private void addChildColumns(
             TableView<?> tableView,
             TableColumn parentColumn,
             JSONArray jsonArray) {
-
         for (int lnRow = 0; lnRow < jsonArray.size(); lnRow++) {
-
             JSONObject loJSONObject = (JSONObject) jsonArray.get(lnRow);
 
             int lnDuration = ((Number) loJSONObject.get("nDuration")).intValue();
@@ -720,14 +753,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             details_data.clear();
                             plOrderNoPartial.clear();
                             try {
-                                poController.Detail(0).getReservationAmount();
-                                poController.Detail(0).getReservationAmount();
                                 if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                     reInitializeColumns();
                                     reInitializeComboboxes();
                                     poController.ReloadDetail();
                                 }
-                                poController.Detail(0).getReservationAmount();
                                 JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
 
                                 array.clear();
@@ -826,7 +856,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     private void reInitializeColumns() {
         try {
-
             removeChildColumns(tblViewDetail, tblMonthlyAmortization);
             JSONArray loJSONArray = poController.loadStandardInterestRates();
             addChildColumns(tblViewDetail, tblMonthlyAmortization, loJSONArray);
@@ -845,7 +874,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
             //include reinitialize of comboboxes
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleFinancingPromo_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -864,7 +894,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbDownPaymentRate);
             JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbDownPaymentRate);
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleFinancingPromo_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -872,7 +903,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setColumnCenter(tblNo);
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
         JFXUtil.setColumnRight(tblDPRate, tblReservationAmount);
-
     }
 
     public void clearTextFields() {
@@ -906,7 +936,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             }
         });
         JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleFinancingPromo_Detail) item).getIndex01(), highlightedRowsMain);
-
     }
 
     private void initButton(int fnValue) {
