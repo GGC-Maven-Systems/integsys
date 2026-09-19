@@ -183,4 +183,13 @@ public class ModelVehicleFinancingPromo_Detail {
     public void setIndex15(String index15) {
         this.index15.set(index15);
     }
+
+    public void setIndexDynamic(int index, String value) {
+        try {
+            String lsIndex = String.format("%02d", index);
+            getClass().getMethod("setIndex" + lsIndex, String.class).invoke(this, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
