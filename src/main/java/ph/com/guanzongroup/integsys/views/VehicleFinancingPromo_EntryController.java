@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import ph.com.guanzongroup.integsys.model.ModelVehicleFinancingPromo_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -445,6 +446,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             });
 
     private void loadRecordMaster() {
+        Platform.runLater(() -> {
+            lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()).toUpperCase());
+        });
         tfValidityID.setText(poController.Master().getValidityId());
         dpValidFrom.setValue(poController.Master().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
         tfValidityPeriod.setText(poController.Master().getValidityDescription());
@@ -767,7 +771,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             removeChildColumns(tblViewDetail, tblMonthlyAmortization);
             JSONArray loJSONArray = poController.loadStandardInterestRates();
             addChildColumns(tblViewDetail, tblMonthlyAmortization, loJSONArray);
-            tblViewDetail.getColumns();
+            Platform.runLater(() -> {
+                disableTableColumnReordering(tblViewDetail);
+                tblViewDetail.refresh();
+            });
+
             JFXUtil.setColumnCenter(tblNo);
             JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
             JFXUtil.setColumnRight(tblDPRate, tblReservationAmount);
@@ -779,12 +787,36 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             SortedList<ModelVehicleFinancingPromo_Detail> sortedData = new SortedList<>(filteredDataDetail);
             sortedData.comparatorProperty().bind(tblViewDetail.comparatorProperty());
             tblViewDetail.setItems(sortedData);
-
-            //include reinitialize of comboboxes
+            tblViewDetail.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+                TableHeaderRow header = (TableHeaderRow) tblViewDetail.lookup("TableHeaderRow");
+                if (header != null) {
+                    header.reorderingProperty().addListener((o, oldVal, newVal) -> {
+                        header.setReordering(false);
+                    });
+                }
+            });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    public static void disableTableColumnReordering(final TableView<?> tableView) {
+        Platform.runLater(() -> {
+            TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
+            if (header == null) {
+                return;
+            }
+            header.setReordering(false);
+            if (!header.reorderingProperty().isBound()) {
+                header.reorderingProperty().addListener(
+                        (obs, oldValue, newValue) -> {
+                            if (newValue) {
+                                header.setReordering(false);
+                            }
+                        });
+            }
+        });
     }
 
     private void reInitializeComboboxes() {
