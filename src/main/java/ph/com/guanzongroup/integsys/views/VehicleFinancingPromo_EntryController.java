@@ -92,7 +92,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
 
     JFXUtil.ReloadableTableTask loadTableDetail;
-    JFXUtil.StageManager stageSerialDialog = new JFXUtil.StageManager();
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
 
@@ -194,7 +193,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            stageSerialDialog.closeDialog();
                             appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
                         } else {
                             return;
@@ -525,7 +523,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             pbSuccess = false;
-                            loadRecordMaster();
+                            loadTableDetail.reload();
                             pbSuccess = true;
                             break;
                         case "dpTo":
@@ -548,7 +546,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             pbSuccess = false;
-                            loadRecordMaster();
+                            loadTableDetail.reload();
                             pbSuccess = true;
                             break;
                         default:
@@ -582,7 +580,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         pbSuccess = false;
-                        loadRecordMaster();
+                        loadTableDetail.reload();
                         pbSuccess = true;
                     } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -866,7 +864,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleFinancingPromo_Detail selected = (ModelVehicleFinancingPromo_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        stageSerialDialog.closeDialog();
                         pnDetail = Integer.parseInt(selected.getIndex01()) - 1;
                         loadRecordDetail();
                     }
@@ -887,7 +884,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-        JFXUtil.setButtonsVisibility(lbShow1, btnApprove, btnExport);
+        JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnExport);
         if (fnValue != EditMode.READY) {
             return;
         }
