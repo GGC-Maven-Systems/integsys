@@ -468,7 +468,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             tfReservationAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), false));
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
-//        JFXUtil.setCmbValue(cmbDownPaymentRate, !poController.Detail(pnDetail).getDownPaymentRate().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getDownPaymentRate()) : -1);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
