@@ -200,8 +200,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         break;
                     case "btnNew":
                         //Clear data
-//                        poController.resetMaster();
-//                        poController.resetOthers();
                         poController.Detail().clear();
                         clearTextFields();
 
@@ -224,10 +222,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        //Populate purhcase receiving serials
-//                        for (int lnCtr = 0; lnCtr <= poController.getDetailCount() - 1; lnCtr++) {
-//                            poController.getPurchaseOrderReceivingSerial(poController.Detail(lnCtr).getEntryNo());
-//                        }
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnSearch":
@@ -235,19 +229,12 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
-//                            psSupplierId = poController.Master().getSupplierId();
-
                             //Clear data
-//                            poController.resetMaster();
-//                            poController.resetOthers();
                             poController.Detail().clear();
                             clearTextFields();
 
-//                            poController.Master().setIndustryId(psIndustryId);
                             poController.Master().setCompanyId(psCompanyId);
-//                            poController.Master().setSupplierId(psSupplierId);
                             pnEditMode = EditMode.UNKNOWN;
-
                             break;
                         } else {
                             return;
@@ -280,25 +267,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-//                                psSupplierId = poController.Master().getSupplierId();
-
-                                // Confirmation Prompt
-//                                JSONObject loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-//                                if ("success".equals(loJSON.get("result"))) {
-//                                    if (poController.Master().getTransactionStatus().equals(PurchaseOrderReceivingStatus.OPEN)) {
-//                                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to confirm this transaction?")) {
-//                                            loJSON = poController.ConfirmTransaction("");
-//                                            if ("success".equals((String) loJSON.get("result"))) {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            } else {
-//                                                ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
-                                // Print Transaction Prompt
-//                                loJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
-//                                poController.loadAttachments();
                                 loadRecordDetail();
                             }
                         } else {
@@ -306,7 +274,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         }
                         break;
                     case "btnBrowse":
-//                        poController.Master().getModel().setTransactionStatus(APPaymentAdjustmentStatus.RETURNED + "" + APPaymentAdjustmentStatus.OPEN);
                         poController.Master().setRecordStatus("01234");
                         poJSON = poController.SearchTransaction("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
@@ -949,9 +916,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-        JFXUtil.setButtonsVisibility(true, btnApprove);
-        JFXUtil.setButtonsVisibility(true, btnExport);
-
+        JFXUtil.setButtonsVisibility(lbShow1, btnApprove, btnExport);
         if (fnValue != EditMode.READY) {
             return;
         }
