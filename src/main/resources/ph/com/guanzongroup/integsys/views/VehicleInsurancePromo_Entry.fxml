@@ -228,37 +228,39 @@
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                      <Label layoutX="10.0" layoutY="44.0" text="Valid From" GridPane.rowIndex="2">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <Label text="Validity ID">
+                                                   <Label text="Validity ID">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <TextField fx:id="tfBarcode122" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                      <DatePicker GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                      <Label layoutX="91.0" layoutY="46.0" text="To" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                        <Label layoutX="10.0" layoutY="44.0" text="Valid From" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <DatePicker layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="8" />
-                                                      <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="8">
-                                                         <font>
-                                                            <Font name="System Bold" size="14.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <Label text="Validity Period" GridPane.rowIndex="3">
+                                                                        <Label text="Validity Period" GridPane.rowIndex="3">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <TextField fx:id="tfValidityPeriod" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3" />
-                                                   </children>
+                                                                        <Label layoutX="91.0" layoutY="46.0" text="To" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <TextField disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2"  fx:id="tfValidityID"/>
+                                                                        <DatePicker GridPane.columnIndex="2" GridPane.rowIndex="2"  fx:id="dpValidFrom"/>
+                                                                        <TextField GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3"  fx:id="tfValidityPeriod"/>
+                                                                        <DatePicker layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2"  fx:id="dpTo"/>
+                                                                        <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="8">
+                                                         <children>
+                                                                              <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
+                                                               <font>
+                                                                  <Font name="System Bold" size="14.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children></AnchorPane>
+                                                                    </children>
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
@@ -277,68 +279,68 @@
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
                                                    </columnConstraints>
                                                    <rowConstraints>
-                                                      <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                      <Label text="Brand" GridPane.rowIndex="2">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <Label text="Variant" GridPane.columnIndex="3" GridPane.rowIndex="2">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <Label layoutX="58.0" layoutY="17.0" text="Model" GridPane.rowIndex="3">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <TextField fx:id="tfBarcode12" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="tfDescription11" layoutX="519.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="tfDescription111" layoutX="334.0" layoutY="12.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                      <Label layoutX="510.0" layoutY="44.0" text="Color" GridPane.columnIndex="3" GridPane.rowIndex="3">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <TextField fx:id="tfDescription1112" layoutX="558.0" layoutY="40.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-                                                      <Label layoutX="653.0" layoutY="45.0" text="Amount" GridPane.columnIndex="6" GridPane.rowIndex="3">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <TextField alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="3" />
-                                                      <Label text="Insurance ID">
+                                                   <Label text="Insurance ID">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <TextField fx:id="tfBarcode121" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                      <TextField fx:id="tfBarcode1311" alignment="CENTER_RIGHT" layoutX="154.0" layoutY="71.0" maxHeight="25.0" maxWidth="80.0" promptText="0" GridPane.columnIndex="8" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
-                                                      <Label layoutX="123.0" layoutY="75.0" text="Year" GridPane.columnIndex="6" GridPane.rowIndex="2">
+                                                                        <Label text="Brand" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <CheckBox mnemonicParsing="false" GridPane.columnIndex="8" GridPane.halignment="LEFT" />
-                                                      <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="6">
+                                                                        <Label layoutX="58.0" layoutY="17.0" text="Model" GridPane.rowIndex="3">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label text="Variant" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label layoutX="510.0" layoutY="44.0" text="Color" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="6">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <Label text="SRP" GridPane.columnIndex="6" GridPane.rowIndex="4">
+                                                                        <Label layoutX="123.0" layoutY="75.0" text="Year" GridPane.columnIndex="6" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label layoutX="653.0" layoutY="45.0" text="Amount" GridPane.columnIndex="6" GridPane.rowIndex="3">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label text="SRP" GridPane.columnIndex="6" GridPane.rowIndex="4">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <TextField alignment="CENTER_RIGHT" layoutX="533.0" layoutY="118.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="4" />
-                                                   </children>
+                                                                        <TextField disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2"  fx:id="tfInsuranceID"/>
+                                                                        <TextField maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="2"  fx:id="tfBrand"/>
+                                                                        <TextField layoutX="334.0" layoutY="12.0" GridPane.columnIndex="2" GridPane.rowIndex="3"  fx:id="tfModel"/>
+                                                                        <TextField layoutX="519.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2"  fx:id="tfVariant"/>
+                                                                        <TextField layoutX="558.0" layoutY="40.0" GridPane.columnIndex="5" GridPane.rowIndex="3"  fx:id="tfColor"/>
+                                                                        <CheckBox mnemonicParsing="false" GridPane.columnIndex="8" GridPane.halignment="LEFT"  onAction="#cmdCheckBox_Click" fx:id="cbActive"/>
+                                                                        <TextField alignment="CENTER_RIGHT" layoutX="154.0" layoutY="71.0" maxHeight="25.0" maxWidth="80.0" promptText="0" GridPane.columnIndex="8" GridPane.halignment="LEFT" GridPane.rowIndex="2"  fx:id="tfYear"/>
+                                                                        <TextField alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="3"  fx:id="tfAmount"/>
+                                                                        <TextField alignment="CENTER_RIGHT" layoutX="533.0" layoutY="118.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="4"  fx:id="tfSRP"/>
+                                                                    </children>
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
@@ -363,18 +365,18 @@
                                                 <RowConstraints minHeight="-Infinity" prefHeight="28.0" vgrow="ALWAYS" />
                                              </rowConstraints>
                                              <children>
-                                                <TableView GridPane.columnSpan="7" GridPane.rowIndex="1" GridPane.rowSpan="2">
-                                                   <columns>
-                                                      <TableColumn prefWidth="123.0" text="Year" />
-                                                      <TableColumn prefWidth="193.0" text="Amount" />
-                                                   </columns>
-                                                </TableView>
-                                                <Label text="List" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+                                             <Label text="List" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
                                                    <font>
                                                       <Font name="System Bold" size="14.0" />
                                                    </font>
                                                 </Label>
-                                             </children>
+                                                                <TableView fx:id="tblViewList" GridPane.columnSpan="7" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                                                   <columns>
+                                                      <TableColumn prefWidth="123.0" text="Year"  minWidth="123.0" maxWidth="123.0" fx:id="tblYear"/>
+                                                      <TableColumn prefWidth="193.0" text="Amount"  minWidth="193.0" maxWidth="193.0" fx:id="tblAmount"/>
+                                                   </columns>
+                                                </TableView>
+                                                            </children>
                                           </GridPane>
                                        </children>
                                     </AnchorPane>
@@ -390,19 +392,19 @@
                                           <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
                                        </rowConstraints>
                                        <children>
-                                          <TableView GridPane.vgrow="ALWAYS">
+                                          <TableView fx:id="tblViewDetail" GridPane.vgrow="ALWAYS">
                                              <columns>
-                                                <TableColumn maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
-                                                <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
-                                                <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
-                                                <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
-                                                <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="1st Year" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="2nd Year" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="3rd Year" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="4th Year" />
-                                                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="5th Year" />
+                                                <TableColumn prefWidth="30.0" text="No"  minWidth="30.0" maxWidth="30.0" fx:id="tblNo"/>
+                                                <TableColumn prefWidth="100.0" text="Brand"  minWidth="100.0" maxWidth="100.0" fx:id="tblBrand"/>
+                                                <TableColumn prefWidth="150.0" text="Model"  minWidth="150.0" maxWidth="150.0" fx:id="tblModel"/>
+                                                <TableColumn prefWidth="200.0" text="Variant"  minWidth="200.0" maxWidth="200.0" fx:id="tblVariant"/>
+                                                <TableColumn prefWidth="200.0" text="Color"  minWidth="200.0" maxWidth="200.0" fx:id="tblColor"/>
+                                                <TableColumn prefWidth="150.0" text="SRP"  minWidth="150.0" maxWidth="150.0" fx:id="tblSRP"/>
+                                                <TableColumn prefWidth="100.0" text="1st Year"  minWidth="100.0" maxWidth="100.0" fx:id="tbl1stYear"/>
+                                                <TableColumn prefWidth="100.0" text="2nd Year"  minWidth="100.0" maxWidth="100.0" fx:id="tbl2ndYear"/>
+                                                <TableColumn prefWidth="100.0" text="3rd Year"  minWidth="100.0" maxWidth="100.0" fx:id="tbl3rdYear"/>
+                                                <TableColumn prefWidth="100.0" text="4th Year"  minWidth="100.0" maxWidth="100.0" fx:id="tbl4thYear"/>
+                                                <TableColumn prefWidth="100.0" text="5th Year"  minWidth="100.0" maxWidth="100.0" fx:id="tbl5thYear"/>
                                              </columns>
                                           </TableView>
                                        </children>
