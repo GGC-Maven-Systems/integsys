@@ -404,12 +404,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
-                    case "tfDescription":
-                        poJSON = poController.Master().setValidityDescription(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
                     case "tfReservationAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));

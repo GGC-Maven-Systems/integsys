@@ -250,7 +250,7 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                          <TextField fx:id="tfValidityID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
+                                                                          <TextField fx:id="tfValidityID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
                                                                           <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                           <TextField fx:id="tfValidityPeriod" GridPane.columnIndex="8" GridPane.rowIndex="2" />
                                                                           <DatePicker fx:id="dpTo" layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
@@ -323,7 +323,7 @@
                                                       </Label>
                                                                             <Label layoutX="526.0" layoutY="15.0" text="SRP" GridPane.columnIndex="6" GridPane.rowIndex="2" />
                                                                             <TextField fx:id="tfFinancingID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                            <TextField fx:id="tfDescription" layoutX="558.0" layoutY="40.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                                            <TextField fx:id="tfDescription" disable="true" layoutX="558.0" layoutY="40.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
                                                                             <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="14" GridPane.halignment="RIGHT" />
                                                                             <TextField fx:id="tfReservationAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="2" />
                                                                             <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
