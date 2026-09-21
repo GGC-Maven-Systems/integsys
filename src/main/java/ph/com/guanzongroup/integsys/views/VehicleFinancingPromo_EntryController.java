@@ -60,6 +60,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleFinancingPrice;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.ValidityPeriodStatus;
 
 /**
  * FXML Controller class
@@ -105,7 +106,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnExport, btnClose;
     @FXML
-    private TextField tfValidityID, tfValidityPeriod, tfFinancingID, tfDescription, tfReservationAmount, tfSRP;
+    private TextField tfValidityID, tfValidityPeriod, tfFinancingID, tfDescription, tfReservationAmount, tfSRP, tfDownPaymentRate;
     @FXML
     private DatePicker dpValidFrom, dpTo;
     @FXML
@@ -230,9 +231,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
                             //Clear data
-                            poController.Detail().clear();
+                            poController.InitTransaction();
                             clearTextFields();
-
                             poController.Master().setCompanyId(psCompanyId);
                             pnEditMode = EditMode.UNKNOWN;
                             break;
@@ -267,15 +267,21 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                loadRecordDetail();
                             }
+                            
+                            poJSON = poController.OpenTransaction(poController.Master().getValidityId());
+                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                btnCancel.fire();
+                            }
+                            pnEditMode = poController.Master().getEditMode();
                         } else {
                             return;
                         }
                         break;
                     case "btnBrowse":
                         poController.Master().setRecordStatus("01234");
-                        poJSON = poController.SearchTransaction("", false);
+                        poJSON = poController.SearchTransaction("", true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             tfValidityID.requestFocus();
@@ -293,20 +299,43 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
+                            
+                            poJSON = poController.OpenTransaction(poController.Master().getValidityId());
+                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                btnCancel.fire();
+                            }
+                            pnEditMode = poController.Master().getEditMode();
+                            
                         } else {
                             return;
                         }
                         break;
                     case "btnVoid":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void transaction?") == true) {
-                            poJSON = poController.VoidTransaction();
+                        String lsStat = "void";
+                        if(ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())){
+                               lsStat = "cancel";
+                        } 
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to "+lsStat+" transaction?") == true) {
+                            if(ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())){
+                                poJSON = poController.VoidTransaction();
+                            } else {
+                                poJSON = poController.CancelTransaction();
+                            }
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
+                            
+                            poJSON = poController.OpenTransaction(poController.Master().getValidityId());
+                            if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                btnCancel.fire();
+                            }
+                            pnEditMode = poController.Master().getEditMode();
                         } else {
                             return;
                         }
@@ -317,11 +346,13 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
-                } else {
-                    loadRecordDetail();
-                    loadTableDetail.reload();
-                }
+//                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
+//                } else {
+//                    loadRecordDetail();
+//                    loadTableDetail.reload();
+//                }
+                loadRecordDetail();
+                loadTableDetail.reload();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -440,7 +471,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     private void loadRecordMaster() {
         Platform.runLater(() -> {
             lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()).toUpperCase());
+            
+            String lsStat = "Void";
+            if(ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())){
+                   lsStat = "Cancel";
+            } 
+            btnVoid.setText(lsStat);
         });
+        
         tfValidityID.setText(poController.Master().getValidityId());
         dpValidFrom.setValue(poController.Master().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
         tfValidityPeriod.setText(poController.Master().getValidityDescription());
@@ -460,6 +498,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             tfReservationAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), false));
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
+            tfDownPaymentRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPaymentRate().doubleValue(), false));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -647,18 +686,18 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 tblViewDetail,
                 details_data,
                 () -> {
-                    try {
+//                    try {
                         pbEntered = false;
-                        // Setting data to table detail
-                        poController.loadStandardDownpaymentRates();
                         Platform.runLater(() -> {
                             int lnCtr;
                             details_data.clear();
                             plOrderNoPartial.clear();
                             try {
-                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                    reInitializeColumns();
+                                if (pnEditMode != EditMode.UNKNOWN) {
                                     reInitializeComboboxes();
+                                    reInitializeColumns();
+                                }
+                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                     poController.ReloadDetail();
                                 }
                                 JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
@@ -738,10 +777,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             }
                         }
                         );
-                    } catch (SQLException | GuanzonException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                    }
+//                    } catch (SQLException | GuanzonException ex) {
+//                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+//                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//                    }
                 }
         );
     }
@@ -882,11 +921,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         if (fnValue != EditMode.READY) {
             return;
         }
-//        switch (poController.Master().getTransactionStatus()) {
-//            case ControllerStatus.VOID:
-//            case ControllerStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate);
-//                break;
-//        }
+        switch (poController.Master().getRecordStatus()) {
+            case ValidityPeriodStatus.VOID:
+            case ValidityPeriodStatus.CANCELLED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnVoid, btnExport);
+                break;
+            case ValidityPeriodStatus.APPROVED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
+                break;
+        }
     }
 }

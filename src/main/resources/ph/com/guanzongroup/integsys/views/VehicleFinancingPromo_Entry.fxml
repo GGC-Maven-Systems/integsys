@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -289,7 +290,7 @@
                                                    </columnConstraints>
                                                    <rowConstraints>
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="5.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
@@ -316,7 +317,7 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                            <Label layoutX="653.0" layoutY="45.0" text="Downpayment Rate (%)" GridPane.columnIndex="9" GridPane.rowIndex="2">
+                                                                            <Label layoutX="653.0" layoutY="45.0" text="Filter By Downpayment Rate (%)" GridPane.columnIndex="8" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
@@ -327,7 +328,14 @@
                                                                             <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="14" GridPane.halignment="RIGHT" />
                                                                             <TextField fx:id="tfReservationAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="2" />
                                                                             <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                                      <ComboBox fx:id="cmbDownPaymentRate" prefWidth="150.0" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                                      <ComboBox fx:id="cmbDownPaymentRate" prefWidth="150.0" GridPane.columnIndex="11" />
+                                                      <Label layoutX="744.0" layoutY="16.0" text="Downpayment Rate (%)" GridPane.columnIndex="9" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <TextField fx:id="tfDownPaymentRate" alignment="CENTER_RIGHT" disable="true" layoutX="584.0" layoutY="44.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                                      <Separator prefWidth="200.0" GridPane.columnSpan="15" GridPane.rowIndex="1" />
                                                                         </children>
                                                 </GridPane>
                                              </children>
