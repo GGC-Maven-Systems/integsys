@@ -59,7 +59,7 @@ import ph.com.guanzongroup.integsys.model.ModelBankFinancingRate_Standard;
 /**
  * FXML Controller class
  *
- * @author User
+ * @author Team 1
  */
 public class BankFinancingRateController implements Initializable, ScreenInterface {
 

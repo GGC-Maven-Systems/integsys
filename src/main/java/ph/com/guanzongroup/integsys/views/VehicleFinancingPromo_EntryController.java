@@ -66,7 +66,7 @@ import ph.com.guanzongroup.cas.sales.status.ValidityPeriodStatus;
 /**
  * FXML Controller class
  *
- * @author User
+ * @author Team 1
  */
 public class VehicleFinancingPromo_EntryController implements Initializable, ScreenInterface {
 
@@ -105,7 +105,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnExport, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnExport, btnClose;
     @FXML
     private TextField tfValidityID, tfValidityPeriod, tfFinancingID, tfDescription, tfReservationAmount, tfSRP, tfDownPaymentRate;
     @FXML
@@ -225,9 +225,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             return;
                         }
                         pnEditMode = poController.getEditMode();
-                        break;
-                    case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
@@ -914,7 +911,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
@@ -922,7 +919,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnExport);
 
         JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
-        
+
         if (fnValue != EditMode.READY) {
             return;
         }
