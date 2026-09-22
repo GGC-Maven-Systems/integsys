@@ -105,7 +105,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnExport, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnPrint, btnClose;
     @FXML
     private TextField tfValidityID, tfValidityPeriod, tfFinancingID, tfDescription, tfReservationAmount, tfSRP, tfDownPaymentRate;
     @FXML
@@ -338,8 +338,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             return;
                         }
                         break;
-                    case "btnExport":
-                        break;
+                    case "btnPrint":
+                        poController.printTransaction(Double.parseDouble(cmbDownPaymentRate.getSelectionModel().getSelectedItem().toString()));
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -916,7 +917,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-        JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnExport);
+        JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint);
 
         JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
 
@@ -926,7 +927,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         switch (poController.Master().getRecordStatus()) {
             case ValidityPeriodStatus.VOID:
             case ValidityPeriodStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnVoid, btnExport);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnVoid, btnPrint);
                 break;
             case ValidityPeriodStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
