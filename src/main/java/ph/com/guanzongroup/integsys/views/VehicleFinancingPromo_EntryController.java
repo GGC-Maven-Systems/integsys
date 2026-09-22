@@ -487,21 +487,19 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     private void loadRecordDetail() {
         try {
-            JFXUtil.setDisabledExcept(true, apDetail);
+            JFXUtil.setDisabled(true, tfSRP ,tfDownPaymentRate,cbActive, cmbDownPaymentRate, tfReservationAmount);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
-
+            JFXUtil.setDisabled(!lbShow1, tfSRP ,tfDownPaymentRate,cbActive, cmbDownPaymentRate);
             if (pnEditMode == EditMode.READY) {
-                JFXUtil.setDisabledExcept(!lbShow1, apDetail, cmbDownPaymentRate);
+                JFXUtil.setDisabled(false, cmbDownPaymentRate);
             } else {
-                JFXUtil.setDisabledExcept(!lbShow1, apDetail);
                 if (lbShow1) {
                     JFXUtil.setDisabled(JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRecordStatus() ? "1" : "0", RecordStatus.INACTIVE), tfReservationAmount);
                 }
             }
-            JFXUtil.setDisabled(true, tfFinancingID, tfDescription);
 
             tfFinancingID.setText(poController.Detail(pnDetail).getVehicleFinancingId());
             tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
