@@ -56,6 +56,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleFinancingPrice;
@@ -268,7 +269,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-                            
+
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -299,14 +300,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-                            
+
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 btnCancel.fire();
                             }
                             pnEditMode = poController.Master().getEditMode();
-                            
+
                         } else {
                             return;
                         }
@@ -314,11 +315,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                     case "btnVoid":
                         poJSON = new JSONObject();
                         String lsStat = "void";
-                        if(ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())){
-                               lsStat = "cancel";
-                        } 
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to "+lsStat+" transaction?") == true) {
-                            if(ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())){
+                        if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
+                            lsStat = "cancel";
+                        }
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to " + lsStat + " transaction?") == true) {
+                            if (ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())) {
                                 poJSON = poController.VoidTransaction();
                             } else {
                                 poJSON = poController.CancelTransaction();
@@ -329,7 +330,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-                            
+
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -471,14 +472,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     private void loadRecordMaster() {
         Platform.runLater(() -> {
             lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()).toUpperCase());
-            
+
             String lsStat = "Void";
-            if(ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())){
-                   lsStat = "Cancel";
-            } 
+            if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
+                lsStat = "Cancel";
+            }
             btnVoid.setText(lsStat);
         });
-        
+
         tfValidityID.setText(poController.Master().getValidityId());
         dpValidFrom.setValue(poController.Master().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
         tfValidityPeriod.setText(poController.Master().getValidityDescription());
@@ -490,6 +491,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            JFXUtil.setDisabled(JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRecordStatus() ? "1" : "0", RecordStatus.INACTIVE), tfReservationAmount);
             tfFinancingID.setText(poController.Detail(pnDetail).getVehicleFinancingId());
             tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().Model().getDescription(),
@@ -687,96 +689,96 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 details_data,
                 () -> {
 //                    try {
-                        pbEntered = false;
-                        Platform.runLater(() -> {
-                            int lnCtr;
-                            details_data.clear();
-                            plOrderNoPartial.clear();
-                            try {
-                                if (pnEditMode != EditMode.UNKNOWN) {
-                                    reInitializeComboboxes();
-                                    reInitializeColumns();
-                                }
-                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                    poController.ReloadDetail();
-                                }
-                                JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
+                    pbEntered = false;
+                    Platform.runLater(() -> {
+                        int lnCtr;
+                        details_data.clear();
+                        plOrderNoPartial.clear();
+                        try {
+                            if (pnEditMode != EditMode.UNKNOWN) {
+                                reInitializeComboboxes();
+                                reInitializeColumns();
+                            }
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadDetail();
+                            }
+                            JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
 
-                                array.clear();
-                                int lnAmmortizationColumnCount = 0;
-                                double lnTotal = 0.0;
-                                for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                    if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
-                                        continue;
-                                    }
-                                    details_data.add(
-                                            new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDownPaymentRate(), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getReservationAmount(), false)),
-                                                    "", //fixed column (this is not visible)
-                                                    "",//starts ammortization column dynamic
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    ""
-                                            ));
-                                    JSONArray loJSONArray = poController.loadStandardInterestRates();
-                                    lnAmmortizationColumnCount = loJSONArray.size();
-                                    for (int lnRow = 0; lnRow < loJSONArray.size(); lnRow++) { //sample is it have size of 3
-                                        JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
-                                        int lnDuration = (int) loJSONObject.get("nDuration"); // this is the column title per array
-                                        Double ldblRate = (Double) loJSONObject.get("nRateValx");
-                                        System.out.println("Montly Amortization Amount : " + poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate));
-                                        //so in another array put it like the first is array[0][0].add("")
-                                        getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
-                                    }
-                                    //i think store agein as a prepared and then will dynamically added in details_data
-                                    if (!poController.Detail(lnCtr).getRecordStatus()) {
-                                        JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
-                                    }
+                            array.clear();
+                            int lnAmmortizationColumnCount = 0;
+                            double lnTotal = 0.0;
+                            for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
+                                    continue;
                                 }
-                                //then re-add in here
-                                int lnCount = 9;
-                                for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                    if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
-                                        continue;
-                                    }
-                                    lnCount = 9;
-                                    //well need to define the number of loJSONArray
-                                    for (int lnMAcount = 0; lnMAcount < lnAmmortizationColumnCount; lnMAcount++) {
-                                        lnCount += 1;
-                                        details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
-                                    }
+                                details_data.add(
+                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDownPaymentRate(), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getReservationAmount(), false)),
+                                                "", //fixed column (this is not visible)
+                                                "",//starts ammortization column dynamic
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                ""
+                                        ));
+                                JSONArray loJSONArray = poController.loadStandardInterestRates();
+                                lnAmmortizationColumnCount = loJSONArray.size();
+                                for (int lnRow = 0; lnRow < loJSONArray.size(); lnRow++) { //sample is it have size of 3
+                                    JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
+                                    int lnDuration = (int) loJSONObject.get("nDuration"); // this is the column title per array
+                                    Double ldblRate = (Double) loJSONObject.get("nRateValx");
+                                    System.out.println("Montly Amortization Amount : " + poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate));
+                                    //so in another array put it like the first is array[0][0].add("")
+                                    getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
                                 }
+                                //i think store agein as a prepared and then will dynamically added in details_data
+                                if (!poController.Detail(lnCtr).getRecordStatus()) {
+                                    JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+                                }
+                            }
+                            //then re-add in here
+                            int lnCount = 9;
+                            for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
+                                    continue;
+                                }
+                                lnCount = 9;
+                                //well need to define the number of loJSONArray
+                                for (int lnMAcount = 0; lnMAcount < lnAmmortizationColumnCount; lnMAcount++) {
+                                    lnCount += 1;
+                                    details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
+                                }
+                            }
 
-                                if (pnDetail < 0 || pnDetail
-                                        >= details_data.size()) {
-                                    if (!details_data.isEmpty()) {
-                                        /* FOCUS ON FIRST ROW */
-                                        tblViewDetail.getSelectionModel().select(0);
-                                        tblViewDetail.getFocusModel().focus(0);
-                                        pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
-                                        loadRecordDetail();
-                                    }
-                                } else {
-                                    /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                    tblViewDetail.getSelectionModel().select(pnDetail);
-                                    tblViewDetail.getFocusModel().focus(pnDetail);
+                            if (pnDetail < 0 || pnDetail
+                                    >= details_data.size()) {
+                                if (!details_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    tblViewDetail.getSelectionModel().select(0);
+                                    tblViewDetail.getFocusModel().focus(0);
+                                    pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
                                     loadRecordDetail();
                                 }
-                                loadRecordMaster();
-                            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                tblViewDetail.getSelectionModel().select(pnDetail);
+                                tblViewDetail.getFocusModel().focus(pnDetail);
+                                loadRecordDetail();
                             }
+                            loadRecordMaster();
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
-                        );
+                    }
+                    );
 //                    } catch (SQLException | GuanzonException ex) {
 //                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -918,6 +920,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnExport);
+
+        JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
+        
         if (fnValue != EditMode.READY) {
             return;
         }
