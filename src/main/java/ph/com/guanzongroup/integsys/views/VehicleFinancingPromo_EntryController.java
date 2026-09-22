@@ -936,6 +936,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             return;
         }
         switch (poController.Master().getRecordStatus()) {
+            case ValidityPeriodStatus.OPEN:
+                JFXUtil.setButtonsVisibility(false, btnPrint);
+                break;
             case ValidityPeriodStatus.VOID:
             case ValidityPeriodStatus.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnVoid, btnPrint);
