@@ -339,7 +339,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         }
                         break;
                     case "btnPrint":
-                        poController.printTransaction(Double.parseDouble(cmbDownPaymentRate.getSelectionModel().getSelectedItem().toString()));
+                        poController.printTransaction(cmbDownPaymentRate.getSelectionModel().getSelectedItem().toString());
                         return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -919,7 +919,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint);
 
-        JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
+//        JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
 
         if (fnValue != EditMode.READY) {
             return;
