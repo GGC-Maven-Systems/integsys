@@ -115,7 +115,7 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
     private TableView<ModelInvTableListInformation> tableListInformation;
 
     @FXML
-    private Button btnClose, btnSave, btnCancel, btnBrowse, btnUpdate, btnRetrieve, btnConfirm, btnVoid, btnTransHistory, btnPrint;
+    private Button btnClose, btnSave, btnCancel, btnBrowse, btnUpdate, btnRetrieve, btnConfirm, btnVoid, btnTransHistory, btnPrint,btnCancelTrans;
 
     @FXML
     private TableColumn<ModelInvOrderDetail, String> tblBrandDetail, tblModelDetail, tblVariantDetail, tblColorDetail,
@@ -721,6 +721,42 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
                     }
 
                     break;
+                case "btnCancelTrans":
+                    String isCancelled = invRequestController.Master().getTransactionStatus();
+
+                    if (!ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to void this transaction?")) {
+                        return;
+                    }
+//
+//                    if (StockRequestStatus.CONFIRMED.equals(status) || StockRequestStatus.PROCESSED.equals(status)) {
+//                        // Require user approval
+//                        JSONObject approvalResult = ShowDialogFX.getUserApproval(poApp);
+//                        if (!"success".equals(approvalResult.get("result"))) {
+//                            ShowMessageFX.Warning((String) approvalResult.get("message"), psFormName, null);
+//                            return;
+//                        }
+//                    }
+
+                {
+                    try {
+                        // Proceed to void the transaction
+                        poJSON = invRequestController.CancelTransaction("Cancelled");
+                    } catch (ParseException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                    }
+                }
+
+                loadMaster();
+                pnEditMode = invRequestController.getEditMode();
+                loadTableInvDetail();
+                loadDetail();
+                ShowMessageFX.Information((String) poJSON.get("message"), psFormName, null);
+
+                if (!"success".equals(poJSON.get("result"))) {
+                    return;
+                }
+
+                break;
 
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(null, "Cancel Confirmation", "Are you sure you want to cancel?")) {
@@ -1135,7 +1171,7 @@ tfInvType, dpTransactionDate, tfReservationQTY, //tfReferenceNo,
 
     private void initButtonsClickActions() {
         List<Button> buttons = Arrays.asList(btnSave, btnCancel,
-                btnClose, btnBrowse, btnUpdate, btnRetrieve, btnConfirm, btnVoid, btnTransHistory, btnPrint);
+                btnClose, btnBrowse, btnUpdate, btnRetrieve, btnConfirm, btnVoid, btnTransHistory, btnPrint,btnCancelTrans);
 
         buttons.forEach(button -> button.setOnAction(this::handleButtonAction));
     }
@@ -1423,8 +1459,8 @@ tfInvType, dpTransactionDate, tfReservationQTY, //tfReferenceNo,
         btnPrint.setManaged(fnEditMode != EditMode.ADDNEW && fnEditMode != EditMode.UNKNOWN);
         btnTransHistory.setVisible(fnEditMode != EditMode.ADDNEW && fnEditMode != EditMode.UNKNOWN);
         btnTransHistory.setManaged(fnEditMode != EditMode.ADDNEW && fnEditMode != EditMode.UNKNOWN);
-        CustomCommonUtil.setVisible(false, btnConfirm, btnVoid, btnUpdate);
-        CustomCommonUtil.setManaged(false, btnConfirm, btnVoid, btnUpdate);
+        CustomCommonUtil.setVisible(false, btnConfirm, btnVoid,btnCancelTrans, btnUpdate);
+        CustomCommonUtil.setManaged(false, btnConfirm, btnVoid,btnCancelTrans, btnUpdate);
 
         if (fnEditMode == EditMode.READY) {
 
@@ -1434,8 +1470,8 @@ tfInvType, dpTransactionDate, tfReservationQTY, //tfReferenceNo,
                     CustomCommonUtil.setManaged(true, btnConfirm, btnVoid, btnUpdate);
                     break;
                 case StockRequestStatus.CONFIRMED:
-                    CustomCommonUtil.setVisible(true, btnVoid, btnUpdate);
-                    CustomCommonUtil.setManaged(true, btnVoid, btnUpdate);
+                    CustomCommonUtil.setVisible(true, btnCancelTrans, btnUpdate);
+                    CustomCommonUtil.setManaged(true, btnCancelTrans, btnUpdate);
                     break;
 
             }

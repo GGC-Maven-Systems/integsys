@@ -203,7 +203,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                             }
                             getLoadedTransaction();
                             initButtonDisplay(poAppController.getEditMode());
-                            break;
+                            return;
                         }
                         if (!isJSONSuccess(poAppController.initTransaction(), "Initialize Transaction")) {
                             unloadForm appUnload = new unloadForm();
@@ -221,7 +221,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                         pnEditMode = poAppController.getEditMode();
                         break;
                     }
-                    break;
+                    return;
 
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
@@ -321,6 +321,15 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                     }
                     poAppController.getDetail(pnCTransactionDetail + 1).getApproved();
                     poAppController.getDetail(pnCTransactionDetail + 1).setApproved(Double.parseDouble(lsValue));
+
+                    double lnQuantity = poAppController.getDetail(pnCTransactionDetail + 1).getQuantity();
+                    double lnApproved = poAppController.getDetail(pnCTransactionDetail + 1).getApproved();
+                    double lnAutoCancel = 0.0;
+                    if (lnQuantity > lnApproved) {
+                        lnAutoCancel = lnQuantity - lnApproved;
+                    }
+
+                    poAppController.getDetail(pnCTransactionDetail + 1).setCancelled(lnAutoCancel);
                     break;
                 case "tfCancelQty":
                     if (!isValidQty(lsValue)) {
@@ -333,7 +342,15 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
                     break;
             }
 
-            reloadTableDetail();
+            try {
+                reloadTableDetail();
+            } catch (GuanzonException e) {
+                throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             loTextField.selectAll();
         }
@@ -842,7 +859,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         loadSelectedDetail(pnCTransactionDetail);
     }
 
-    private void reloadTableDetail() {
+    private void reloadTableDetail() throws GuanzonException, SQLException, CloneNotSupportedException {
         List<Model_Inv_Stock_Request_Detail> rawDetail = poAppController.getDetailList();
         laTransactionDetail.setAll(rawDetail);
 
@@ -854,7 +871,7 @@ public class InventoryRequest_ApprovalController implements Initializable, Scree
         tblRequestDetail.getSelectionModel().select(indexToSelect);
 
         pnCTransactionDetail = tblRequestDetail.getSelectionModel().getSelectedIndex(); // Not focusedIndex
-
+        loadSelectedDetail(pnCTransactionDetail);
         tblRequestDetail.refresh();
     }
 
