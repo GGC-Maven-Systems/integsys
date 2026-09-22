@@ -932,9 +932,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint);
 
-//      JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
-        cmbDownPaymentRate.setDisable(fnValue == EditMode.UNKNOWN);
-
         if (fnValue != EditMode.READY) {
             return;
         }
