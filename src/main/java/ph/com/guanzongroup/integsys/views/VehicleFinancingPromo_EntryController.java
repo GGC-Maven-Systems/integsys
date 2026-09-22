@@ -345,6 +345,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
+
 //                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
 //                } else {
 //                    loadRecordDetail();
@@ -486,10 +487,22 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     private void loadRecordDetail() {
         try {
+            JFXUtil.setDisabledExcept(true, apDetail);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            JFXUtil.setDisabled(JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRecordStatus() ? "1" : "0", RecordStatus.INACTIVE), tfReservationAmount);
+            boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
+
+            if (pnEditMode == EditMode.READY) {
+                JFXUtil.setDisabledExcept(!lbShow1, apDetail, cmbDownPaymentRate);
+            } else {
+                JFXUtil.setDisabledExcept(!lbShow1, apDetail);
+                if (lbShow1) {
+                    JFXUtil.setDisabled(JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getRecordStatus() ? "1" : "0", RecordStatus.INACTIVE), tfReservationAmount);
+                }
+            }
+            JFXUtil.setDisabled(true, tfFinancingID, tfDescription);
+
             tfFinancingID.setText(poController.Detail(pnDetail).getVehicleFinancingId());
             tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().Model().getDescription(),
@@ -871,8 +884,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     public void initDetailsGrid() {
         JFXUtil.setColumnCenter(tblNo);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
-        JFXUtil.setColumnRight(tblDPRate, tblReservationAmount);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
+        JFXUtil.setColumnRight(tblDPRate, tblReservationAmount, tblSRP);
     }
 
     public void clearTextFields() {
@@ -916,10 +929,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
+        JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint);
 
-//        JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
+//      JFXUtil.setDisabled(fnValue == EditMode.UNKNOWN, cmbDownPaymentRate);
+        cmbDownPaymentRate.setDisable(fnValue == EditMode.UNKNOWN);
 
         if (fnValue != EditMode.READY) {
             return;
