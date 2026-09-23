@@ -710,7 +710,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 tblViewDetail,
                 details_data,
                 () -> {
-//                    try {
                     pbEntered = false;
                     Platform.runLater(() -> {
                         int lnCtr;
@@ -756,11 +755,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
                                     int lnDuration = (int) loJSONObject.get("nDuration"); // this is the column title per array
                                     Double ldblRate = (Double) loJSONObject.get("nRateValx");
-                                    System.out.println("Montly Amortization Amount : " + poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate));
-                                    //so in another array put it like the first is array[0][0].add("")
                                     getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
                                 }
-                                //i think store agein as a prepared and then will dynamically added in details_data
+                                //store agein as a prepared and then will dynamically added in details_data
                                 if (!poController.Detail(lnCtr).getRecordStatus()) {
                                     JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
                                 }
@@ -778,7 +775,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-                            int lnTempRow = getDetailRow(filteredDataDetail, pnDetail, 9); 
+                            int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 9); 
                             if (pnDetail < 0 || pnDetail
                                     >= filteredDataDetail.size()) {
                                 if (!filteredDataDetail.isEmpty()) {
@@ -801,15 +798,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         }
                     }
                     );
-//                    } catch (SQLException | GuanzonException ex) {
-//                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                    }
                 }
         );
     }
 
-    public static int getDetailRow(ObservableList<?> dataList, int lnpn, int columnIndex) {
+    public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
         try {
             String getterName = String.format("getIndex%02d", columnIndex);
 
