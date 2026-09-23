@@ -724,7 +724,7 @@ public class InvRequest_ConfirmationController implements Initializable, ScreenI
                 case "btnCancelTrans":
                     String isCancelled = invRequestController.Master().getTransactionStatus();
 
-                    if (!ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to void this transaction?")) {
+                    if (!ShowMessageFX.YesNo(null, psFormName, "Are you sure you want to cancel this transaction?")) {
                         return;
                     }
 //
