@@ -118,6 +118,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     private TableView tblViewDetail;
     @FXML
     private TableColumn tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblDPRate, tblReservationAmount, tblMonthlyAmortization, tblsamp;
+    LocalDate ValidFrom;
 
     /**
      * Initializes the controller class.
@@ -224,6 +225,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
+                        ValidFrom = CustomCommonUtil.parseDateStringToLocalDate(CustomCommonUtil.formatDateToShortString(poController.Master().getFromDate()));
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnCancel":
@@ -486,6 +488,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     private void loadRecordDetail() {
         try {
             JFXUtil.setDisabled(true, tfSRP, tfDownPaymentRate, cbActive, cmbDownPaymentRate, tfReservationAmount);
+            JFXUtil.clearNodes(tfFinancingID, tfSRP, tfDownPaymentRate, cbActive, tfReservationAmount, tfDescription);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
@@ -548,10 +551,18 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         case "dpValidFrom":
                             LocalDate selectedFromDate = dpValidFrom.getValue();
                             LocalDate toDate = dpTo.getValue();
+                            if (pnEditMode == EditMode.ADDNEW) {
+                                String lsDateFrom = CustomCommonUtil.formatDateToShortString(JFXUtil.getFirstDayOfMonth(oApp.getServerDate()));
+                                ValidFrom = CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd");
+                            }
+                            if (toDate != null && selectedFromDate.isBefore(ValidFrom)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, back date is not allowed.");
+                                loadRecordMaster();
+                                return;
+                            }
                             if (toDate != null && selectedFromDate.isAfter(toDate)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
-                                String lsDateFrom = CustomCommonUtil.formatDateToShortString(JFXUtil.getFirstDayOfMonth(oApp.getServerDate()));
-                                dpValidFrom.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
+                                loadRecordMaster();
                                 return;
                             }
                             if (pbSuccess) {
@@ -574,7 +585,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             LocalDate fromDate = dpValidFrom.getValue();
                             if (fromDate != null && selectedToDate.isBefore(fromDate)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
-                                dpTo.setValue(CustomCommonUtil.parseDateStringToLocalDate(dateNow.toString()));
+                                loadRecordMaster();
                                 return;
                             }
                             if (pbSuccess) {
@@ -775,7 +786,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-                            int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 9); 
+                            int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 9);
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
