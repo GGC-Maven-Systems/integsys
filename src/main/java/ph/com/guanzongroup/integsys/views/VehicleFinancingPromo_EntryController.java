@@ -11,6 +11,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -551,13 +552,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         case "dpValidFrom":
                             LocalDate selectedFromDate = dpValidFrom.getValue();
                             LocalDate toDate = dpTo.getValue();
-                            if (pnEditMode == EditMode.ADDNEW) {
-                                String lsDateFrom = CustomCommonUtil.formatDateToShortString(JFXUtil.getFirstDayOfMonth(oApp.getServerDate()));
-                                ValidFrom = CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd");
-                            }
-                            if (toDate != null && selectedFromDate.isBefore(ValidFrom)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, back date is not allowed.");
-                                loadRecordMaster();
+                            LocalDate currentDate = oApp.getServerDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                            LocalDate firstDayOfCurrentMonth = currentDate.withDayOfMonth(1);
+                            if (selectedFromDate != null && selectedFromDate.isBefore(firstDayOfCurrentMonth)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be before the current month.");
+                                dpValidFrom.setValue(firstDayOfCurrentMonth);
                                 return;
                             }
                             if (toDate != null && selectedFromDate.isAfter(toDate)) {
