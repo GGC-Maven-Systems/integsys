@@ -777,12 +777,12 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             }
                             int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 9); 
                             if (pnDetail < 0 || pnDetail
-                                    >= filteredDataDetail.size()) {
-                                if (!filteredDataDetail.isEmpty()) {
+                                    >= details_data.size()) {
+                                if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     tblViewDetail.getSelectionModel().select(0);
                                     tblViewDetail.getFocusModel().focus(0);
-                                    pnDetail = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                                    pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
                                     loadRecordDetail();
                                 }
                             } else {
