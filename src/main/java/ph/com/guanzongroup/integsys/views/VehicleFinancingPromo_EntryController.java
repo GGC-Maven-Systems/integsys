@@ -778,14 +778,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-                            int lnTempRow = getDetailRow(filteredDataDetail, pnDetail, 9); //this method is used only when Reverse is applied
+                            int lnTempRow = getDetailRow(filteredDataDetail, pnDetail, 9); 
                             if (pnDetail < 0 || pnDetail
-                                    >= details_data.size()) {
+                                    >= filteredDataDetail.size()) {
                                 if (!filteredDataDetail.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     tblViewDetail.getSelectionModel().select(0);
                                     tblViewDetail.getFocusModel().focus(0);
-                                    pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
+                                    pnDetail = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                                     loadRecordDetail();
                                 }
                             } else {
@@ -972,6 +972,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                         pnDetail = lnRow;
                         loadRecordDetail();
+                        moveNext(false, false);
                     }
                 }
             }
