@@ -386,12 +386,12 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 }
                 break;
             case UP:
-//                JFXUtil.altSwitch(lsID, new Object[][]{
-//                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(true, true)},});
+                JFXUtil.altSwitch(lsID, new Object[][]{
+                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(true, true)},});
                 break;
             case DOWN:
-//                JFXUtil.altSwitch(lsID, new Object[][]{
-//                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(false, true)},});
+                JFXUtil.altSwitch(lsID, new Object[][]{
+                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(false, true)},});
                 break;
             default:
                 break;
@@ -400,9 +400,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
         protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
-            int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
+            int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
+                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
+                            : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -435,6 +437,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         }
                         poController.Detail(pnDetail).getReservationAmount();
                         if (pbEntered) {
+                            moveNext(false, true);
                             pbEntered = false;
                         }
                         break;
@@ -488,8 +491,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             }
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             boolean lbShow2 = pnEditMode == EditMode.UPDATE;
-            JFXUtil.setDisabled(!lbShow1, tfSRP, tfDownPaymentRate, cbActive, cmbDownPaymentRate);
-            JFXUtil.setDisabled(lbShow2, tfSRP, tfDownPaymentRate);
+            JFXUtil.setDisabled(!lbShow1, cbActive, cmbDownPaymentRate);
             if (pnEditMode == EditMode.READY) {
                 JFXUtil.setDisabled(false, cmbDownPaymentRate);
             } else {
@@ -632,6 +634,20 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         });
     }
 
+    public void moveNext(boolean isUp, boolean continueNext) {
+        if (continueNext) {
+            apDetail.requestFocus();
+            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
+                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
+        }
+        loadRecordDetail();
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
+        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+            {poController.Detail(pnDetail).getReservationAmount(), tfReservationAmount},}, tfReservationAmount); // default
+    }
+
     private void addChildColumns(TableView<?> tableView, TableColumn parentColumn, JSONArray jsonArray) {
         for (int lnRow = 0; lnRow < jsonArray.size(); lnRow++) {
             JSONObject loJSONObject = (JSONObject) jsonArray.get(lnRow);
@@ -726,7 +742,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDownPaymentRate(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getReservationAmount(), false)),
-                                                "", //fixed column (this is not visible)
+                                                String.valueOf(lnCtr), //fixed column (this is not visible)
                                                 "",//starts ammortization column dynamic
                                                 "",
                                                 "",
@@ -762,7 +778,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-
+                            int lnTempRow = getDetailRow(filteredDataDetail, pnDetail, 9); //this method is used only when Reverse is applied
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!filteredDataDetail.isEmpty()) {
@@ -774,8 +790,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewDetail.getSelectionModel().select(pnDetail);
-                                tblViewDetail.getFocusModel().focus(pnDetail);
+                                tblViewDetail.getSelectionModel().select(lnTempRow);
+                                tblViewDetail.getFocusModel().focus(lnTempRow);
                                 loadRecordDetail();
                             }
                             loadRecordMaster();
@@ -791,6 +807,28 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 //                    }
                 }
         );
+    }
+
+    public static int getDetailRow(ObservableList<?> dataList, int lnpn, int columnIndex) {
+        try {
+            String getterName = String.format("getIndex%02d", columnIndex);
+
+            for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
+                Object item = dataList.get(lnCtr);
+
+                String value = (String) item.getClass()
+                        .getMethod(getterName)
+                        .invoke(item);
+
+                if (String.valueOf(lnpn).equals(value)) {
+                    return lnCtr;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1; // not found
     }
 
     private void removeChildColumns(TableView<?> tableView, TableColumn<?, ?> parentColumn) {
@@ -931,10 +969,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleFinancingPromo_Detail selected = (ModelVehicleFinancingPromo_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
-                        pnDetail = lnRow - 1;
+                        int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                        pnDetail = lnRow;
                         loadRecordDetail();
-//                        moveNext(false, false);
                     }
                 }
             }
