@@ -127,6 +127,14 @@
                                     <Blend />
                                  </effect>
                               </Button>
+                              <Button fx:id="btnCancelTrans" contentDisplay="TOP" mnemonicParsing="false" prefHeight="65.0" prefWidth="80.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Cancel">
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="TIMES" size="20" />
+                                 </graphic>
+                              </Button>
                               <Button fx:id="btnVoid" contentDisplay="TOP" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="TIMES" size="20" />

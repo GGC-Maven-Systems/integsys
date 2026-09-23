@@ -223,25 +223,25 @@ public class InventoryMaintenanceController implements Initializable, ScreenInte
                     break;
                 
                 case "btnBrowse":
-                    if (lastFocusedControl == null) {
-                        if (!tfStockID.getText().isEmpty()) {
-                            if (ShowMessageFX.OkayCancel(null, "Search Record! by Barcode", "Are you sure you want replace loaded Record?") == false) {
-                                return;
-                            }
-                        }
-                        if (!isJSONSuccess(poAppController.searchRecordInventoryMaster(tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "", true),
-                                "Initialize Search Barcode No! ")) {
-                            return;
-                        }
-                        if (poAppController.getEditMode() == EditMode.ADDNEW) {
-                            ShowMessageFX.Warning("No Inventory Detected", "Inventory Master", "No inventory found in your Branch!!!Please "
-                                    + "Save Record to create. ");
-                        }
-                        
-                        getLoadedRecord();
-                        initButtonDisplay(poAppController.getEditMode());
-                        return;
-                    }
+//                    if (lastFocusedControl == null) {
+//                        if (!tfStockID.getText().isEmpty()) {
+//                            if (ShowMessageFX.OkayCancel(null, "Search Record! by Barcode", "Are you sure you want replace loaded Record?") == false) {
+//                                return;
+//                            }
+//                        }
+//                        if (!isJSONSuccess(poAppController.searchRecordInventoryMaster(tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "", true),
+//                                "Initialize Search Barcode No! ")) {
+//                            return;
+//                        }
+//                        if (poAppController.getEditMode() == EditMode.ADDNEW) {
+//                            ShowMessageFX.Warning("No Inventory Detected", "Inventory Master", "No inventory found in your Branch!!!Please "
+//                                    + "Save Record to create. ");
+//                        }
+//
+//                        getLoadedRecord();
+//                        initButtonDisplay(poAppController.getEditMode());
+//                        return;
+//                    }
                     
                     switch (lastFocusedControl.getId()) {
                         case "tfSearchBarcode":
@@ -464,6 +464,7 @@ public class InventoryMaintenanceController implements Initializable, ScreenInte
     };
     
     private void txtField_KeyPressed(KeyEvent event) {
+        JSONObject poJSON = new JSONObject();
         TextField loTxtField = (TextField) event.getSource();
         String txtFieldID = ((TextField) event.getSource()).getId();
         String lsValue = "";
@@ -485,15 +486,17 @@ public class InventoryMaintenanceController implements Initializable, ScreenInte
                                         return;
                                     }
                                 }
-                                if (!isJSONSuccess(poAppController.searchRecordInventoryMaster(tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "", true),
-                                        "Initialize Search Barcode No! ")) {
+
+                                poJSON = poAppController.searchRecordInventoryMaster(
+                                        tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "",
+                                        true
+                                );
+
+                                if (!"success".equals(poJSON.get("result"))) {
+                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
                                     return;
                                 }
-                                
-                                if (poAppController.getEditMode() == EditMode.ADDNEW) {
-                                    ShowMessageFX.Warning("No Inventory Detected", "Inventory Master", "No inventory found in your Branch!!!Please "
-                                            + "Save Record to create. ");
-                                }
+
                                 getLoadedRecord();
                                 initButtonDisplay(poAppController.getEditMode());
                                 break;
