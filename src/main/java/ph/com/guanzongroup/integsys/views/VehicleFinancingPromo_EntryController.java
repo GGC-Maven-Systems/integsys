@@ -375,7 +375,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         switch (event.getCode()) {
             case TAB:
             case ENTER:
-                pbEntered = true;
+                if (tfReservationAmount.isFocused()) {
+                    pbEntered = true;
+                }
                 CommonUtils.SetNextFocus(txtField);
                 event.consume();
                 break;
@@ -384,22 +386,12 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 }
                 break;
             case UP:
-                switch (lsID) {
-                    case "tfBarcode":
-                    case "tfReceiveQuantity":
-                        event.consume();
-                        break;
-                }
+//                JFXUtil.altSwitch(lsID, new Object[][]{
+//                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(true, true)},});
                 break;
             case DOWN:
-                switch (lsID) {
-                    case "tfBarcode":
-                    case "tfReceiveQuantity":
-                        event.consume();
-                        break;
-                    default:
-                        break;
-                }
+//                JFXUtil.altSwitch(lsID, new Object[][]{
+//                    {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(false, true)},});
                 break;
             default:
                 break;
@@ -442,6 +434,9 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         poController.Detail(pnDetail).getReservationAmount();
+                        if (pbEntered) {
+                            pbEntered = false;
+                        }
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
@@ -487,12 +482,14 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     private void loadRecordDetail() {
         try {
-            JFXUtil.setDisabled(true, tfSRP ,tfDownPaymentRate,cbActive, cmbDownPaymentRate, tfReservationAmount);
+            JFXUtil.setDisabled(true, tfSRP, tfDownPaymentRate, cbActive, cmbDownPaymentRate, tfReservationAmount);
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
-            JFXUtil.setDisabled(!lbShow1, tfSRP ,tfDownPaymentRate,cbActive, cmbDownPaymentRate);
+            boolean lbShow2 = pnEditMode == EditMode.UPDATE;
+            JFXUtil.setDisabled(!lbShow1, tfSRP, tfDownPaymentRate, cbActive, cmbDownPaymentRate);
+            JFXUtil.setDisabled(lbShow2, tfSRP, tfDownPaymentRate);
             if (pnEditMode == EditMode.READY) {
                 JFXUtil.setDisabled(false, cmbDownPaymentRate);
             } else {
@@ -667,7 +664,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         JFXUtil.setFocusListener(txtMaster_Focus, tfValidityPeriod);
         JFXUtil.setFocusListener(txtDetail_Focus, tfDescription, tfReservationAmount);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
-        JFXUtil.setCommaFormatter(tfReservationAmount);
+        JFXUtil.setCommaFormatter(tfReservationAmount, tfSRP, tfDownPaymentRate);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
@@ -705,8 +702,8 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         plOrderNoPartial.clear();
                         try {
                             if (pnEditMode != EditMode.UNKNOWN) {
-                                reInitializeComboboxes();
                                 reInitializeColumns();
+                                reInitializeComboboxes();
                             }
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadDetail();
@@ -768,7 +765,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
-                                if (!details_data.isEmpty()) {
+                                if (!filteredDataDetail.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     tblViewDetail.getSelectionModel().select(0);
                                     tblViewDetail.getFocusModel().focus(0);
@@ -807,6 +804,19 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         tableView.refresh();
     }
 
+    private boolean isCmbActive() {
+        if (cmbDownPaymentRate.getSelectionModel().getSelectedItem() != null) {
+            String lsSelected = cmbDownPaymentRate.getSelectionModel().getSelectedItem().toString();
+            if (lsSelected != null && cmbDownPaymentRate.getItems().contains("--ALL--")) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+        }
+        return false;
+    }
+
     private void reInitializeColumns() {
         try {
             removeChildColumns(tblViewDetail, tblMonthlyAmortization);
@@ -823,7 +833,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
             tblViewDetail.setItems(details_data);
 
-            filteredDataDetail = new FilteredList<>(details_data, b -> true);
+            if (isCmbActive()) {
+            } else {
+                filteredDataDetail = new FilteredList<>(details_data, b -> true);
+            }
 
             SortedList<ModelVehicleFinancingPromo_Detail> sortedData = new SortedList<>(filteredDataDetail);
             sortedData.comparatorProperty().bind(tblViewDetail.comparatorProperty());
@@ -862,6 +875,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
 
     private void reInitializeComboboxes() {
         try {
+            String lsSelected = "";
+            if (cmbDownPaymentRate.getSelectionModel().getSelectedItem() != null) {
+                lsSelected = cmbDownPaymentRate.getSelectionModel().getSelectedItem().toString();
+            }
+
             ArrayList<Double> laStandardDownpaymentRate = poController.loadStandardDownpaymentRates();
             comboboxlist.clear();
             for (int lnCtr2 = 0; lnCtr2 < laStandardDownpaymentRate.size(); lnCtr2++) {
@@ -871,6 +889,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             cmbDownPaymentRate.setItems(comboboxlist);
             if (!comboboxlist.isEmpty()) {
                 cmbDownPaymentRate.getSelectionModel().selectLast();
+            }
+
+            if (isCmbActive() && !lsSelected.isEmpty()) {
+                cmbDownPaymentRate.getSelectionModel().select(lsSelected);
+            } else {
             }
             JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbDownPaymentRate);
             JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbDownPaymentRate);
@@ -908,8 +931,10 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleFinancingPromo_Detail selected = (ModelVehicleFinancingPromo_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        pnDetail = Integer.parseInt(selected.getIndex01()) - 1;
+                        int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
+                        pnDetail = lnRow - 1;
                         loadRecordDetail();
+//                        moveNext(false, false);
                     }
                 }
             }
