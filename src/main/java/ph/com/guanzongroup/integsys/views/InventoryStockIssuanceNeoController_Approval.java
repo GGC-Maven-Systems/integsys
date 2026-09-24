@@ -848,12 +848,14 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
 
                             }
                         }
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
+                        //this blocked of codes is temporarily disabled as per maam she
+                        //09242026 disabled by teejei
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
                         poAppController.getDetail(pnTransactionDetail).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
