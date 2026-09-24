@@ -165,9 +165,9 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnExport" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Export">
+                              <Button fx:id="btnPrint" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="DOWNLOAD" size="20" />
+                                    <FontAwesomeIconView glyphName="PRINT" size="20" />
                                  </graphic>
                                  <effect>
                                     <Blend />
@@ -207,7 +207,7 @@
                                  <children>
                                     <VBox spacing="5.0">
                                        <children>
-                                          <AnchorPane fx:id="apDetail12" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -264,7 +264,7 @@
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="apDetail112" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apDetail" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -333,7 +333,7 @@
                                                          </font>
                                                       </Label>
                                                                         <TextField fx:id="tfAddOnsID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                        <TextField fx:id="tfDescription" alignment="CENTER_RIGHT" layoutX="154.0" layoutY="71.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
+                                                                        <TextField fx:id="tfDescription" layoutX="154.0" layoutY="71.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
                                                                         <TextField fx:id="tfBrand" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                                                         <TextField fx:id="tfModel" layoutX="334.0" layoutY="12.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                                         <TextField fx:id="tfVariant" layoutX="519.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="4" />
@@ -341,6 +341,12 @@
                                                                         <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="8" GridPane.halignment="LEFT" />
                                                                         <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
                                                                         <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="5" />
+                                                      <Label layoutX="485.0" layoutY="54.0" text="Apply to all" GridPane.columnIndex="6" GridPane.rowIndex="4">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <CheckBox fx:id="cbApplyToAll" layoutX="533.0" layoutY="16.0" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="8" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
                                                                     </children>
                                                 </GridPane>
                                              </children>
@@ -402,9 +408,7 @@
                                                 <TableColumn fx:id="tblVariant" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
                                                 <TableColumn fx:id="tblColor" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
                                                 <TableColumn fx:id="tblSRP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                <TableColumn fx:id="tblRustproof" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Rustproof" />
-                                                <TableColumn fx:id="tblPermashine" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Permashine" />
-                                                <TableColumn fx:id="tblCeramicCoating" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Ceramic Coating" />
+                                                <TableColumn fx:id="tblsamp" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="x" />
                                              </columns>
                                           </TableView>
                                        </children>
