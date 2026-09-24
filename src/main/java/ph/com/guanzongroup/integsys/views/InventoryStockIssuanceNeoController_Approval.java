@@ -68,6 +68,7 @@ import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
 import ph.com.guanzongroup.cas.cashflow.status.JournalStatus;
 import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -1170,7 +1171,7 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
         tfSearchDescription.setText(tblColDetailDescr.getCellData(tblIndex));
         tfBrand.setText(tblColDetailBrand.getCellData(tblIndex));
         tfVariant.setText(tblColDetailVariant.getCellData(tblIndex));
-        tfCost.setText(tblColDetailCost.getCellData(tblIndex));
+        tfCost.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(tblColDetailCost.getCellData(tblIndex), true));
         tfIssuedQty.setText(tblColDetailOrderQty.getCellData(tblIndex));
         tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
@@ -1437,12 +1438,13 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
             });
 
             tblColDetailCost.setCellValueFactory((loModel) -> {
-                try {
-                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
-                } catch (SQLException | GuanzonException e) {
-                    poLogWrapper.severe(psFormName, e.getMessage());
-                    return new SimpleStringProperty("");
-                }
+                return new SimpleStringProperty(String.valueOf(loModel.getValue().getInventoryCost()));
+//                try {
+//                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
+//                } catch (SQLException | GuanzonException e) {
+//                    poLogWrapper.severe(psFormName, e.getMessage());
+//                    return new SimpleStringProperty("");
+//                }
             });
 
             tblColDetailQOH.setCellValueFactory((loModel) -> {

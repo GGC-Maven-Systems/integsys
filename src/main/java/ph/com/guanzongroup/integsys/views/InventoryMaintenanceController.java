@@ -486,17 +486,14 @@ public class InventoryMaintenanceController implements Initializable, ScreenInte
                                         return;
                                     }
                                 }
-
-                                poJSON = poAppController.searchRecordInventoryMaster(
-                                        tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "",
-                                        true
-                                );
-
-                                if (!"success".equals(poJSON.get("result"))) {
-                                    ShowMessageFX.Warning((String) poJSON.get("message"), psFormName, null);
+                                if (!isJSONSuccess(poAppController.searchRecordInventoryMaster(tfSearchBarcode.getText() != null ? tfSearchBarcode.getText() : "", true),
+                                        "Initialize Search Barcode No! ")) {
                                     return;
                                 }
-
+                                if (poAppController.getEditMode() == EditMode.ADDNEW) {
+                                    ShowMessageFX.Warning("No Inventory Detected", "Inventory Master", "No inventory found in your Branch!!!Please "
+                                            + "Save Record to create. ");
+                                }
                                 getLoadedRecord();
                                 initButtonDisplay(poAppController.getEditMode());
                                 break;
