@@ -696,6 +696,27 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    //Implemented a temporary solution to allow the Inventory Cost to be updated during Item Transfer.
+                    // The system now validates the entered cost, prevents negative values,
+                    // and updates the selected item’s Inventory Cost in the transaction detail before refreshing the item details.
+                    // This addresses existing items in the database that do not yet have an SRP/Cost recorded in CAS.
+                    //THIS BLOCK OF CODE IS TEMPORARY AND WILL BE REMOVED ONCE THE SYSTEM IS FULLY IMPLEMENTED. as per maam she
+                    case "tfCost":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        double ldInventoryCost = Double.valueOf(lsValue);
+                        if (ldInventoryCost < 0) {
+                            ShowMessageFX.Warning("Inventory Cost cannot be a negative value.", psFormName,null);
+                            return;
+
+                        }
+                        poAppController.getDetail(pnTransactionDetail).setInventoryCost(ldInventoryCost);
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+                        break;
                     case "tfProjectCode":
                         if (lsValue.isEmpty()) {
                             return;

@@ -57,6 +57,7 @@ import org.guanzon.cas.inv.warehouse.status.InventoryStockIssuanceStatus;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Detail;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  * FXML Controller class
@@ -582,6 +583,22 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    case "tfCost":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        double ldInventoryCost = Double.valueOf(lsValue);
+                        if (ldInventoryCost < 0) {
+                            ShowMessageFX.Warning("Inventory Cost cannot be a negative value.", psFormName,null);
+                            return;
+
+                        }
+                        poAppController.getDetail(pnTransactionDetail).setInventoryCost(ldInventoryCost);
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+                        break;
                     case "tfProjectCode":
                         if (lsValue.isEmpty()) {
                             return;
@@ -589,7 +606,6 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
 
                         poAppController.getMaster().setProjectCode(lsValue);
                         loadTransactionMaster();
-
                         break;
                     case "tfOrderNo":
                         if (lsValue.isEmpty()) {
