@@ -54,7 +54,8 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleAddOn;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.ValidityPeriodStatus;
-import ph.com.guanzongroup.integsys.model.ModelVehicleFinancingPromo_Detail;
+import ph.com.guanzongroup.integsys.model.ModelVehicleAddOn_Detail;
+import ph.com.guanzongroup.integsys.model.ModelVehicleAddOn_List;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -81,10 +82,10 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
     boolean pbKeyPressed = false;
     LocalDate ValidFrom;
     
-    private ObservableList<ModelVehicleFinancingPromo_Detail> list_data = FXCollections.observableArrayList(); //ViewList
-    private ObservableList<ModelVehicleFinancingPromo_Detail> details_data = FXCollections.observableArrayList(); //Details
-    private FilteredList<ModelVehicleFinancingPromo_Detail> filteredDataDetail;
-    private FilteredList<ModelVehicleFinancingPromo_Detail> filteredDataList;
+    private ObservableList<ModelVehicleAddOn_List> list_data = FXCollections.observableArrayList(); //ViewList
+    private ObservableList<ModelVehicleAddOn_Detail> details_data = FXCollections.observableArrayList(); //Details
+    private FilteredList<ModelVehicleAddOn_Detail> filteredDataDetail;
+    private FilteredList<ModelVehicleAddOn_List> filteredDataList;
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     
@@ -112,7 +113,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
     @FXML
     private TableView tblViewDetail,tblViewList;
     @FXML
-    private TableColumn tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblsamp,tblDescription, tblAmount;
+    private TableColumn tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblsamp,tblListNo, tblDescription, tblAmount;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -131,6 +132,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
             clearTextFields();
             loadRecordDetail();
             loadTableDetail.reload();
+            
             pnEditMode = poController.getEditMode();
             poController.setWithUI(true);
             initButton(pnEditMode);
@@ -252,8 +254,9 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                             poJSON = poController.SaveTransaction();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                poController.AddDetail();
+                                poController.ReloadDetail();
                                 loadTableDetail.reload();
+                                
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
@@ -340,6 +343,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
 
                 loadRecordDetail();
                 loadTableDetail.reload();
+                
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -391,8 +395,8 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
             int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewList":
-                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataList.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
-                            : Integer.parseInt(filteredDataList.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
+                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataList.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex04())
+                            : Integer.parseInt(filteredDataList.get(JFXUtil.moveToNextRow(currentTable)).getIndex04());
                     if (!list_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -426,20 +430,36 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        if (pbEntered) {
-                            moveNext(false, true);
-                            pbEntered = false;
+                        if(pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE ){
+                            try {
+                                poController.populateDetail(pnDetail, cbApplyToAll.isSelected(), poController.Detail(pnDetail).getAmount());
+                            } catch (CloneNotSupportedException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
                         }
+//                        if (pbEntered) {
+//                            moveNext(false, true);
+//                            pbEntered = false;
+//                        }
                         break;
                     case "tfDescription":
                         poJSON = poController.Detail(pnDetail).setAddOnType(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        if (pbEntered) {
-                            moveNext(false, true);
-                            pbEntered = false;
+                        if(pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE ){
+                            try {
+                                poController.populateDetail(pnDetail, cbApplyToAll.isSelected(), poController.Detail(pnDetail).getAmount());
+                            } catch (CloneNotSupportedException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                            }
                         }
+//                        if (pbEntered) {
+//                            moveNext(false, true);
+//                            pbEntered = false;
+//                        }
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
@@ -490,10 +510,10 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
             tfAddOnsID.setText(poController.Detail(pnDetail).getAddOnId());
             tfDescription.setText(poController.Detail(pnDetail).getAddOnType());
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), false));
-            tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), false));
+            tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
             
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
-            cbApplyToAll.setSelected(poController.Detail(pnDetail).getRecordStatus());
+//            cbApplyToAll.setSelected(poController.Detail(pnDetail).getRecordStatus()); //TODO
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -512,12 +532,17 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                     }
+                    
+                    if(!checkedBox.isSelected()){
+                        poController.removeDetail(poController.Detail(pnDetail).getAddOnType());
+                    }
+                    
                     loadTableDetail.reload();
                     break;
                 case "cbApplyToAll": // this is the id
                     if(pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE ){
                         try {
-                            poController.populateDetail(poController.Detail(pnDetail).getAddOnType(), checkedBox.isSelected(), poController.Detail(pnDetail).getAmount());
+                            poController.populateDetail(pnDetail, checkedBox.isSelected(), poController.Detail(pnDetail).getAmount());
                         } catch (CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -640,8 +665,8 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
     public void moveNext(boolean isUp, boolean continueNext) {
         if (continueNext) {
             apDetail.requestFocus();
-            pnDetail = isUp ? Integer.parseInt(filteredDataList.get(JFXUtil.moveToPreviousRow(tblViewList)).getIndex09())
-                    : Integer.parseInt(filteredDataList.get(JFXUtil.moveToNextRow(tblViewList)).getIndex09());
+            pnDetail = isUp ? Integer.parseInt(filteredDataList.get(JFXUtil.moveToPreviousRow(tblViewList)).getIndex04())
+                    : Integer.parseInt(filteredDataList.get(JFXUtil.moveToNextRow(tblViewList)).getIndex04());
         }
         loadRecordDetail();
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -725,15 +750,15 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                                     continue;
                                 }
                                 details_data.add(
-                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
+                                        new ModelVehicleAddOn_Detail(String.valueOf(lnCtr + 1),
                                                 String.valueOf(poController.VariantDetail(lnCtr).ModelVariant().Model().Brand().getDescription()),
                                                 String.valueOf(poController.VariantDetail(lnCtr).ModelVariant().Model().getDescription()),
                                                 String.valueOf(poController.VariantDetail(lnCtr).ModelVariant().getDescription()),
                                                 String.valueOf(poController.VariantDetail(lnCtr).ModelVariant().Color().getDescription()),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.VariantDetail(lnCtr).getSRPAmount(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.VariantDetail(lnCtr).getAmount(), false)),
                                                 "",
-                                                String.valueOf(lnCtr), //fixed column (this is not visible)
+                                                "",
+                                                "",
                                                 "",//starts ammortization column dynamic
                                                 "",
                                                 "",
@@ -756,12 +781,12 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                                 }
                             }
                             //then re-add in here
-                            int lnCount = 7;
+                            int lnCount = 6;
                             for (lnCtr = 0; lnCtr < poController.getVariantDetailCount(); lnCtr++) {
                                 if (JFXUtil.isObjectEqualTo(poController.VariantDetail(lnCtr).ModelVariant().getDescription(), null, "")) {
                                     continue;
                                 }
-                                lnCount = 7;
+                                lnCount = 6;
                                 //well need to define the number of loJSONArray
                                 for (int lnMAcount = 0; lnMAcount < lnDynamicColumnCount; lnMAcount++) {
                                     lnCount += 1;
@@ -784,7 +809,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
 //                                tblViewDetail.getFocusModel().focus(lnTempRow);
 //                                loadRecordDetail();
 //                            }
-                            loadRecordMaster();
+                            loadTableList.reload();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -803,23 +828,25 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                         int lnCtr;
                         list_data.clear();
                         try {
-                            if (pnEditMode != EditMode.UNKNOWN) {
-                                reInitializeColumns();
-                            }
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadDetail();
                             }
 //                            JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
+                            int lnRow = 1;
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
-                                    continue;
-                                }
-                                if (!psVariantId.equals(poController.Detail(lnCtr).getVariantId())) {
-                                    continue;
-                                }
-                                list_data.add(
-                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
-                                                String.valueOf(poController.Detail(lnCtr).getAddOnType()),
+//                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
+//                                    continue;
+//                                }
+                                if(poController.Detail(lnCtr).getVariantId() != null && !"".equals(poController.Detail(lnCtr).getVariantId())){
+                                    if (!psVariantId.equals(poController.Detail(lnCtr).getVariantId())) {
+                                        continue;
+                                    }
+                                } 
+                                String lsType = poController.Detail(lnCtr).getAddOnType();
+                                if(lsType == null) { lsType = "";}
+                               list_data.add(
+                                        new ModelVehicleAddOn_List(String.valueOf(lnRow),
+                                                String.valueOf(lsType),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false)),
                                                 String.valueOf(lnCtr), //fixed column (this is not visible)
                                                 "",
@@ -834,25 +861,31 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                                                 "",
                                                 ""
                                         ));
+                                lnRow++;
                             }
-                            int lnTempRow = getDetailRowFilter(filteredDataList, pnDetail, 4);
-                            if (pnDetail < 0 || pnDetail
-                                    >= list_data.size()) {
-                                if (!list_data.isEmpty()) {
+//                            int lnTempRow = getDetailRowFilter(filteredDataList, pnDetail, 4);
+//                            if (pnDetail < 0 || pnDetail
+//                                    >= list_data.size()) {
+//                                if (!list_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     tblViewList.getSelectionModel().select(0);
                                     tblViewList.getFocusModel().focus(0);
-                                    pnDetail = tblViewList.getSelectionModel().getSelectedIndex();
+//                                    pnDetail = tblViewList.getSelectionModel().getSelectedIndex();
+                                    ModelVehicleAddOn_List selected = (ModelVehicleAddOn_List) tblViewList.getSelectionModel().getSelectedItem();
+                                    if (selected != null) {
+                                        pnDetail = Integer.parseInt(filteredDataList.get(tblViewList.getSelectionModel().getSelectedIndex()).getIndex04());
+                                    }
+                                    
                                     loadRecordDetail();
-                                }
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewList.getSelectionModel().select(lnTempRow);
-                                tblViewList.getFocusModel().focus(lnTempRow);
-                                loadRecordDetail();
-                            }
+//                                }
+//                            } else {
+//                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+//                                tblViewList.getSelectionModel().select(pnDetail);
+//                                tblViewList.getFocusModel().focus(pnDetail);
+//                                loadRecordDetail();
+//                            }
                             loadRecordMaster();
-                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                        } catch (CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
@@ -885,19 +918,19 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
         return -1; // not found
     }
 
-    private void removeChildColumns(TableView<?> tableView, TableColumn<?, ?> parentColumn) {
-        if (parentColumn == null) {
+    private void removeChildColumns(TableView<?> tableView) {
+        if (tableView == null) {
             return;
         }
 
-        if (parentColumn.getColumns().size() > 1) {
-            parentColumn.getColumns().remove(1, parentColumn.getColumns().size());
+        if (tableView.getColumns().size() > 6) {
+            tableView.getColumns().remove(6, tableView.getColumns().size());
         }
         tableView.refresh();
     }
 
     private void reInitializeColumns() {
-        //            removeChildColumns(tblViewDetail, tblMonthlyAmortization);
+        removeChildColumns(tblViewDetail);
         ArrayList<String> loArray = poController.loadUniqueAddOnType();
         addChildColumns(tblViewDetail, loArray);
         Platform.runLater(() -> {
@@ -910,7 +943,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
         filteredDataDetail = new FilteredList<>(details_data, b -> true);
-        SortedList<ModelVehicleFinancingPromo_Detail> sortedData = new SortedList<>(filteredDataDetail);
+        SortedList<ModelVehicleAddOn_Detail> sortedData = new SortedList<>(filteredDataDetail);
         sortedData.comparatorProperty().bind(tblViewDetail.comparatorProperty());
         tblViewDetail.setItems(sortedData);
         tblViewDetail.widthProperty().addListener((obs, oldWidth, newWidth) -> {
@@ -923,14 +956,15 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
         });
         
         //ViewList
+        JFXUtil.setColumnCenter(tblListNo);
         JFXUtil.setColumnLeft(tblDescription);
         JFXUtil.setColumnRight(tblAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewList);
         tblViewList.setItems(list_data);
         filteredDataList = new FilteredList<>(list_data, b -> true);
-        SortedList<ModelVehicleFinancingPromo_Detail> sortedData1 = new SortedList<>(filteredDataList);
-        sortedData1.comparatorProperty().bind(tblViewList.comparatorProperty());
-        tblViewList.setItems(sortedData);
+        SortedList<ModelVehicleAddOn_List> sortedList = new SortedList<>(filteredDataList);
+        sortedList.comparatorProperty().bind(tblViewList.comparatorProperty());
+        tblViewList.setItems(sortedList);
         tblViewList.widthProperty().addListener((obs, oldWidth, newWidth) -> {
             TableHeaderRow header = (TableHeaderRow) tblViewList.lookup("TableHeaderRow");
             if (header != null) {
@@ -941,7 +975,7 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
         });
         
     }
-
+    
     public static void disableTableColumnReordering(final TableView<?> tableView) {
         Platform.runLater(() -> {
             TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
@@ -961,16 +995,17 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
     }
 
     public void initDetailsGrid() {
-        JFXUtil.setColumnCenter(tblNo);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
+        JFXUtil.setColumnCenter(tblNo,tblListNo);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor,tblDescription);
         JFXUtil.setColumnRight(tblAmount, tblSRP);
     }
-
+    
     public void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail);
         loadRecordDetail();
         loadTableDetail.reload();
+        
     }
 
     public void loadRecordSearch() {
@@ -986,9 +1021,9 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelVehicleFinancingPromo_Detail selected = (ModelVehicleFinancingPromo_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                    ModelVehicleAddOn_Detail selected = (ModelVehicleAddOn_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01()) - 1;
 //                        pnDetail = lnRow;
                         if (lnRow < 0 || lnRow > poController.getVariantDetailCount()- 1) {
                             return;
@@ -1000,22 +1035,22 @@ public class VehicleAddOnsPromo_EntryController  implements Initializable, Scree
                 }
             }
         });
-        JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleFinancingPromo_Detail) item).getIndex01(), highlightedRowsMain);
+        JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleAddOn_Detail) item).getIndex01(), highlightedRowsMain);
         
         tblViewList.setOnMouseClicked(event -> {
             if (list_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelVehicleFinancingPromo_Detail selected = (ModelVehicleFinancingPromo_Detail) tblViewList.getSelectionModel().getSelectedItem();
+                    ModelVehicleAddOn_List selected = (ModelVehicleAddOn_List) tblViewList.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(filteredDataList.get(tblViewList.getSelectionModel().getSelectedIndex()).getIndex04());
+                        int lnRow = Integer.parseInt(list_data.get(tblViewList.getSelectionModel().getSelectedIndex()).getIndex04());
                         pnDetail = lnRow;
                         loadRecordDetail();
-                        moveNext(false, false);
+//                        moveNext(false, false);
                     }
                 }
             }
         });
-//        JFXUtil.applyRowHighlighting(tblViewList, item -> ((ModelVehicleFinancingPromo_Detail) item).getIndex01(), highlightedRowsMain);
+//        JFXUtil.applyRowHighlighting(tblViewList, item -> ((ModelVehicleAddOn_Detail) item).getIndex01(), highlightedRowsMain);
     }
 
     private void initButton(int fnValue) {
