@@ -7,6 +7,8 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -98,13 +100,13 @@
                                 <Insets left="5.0" right="5.0" />
                             </BorderPane.margin>
                             <children>
-                                <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-border-color: FF8201; -fx-border-radius: 5;" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                <VBox alignment="TOP_CENTER" spacing="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                     <children>
-                                        <AnchorPane fx:id="apMaster">
+                                        <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
                                             <children>
-                                    <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                        <columnConstraints>
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                           <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
@@ -119,24 +121,20 @@
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
-                                       <Label text="Add On ID">
+                                       <Label text="Add On Type ID">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
                                           </Label>
-                                                        <Label layoutX="104.0" layoutY="45.0" text="Add On Type" GridPane.rowIndex="2">
+                                                        <Label layoutX="104.0" layoutY="45.0" text="Add On Type Name" GridPane.rowIndex="2">
                                              <font>
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
                                                         <TextField fx:id="tfStandardRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
-                                                        <TextField fx:id="tfDuration" alignment="BOTTOM_LEFT" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="236.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
                                           <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                              <children>
                                                 <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -146,44 +144,47 @@
                                                 </Label>
                                              </children>
                                           </AnchorPane>
-                                          <Label text="Add On Amount" GridPane.rowIndex="3">
+                                          <Label text="Active" GridPane.rowIndex="4">
                                              <font>
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="tfDuration1" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                          <CheckBox mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                          <Label text="Active" GridPane.rowIndex="7">
+                                          <CheckBox mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                          <Label text="Entry By" GridPane.rowIndex="3">
                                              <font>
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                          <Label text="Validity" GridPane.rowIndex="4">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField fx:id="tfDuration2" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="235.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                          <Label text="SRP Amount" GridPane.rowIndex="5">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <Label text="Variant" GridPane.rowIndex="6">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField fx:id="tfDuration21" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                          <TextField fx:id="tfDuration211" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                          <TextField fx:id="tfDuration1" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                     </children>
                                     </GridPane>
                                             </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
                                         </AnchorPane>
+                              <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: FF8201;">
+                                 <children>
+                                    <TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <columns>
+                                        <TableColumn maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="No" />
+                                        <TableColumn maxWidth="280.0" minWidth="280.0" prefWidth="280.0" text="Type Name" />
+                                          <TableColumn maxWidth="75.0" minWidth="75.0" prefWidth="75.0" text="Sort Order" />
+                                          <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Status" />
+                                      </columns>
+                                    </TableView>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </AnchorPane>
                                     </children>
-                                    <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                    </padding>
                                 </VBox>
                             </children>
                         </AnchorPane>
@@ -206,7 +207,7 @@
                                                         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                     </rowConstraints>
                                        <children>
-                                          <Label fx:id="lblParameterLabel" styleClass="label-header" text="Add Ons" textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                                          <Label fx:id="lblParameterLabel" styleClass="label-header" text="Add Ons Type" textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
