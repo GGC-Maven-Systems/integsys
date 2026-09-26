@@ -1,0 +1,63 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Sep 21, 2026, 3:16:45 PM
+    Author     : Maynard
+*/
+
+.chip-container {
+    -fx-background-color: #FFE6B9;
+    -fx-background-radius: 15;
+    -fx-border-color: #FF8201;
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.chip-container:hover {
+    -fx-background-color: #FFDFA0;
+    -fx-border-color: #E67300;
+}
+
+.chip-container.chip-selected {
+    -fx-background-color: #FF8201;
+    -fx-border-color: #CC6800;
+}
+
+.chip-container.chip-selected .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.chip-remove-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50%;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-max-width: 20;
+    -fx-max-height: 20;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.chip-remove-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.15);
+}
+
+.chip-remove-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+}
+
+.table-row-cell.row-model-exception {
+    -fx-background-color: #FFF3E0;
+}
+
+.table-row-cell.row-model-exception:selected {
+    -fx-background-color: #FFCC80;
+}
+
+.table-row-cell.row-model-exception .table-cell {
+    -fx-text-fill: #8B4000;
+}
