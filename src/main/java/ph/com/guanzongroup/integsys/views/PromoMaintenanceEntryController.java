@@ -1474,7 +1474,8 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         boolean lbIsApproved = lbHasTransaction
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
         String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
-        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus);
+        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus)
+                || "5".equals(lsStatus);;
 
         // Always visible
         initButtonControls(true, "btnClose");

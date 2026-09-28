@@ -62,6 +62,7 @@ import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.constant.Model_Shop_Type;
 import ph.com.guanzongroup.cas.sales.mcpromo.MCPromoSales;
@@ -661,6 +662,9 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
                         return;
                     }
                     if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
+                        if (!resolveConflicts()) {
+                            return;
+                        }
                         if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
                             return;
                         }
@@ -1624,7 +1628,8 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         boolean lbIsApproved = lbHasTransaction
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
         String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
-        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus);
+        boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus)
+                || "5".equals(lsStatus);
 
         // Always visible
         initButtonControls(true, "btnClose");
@@ -2264,12 +2269,34 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         tblViewGiveAway.refresh();
     }
 
+    private void reloadTableMasterList() {
+        List<Model_Sales_Promotion_Master> rawMaster = poAppController.getMasterList();
+        getListTable().setItems(paMasterList);
+        paMasterList.setAll(rawMaster);
+
+        // Restore or select last row
+        int indexToSelect = (pnMasterList >= 1 && pnMasterList < paMasterList.size())
+                ? pnMasterList - 1
+                : paMasterList.size() - 1;
+
+        tblViewMaster.getSelectionModel().select(indexToSelect);
+
+        pnMasterList = tblViewMaster.getSelectionModel().getSelectedIndex() + 1; // Not focusedIndex
+        if (pnMasterList <= 0) {
+            if (paMasterList.size() > 0) {
+                pnMasterList = 1;
+            }
+        }
+        tblViewMaster.refresh();
+    }
+
     private void getLoadedTransaction()
             throws SQLException, GuanzonException, CloneNotSupportedException {
 
         loadTransactionMaster();
         reloadTableModel();
         reloadTableGiveAway();
+        reloadTableMasterList();
 
         if (pnRow > 0 && pnRow <= paCombined.size()) {
             loadSelectedTransactionModel(pnRow);
@@ -3280,5 +3307,30 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         pnEditMode = poAppController.getEditMode();
 
         initButtonDisplay(pnEditMode);
+    }
+
+    private boolean resolveConflicts() throws SQLException, GuanzonException, CloneNotSupportedException {
+        JSONObject loConflict = poAppController.checkConflictOverlapping();
+        if (!"error".equals(loConflict.get("result"))) {
+            return true; // no conflict
+        }
+
+        JSONArray laConflicts = (JSONArray) loConflict.get("conflicts");
+        if (laConflicts == null || laConflicts.isEmpty()) {
+            // real error (e.g. missing start date), not a conflict
+            ShowMessageFX.Warning(null, psFormName, (String) loConflict.get("message"));
+            return false;
+        }
+
+        if (!ShowMessageFX.YesNo(null, psFormName,
+                loConflict.get("message") + "\n\nDo you want to REPLACE the conflicting promo(s) with this one?")) {
+            return false;
+        }
+
+        String[] laIDs = new String[laConflicts.size()];
+        for (int i = 0; i < laConflicts.size(); i++) {
+            laIDs[i] = (String) ((JSONObject) laConflicts.get(i)).get("promoID");
+        }
+        return isJSONSuccess(poAppController.ReplaceTransaction(laIDs), "Replace Transaction");
     }
 }
