@@ -5,12 +5,13 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
@@ -21,7 +22,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,6 +42,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.input.KeyCode;
 import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.F3;
 import static javafx.scene.input.KeyCode.TAB;
@@ -59,6 +60,7 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.constant.Model_Shop_Type;
@@ -80,7 +82,7 @@ import ph.com.guanzongroup.integsys.views.child.APListController;
 import ph.com.guanzongroup.integsys.views.child.APStatusController;
 import ph.com.guanzongroup.integsys.views.unloadForm;
 
-public class PromoMaintenanceEntryController implements Initializable, ScreenInterface {
+public class PromoMaintenanceListController implements Initializable, ScreenInterface {
 
     private GRiderCAS poApp;
     private LogWrapper poLogWrapper;
@@ -96,12 +98,27 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
     private ObservableList<Model_Sales_Promotion_Model_Exception> paModelException;
     private ObservableList<Model_Sales_Promotion_GiveAway_Item> paGiveAway;
     private ObservableList<Model> paCombined;
-    private int pnEditMode, pnRow, pnGiveAway, pnBrand, pnModel, pnModelException;
+    private int pnEditMode, pnRow, pnGiveAway, pnBrand, pnModel, pnModelException, pnMasterList;
 
     private ToggleGroup tgInsurance;
     private ToggleGroup tgRegistration;
     private ToggleGroup tgIncentive;
     private boolean pbSuppressToggleListener = false;
+    private static final String[] SHOP_TYPE_LABELS = {"3S Shop", "Multi Brand", "Big Bike", "Other Shop"};
+    private static final String[] SHOP_TYPE_CODES = {"0", "1", "2", "x"};   // "x" = blank type, as stored by searchPromotionByShop
+
+    private ObservableList<Model_Sales_Promotion_Master> paMasterList;
+    private final Map<String, String> poUserCache = new HashMap<>();
+
+    @SuppressWarnings("unchecked")
+    private TableView<Model_Sales_Promotion_Master> getListTable() {
+        return (TableView<Model_Sales_Promotion_Master>) tblViewMaster;
+    }
+
+    @SuppressWarnings("unchecked")
+    private ComboBox<String> asStringCombo(ComboBox<?> foCombo) {
+        return (ComboBox<String>) foCombo;
+    }
 
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apShopType,
@@ -111,11 +128,11 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
     private TextField tfSearchPromoID, tfSearchDescription;
 
     @FXML
-    private Label lblSource, lblStatus;
+    private Label lblSource, lblStatus, lblStatusList;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnPreview,
-            btnVoid, btnSave, btnCancel, btnSaveNew, btnDuplicate,
-            btnClose, btnSearch;
+    private Button btnBrowse, btnUpdate, btnPreview,
+            btnConfirm, btnVoid, btnSave, btnCancel, btnSaveNew, btnDuplicate,
+            btnRetrieve, btnClose, btnSearch;
 
     @FXML
     private TextField tfPromo, tfSRPFrom, tfSRPThru, tfSupplier, tfReferenceNo, tfSubject, tfRemarks;
@@ -133,6 +150,11 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
 
     @FXML
     private Tab tabModel, tabGiveAway;
+
+    @FXML
+    private TabPane tabPaneMain;
+    @FXML
+    private Tab tabEntry, tabList;
 
     @FXML
     private TableView<Model> tblViewModel;
@@ -158,6 +180,34 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
 
     @FXML
     private RadioButton rbInsurance1, rbRegistration1, rbInsurance0, rbRegistration0, rbIncentive1, rbIncentive0;
+
+    @FXML
+    private TextField tfFilterBrand, tfFilterModel, tfFilterArea, tfFilterProvince,
+            tfFilterClient, tfFilterSRPFrom, tfFilterSRPThru, tfPromoList,
+            tfReferList, tfSubjectList, tfRemarksList;
+
+    @FXML
+    private ComboBox<?> cmbFilterTranType, cmbFilterStatus, cmbFilterPromoType, cmbFilterPromoSource, cmbFilterShopType;
+
+    @FXML
+    private DatePicker dpFilterStart, dpFilterEnd, dpDateFromList, dpDateThruList, dpTransactionDateList;
+
+    @FXML
+    private AnchorPane apShopType1;
+
+    @FXML
+    private HBox hbShopTypeList;
+
+    @FXML
+    private ComboBox<?> cbPromoTypeList;
+
+    @FXML
+    private TableView<Model_Sales_Promotion_Master> tblViewMaster;
+
+    @FXML
+    private TableColumn<Model_Sales_Promotion_Master, String> tblColListNo, tblColListReferNo, tblColListSubject, tblColListDate,
+            tblColListPromoType, tblColListTranType, tblColListShopType, tblColListSRP, tblColListStart, tblColListEnd,
+            tblColListPreparedBy, tblColListStatus;
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -207,7 +257,6 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                         + "\nCompany :" + psCompanyID
                         + "\nCategory:" + psCategoryID);
 
-                btnNew.fire();
             });
             initializeTableGiveAway();
             initializeTableModel();
@@ -216,6 +265,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
             clearPromoDetail();
             clearPromoGiveAway();
             initRadioGroups();
+            initializeListTab();
             pnBrand = -1;
             pnModel = -1;
             pnModelException = -1;
@@ -232,7 +282,93 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
     }
 
     @FXML
-    void ontblModelClicked(MouseEvent e) {
+    void ontblMasterKeyPressed(KeyEvent e) {
+        if (e.getCode() != KeyCode.UP
+                && e.getCode() != KeyCode.DOWN
+                && e.getCode() != KeyCode.ENTER) {
+            return;
+        }
+
+        try {
+            int lnSelectedIndex = tblViewMaster.getSelectionModel().getSelectedIndex();
+
+            if (lnSelectedIndex < 0) {
+                return;
+            }
+
+            // UP / DOWN = load selected transaction
+            if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
+                openSelectedMasterTransaction();
+                e.consume();
+            }
+
+            // ENTER = load and go to entry tab
+            if (e.getCode() == KeyCode.ENTER) {
+                openSelectedMasterTransaction();
+
+                tabPaneMain.getSelectionModel().select(tabEntry);
+                e.consume();
+            }
+
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(
+                    Level.SEVERE,
+                    MiscUtil.getException(ex),
+                    ex
+            );
+
+            ShowMessageFX.Error(
+                    MiscUtil.getException(ex),
+                    psFormName,
+                    null
+            );
+
+            poLogWrapper.severe(
+                    psFormName + " :" + ex.getMessage()
+            );
+        }
+    }
+
+    @FXML
+    void ontblMasterClicked(MouseEvent e) {
+        pnMasterList = tblViewMaster.getSelectionModel().getSelectedIndex() + 1;
+        if (pnMasterList <= 0) {
+            return;
+        }
+        try {
+            Model_Sales_Promotion_Master loSelected = tblViewMaster.getSelectionModel().getSelectedItem();
+            if (loSelected == null) {
+                return;
+            }
+
+            int lnMode = poAppController.getEditMode();
+            if ((lnMode == EditMode.ADDNEW || lnMode == EditMode.UPDATE)
+                    && !ShowMessageFX.OkayCancel(null, psFormName,
+                            "You have an unsaved transaction. Disregard changes and open the selected promo?")) {
+                return;
+            }
+
+            if (!isJSONSuccess(poAppController.OpenTransaction(loSelected.getPromoID()),
+                    "Initialize Open Transaction")) {
+                return;
+            }
+            getLoadedTransaction();
+            pnEditMode = poAppController.getEditMode();
+            initButtonDisplay(pnEditMode);
+
+            if (e.getClickCount() == 2) {
+                tabPaneMain.getSelectionModel().select(tabEntry);
+            }
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    @FXML
+    void ontblModelClicked(MouseEvent e
+    ) {
         pnRow = tblViewModel.getSelectionModel().getSelectedIndex() + 1;
         if (pnRow < 0) {
             return;
@@ -331,7 +467,8 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
     }
 
     @FXML
-    void ontblGiveAwayClicked(MouseEvent e) {
+    void ontblGiveAwayClicked(MouseEvent e
+    ) {
         try {
             pnGiveAway = tblViewGiveAway.getSelectionModel().getSelectedIndex() + 1;
             if (pnGiveAway <= 0) {
@@ -349,11 +486,16 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
     }
 
     @FXML
-    private void cmdButton_Click(ActionEvent event) {
+    private void cmdButton_Click(ActionEvent event
+    ) {
         try {
             //get button id
             String btnID = ((Button) event.getSource()).getId();
             switch (btnID) {
+
+                case "btnRetrieve":
+                    loadMasterList();
+                    break;
                 case "btnPreview":
                     if (tfPromo.getText() == null || tfPromo.getText().isEmpty()) {
                         ShowMessageFX.Information("Please load transaction before proceeding..", psFormName, null);
@@ -365,7 +507,6 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     }
                     break;
                 case "btnSearch":
-
                     if (lastFocusedControl == null) {
                         if (tfBrand.isDisable()) {
                             if (!isJSONSuccess(poAppController.searchPromotionByBrand(-1, (tfBrand.getText() == null ? "" : tfBrand.getText()), false),
@@ -459,10 +600,11 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                                 "Initialize Browse Transaction")) {
                             return;
                         }
+
                         getLoadedTransaction();
                         initButtonDisplay(poAppController.getEditMode());
+                        refreshEntryTabState();
                         break;
-
                     }
                     switch (lastFocusedControl.getId()) {
                         case "tfSearchPromoID":
@@ -498,15 +640,6 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     }
                     break;
 
-                case "btnNew":
-                    if (!isJSONSuccess(poAppController.newTransaction(), "Initialize New Transaction")) {
-                        return;
-                    }
-//                    clearAllInputs();
-                    getLoadedTransaction();
-                    pnEditMode = poAppController.getEditMode();
-                    break;
-
                 case "btnUpdate":
                     if (poAppController.getMaster().getPromoID() == null || poAppController.getMaster().getPromoID().isEmpty()) {
                         ShowMessageFX.Information("Please load transaction before proceeding..", "Promo Maintenance", "");
@@ -518,9 +651,29 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     }
 
                     getLoadedTransaction();
+
+                    tabPaneMain.getSelectionModel().select(tabEntry);
                     pnEditMode = poAppController.getEditMode();
                     break;
-
+                case "btnConfirm":
+                    if (tfPromo.getText().isEmpty()) {
+                        ShowMessageFX.Information("Please load transaction before proceeding..", "Promo Maintenance", "");
+                        return;
+                    }
+                    if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
+                        if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
+                            return;
+                        }
+                        if (ShowMessageFX.YesNo(null, psFormName, "Do you want to open preview of this Promo?") == true) {
+                            if (!isJSONSuccess(poAppController.printRecord(), "Initialize Print Preview")) {
+                                return;
+                            }
+                        }
+                    }
+                    reloadTableModel();
+                    getLoadedTransaction();
+                    pnEditMode = poAppController.getEditMode();
+                    break;
                 case "btnSave":
                     if (tfPromo.getText().isEmpty()) {
                         ShowMessageFX.Information("Please load transaction before proceeding..", "Promo Maintenance", "");
@@ -585,22 +738,6 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                         refreshChipBoxes();
                         pnEditMode = poAppController.getEditMode();
                         return;
-                    }
-                    break;
-                case "btnHistory":
-                    if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
-                        ShowMessageFX.Warning("No transaction status history to load!", psFormName, null);
-                        return;
-                    }
-
-                    try {
-                        poAppController.ShowStatusHistory();
-                    } catch (NullPointerException npe) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                        ShowMessageFX.Error("No transaction status history to load!", psFormName, null);
-                    } catch (Exception ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                        ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
                     }
                     break;
 
@@ -825,7 +962,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                                             psFormName, null
                                     );
                                     tfSRPFrom.setText("0.0");
-                                    poAppController.getMaster().setAmountFrom(0.0);
+                                    poAppController.getMaster().setAmountTo(0.0);
                                     return;
                                 }
 
@@ -835,7 +972,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                                             psFormName, null
                                     );
                                     tfSRPFrom.setText("0.0");
-                                    poAppController.getMaster().setAmountFrom(0.0);
+                                    poAppController.getMaster().setAmountTo(0.0);
                                     return;
                                 }
 
@@ -1150,7 +1287,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                                 initButtonDisplay(poAppController.getEditMode());
                                 break;
                             case "tfSearchDescription":
-                                if (!isJSONSuccess(poAppController.searchTransaction(lsValue, true, true),
+                                if (!isJSONSuccess(poAppController.searchTransaction(lsValue, false, true),
                                         "Initialize Search Transaction! ")) {
                                     return;
                                 }
@@ -1276,6 +1413,18 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
             if (tfPromo.getText() == null || tfPromo.getText().trim().isEmpty()) {
                 lblStatus.setText("UNKNOWN");
             }
+
+            //LIST 
+            tfPromoList.setText(poAppController.getMaster().getPromoID());
+            dpTransactionDateList.setValue(ParseDate(poAppController.getMaster().getDate()));
+
+            dpDateFromList.setValue(ParseDate(poAppController.getMaster().getFromDate()));
+            dpDateThruList.setValue(ParseDate(poAppController.getMaster().getThruDate()));
+            cbPromoTypeList.getSelectionModel().select(Integer.parseInt(poAppController.getMaster().getTransactionType()));
+            tfReferList.setText(String.valueOf(poAppController.getMaster().getReferNo()));
+            tfSubjectList.setText(poAppController.getMaster().getPromoDescription());
+            tfRemarksList.setText(poAppController.getMaster().getRemarks());
+            lblStatusList.setText(lblStatus.getText());
         } catch (SQLException | GuanzonException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(e), e);
             ShowMessageFX.Error(MiscUtil.getException(e), psFormName, null);
@@ -1431,6 +1580,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         }
         pnEditMode = poAppController.getEditMode();
         loadComboBoxList();
+        loadFilterComboBoxes();
 
         initButtonDisplay(poAppController.getEditMode());
         if (tfPromo.getText().trim().isEmpty()) {
@@ -1482,15 +1632,14 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         // Editing mode buttons
         initButtonControls(false, "btnSaveNew", "btnSearch");
         initButtonControls(lbEditing, "btnSearch", "btnSave", "btnCancel");
-
         if (fnEditMode == EditMode.UPDATE) {
             initButtonControls(fnEditMode == EditMode.UPDATE, "btnSearch", "btnSaveNew", "btnSave", "btnCancel");
         }
-        initButtonControls(!lbEditing, "btnBrowse", "btnNew");
+        initButtonControls(!lbEditing, "btnBrowse");
 
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnPreview", "btnDuplicate");
-        initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnConfirm", "btnUpdate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate", "btnVoid");
 
         // Disable panes during editing
@@ -1547,6 +1696,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         if (paCombined == null) {
             paCombined = FXCollections.observableArrayList();
         }
+        paCombined.clear();
         paCombined.addAll(paBrand);
         paCombined.addAll(paModel);
         paCombined.addAll(paModelException);
@@ -1574,9 +1724,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = loPromoModel.Brand().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if (loModel instanceof Model_Sales_Promotion_Model) {
                 Model_Sales_Promotion_Model loPromoModel = (Model_Sales_Promotion_Model) loModel;
@@ -1584,9 +1732,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = loPromoModel.Model().Brand().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if (loModel instanceof Model_Sales_Promotion_Model_Exception) {
                 Model_Sales_Promotion_Model_Exception loException = (Model_Sales_Promotion_Model_Exception) loModel;
@@ -1594,9 +1740,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = loException.Model().Brand().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -1613,9 +1757,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = "All " + loPromoBrand.Brand().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if (loModel instanceof Model_Sales_Promotion_Model) {
                 Model_Sales_Promotion_Model loPromoModel = (Model_Sales_Promotion_Model) loModel;
@@ -1623,9 +1765,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = loPromoModel.Model().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if (loModel instanceof Model_Sales_Promotion_Model_Exception) {
                 Model_Sales_Promotion_Model_Exception loException = (Model_Sales_Promotion_Model_Exception) loModel;
@@ -1633,9 +1773,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     value = loException.Model().getDescription();
                 } catch (SQLException | GuanzonException ex) {
                     value = "";
-                    Logger
-                            .getLogger(PromoMaintenanceEntryController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PromoMaintenanceListController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -2109,7 +2247,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         paGiveAway.setAll(rawGiveAway);
 
         // Restore or select last row
-        int indexToSelect = (pnGiveAway >= 1 && pnGiveAway <= paGiveAway.size())
+        int indexToSelect = (pnGiveAway >= 1 && pnGiveAway < paGiveAway.size())
                 ? pnGiveAway - 1
                 : paGiveAway.size() - 1;
 
@@ -2126,12 +2264,25 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         tblViewGiveAway.refresh();
     }
 
-    private void getLoadedTransaction() throws SQLException, GuanzonException, CloneNotSupportedException {
+    private void getLoadedTransaction()
+            throws SQLException, GuanzonException, CloneNotSupportedException {
+
         loadTransactionMaster();
         reloadTableModel();
         reloadTableGiveAway();
-        loadSelectedTransactionModel(pnRow);
-        loadSelectedTransactionGiveAway(pnGiveAway);
+
+        if (pnRow > 0 && pnRow <= paCombined.size()) {
+            loadSelectedTransactionModel(pnRow);
+        } else {
+            clearPromoDetail();
+        }
+
+        if (pnGiveAway > 0 && pnGiveAway <= paGiveAway.size()) {
+            loadSelectedTransactionGiveAway(pnGiveAway);
+        } else {
+            clearPromoGiveAway();
+        }
+
         refreshChipBoxes();
     }
 
@@ -2413,6 +2564,19 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         hbModel.setDisable(paBrand.size() > 0);
         hbBrand.setDisable(paModel.size() > 0);
         hbModelException.setDisable(paModel.size() <= 0 && paBrand.size() <= 0);
+
+        hbShopTypeList.setDisable(true);
+        renderChips(
+                hbShopTypeList,
+                paShopType,
+                Model_Shop_Type::getDescription,
+                (p) -> {
+                    JSONObject loResult = poAppController.removeSalesPromotionByShop(p.getEntryNo());
+                    if (!isJSONSuccess(loResult, "Remove Shop Type")) {
+                        return;
+                    }
+                }
+        );
 
         renderChips(
                 hbShopType,
@@ -2740,4 +2904,381 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         }
     }
 
+    // =====================================================
+    // TAB LIST 
+    // =====================================================
+    private void initializeListTab() {
+        paMasterList = FXCollections.observableArrayList();
+        getListTable().setItems(paMasterList);
+
+        // preview panel is read-only
+        tfPromoList.setEditable(false);
+        tfReferList.setEditable(false);
+        tfSubjectList.setEditable(false);
+        tfRemarksList.setEditable(false);
+        dpDateFromList.setDisable(true);
+        dpDateThruList.setDisable(true);
+        dpTransactionDateList.setDisable(true);
+        cbPromoTypeList.setDisable(true);
+
+        String lsRight = "-fx-alignment: CENTER-RIGHT; -fx-padding: 0 5 0 0;";
+        tblColListSRP.setStyle(lsRight);
+        tblColListNo.setStyle("-fx-alignment: CENTER;");
+
+        tblColListNo.setCellValueFactory((c) -> new SimpleStringProperty(
+                String.valueOf(getListTable().getItems().indexOf(c.getValue()) + 1)));
+        tblColListReferNo.setCellValueFactory((c) -> new SimpleStringProperty(nvl(c.getValue().getReferNo())));
+        tblColListSubject.setCellValueFactory((c) -> new SimpleStringProperty(nvl(c.getValue().getPromoDescription())));
+        tblColListDate.setCellValueFactory((c) -> new SimpleStringProperty(fmtDate(c.getValue().getDate())));
+        tblColListPromoType.setCellValueFactory((c) -> new SimpleStringProperty(
+                lookup(PromoType.PromoType, c.getValue().getPromoType())));
+        tblColListTranType.setCellValueFactory((c) -> new SimpleStringProperty(
+                lookup(TransactionType.TransactionType, c.getValue().getTransactionType())));
+        tblColListShopType.setCellValueFactory((c) -> new SimpleStringProperty(shopTypeText(c.getValue().getShopType())));
+        tblColListSRP.setCellValueFactory((c) -> new SimpleStringProperty(
+                CommonUtils.NumberFormat(c.getValue().getAmountFrom(), "###,###,##0.00") + " - "
+                + CommonUtils.NumberFormat(c.getValue().getAmountTo(), "###,###,##0.00")));
+        tblColListStart.setCellValueFactory((c) -> new SimpleStringProperty(fmtDate(c.getValue().getFromDate())));
+        tblColListEnd.setCellValueFactory((c) -> new SimpleStringProperty(fmtDate(c.getValue().getThruDate())));
+
+        tblColListPreparedBy.setCellValueFactory((c) -> new SimpleStringProperty(preparedBy(c.getValue())));
+        tblColListStatus.setCellValueFactory((c) -> new SimpleStringProperty(statusText(c.getValue().getTransactionStatus())));
+
+        // search-by-lookup filters (F3 / Enter / Tab)
+        for (TextField loField : new TextField[]{tfFilterBrand, tfFilterModel, tfFilterArea,
+            tfFilterProvince, tfFilterClient}) {
+            loField.setOnKeyPressed(this::filterKeyPressed);
+        }
+
+        // emptying a filter text field clears that filter
+        tfFilterBrand.textProperty().addListener((o, ov, nv) -> {
+            if (nv == null || nv.isEmpty()) {
+                poAppController.setBrand(null);
+            }
+        });
+        tfFilterModel.textProperty().addListener((o, ov, nv) -> {
+            if (nv == null || nv.isEmpty()) {
+                poAppController.setModel(null);
+            }
+        });
+        tfFilterArea.textProperty().addListener((o, ov, nv) -> {
+            if (nv == null || nv.isEmpty()) {
+                poAppController.setBranchArea(null);
+            }
+        });
+        tfFilterProvince.textProperty().addListener((o, ov, nv) -> {
+            if (nv == null || nv.isEmpty()) {
+                poAppController.setProvince(null);
+            }
+        });
+        tfFilterClient.textProperty().addListener((o, ov, nv) -> {
+            if (nv == null || nv.isEmpty()) {
+                poAppController.setSourceClient(null);
+            }
+        });
+
+        tblViewMaster.getSelectionModel().selectedItemProperty()
+                .addListener((o, ov, nv) -> refreshEntryTabState());
+        refreshEntryTabState();
+    }
+
+    private void loadFilterComboBoxes() {
+        setComboItems(cmbFilterTranType, TransactionType.TransactionType, true);
+        setComboItems(cmbFilterStatus, SalesPromotionStatus.STATUS, true);
+        setComboItems(cmbFilterPromoType, PromoType.PromoType, true);
+        setComboItems(cmbFilterPromoSource, PromoSource.PromoSource, true);
+        setComboItems(cbPromoTypeList, PromoType.PromoType, false);
+        setComboItems(cmbFilterShopType, java.util.Arrays.asList(SHOP_TYPE_LABELS), true);
+    }
+
+    private void setComboItems(ComboBox<?> foCombo, List<String> faItems, boolean fbWithAll) {
+        if (foCombo == null) {
+            return;
+        }
+        List<String> laItems = new ArrayList<>();
+        if (fbWithAll) {
+            laItems.add("All");
+        }
+        laItems.addAll(faItems);
+        asStringCombo(foCombo).setItems(FXCollections.observableArrayList(laItems));
+        if (fbWithAll) {
+            foCombo.getSelectionModel().select(0);
+        }
+    }
+
+    // -----------------------------------------------------
+    // FILTER LOOKUPS
+    // -----------------------------------------------------
+    private void filterKeyPressed(KeyEvent event) {
+        if (event.getCode() != F3 && event.getCode() != ENTER && event.getCode() != TAB) {
+            return;
+        }
+        TextField loField = (TextField) event.getSource();
+        String lsValue = loField.getText() == null ? "" : loField.getText();
+
+        try {
+            boolean lbOk;
+            String lsDisplay = "";
+
+            switch (loField.getId()) {
+                case "tfFilterBrand":
+                    lbOk = isJSONSuccess(poAppController.searchFilterByBrand(lsValue, false), "Search Filter Brand");
+                    if (lbOk) {
+                        lsDisplay = poAppController.getBrand().getModel().getDescription();
+                    }
+                    break;
+                case "tfFilterModel":
+                    lbOk = isJSONSuccess(poAppController.searchFilterByModel(lsValue, false), "Search Filter Model");
+                    if (lbOk) {
+                        lsDisplay = poAppController.getModel().getModel().getDescription();
+                    }
+                    break;
+                case "tfFilterArea":
+                    lbOk = isJSONSuccess(poAppController.searchFilterByBranchArea(lsValue, false), "Search Filter Branch Area");
+                    if (lbOk) {
+                        lsDisplay = poAppController.getBranchArea().getModel().getAreaDescription();
+                    }
+                    break;
+                case "tfFilterProvince":
+                    lbOk = isJSONSuccess(poAppController.searchFilterByProvince(lsValue, false), "Search Filter Province");
+                    if (lbOk) {
+                        lsDisplay = poAppController.getProvince().getModel().getDescription();
+                    }
+                    break;
+                case "tfFilterClient":
+                    JSONObject loJSON = poAppController.searchFilterBySupplier(lsValue, false);
+                    lbOk = isJSONSuccess(loJSON, "Search Filter Client");
+                    if (lbOk) {
+                        lsDisplay = poAppController.getSourceClient().getModel().Client().getCompanyName();
+                    }
+                    break;
+                default:
+                    return;
+            }
+
+            loField.setText(lbOk ? nvl(lsDisplay) : "");
+            event.consume();
+            CommonUtils.SetNextFocus(loField);
+        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(MiscUtil.getException(ex), psFormName, null);
+            poLogWrapper.severe(psFormName + " :" + ex.getMessage());
+        }
+    }
+
+    private void clearListPreview() {
+        tfPromoList.clear();
+        tfReferList.clear();
+        tfSubjectList.clear();
+        tfRemarksList.clear();
+        dpTransactionDateList.setValue(null);
+        dpDateFromList.setValue(null);
+        dpDateThruList.setValue(null);
+        cbPromoTypeList.getSelectionModel().clearSelection();
+        hbShopTypeList.getChildren().clear();
+    }
+    // -----------------------------------------------------
+    // RETRIEVE
+    // -----------------------------------------------------
+
+    private boolean applyListFilters() {
+        // combos (index 0 = All)
+        poAppController.setTranType(comboCode(cmbFilterTranType));
+        poAppController.setTranStatus(comboCode(cmbFilterStatus));
+        poAppController.setPromoType(comboCode(cmbFilterPromoType));
+        poAppController.setPromoSource(comboCode(cmbFilterPromoSource));
+
+        // SRP range
+        String lsFrom = cleanNumber(tfFilterSRPFrom.getText());
+        String lsThru = cleanNumber(tfFilterSRPThru.getText());
+        try {
+            double lnFrom = lsFrom.isEmpty() ? 0.0 : Double.parseDouble(lsFrom);
+            double lnThru = lsThru.isEmpty() ? 0.0 : Double.parseDouble(lsThru);
+            if (lnFrom < 0 || lnThru < 0) {
+                ShowMessageFX.Information("Invalid SRP amount.", psFormName, null);
+                return false;
+            }
+            if (!lsFrom.isEmpty() && !lsThru.isEmpty() && lnFrom > lnThru) {
+                ShowMessageFX.Information("SRP From cannot be higher than SRP Thru.", psFormName, null);
+                return false;
+            }
+        } catch (NumberFormatException ex) {
+            ShowMessageFX.Information("Invalid input. Please enter a valid numeric SRP.", psFormName, null);
+            return false;
+        }
+        poAppController.setSRPFrom(lsFrom);
+        poAppController.setSRPThru(lsThru);
+        poAppController.setShopType(shopTypeFilterCode());
+        // dates
+        LocalDate ldStart = dpFilterStart.getValue();
+        LocalDate ldEnd = dpFilterEnd.getValue();
+        if (ldStart != null && ldEnd != null && ldStart.isAfter(ldEnd)) {
+            ShowMessageFX.Information("Start date cannot be after end date.", psFormName, null);
+            return false;
+        }
+        poAppController.setDateFrom(ldStart == null ? "" : ldStart.toString()); // yyyy-MM-dd
+        poAppController.setDateEnd(ldEnd == null ? "" : ldEnd.toString());
+
+        return true;
+    }
+
+    private void loadMasterList() throws SQLException, GuanzonException, CloneNotSupportedException {
+        if (!applyListFilters()) {
+            return;
+        }
+        paMasterList.clear();
+        clearListPreview();
+
+        if (isJSONSuccess(poAppController.loadTransactionList(), "Retrieve Promo List")) {
+            paMasterList.setAll(poAppController.getMasterList());
+        }
+        tblViewMaster.getSelectionModel().clearSelection();
+        tblViewMaster.refresh();
+        refreshEntryTabState();
+    }
+
+    private void refreshEntryTabState() {
+        if (tabEntry == null || tblViewMaster == null) {
+            return;
+        }
+        boolean lbHasSelection = tfPromoList != null && !tfPromoList.getText().isEmpty();
+        boolean lbEditing = poAppController != null
+                && (poAppController.getEditMode() == EditMode.ADDNEW
+                || poAppController.getEditMode() == EditMode.UPDATE);
+
+        tabEntry.setDisable(!lbHasSelection && !lbEditing);
+
+        if (tabEntry.isDisable() && tabPaneMain != null && tabList != null
+                && tabPaneMain.getSelectionModel().getSelectedItem() == tabEntry) {
+            tabPaneMain.getSelectionModel().select(tabList);
+        }
+    }
+
+    private String preparedBy(Model_Sales_Promotion_Master foMaster) {
+        try {
+            Object loValue = foMaster.getValue("sModified");
+            if (loValue == null || loValue.toString().isEmpty()) {
+                return "";
+            }
+            String lsRaw = loValue.toString();
+            if (!poUserCache.containsKey(lsRaw)) {
+                String lsUserID = lsRaw.length() > 10 ? poApp.Decrypt(lsRaw) : lsRaw;
+                String lsName = poAppController.getSysUser(lsUserID);
+                poUserCache.put(lsRaw, lsName == null ? "" : lsName);
+            }
+            return poUserCache.get(lsRaw);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            return "";
+        }
+    }
+
+    private String shopTypeFilterCode() {
+        int lnIndex = cmbFilterShopType.getSelectionModel().getSelectedIndex();
+        return (lnIndex <= 0 || lnIndex > SHOP_TYPE_CODES.length) ? "" : SHOP_TYPE_CODES[lnIndex - 1];
+    }
+
+    // -----------------------------------------------------
+    // HELPER CODE UTILITY HERE
+    // -----------------------------------------------------
+    private String nvl(String fsValue) {
+        return fsValue == null ? "" : fsValue;
+    }
+
+    private String comboCode(ComboBox<?> foCombo) {
+        int lnIndex = foCombo.getSelectionModel().getSelectedIndex();
+        return lnIndex <= 0 ? "" : String.valueOf(lnIndex - 1);
+    }
+
+    private String cleanNumber(String fsValue) {
+        return fsValue == null ? "" : fsValue.trim().replace(",", "");
+    }
+
+    private String fmtDate(Date fdDate) {
+        return fdDate == null ? "" : SQLUtil.dateFormat(fdDate, SQLUtil.FORMAT_LONG_DATE);
+    }
+
+    private String lookup(List<String> faList, String fsIndex) {
+        try {
+            return faList.get(Integer.parseInt(fsIndex));
+        } catch (NumberFormatException | NullPointerException | IndexOutOfBoundsException ex) {
+            return "";
+        }
+    }
+
+    private String shopTypeText(String fsShopType) {
+        if (fsShopType == null || fsShopType.trim().isEmpty()) {
+            return "ALL";
+        }
+        List<String> laLabels = new ArrayList<>();
+        for (String lsCode : fsShopType.split("»")) {
+            if (!lsCode.trim().isEmpty()) {
+                laLabels.add(shopTypeLabel(lsCode));
+            }
+        }
+        return String.join(", ", laLabels);
+    }
+
+    private String shopTypeLabel(String fsCode) {
+        switch (fsCode == null ? "" : fsCode.trim()) {
+            case "0":
+                return "3S Shop";
+            case "1":
+                return "Multi Brand";
+            case "2":
+                return "Big Bike";
+            default:
+                return "Other Shop";
+        }
+    }
+
+    private String statusText(String fsStatus) {
+        try {
+            String lsText = SalesPromotionStatus.STATUS.get(Integer.parseInt(fsStatus));
+            return lsText == null ? "" : lsText;
+        } catch (NumberFormatException | NullPointerException | IndexOutOfBoundsException ex) {
+            return "";
+        }
+    }
+
+    private void openSelectedMasterTransaction()
+            throws CloneNotSupportedException, SQLException, GuanzonException {
+
+        pnMasterList
+                = tblViewMaster.getSelectionModel().getSelectedIndex() + 1;
+
+        if (pnMasterList <= 0) {
+            return;
+        }
+
+        Model_Sales_Promotion_Master loSelected
+                = tblViewMaster.getSelectionModel().getSelectedItem();
+
+        if (loSelected == null) {
+            return;
+        }
+
+        int lnMode = poAppController.getEditMode();
+
+        if ((lnMode == EditMode.ADDNEW || lnMode == EditMode.UPDATE)
+                && !ShowMessageFX.OkayCancel(
+                        null,
+                        psFormName,
+                        "You have an unsaved transaction. "
+                        + "Disregard changes and open the selected promo?")) {
+            return;
+        }
+
+        if (!isJSONSuccess(
+                poAppController.OpenTransaction(loSelected.getPromoID()),
+                "Initialize Open Transaction")) {
+            return;
+        }
+
+        getLoadedTransaction();
+
+        pnEditMode = poAppController.getEditMode();
+
+        initButtonDisplay(pnEditMode);
+    }
 }

@@ -612,7 +612,7 @@
                                                 </TabPane>
                                              </children>
                                              <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                                              </padding>
                                           </AnchorPane>
                                        </children>
@@ -693,6 +693,7 @@
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
                                                   </rowConstraints>
                                                    <children>
                                                       <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="2147483647">
@@ -782,7 +783,7 @@
                                                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="10.0" />
                                                    </columnConstraints>
                                                    <rowConstraints>
-                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="-Infinity" prefHeight="15.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -837,8 +838,8 @@
                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="35.0" vgrow="ALWAYS" />
                                           <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
@@ -884,25 +885,6 @@
                                  <padding>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
                                  </padding>
-                              </AnchorPane>
-                              <AnchorPane>
-                                 <children>
-                                    <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                       <children>
-                                          <Button fx:id="btnDuplicateMechanic" disable="true" mnemonicParsing="false" onAction="#cmdButton_Click" style="-fx-background-color: #FFE6B9; -fx-border-color: #FF8201; -fx-border-radius: 15; -fx-background-radius: 15;" text="Duplicate Mechanic" visible="false" HBox.hgrow="ALWAYS">
-                                             <graphic>
-                                                <FontAwesomeIconView glyphName="COPY" size="19" />
-                                             </graphic>
-                                             <font>
-                                                <Font name="System Bold" size="12.0" />
-                                             </font>
-                                          </Button>
-                                       </children>
-                                    </HBox>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets left="5.0" right="5.0" />
-                                 </VBox.margin>
                               </AnchorPane>
                            </children>
                         </VBox>
