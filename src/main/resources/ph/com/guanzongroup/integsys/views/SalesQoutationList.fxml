@@ -7,9 +7,9 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Pagination?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -20,8 +20,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane fx:id="AnchorMain" prefHeight="1000.0" prefWidth="1761.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="AnchorMain" prefHeight="1000.0" prefWidth="1761.0" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -66,55 +65,92 @@
                <bottom>
                   <AnchorPane fx:id="apButton" prefHeight="80.0" BorderPane.alignment="CENTER">
                      <children>
-                        <HBox alignment="CENTER_LEFT" prefHeight="75.0" prefWidth="1482.0" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                            <children>
-                              <Button fx:id="btnCertify" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Certify">
+                              <Button fx:id="btnBrowse" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Browse">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="CHECK" size="20" />
+                                    <FontAwesomeIconView glyphName="FOLDER_OPEN" size="20" styleClass="FontIcon" />
                                  </graphic>
-                                 <effect>
-                                    <Blend />
-                                 </effect>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
                               </Button>
-                              <Button fx:id="btnReturn" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Return">
+                              <Button fx:id="btnCreateFrom" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="New From" textAlignment="CENTER">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnNew1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnVoid" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="CLOSE" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnVoid11" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Lost">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="ARCHIVE" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnVoid1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="BELL" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnPrint" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
                                  <effect>
                                     <Blend />
                                  </effect>
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="REPEAT" size="20" />
+                                    <FontAwesomeIconView glyphName="PRINT" size="20" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnDisapproved" contentDisplay="TOP" ellipsisString="" maxWidth="120.0" minWidth="100.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="83.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Disapprove">
-                                 <graphic>
-                                    <FontAwesomeIconView glyphName="THUMBS_DOWN" size="20" />
-                                 </graphic>
+                              <Button fx:id="btnExport" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Export">
                                  <effect>
                                     <Blend />
                                  </effect>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="FILE_PDF_ALT" size="20" />
+                                 </graphic>
                               </Button>
-                              <Button fx:id="btnRetrieve" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
+                              <Button fx:id="btnVoid12" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="LIST_ALT" size="20" />
+                                    <FontAwesomeIconView glyphName="BELL" size="20" styleClass="FontIcon" text="" />
                                  </graphic>
-                                 <effect>
-                                    <Blend />
-                                 </effect>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
                               </Button>
-                              <Button fx:id="btnClose" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">
+                              <Button fx:id="btnClose" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="POWER_OFF" size="20" />
+                                    <FontAwesomeIconView glyphName="POWER_OFF" size="20" styleClass="FontIcon" />
                                  </graphic>
-                                 <effect>
-                                    <Blend />
-                                 </effect>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
                               </Button>
                            </children>
                            <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
                            </padding>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
                         </HBox>
                      </children>
                   </AnchorPane>
@@ -200,27 +236,83 @@
                                                 <RowConstraints maxHeight="35.0" minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
                                              </rowConstraints>
                                              <children>
-                                                <TableView fx:id="tblViewMainList">
+                                                <TreeTableView fx:id="tblViewMainList" editable="false" showRoot="false">
+
                                                    <columns>
-                                                      <TableColumn fx:id="tblRowNo" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" sortable="false" text="No." />
-                                                      <TableColumn fx:id="tblCheckBox" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false">
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- ROW NUMBER                                                -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblRowNo" maxWidth="45.0" minWidth="45.0" prefWidth="45.0" resizable="false" text="No." />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- CHECKBOX                                                   -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblCheckBox" maxWidth="35.0" minWidth="35.0" prefWidth="35.0" resizable="false">
+
                                                          <graphic>
                                                             <CheckBox fx:id="chckSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
                                                          </graphic>
-                                                      </TableColumn>
-                                                      <TableColumn fx:id="tblDVNo" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" sortable="false" text="Qoutation / Parent" />
-                                                      <TableColumn fx:id="tblDate" maxWidth="130.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Version" />
-                                                      <TableColumn fx:id="tblSupplier" maxWidth="300.0" minWidth="-Infinity" prefWidth="120.0" resizable="false" sortable="false" text="Status" />
-                                                      <TableColumn fx:id="tblPayeeName" maxWidth="433.0" minWidth="-Infinity" prefWidth="315.0" resizable="false" sortable="false" text="Customer" />
-                                                      <TableColumn fx:id="tblPaymentForm" maxWidth="272.0" minWidth="-Infinity" prefWidth="160.0" resizable="false" sortable="false" text="Amount" />
-                                                      <TableColumn fx:id="tblBankName" maxWidth="240.0" minWidth="-Infinity" prefWidth="150.0" resizable="false" sortable="false" text="Created" />
-                                                      <TableColumn fx:id="tblBankAccount" maxWidth="334.0" minWidth="-Infinity" prefWidth="150.0" resizable="false" sortable="false" text="Valid Until" />
-                                                      <TableColumn fx:id="tblTransAmount" maxWidth="353.0" minWidth="-Infinity" prefWidth="150.0" resizable="false" sortable="false" text="Confirm Date" />
+
+                                                      </TreeTableColumn>
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- QUOTATION / PARENT                                         -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblDVNo" minWidth="180.0" prefWidth="210.0" resizable="true" text="Quotation / Parent" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- VERSION                                                    -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblDate" minWidth="80.0" prefWidth="85.0" resizable="true" text="Version" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- STATUS                                                     -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblSupplier" minWidth="100.0" prefWidth="120.0" resizable="true" text="Status" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- CUSTOMER                                                   -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblPayeeName" minWidth="150.0" prefWidth="220.0" resizable="true" text="Customer" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- AMOUNT                                                     -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblPaymentForm" minWidth="100.0" prefWidth="130.0" resizable="true" text="Amount" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- CREATED                                                    -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblBankName" minWidth="100.0" prefWidth="120.0" resizable="true" text="Created" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- VALID UNTIL                                                -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblBankAccount" minWidth="100.0" prefWidth="120.0" resizable="true" text="Valid Until" />
+
+                                                      <!-- ========================================================= -->
+                                                      <!-- CONFIRM DATE                                               -->
+                                                      <!-- ========================================================= -->
+
+                                                      <TreeTableColumn fx:id="tblTransAmount" minWidth="100.0" prefWidth="120.0" resizable="true" text="Confirm Date" />
+
                                                    </columns>
+
                                                    <GridPane.margin>
                                                       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                                    </GridPane.margin>
-                                                </TableView>
+
+                                                </TreeTableView>
                                                 <Pagination fx:id="pagination" maxPageIndicatorCount="0" GridPane.rowIndex="1">
                                                    <GridPane.margin>
                                                       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

@@ -26,7 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -109,7 +109,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnApproved" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
+                              <Button fx:id="btnNew1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -125,7 +125,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnLost" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Lost">
+                              <Button fx:id="btnVoid11" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Lost">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="ARCHIVE" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -133,7 +133,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnFollowUp" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
+                              <Button fx:id="btnVoid1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="BELL" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -174,7 +174,7 @@
                   </AnchorPane>
                </bottom>
                <center>
-                  <AnchorPane fx:id="AnchorInputs" BorderPane.alignment="CENTER">
+                  <AnchorPane BorderPane.alignment="CENTER">
                      <children>
                         <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
@@ -217,13 +217,14 @@
                                                             <RowConstraints />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
                                                          </rowConstraints>
                                                          <children>
                                                             <TextField fx:id="tfTransNo" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                            <TextField fx:id="tfCustomerName" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                            <Button fx:id="btnAddClient" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" wrapText="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                                            <TextField fx:id="tfCustomerName" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                            <Button fx:id="btnAddClient" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" wrapText="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
                                                                <tooltip>
                                                                   <Tooltip text="Add New Client" />
                                                                </tooltip>
@@ -234,25 +235,25 @@
                                                                   <Insets left="10.0" />
                                                                </GridPane.margin>
                                                             </Button>
-                                                            <DatePicker fx:id="dpTransDate" disable="true" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                            <TextField fx:id="tfContactNo" editable="false" maxHeight="25.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                            <TextField fx:id="tfAddress" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="6" />
-                                                            <Label text="Date" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                            <DatePicker fx:id="dpTransDate" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                            <TextField fx:id="tfContactNo" editable="false" maxHeight="25.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                            <TextField fx:id="tfAddress" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="5" GridPane.rowIndex="7" />
+                                                            <Label text="Date" GridPane.rowIndex="5">
                                                                <GridPane.margin>
                                                                   <Insets left="120.0" right="10.0" />
                                                                </GridPane.margin>
                                                             </Label>
-                                                            <Label text="Address" GridPane.rowIndex="6">
+                                                            <Label text="Address" GridPane.rowIndex="7">
                                                                <GridPane.margin>
                                                                   <Insets right="10.0" />
                                                                </GridPane.margin>
                                                             </Label>
-                                                            <Label alignment="CENTER_RIGHT" text="Contact No" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                                            <Label alignment="CENTER_RIGHT" text="Contact No" GridPane.columnIndex="3" GridPane.rowIndex="6">
                                                                <GridPane.margin>
                                                                   <Insets left="90.0" right="10.0" />
                                                                </GridPane.margin>
                                                             </Label>
-                                                            <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="130.0" style="-fx-background-color: FF8201;" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="8" GridPane.rowIndex="3">
+                                                            <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="130.0" style="-fx-background-color: FF8201;" text="STATUS" textAlignment="CENTER" GridPane.columnIndex="5" GridPane.rowIndex="3">
                                                                <font>
                                                                   <Font name="System Bold" size="14.0" />
                                                                </font>
@@ -262,7 +263,7 @@
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Customer Name" GridPane.rowIndex="5">
+                                                            <Label text="Customer Name" GridPane.rowIndex="6">
                                                                <GridPane.margin>
                                                                   <Insets right="10.0" />
                                                                </GridPane.margin>
@@ -319,47 +320,48 @@
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
                                                          </rowConstraints>
                                                          <children>
-                                                            <TextField fx:id="tfVersionTransNo" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                            <DatePicker fx:id="dpQoutationDate" disable="true" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                            <TextField fx:id="tfVersion" editable="false" prefWidth="170.0" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                            <TextField fx:id="tfQoutationTitle" maxHeight="25.0" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                                                            <DatePicker fx:id="dpQoutationExpectedDate" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                                                            <DatePicker fx:id="dpQoutationValidity" editable="false" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                                                            <TextArea fx:id="taReason" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="8" GridPane.rowIndex="5" />
-                                                            <Label text="Quotation Title" GridPane.rowIndex="4">
+                                                            <TextField fx:id="tfQoutationTransNo" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                            <DatePicker fx:id="dpQoutationDate" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                                            <TextField fx:id="tfVersion" editable="false" prefWidth="170.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                            <TextField fx:id="tfQoutationTitle" editable="false" maxHeight="25.0" style="-fx-font-weight: bold;" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                                            <DatePicker fx:id="dpQoutationExpectedDate" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                            <DatePicker fx:id="dpQoutationValidity" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                            <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="8" GridPane.rowIndex="6" />
+                                                            <Label text="Quotation Title" GridPane.columnIndex="3" GridPane.rowIndex="4">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Version" GridPane.columnIndex="6" GridPane.rowIndex="2">
+                                                            <Label text="Version" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Reason" GridPane.rowIndex="5">
+                                                            <Label text="Reason" GridPane.rowIndex="6">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Expected Date" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                                            <Label text="Expected Date" GridPane.rowIndex="5">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Date" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                            <Label text="Version Date" GridPane.rowIndex="4">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Transaction No" GridPane.rowIndex="2">
+                                                            <Label fx:id="tfVersionTransNo" text="Version Transaction No" GridPane.rowIndex="2">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
                                                             </Label>
-                                                            <Label text="Qoute Validity" GridPane.columnIndex="6" GridPane.rowIndex="4">
+                                                            <Label text="Qoute Validity" GridPane.columnIndex="3" GridPane.rowIndex="5">
                                                                <padding>
                                                                   <Insets right="10.0" />
                                                                </padding>
@@ -413,8 +415,8 @@
                                                                </rowConstraints>
                                                                <children>
                                                                   <ComboBox fx:id="cmbDeliveryMethod" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                                  <TextField fx:id="tfDeliveryAddress" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
-                                                                  <TextField fx:id="tfDeliveryRemarks" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
+                                                                  <TextField fx:id="tfDeliveryAddress" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                                                                  <TextField fx:id="tfDeliveryRemarks" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
                                                                   <Label text="Remarks" GridPane.rowIndex="4">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
@@ -480,7 +482,7 @@
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <TextField fx:id="tfPaymentRemarks" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.rowIndex="4" />
+                                                                  <TextField fx:id="tfPaymentRemarks" editable="false" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.rowIndex="4" />
                                                                   <Label text="Payment Form" GridPane.rowIndex="2">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
@@ -496,7 +498,7 @@
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <TextField fx:id="tfPaymentTerms" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                                                  <TextField fx:id="tfPaymentNoOfDays1" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                </children>
                                                             </GridPane>
                                                          </children>
@@ -553,9 +555,9 @@
                                                                                  <children>
                                                                                     <TextField fx:id="tfMCItemBrand" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                     <TextField fx:id="tfMCItemModel" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                                                    <ComboBox fx:id="cmbInsurance" prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                                    <ComboBox fx:id="cmbPaymentForm1" prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                     <TextField fx:id="tfMCItemInsuranceAmt" maxHeight="25.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                                                    <ComboBox fx:id="cmbRegistration" prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                                                                    <ComboBox fx:id="cmbPaymentForm11" prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                                                                     <TextField fx:id="tfMCItemRegisAmt" maxHeight="25.0" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="5" />
                                                                                     <TextField fx:id="tfMCItemDiscount" maxHeight="25.0" GridPane.columnIndex="9" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                     <TextField fx:id="tfMCItemAddDiscount" maxHeight="25.0" GridPane.columnIndex="9" GridPane.columnSpan="2" GridPane.rowIndex="3" />
