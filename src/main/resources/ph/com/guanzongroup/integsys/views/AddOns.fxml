@@ -4,7 +4,6 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
@@ -115,12 +114,7 @@
                                        </columnConstraints>
                                        <rowConstraints>
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="15.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
@@ -136,7 +130,7 @@
                                              </font>
                                           </Label>
                                                         <TextField fx:id="tfStandardRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
-                                                        <TextField fx:id="tfDuration" alignment="BOTTOM_LEFT" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="236.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
                                           <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                              <children>
                                                 <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -146,36 +140,6 @@
                                                 </Label>
                                              </children>
                                           </AnchorPane>
-                                          <Label text="Add On Amount" GridPane.rowIndex="3">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField fx:id="tfDuration1" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                          <CheckBox mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                          <Label text="Active" GridPane.rowIndex="7">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <Label text="Validity" GridPane.rowIndex="4">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField fx:id="tfDuration2" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="235.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                          <Label text="SRP Amount" GridPane.rowIndex="5">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <Label text="Variant" GridPane.rowIndex="6">
-                                             <font>
-                                                <Font size="12.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField fx:id="tfDuration21" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                          <TextField fx:id="tfDuration211" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                                                     </children>
                                     </GridPane>
                                             </children>
@@ -205,13 +169,6 @@
                                                     <rowConstraints>
                                                         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                     </rowConstraints>
-                                       <children>
-                                          <Label fx:id="lblParameterLabel" styleClass="label-header" text="Add Ons" textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2">
-                                             <font>
-                                                <Font name="System Bold" size="14.0" />
-                                             </font>
-                                          </Label>
-                                       </children>
                                                 </GridPane>
                                                 <Separator minHeight="5.0" style="-fx-background-color: FF8201;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                                             </children>
