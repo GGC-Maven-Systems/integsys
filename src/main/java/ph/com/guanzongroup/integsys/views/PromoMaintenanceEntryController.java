@@ -1475,7 +1475,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
         String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
         boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus)
-                || "5".equals(lsStatus);;
+                || "5".equals(lsStatus) || "1".equals(lsStatus);
 
         // Always visible
         initButtonControls(true, "btnClose");
@@ -1492,7 +1492,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnPreview", "btnDuplicate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
-        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate", "btnVoid");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);

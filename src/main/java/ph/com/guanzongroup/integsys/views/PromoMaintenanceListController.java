@@ -98,6 +98,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
     private ObservableList<Model_Sales_Promotion_Model> paModel;
     private ObservableList<Model_Sales_Promotion_Model_Exception> paModelException;
     private ObservableList<Model_Sales_Promotion_GiveAway_Item> paGiveAway;
+    private ObservableList<Model_Sales_Promotion_Master> paMasterList;
     private ObservableList<Model> paCombined;
     private int pnEditMode, pnRow, pnGiveAway, pnBrand, pnModel, pnModelException, pnMasterList;
 
@@ -108,13 +109,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
     private static final String[] SHOP_TYPE_LABELS = {"3S Shop", "Multi Brand", "Big Bike", "Other Shop"};
     private static final String[] SHOP_TYPE_CODES = {"0", "1", "2", "x"};   // "x" = blank type, as stored by searchPromotionByShop
 
-    private ObservableList<Model_Sales_Promotion_Master> paMasterList;
     private final Map<String, String> poUserCache = new HashMap<>();
-
-    @SuppressWarnings("unchecked")
-    private TableView<Model_Sales_Promotion_Master> getListTable() {
-        return (TableView<Model_Sales_Promotion_Master>) tblViewMaster;
-    }
 
     @SuppressWarnings("unchecked")
     private ComboBox<String> asStringCombo(ComboBox<?> foCombo) {
@@ -266,7 +261,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
             clearPromoDetail();
             clearPromoGiveAway();
             initRadioGroups();
-            initializeListTab();
+            initializeMasterList();
             pnBrand = -1;
             pnModel = -1;
             pnModelException = -1;
@@ -1629,7 +1624,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
                 && "1".equals(poAppController.getMaster().getTransactionStatus());
         String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
         boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus)
-                || "5".equals(lsStatus);
+                || "5".equals(lsStatus) || "1".equals(lsStatus);
 
         // Always visible
         initButtonControls(true, "btnClose");
@@ -1645,7 +1640,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         // Transaction-dependent buttons (only when not editing)
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnPreview", "btnDuplicate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnConfirm", "btnUpdate");
-        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate", "btnVoid");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
@@ -2269,11 +2264,12 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         tblViewGiveAway.refresh();
     }
 
-    private void reloadTableMasterList() {
+    private void reloadTableMasterList() throws SQLException, GuanzonException, CloneNotSupportedException {
         List<Model_Sales_Promotion_Master> rawMaster = poAppController.getMasterList();
-        getListTable().setItems(paMasterList);
         paMasterList.setAll(rawMaster);
-
+        if (!isJSONSuccess(poAppController.loadTransactionList(), "Refresh Promo List")) {
+            return;
+        }
         // Restore or select last row
         int indexToSelect = (pnMasterList >= 1 && pnMasterList < paMasterList.size())
                 ? pnMasterList - 1
@@ -2934,9 +2930,9 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
     // =====================================================
     // TAB LIST 
     // =====================================================
-    private void initializeListTab() {
+    private void initializeMasterList() {
         paMasterList = FXCollections.observableArrayList();
-        getListTable().setItems(paMasterList);
+        tblViewMaster.setItems(paMasterList);
 
         // preview panel is read-only
         tfPromoList.setEditable(false);
@@ -2953,7 +2949,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
         tblColListNo.setStyle("-fx-alignment: CENTER;");
 
         tblColListNo.setCellValueFactory((c) -> new SimpleStringProperty(
-                String.valueOf(getListTable().getItems().indexOf(c.getValue()) + 1)));
+                String.valueOf(tblViewMaster.getItems().indexOf(c.getValue()) + 1)));
         tblColListReferNo.setCellValueFactory((c) -> new SimpleStringProperty(nvl(c.getValue().getReferNo())));
         tblColListSubject.setCellValueFactory((c) -> new SimpleStringProperty(nvl(c.getValue().getPromoDescription())));
         tblColListDate.setCellValueFactory((c) -> new SimpleStringProperty(fmtDate(c.getValue().getDate())));
@@ -3271,8 +3267,7 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
     private void openSelectedMasterTransaction()
             throws CloneNotSupportedException, SQLException, GuanzonException {
 
-        pnMasterList
-                = tblViewMaster.getSelectionModel().getSelectedIndex() + 1;
+        pnMasterList = tblViewMaster.getSelectionModel().getSelectedIndex() + 1;
 
         if (pnMasterList <= 0) {
             return;
