@@ -20,7 +20,6 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.LogWrapper;
@@ -87,23 +86,18 @@ public class DepartmentController implements Initializable, ScreenInterface {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try {
-            initializeObject();
-            pnEditMode = poDepartment.getEditMode();
+        initializeObject();
+        pnEditMode = poDepartment.getEditMode();
+        initButton(pnEditMode);
+        InitTextFields();
+        ClickButton();
+        initTabAnchor();
+        if (poDepartment.getEditMode() == EditMode.ADDNEW) {
             initButton(pnEditMode);
-            InitTextFields();
-            ClickButton();
             initTabAnchor();
-
-            if (poDepartment.getEditMode() == EditMode.ADDNEW) {
-                initButton(pnEditMode);
-                initTabAnchor();
-                loadRecord();
-            }
-            pbLoaded = true;
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(DepartmentController.class.getName()).log(Level.SEVERE, null, ex);
+            loadRecord();
         }
+        pbLoaded = true;
     }
 
     private void initializeObject() {
@@ -461,20 +455,7 @@ public class DepartmentController implements Initializable, ScreenInterface {
 
     @FXML
     void cbField01_Clicked(MouseEvent event) {
-        if (cbField01.isSelected()) {
-            try {
-                poDepartment.getModel().setRecordStatus("1");
-            } catch (SQLException ex) {
-                Logger.getLogger(DepartmentController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GuanzonException ex) {
-                Logger.getLogger(DepartmentController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            try {
-                poDepartment.getModel().setRecordStatus("0");
-            } catch (SQLException | GuanzonException ex) {
-            }
-        }
+        poDepartment.getModel().setRecordStatus(cbField01.isSelected() ? "1" : "0");
     }
 
     private void initTabAnchor() {

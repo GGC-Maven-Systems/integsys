@@ -78,6 +78,17 @@
                                     <Blend />
                                  </effect>
                               </Button>
+                              <Button fx:id="btnPOAppHistory" alignment="CENTER" contentDisplay="TOP" ellipsisString="" minWidth="75.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="PO Approval History" textAlignment="CENTER" wrapText="true">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="BOOK" size="15" />
+                                 </graphic>
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
                                         <Button fx:id="btnClose" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">
                                             <graphic>
                                                 <FontAwesomeIconView glyphName="POWER_OFF" size="20" />

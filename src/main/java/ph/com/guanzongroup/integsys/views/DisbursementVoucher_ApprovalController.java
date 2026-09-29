@@ -1379,6 +1379,7 @@ public class DisbursementVoucher_ApprovalController implements Initializable, Sc
         tblAttachments.setItems(attachment_data);
     }
 
+
     public void slideImage(int direction) {
         if (attachment_data.size() <= 0) {
             return;

@@ -57,6 +57,8 @@ import org.guanzon.cas.inv.warehouse.status.InventoryStockIssuanceStatus;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Detail;
 import org.guanzon.cas.inv.warehouse.model.Model_Inventory_Transfer_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
  * FXML Controller class
@@ -582,6 +584,23 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    case "tfCost":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        double ldInventoryCost = Double.valueOf(lsValue);
+                        if (ldInventoryCost < 0) {
+                            ShowMessageFX.Warning("Inventory Cost cannot be a negative value.", psFormName,null);
+                            return;
+
+                        }
+                        poAppController.getDetail(pnTransactionDetail).setInventoryCost(ldInventoryCost);
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+
+                        break;
                     case "tfProjectCode":
                         if (lsValue.isEmpty()) {
                             return;
@@ -589,7 +608,6 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
 
                         poAppController.getMaster().setProjectCode(lsValue);
                         loadTransactionMaster();
-
                         break;
                     case "tfOrderNo":
                         if (lsValue.isEmpty()) {
@@ -710,12 +728,14 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
 
                             }
                         }
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
+                        //this blocked of codes is temporarily disabled as per maam she
+                        //09242026 disabled by teejei
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
 
                         poAppController.getDetail(pnTransactionDetail).setQuantity(lnIssuedQty);
 
@@ -998,7 +1018,7 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
         tfSearchDescription.setText(tblColDetailDescr.getCellData(tblIndex));
         tfBrand.setText(tblColDetailBrand.getCellData(tblIndex));
         tfVariant.setText(tblColDetailVariant.getCellData(tblIndex));
-        tfCost.setText(tblColDetailCost.getCellData(tblIndex));
+        tfCost.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(tblColDetailCost.getCellData(tblIndex), true));
         tfIssuedQty.setText(tblColDetailOrderQty.getCellData(tblIndex));
         tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
@@ -1262,12 +1282,13 @@ public class InventoryStockIssuanceNeoController implements Initializable, Scree
             });
 
             tblColDetailCost.setCellValueFactory((loModel) -> {
-                try {
-                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
-                } catch (SQLException | GuanzonException e) {
-                    poLogWrapper.severe(psFormName, e.getMessage());
-                    return new SimpleStringProperty("");
-                }
+                return new SimpleStringProperty(String.valueOf(loModel.getValue().getInventoryCost()));
+//                try {
+//                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
+//                } catch (SQLException | GuanzonException e) {
+//                    poLogWrapper.severe(psFormName, e.getMessage());
+//                    return new SimpleStringProperty("");
+//                }
             });
 
             tblColDetailQOH.setCellValueFactory((loModel) -> {

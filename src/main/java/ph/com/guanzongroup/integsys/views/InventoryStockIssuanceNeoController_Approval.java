@@ -68,6 +68,7 @@ import org.guanzon.cas.inv.warehouse.model.Model_Inv_Stock_Request_Master;
 import org.guanzon.cas.inv.warehouse.services.DeliveryIssuanceControllers;
 import ph.com.guanzongroup.cas.cashflow.status.JournalStatus;
 import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -696,6 +697,27 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
             if (!nv) {
                 /*Lost Focus*/
                 switch (lsTextFieldID) {
+                    //Implemented a temporary solution to allow the Inventory Cost to be updated during Item Transfer.
+                    // The system now validates the entered cost, prevents negative values,
+                    // and updates the selected item’s Inventory Cost in the transaction detail before refreshing the item details.
+                    // This addresses existing items in the database that do not yet have an SRP/Cost recorded in CAS.
+                    //THIS BLOCK OF CODE IS TEMPORARY AND WILL BE REMOVED ONCE THE SYSTEM IS FULLY IMPLEMENTED. as per maam she
+                    case "tfCost":
+                        if (lsValue.isEmpty()) {
+                            return;
+                        }
+
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        double ldInventoryCost = Double.valueOf(lsValue);
+                        if (ldInventoryCost < 0) {
+                            ShowMessageFX.Warning("Inventory Cost cannot be a negative value.", psFormName,null);
+                            return;
+
+                        }
+                        poAppController.getDetail(pnTransactionDetail).setInventoryCost(ldInventoryCost);
+                        reloadTableDetail();
+                        loadSelectedTransactionDetail(pnTransactionDetail);
+                        break;
                     case "tfProjectCode":
                         if (lsValue.isEmpty()) {
                             return;
@@ -826,12 +848,14 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
 
                             }
                         }
-                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
-                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
-                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
-                            loTextField.setText(String.valueOf(lnIssuedQty));
-                            tfIssuedQty.requestFocus();
-                        }
+                        //this blocked of codes is temporarily disabled as per maam she
+                        //09242026 disabled by teejei
+//                        if (lnIssuedQty > poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand()) {
+//                            lnIssuedQty = poAppController.getDetail(pnTransactionDetail).InventoryMaster().getQuantityOnHand();
+//                            ShowMessageFX.Information("Issued Quantity exceed Quantity on Hand Detected", psFormName, null);
+//                            loTextField.setText(String.valueOf(lnIssuedQty));
+//                            tfIssuedQty.requestFocus();
+//                        }
                         poAppController.getDetail(pnTransactionDetail).setQuantity(lnIssuedQty);
 
                         reloadTableDetail();
@@ -1149,7 +1173,7 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
         tfSearchDescription.setText(tblColDetailDescr.getCellData(tblIndex));
         tfBrand.setText(tblColDetailBrand.getCellData(tblIndex));
         tfVariant.setText(tblColDetailVariant.getCellData(tblIndex));
-        tfCost.setText(tblColDetailCost.getCellData(tblIndex));
+        tfCost.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(tblColDetailCost.getCellData(tblIndex), true));
         tfIssuedQty.setText(tblColDetailOrderQty.getCellData(tblIndex));
         tfQOH.setText(tblColDetailQOH.getCellData(tblIndex));
 //        tfReceiveQuantity.setText(tblColDetailRecQty.getCellData(tblIndex));
@@ -1416,12 +1440,13 @@ public class InventoryStockIssuanceNeoController_Approval implements Initializab
             });
 
             tblColDetailCost.setCellValueFactory((loModel) -> {
-                try {
-                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
-                } catch (SQLException | GuanzonException e) {
-                    poLogWrapper.severe(psFormName, e.getMessage());
-                    return new SimpleStringProperty("");
-                }
+                return new SimpleStringProperty(String.valueOf(loModel.getValue().getInventoryCost()));
+//                try {
+//                    return new SimpleStringProperty(String.valueOf(loModel.getValue().Inventory().getCost()));
+//                } catch (SQLException | GuanzonException e) {
+//                    poLogWrapper.severe(psFormName, e.getMessage());
+//                    return new SimpleStringProperty("");
+//                }
             });
 
             tblColDetailQOH.setCellValueFactory((loModel) -> {

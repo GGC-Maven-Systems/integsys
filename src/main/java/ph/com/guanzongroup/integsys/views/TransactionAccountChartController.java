@@ -28,14 +28,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
-import ph.com.guanzongroup.cas.cashflow.services.CashflowControllers;
+import org.guanzon.cas.parameter.services.ParamControllers;
 
 public class TransactionAccountChartController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
     private final String pxeModuleName = "Transaction Account Chart";
     private int pnEditMode;
-    private CashflowControllers oParameters;
+    private ParamControllers oParameters;
     private boolean state = false;
     private boolean pbLoaded = false;
     private String psPrimary = "";
@@ -103,7 +103,7 @@ public class TransactionAccountChartController implements Initializable, ScreenI
     private void initializeObject() {
         try {
             LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new CashflowControllers(oApp, logwrapr);
+            oParameters = new ParamControllers(oApp, logwrapr);
             oParameters.TransactionAccountChart().setRecordStatus("0123");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(TransactionAccountChartController.class.getName()).log(Level.SEVERE, null, ex);

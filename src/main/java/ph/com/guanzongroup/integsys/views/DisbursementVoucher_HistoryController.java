@@ -6,6 +6,7 @@ package ph.com.guanzongroup.integsys.views;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -49,6 +50,7 @@ import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.F3;
 import static javafx.scene.input.KeyCode.TAB;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -81,8 +83,10 @@ import ph.com.guanzongroup.integsys.model.ModelJournalEntryProposal_Detail;
 import ph.com.guanzongroup.integsys.model.ModelJournalEntryProposal_Main;
 import ph.com.guanzongroup.integsys.model.ModelJournalEntry_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
+import ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
-
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 /**
  * FXML Controller class
  *
@@ -137,6 +141,7 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
             new JFXUtil.Status(JournalProposalStatus.RETURNED, "RETURNED")
     );
     private int currentIndex = 0;
+    private String psLastOpenedAttachmentPath = "";
     JFXUtil.StageManager stageAttachment = new JFXUtil.StageManager();
     AnchorPane root = null;
     Scene scene = null;
@@ -294,6 +299,8 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
             initTableOnClick();
             initTabPane();
             clearTextFields();
+
+            openPath();
             pnEditMode = EditMode.UNKNOWN;
 
             initButton(pnEditMode);
@@ -1002,6 +1009,7 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
 
     private void initAttachmentPreviewPane() {
         imageviewerutil.initAttachmentPreviewPane(stackPane1, imageView);
+
         stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
             double computedHeight = newHeight.doubleValue();
             imageviewerutil.ldstackPaneHeight = computedHeight;
@@ -1017,6 +1025,35 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
         JFXUtil.setColumnsIndexAndDisableReordering(tblAttachments);
 
         tblAttachments.setItems(attachment_data);
+    }
+
+
+    /**
+     * Wires up a double-click handler on {@code stackPane1} (the attachment
+     * preview pane) so that double-clicking the currently previewed attachment
+     * with the primary mouse button opens its file location in Windows
+     * Explorer.
+     * <p>
+     * Only double-clicks (click count of 2) performed with
+     * {@link javafx.scene.input.MouseButton#PRIMARY} trigger the action; all
+     * other clicks (single clicks, secondary/middle clicks) are ignored. When
+     * triggered, this delegates to {@link #openAttachmentLocation()}, which
+     * resolves the currently selected attachment's file path and opens/focuses
+     * Explorer at that location.
+     * <p>
+     * This method only registers the event handler; it does not itself open
+     * anything. It is expected to be called once during controller
+     * initialization.
+     *
+     * @author TEEJEI DE CELIS
+     * @since 2026-09-16
+     */
+    public  void openPath(){
+        stackPane1.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
+                openAttachmentLocation();
+            }
+        });
     }
 
     public void slideImage(int direction) {
@@ -1105,6 +1142,7 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
                 JFXUtil.resetImageBounds(imageView, stackPane1);
             }
         });
+
         tblVwDetails.setOnMouseClicked(event -> {
             if (!details_data.isEmpty()) {
                 ModelDisbursementVoucher_Detail selected = (ModelDisbursementVoucher_Detail) tblVwDetails.getSelectionModel().getSelectedItem();
@@ -1768,6 +1806,80 @@ public class DisbursementVoucher_HistoryController implements Initializable, Scr
         } catch (Exception ex) {
         }
     }
+
+    /**
+     * Opens Windows File Explorer at the location of the currently selected
+     * attachment in {@code tblAttachments}, reusing an already-open Explorer
+     * window for the same folder when possible.
+     * <p>
+     * This method is responsible only for resolving the selected attachment's
+     * display file name and its fully qualified file path on disk, which is
+     * form-specific logic depending on {@code imageinfo_temp} and the
+     * controller's attachment model. Resolution proceeds as follows:
+     * <ol>
+     *   <li>Returns immediately if no valid row is selected in
+     *       {@code tblAttachments}.</li>
+     *   <li>Retrieves the selected attachment's file name from
+     *       {@code attachment_data}.</li>
+     *   <li>If the file name exists in {@code imageinfo_temp}, uses the
+     *       associated cached path.</li>
+     *   <li>Otherwise, resolves the path from
+     *       {@code poController.TransactionAttachmentList(pnAttachment)}'s
+     *       image path, falling back to the
+     *       {@code sys.default.path.temp.attachments} system property if no
+     *       image path is set.</li>
+     * </ol>
+     * All remaining behavior — validating the file name/path, confirming with
+     * the user, and opening or refocusing Explorer at the resolved file — is
+     * delegated to
+     * {@link ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil#confirmAndOpenAttachmentLocation(String, String)}.
+     * <p>
+     * Any exception raised during resolution or delegation (including
+     * {@link java.io.IOException} from the underlying Explorer/PowerShell
+     * process) is caught and logged via {@link Exception#printStackTrace()}
+     * rather than propagated, so a failure here will not interrupt the rest
+     * of the UI.
+     *
+     * @author TEEJEI DE CELIS
+     * @since 2026-09-16
+     */
+
+    private void openAttachmentLocation() {
+        try {
+            int lnSelectedIndex = tblAttachments.getSelectionModel().getSelectedIndex();
+
+            if (lnSelectedIndex < 0 || lnSelectedIndex >= attachment_data.size()) {
+                return;
+            }
+
+            String lsFileName = (String) attachment_data.get(lnSelectedIndex).getIndex02();
+
+            String lsFilePath = null;
+
+            if (lsFileName != null && !lsFileName.isEmpty()) {
+                if (imageinfo_temp.containsKey(lsFileName)) {
+                    lsFilePath = imageinfo_temp.get(lsFileName);
+                } else {
+                    String lsImagePath = poController.TransactionAttachmentList(pnAttachment)
+                            .getModel()
+                            .getImagePath();
+
+                    if (lsImagePath != null && !"".equals(lsImagePath)) {
+                        lsFilePath = lsImagePath + "/" + lsFileName;
+                    } else {
+                        lsFilePath = System.getProperty("sys.default.path.temp.attachments")
+                                + "/" + lsFileName;
+                    }
+                }
+            }
+
+            ExplorerWindowUtil.confirmAndOpenAttachmentLocation(lsFileName, lsFilePath);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
     private void initComboBoxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(cPaymentMode, cmbPaymentMode), new JFXUtil.Pairs<>(cPayeeType, cmbPayeeType),
