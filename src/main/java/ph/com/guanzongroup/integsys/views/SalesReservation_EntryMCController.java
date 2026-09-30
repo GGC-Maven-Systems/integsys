@@ -79,6 +79,7 @@ public class SalesReservation_EntryMCController implements Initializable, Screen
     private String psFormName = "Sales Reservation Entry MC";
     private LogWrapper logWrapper;
     private JSONObject poJSON;
+
     
     private String psIndustryID = "";
     private String psCompanyID = "";
@@ -224,6 +225,7 @@ public class SalesReservation_EntryMCController implements Initializable, Screen
         try {
             poSalesControllers = new SalesControllers(poApp, logWrapper);
             poSalesControllers.SalesReservation().setTransactionStatus(Sales_Reservation_Static.OPEN);
+            poSalesControllers.SalesReservation().setWithUI(true);
 
             poJSON = poSalesControllers.SalesReservation().InitTransaction();
             if (!"success".equals(poJSON.get("result"))) {
