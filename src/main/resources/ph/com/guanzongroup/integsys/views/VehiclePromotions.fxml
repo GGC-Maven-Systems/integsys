@@ -54,12 +54,6 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Downpayment Rate">
-                                       <font>
-                                          <Font name="System Bold" size="14.0" />
-                                       </font>
-                                    </Label>
-                                    <ComboBox prefWidth="150.0" GridPane.columnIndex="2" />
                                  </children>
                               </GridPane>
                            </children>
@@ -72,9 +66,9 @@
                             <children>
                                 <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                              <Button fx:id="btnExport" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Export">
+                              <Button fx:id="btnExport" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="DOWNLOAD" size="20" />
+                                    <FontAwesomeIconView glyphName="PRINT" size="20" />
                                  </graphic>
                                  <effect>
                                     <Blend />
@@ -127,10 +121,11 @@
                                                                         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" prefWidth="1500.0" />
                                                                      </columnConstraints>
                                                                      <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="ALWAYS" />
                                                                         <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
                                                                      </rowConstraints>
                                                                      <children>
-                                                                        <TableView fx:id="tblViewFinancingAllIn" GridPane.vgrow="ALWAYS">
+                                                                        <TableView fx:id="tblViewFinancingAllIn" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                                                            <columns>
                                                                               <TableColumn fx:id="tblNoFinancingAllIn" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
                                                                               <TableColumn fx:id="tblBrandFinancingAllIn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
@@ -149,6 +144,19 @@
                                                                               </TableColumn>
                                                                            </columns>
                                                                         </TableView>
+                                                                        <Label text="Downpayment Rate">
+                                                                           <font>
+                                                                              <Font name="System Bold" size="14.0" />
+                                                                           </font>
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </Label>
+                                                                        <ComboBox prefWidth="150.0">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="150.0" />
+                                                                           </GridPane.margin>
+                                                                        </ComboBox>
                                                                      </children>
                                                                   </GridPane>
                                                                </children>

@@ -429,14 +429,6 @@
                                                                                        </font>
                                                                                     </Label>
                                                                                     <TextField fx:id="tfAddress1121" disable="true" editable="false" layoutX="534.0" layoutY="40.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                                                                    <Button mnemonicParsing="false" GridPane.columnIndex="4" GridPane.halignment="LEFT">
-                                                                                       <graphic>
-                                                                                          <FontAwesomeIconView glyphName="PLUS" />
-                                                                                       </graphic>
-                                                                                       <GridPane.margin>
-                                                                                          <Insets left="5.0" />
-                                                                                       </GridPane.margin>
-                                                                                    </Button>
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>
@@ -580,14 +572,6 @@
                                                                                        </font>
                                                                                     </Label>
                                                                                     <TextField fx:id="tfAddress11211" disable="true" editable="false" layoutX="534.0" layoutY="40.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                                                                    <Button mnemonicParsing="false" GridPane.columnIndex="4" GridPane.halignment="LEFT">
-                                                                                       <graphic>
-                                                                                          <FontAwesomeIconView glyphName="PLUS" />
-                                                                                       </graphic>
-                                                                                       <GridPane.margin>
-                                                                                          <Insets left="5.0" />
-                                                                                       </GridPane.margin>
-                                                                                    </Button>
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>

@@ -129,8 +129,8 @@
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                                        <TextField fx:id="tfStandardRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
-                                                        <TextField fx:id="tfDuration" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="tfAddOnID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
+                                                        <TextField fx:id="tfDescription" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
                                           <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                              <children>
                                                 <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
