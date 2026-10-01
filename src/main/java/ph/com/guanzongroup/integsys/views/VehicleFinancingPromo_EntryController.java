@@ -481,9 +481,13 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
         });
 
         tfValidityID.setText(poController.Master().getValidityId());
-        dpValidFrom.setValue(poController.Master().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+        String lsValidFrom = CustomCommonUtil.formatDateToShortString(poController.Master().getFromDate());
+        JFXUtil.setDateValue(dpValidFrom, CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
+
+        String lsValidTo = CustomCommonUtil.formatDateToShortString(poController.Master().getThruDate());
+        JFXUtil.setDateValue(dpTo, CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+        
         tfValidityPeriod.setText(poController.Master().getValidityDescription());
-        dpTo.setValue(poController.Master().getThruDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Master().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
     }
 
     private void loadRecordDetail() {
