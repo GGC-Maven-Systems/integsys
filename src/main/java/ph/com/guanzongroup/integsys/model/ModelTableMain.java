@@ -99,6 +99,9 @@ public class ModelTableMain {
 
     }
 
+    public ModelTableMain(String s, String description, String modelId, String description1, String description2, String description3, String s1, Object setIntegerValueToDecimalFormat, boolean b) {
+    }
+
     public String getIndex01() {
         return index01.get();
     }

@@ -14,12 +14,14 @@ import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,7 +30,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -57,6 +61,7 @@ import ph.com.guanzongroup.integsys.model.ModelTableMain;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +95,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     private volatile boolean isLoadingDetail = false;
     private int pnGawayRow = -1;
     private static final int GAWAY_EMPTY_ROWS = 1;
-    private  int pnMCRow = -1;
+    private int pnMCRow = -1;
     private static final int MC_ITEMS_EMPTY_ROWS = 1;
     // =========================================================================
     // Table Data
@@ -101,13 +106,14 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
     private ObservableList<ModelTableDetail> detail_data = FXCollections.observableArrayList();
     private FilteredList<ModelTableMain> filteredMain_Data;
+    private FilteredList<ModelTableDetail> filteredDetail_Data;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     // =========================================================================
-// Root Containers
-// =========================================================================
+    // Root Containers
+    // =========================================================================
     @FXML private AnchorPane ChildAnchorPane;
     @FXML private AnchorPane apSearchMaster;
     @FXML private AnchorPane AnchorInputs;
@@ -121,8 +127,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private HBox hbButtons;
 
     // =========================================================================
-// Action Buttons
-// =========================================================================
+    // Action Buttons
+    // =========================================================================
     @FXML private Button btnBrowse;
     @FXML private Button btnNew;
     @FXML private Button btnCreateFrom;
@@ -138,8 +144,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private Button btnClose;
     @FXML private Button btnAddClient;
     // =========================================================================
-// Customer Information Controls
-// =========================================================================
+    // Customer Information Controls
+    // =========================================================================
     @FXML private TextField tfTransNo;
     @FXML private TextField tfCustomerName;
     @FXML private FontAwesomeIconView faAdd;
@@ -151,8 +157,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
 
     // =========================================================================
-// Quotation Information Controls
-// =========================================================================
+    // Quotation Information Controls
+    // =========================================================================
     @FXML private TextField tfVersionTransNo;
     @FXML private DatePicker dpQoutationDate;
     @FXML private TextField tfVersion;
@@ -160,19 +166,19 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private DatePicker dpQoutationExpectedDate;
     @FXML private DatePicker dpQoutationValidity;
     @FXML private TextArea taReason;
-
+    @FXML private TextArea taAdditionalRemarks;
     // =========================================================================
-// Delivery Information Controls
-// =========================================================================
+    // Delivery Information Controls
+    // =========================================================================
     @FXML private ComboBox cmbDeliveryMethod;
     @FXML private TextField tfDeliveryAddress;
     @FXML private TextField tfDeliveryRemarks;
-    @FXML private  Label lblDeliverTo;
+    @FXML private Label lblDeliverTo;
 
 
     // =========================================================================
-// Payment Information Controls
-// =========================================================================
+    // Payment Information Controls
+    // =========================================================================
     @FXML private ComboBox<?> tfPaymentVAT;
     @FXML private ComboBox cmbPaymentForm;
     @FXML private TextField tfPaymentRemarks;
@@ -185,8 +191,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
 
     // =========================================================================
-// Motorcycle Item Information Controls
-// =========================================================================
+    // Motorcycle Item Information Controls
+    // =========================================================================
     @FXML private TextField tfMCItemBrand;
     @FXML private TextField tfMCItemModel;
     @FXML private TextField tfMCItemInsuranceAmt;
@@ -198,8 +204,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
 
     // =========================================================================
-// Motorcycle Item Table Controls
-// =========================================================================
+    // Motorcycle Item Table Controls
+    // =========================================================================
     @FXML private TableView<ModelTableMain> tblMCItem;
 
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemNo;
@@ -219,8 +225,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
 
     // =========================================================================
-// Giveaway Information Controls
-// =========================================================================
+    // Giveaway Information Controls
+    // =========================================================================
     @FXML private TextField tfGawayBarrcode;
     @FXML private TextField tfGawayDescription;
     @FXML private TextField tfGawayRemarks;
@@ -228,8 +234,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
 
     // =========================================================================
-// Giveaway Table Controls
-// =========================================================================
+    // Giveaway Table Controls
+    // =========================================================================
     @FXML private TableView<ModelTableDetail> tblGawayItem;
 
     @FXML private TableColumn<ModelTableDetail, String> tblRowGawayNo;
@@ -273,7 +279,6 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         initButton(pnEditMode);
         InitTextFields();
         initTables();
-//        initTableOnClick();
         ClickButton();
         initComboBoxField();
         initDatePickers();
@@ -282,14 +287,13 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
     private void initializeObject() {
         try {
-        LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-        oSalesController = new SalesControllers(oApp, logwrapr);
-        oSalesController.SalesQoutation().initialize();
-        oSalesController.SalesQoutation().setRecordStatus(SalesQoutationStatic.OPEN);
-        oSalesController.SalesQoutation().setWithUI(true);
+            LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+            oSalesController = new SalesControllers(oApp, logwrapr);
+            oSalesController.SalesQoutation().initialize();
+            oSalesController.SalesQoutation().setRecordStatus(SalesQoutationStatic.OPEN);
+            oSalesController.SalesQoutation().setWithUI(true);
 
-        Platform.runLater((
-        ) -> btnNew.fire());
+            Platform.runLater(() -> btnNew.fire());
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
         }
@@ -311,7 +315,6 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             anchorGawayItems.setDisable(true);
             anchorAdditionalRemarks.setDisable(true);
             switch (fnValue) {
-//                btnBrowse, btnNew, btnCreateFrom, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose;
                 case EditMode.ADDNEW:
                     // When adding or updating, only show Save and Cancel
                     CustomCommonUtil.setVisible(true, btnSave, btnCancel, btnClose);
@@ -332,19 +335,25 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         case SalesQoutationStatic.LOST:
                         case SalesQoutationStatic.SALES:
                         case SalesQoutationStatic.VOID:
-                            CustomCommonUtil.setVisible(true, btnBrowse,  btnPrint, btnExport, btnClose);
-                            CustomCommonUtil.setManaged(true, btnBrowse,  btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setVisible(true, btnBrowse, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setManaged(true, btnBrowse, btnPrint, btnExport, btnClose);
                             break;
-
                     }
+                    break; // added: READY no longer falls through into UPDATE
                 case EditMode.UPDATE:
                     CustomCommonUtil.setVisible(true, btnSave, btnCancel, btnClose);
                     CustomCommonUtil.setManaged(true, btnSave, btnCancel, btnClose);
+                    anchorQoutation.setDisable(false);
+                    anchorVersion.setDisable(false);
+                    anchorOthers.setDisable(false);
+                    anchorMCItems.setDisable(false);
+                    anchorGawayItems.setDisable(false);
+                    anchorAdditionalRemarks.setDisable(false);
                     break;
                 case EditMode.UNKNOWN:
                 default:
-                    // Default fallback: show only Browse and Close
-                    CustomCommonUtil.setVisible(true,btnBrowse, btnNew, btnClose);
+                    // Default fallback: show only Browse, New and Close
+                    CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnClose);
                     CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnClose);
                     break;
             }
@@ -364,22 +373,23 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
         // register explicitly in case the recursive walk misses nested/skinned containers
         TextField[] laMCFields = {tfMCItemBrand, tfMCItemModel, tfMCItemQuantity,
-                tfMCItemDiscount, tfMCItemFreight, tfMCItemRegisAmt, tfMCItemInsuranceAmt,tfVersion,tfTransNo,tfVersionTransNo};
+                tfMCItemDiscount, tfMCItemFreight, tfMCItemRegisAmt, tfMCItemInsuranceAmt, tfVersion, tfTransNo, tfVersionTransNo};
         for (TextField tf : laMCFields) {
             tf.focusedProperty().removeListener(txtField_Focus);
             tf.focusedProperty().addListener(txtField_Focus);
         }
 
         tblMCItem.setOnMouseClicked(this::setTblMCItem_Clicked);
+        tblGawayItem.setOnMouseClicked(this::setTblGawayItem_Clicked);
     }
 
     private void initComboBoxField() {
-
+        tfMCItemInsuranceAmt.setEditable(false);
+        tfMCItemRegisAmt.setEditable(false);
         cmbDeliveryMethod.setItems(SalesQoutationStatic.DELIVERY_TYPE_DESCRIPTION);
         cmbPaymentForm.setItems(SalesQoutationStatic.PAYMENT_TYPE_DESCRIPTION);
         cmbInsurance.setItems(SalesQoutationStatic.INSURANCE_DESCRIPTION);
         cmbRegistration.setItems(SalesQoutationStatic.REGISTRATION_DESCRIPTION);
-
 
         cmbDeliveryMethod.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue == null || newValue.intValue() < 0) return;
@@ -398,6 +408,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 oSalesController.SalesQoutation().Version().Master().setBranchCode("");
             }
         });
+
         cmbPaymentForm.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue == null || newValue.intValue() < 0) return;
 
@@ -406,13 +417,28 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
             tfPaymentTerms.setPromptText(lbTerm ? "Press F3: Search" : null);
             tfPaymentTerms.setEditable(lbTerm);
-            oSalesController.SalesQoutation().Version().Master().setParentId(fbPaymentType);
+            // fixed: was setParentId(...), which overwrites the quotation link
+            oSalesController.SalesQoutation().Version().Master().setPaymentForm(fbPaymentType);
             if (!lbTerm) {
                 oSalesController.SalesQoutation().Version().Master().setTermId("");
             }
         });
 
+        cmbInsurance.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.intValue() < 0) return;
 
+            fbInsurance = SalesQoutationStatic.INSURANCE_CODE[newValue.intValue()];
+            boolean isYes = SalesQoutationStatic.InsuranceType.YES.equals(fbInsurance);
+            tfMCItemInsuranceAmt.setEditable(isYes);
+        });
+
+        cmbRegistration.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.intValue() < 0) return;
+
+            fbRegistration = SalesQoutationStatic.REGISTRATION_CODE[newValue.intValue()];
+            boolean isYes = SalesQoutationStatic.Registration.YES.equals(fbRegistration);
+            tfMCItemRegisAmt.setEditable(isYes);
+        });
 
         tfPaymentVAT.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -444,34 +470,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 }
             }
         });
-
-        cmbInsurance.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable,
-                                Number oldValue,
-                                Number newValue) {
-
-                if (newValue != null && newValue.intValue() >= 0) {
-                    fbInsurance = SalesQoutationStatic.INSURANCE_CODE[newValue.intValue()];
-                }
-            }
-        });
-
-        cmbRegistration.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable,
-                                Number oldValue,
-                                Number newValue) {
-
-                if (newValue != null && newValue.intValue() >= 0) {
-                    fbRegistration = SalesQoutationStatic.REGISTRATION_CODE[newValue.intValue()];
-                }
-            }
-        });
     }
 
     // =========================================================================
-    // Load ReCord
+    // Load Record
     // =========================================================================
     private void LoadRecord() {
         try {
@@ -512,10 +514,11 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             dpQoutationValidity.setValue(CustomCommonUtil.parseDateStringToLocalDate(
                     SQLUtil.dateFormat(oSalesController.SalesQoutation().Version().Master().getValidThruDate(), SQLUtil.FORMAT_SHORT_DATE)));
 
-
             taReason.setText(oSalesController.SalesQoutation().Version().Master().getReasons());
+
             String lsType = oSalesController.SalesQoutation().Version().Master().getDeliveryType();
-            int lnIdx = java.util.Arrays.asList(SalesQoutationStatic.DELIVERY_TYPE_CODE).indexOf(lsType);
+            if (lsType == null) lsType = "";
+            int lnIdx = Arrays.asList(SalesQoutationStatic.DELIVERY_TYPE_CODE).indexOf(lsType);
             cmbDeliveryMethod.getSelectionModel().select(lnIdx);
 
             switch (lsType) {
@@ -533,17 +536,15 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfDeliveryRemarks.setText(oSalesController.SalesQoutation().Version().Master().getRemarks());
 
             String lsPayForm = oSalesController.SalesQoutation().Version().Master().getPaymentForm();
-            int lnPayForm = java.util.Arrays.asList(SalesQoutationStatic.PAYMENT_TYPE_CODE).indexOf(lsPayForm);
+            int lnPayForm = Arrays.asList(SalesQoutationStatic.PAYMENT_TYPE_CODE).indexOf(lsPayForm);
             cmbPaymentForm.getSelectionModel().select(lnPayForm);
-
             tfPaymentTerms.setText(oSalesController.SalesQoutation().Version().Master().Terms().getDescription());
             tfPaymentRemarks.setText(oSalesController.SalesQoutation().Version().Master().getRemarks1());
+            taAdditionalRemarks.setText(oSalesController.SalesQoutation().Version().Master().getRemarks2());
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
         }
-
     }
-
 
     private void initDatePickers() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpQoutationDate, dpQoutationExpectedDate, dpQoutationValidity, dpTransDate);
@@ -597,20 +598,21 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     // =========================================================================
     // Table Setup Methods
     // =========================================================================
-    private void initTables(){
+    private void initTables() {
         initTableMCItems();
         initTableGawayItems();
     }
 
-
     private void initTableMCItems() {
-        JFXUtil.setColumnCenter(tblRowMCitemNo, tblRowMCitemBrand, tblRowMCitemModel, tblRowMCitemDesc, tblRowMCitemColor, tblRowMCitemVariant, tblRowMCitemSRP, tblRowMCitemDiscount, tblRowMCitemFreight, tblRowMCitemReg, tblRowMCitemInsurance, tblRowMCitemQty, tblRowMCitemTotal, tblRowMCitemAction);
+        JFXUtil.setColumnCenter(tblRowMCitemNo, tblRowMCitemBrand, tblRowMCitemModel, tblRowMCitemDesc, tblRowMCitemColor, tblRowMCitemVariant);
+        JFXUtil.setColumnRight(tblRowMCitemSRP, tblRowMCitemDiscount, tblRowMCitemFreight, tblRowMCitemReg, tblRowMCitemInsurance, tblRowMCitemQty, tblRowMCitemTotal, tblRowMCitemAction);
         JFXUtil.setColumnsIndexAndDisableReordering(tblMCItem);
-        initActionColumnMCItem();   // <- add, after setColumnCenter so it isn't overwritten
+        initActionColumnMCItem();   // after setColumnCenter so it isn't overwritten
 
         filteredMain_Data = new FilteredList<>(main_data, b -> true);
         tblMCItem.setItems(filteredMain_Data);
     }
+
     private void initActionColumnMCItem() {
         tblRowMCitemAction.setCellValueFactory(cd -> new javafx.beans.property.SimpleStringProperty(""));
         tblRowMCitemAction.setCellFactory(col -> new TableCell<ModelTableMain, String>() {
@@ -669,18 +671,11 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             SalesQoutationVersion loVersion = oSalesController.SalesQoutation().Version();
             if (fnRow < 0 || fnRow >= loVersion.getDetailCount()) return;
 
-            // Option A (no remove method needed): blank the row, ReloadDetail() drops empty rows
+            // blank the row; ReloadDetail() in loadTableMCItem() drops empty rows
             loVersion.Detail(fnRow).setStockId(null);
-            // Option B (if you have one): loVersion.RemoveDetail(fnRow);
 
             pnMCRow = -1;
-            tfMCItemBrand.clear();
-            tfMCItemModel.clear();
-            tfMCItemQuantity.clear();
-            tfMCItemDiscount.clear();
-            tfMCItemFreight.clear();
-            tfMCItemRegisAmt.clear();
-            tfMCItemInsuranceAmt.clear();
+            clearMCItemTextFields();
 
             loadTableMCItem();
         } catch (Exception ex) {
@@ -688,13 +683,106 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
     }
+
     private void initTableGawayItems() {
         JFXUtil.setColumnCenter(tblRowGawayNo, tblRowGawayItem, tblRowGawayItemCode, tblRowGawayDesc, tblRowGawayQty, tblRowGawayRemarks, tblRowGawayAction);
         JFXUtil.setColumnsIndexAndDisableReordering(tblGawayItem);
-        tblGawayItem.setItems(detail_data);
+        initActionColumnGawayItem();   // after setColumnCenter so it isn't overwritten
+
+        filteredDetail_Data = new FilteredList<>(detail_data, b -> true);
+        tblGawayItem.setItems(filteredDetail_Data);
     }
 
+    private void initActionColumnGawayItem() {
+        tblRowGawayAction.setCellValueFactory(cd -> new javafx.beans.property.SimpleStringProperty(""));
+        tblRowGawayAction.setCellFactory(col -> new TableCell<ModelTableDetail, String>() {
+            private final Button btnRemove = new Button();
+            private final Tooltip tooltip = new Tooltip();
 
+            {
+                FontAwesomeIconView loIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+                loIcon.setGlyphSize(14);
+                loIcon.setFill(javafx.scene.paint.Color.WHITE);
+
+                btnRemove.setGraphic(loIcon);
+                btnRemove.setStyle("-fx-background-color: #d9534f; -fx-cursor: hand; -fx-padding: 4 8 4 8;");
+                tooltip.setShowDelay(Duration.millis(200));
+                btnRemove.setTooltip(tooltip);
+
+                btnRemove.setOnAction(e -> {
+                    int lnRow = getIndex();
+                    if (lnRow >= 0 && lnRow < getTableView().getItems().size()) {
+                        removeGawayItemRow(lnRow);
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setAlignment(Pos.CENTER);
+                setText(null);
+
+                boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
+                if (empty || !lbEditing || getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                    return;
+                }
+
+                ModelTableDetail loRowData = getTableView().getItems().get(getIndex());
+                // FIX: a genuinely blank placeholder row now has an empty
+                // index02 (the Giveaways/Service category column) - checking
+                // index03 (StockId/ItemCode) alone would wrongly treat every
+                // Service row (which has no stock item) as blank and hide
+                // its remove button.
+                boolean lbBlank = loRowData == null || loRowData.getIndex02().isEmpty();
+                if (lbBlank) {
+                    setGraphic(null);
+                    return;
+                }
+
+                // tooltip: "Remove" + the item description
+                tooltip.setText("Remove\n" + loRowData.getIndex04());
+                setGraphic(btnRemove);
+            }
+        });
+    }
+
+    /*
+     * FIX: previously called loVersionGiveaway.Detail(fnRow) - that method
+     * does not exist on SalesQoutationVersionGiveaways (it only exposes
+     * Giveaway(int row)), and the whole row-removal approach was borrowed
+     * from the MC item side without a matching "ReloadDetail() drops blank
+     * rows" mechanism on this class. SalesQoutationVersionGiveaways instead
+     * has a purpose-built removeGiveaway(int row) that removes the row from
+     * the in-memory list outright (it is deleted from the DB on save via
+     * saveGiveaways()'s own cleanup), so that is used directly here. This
+     * also now reloads the GIVEAWAY table (loadTableGawayItem()) instead of
+     * the MC item table.
+     */
+    private void removeGawayItemRow(int fnRow) {
+        if (!ShowMessageFX.YesNo("Remove this item from the quotation?", pxeModuleName, null)) {
+            return;
+        }
+        try {
+            SalesQoutationVersionGiveaways loVersionGiveaway = oSalesController.SalesQoutation().Giveaways();
+            if (fnRow < 0 || fnRow >= loVersionGiveaway.getGiveawayCount()) return;
+
+            poJSON = loVersionGiveaway.removeGiveaway(fnRow);
+            if ("error".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                return;
+            }
+
+            pnGawayRow = -1;
+            clearGawayItemTextFields();
+
+            loadTableGawayItem();
+        } catch (Exception ex) {
+            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
 
     private void loadTableMCItem() {
         JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
@@ -712,7 +800,6 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             loVersion.ReloadDetail();
 
-                            // add a blank row only if the last row isn't already blank
                             int lnLast = loVersion.getDetailCount() - 1;
                             boolean lbLastBlank = lnLast >= 0
                                     && (loVersion.Detail(lnLast).getStockId() == null
@@ -721,6 +808,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 poJSON = loVersion.AddDetail();
                             }
                         }
+
+                        // 1. Initialize total variable
+                        double grandTotal = 0.0;
 
                         for (int lnCtr = 0; lnCtr < loVersion.getDetailCount(); lnCtr++) {
                             Model_Sales_Quotation_Version_Detail loRow = loVersion.Detail(lnCtr);
@@ -731,6 +821,21 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                         "", "", "", "", "", "", "", "", "", "", "", "", ""));
                                 continue;
                             }
+
+                            // 2. Extract unit values (converting safe String outputs or direct numeric getters to double)
+                            double price = parseDouble(safe(() -> loRow.Inventory().getSellingPrice()));
+                            double discount = parseDouble(safe(loRow::getDiscount));
+                            double adddiscount = parseDouble(safe(loRow::getAdditionalDiscount));
+                            double freight = parseDouble(safe(loRow::getFreight));
+                            double reg = parseDouble(safe(loRow::getRegistrationAmount));
+                            double ins = parseDouble(safe(loRow::getInsuranceAmount));
+
+                            int qty = parseInt(safe(loRow::getQuantity));
+
+
+                            // 3. Compute row total: ((Price - Discount - Additional Discount) * Qty) + Charges
+                            double rowTotal = ((price - discount - adddiscount)  + freight + reg + ins)* qty;
+                            grandTotal += rowTotal;
 
                             main_data.add(new ModelTableMain(
                                     String.valueOf(lnCtr + 1),
@@ -745,9 +850,13 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                     safe(loRow::getRegistrationAmount),
                                     safe(loRow::getInsuranceAmount),
                                     safe(loRow::getQuantity),
-                                    "",
-                                    ""));
+                                    String.format("%.2f", rowTotal) , // Position 13: Total
+                                    ""
+                            ));
                         }
+
+                        // 4. Update your JavaFX UI component with the grand total
+                        // lblGrandTotal.setText(String.format("%,.2f", grandTotal));
 
                         if (pnMCRow < 0 || pnMCRow >= main_data.size()) {
                             if (!main_data.isEmpty()) {
@@ -757,6 +866,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         } else {
                             JFXUtil.selectAndFocusRow(tblMCItem, pnMCRow);
                         }
+
+                        updateMCComboState();
                     } catch (Exception ex) {
                         Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -780,6 +891,301 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         new Thread(task).start();
     }
 
+    // Helper methods to safely parse String results returned by safe()
+    private double parseDouble(String value) {
+        if (value == null || value.trim().isEmpty()) return 0.0;
+        try {
+            return Double.parseDouble(value.replace(",", ""));
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.trim().isEmpty()) return 0;
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    /*
+     * NEW: this method did not exist before. The giveaway table's backing
+     * list (detail_data) was never populated anywhere, so giveaways loaded
+     * via SalesQoutation.openRecord()/newRecord() -> Giveaways() were never
+     * shown on screen.
+     *
+     * Mirrors loadTableMCItem()'s structure, but SalesQoutationVersionGiveaways
+     * has no ReloadDetail()/AddDetail() pair - only addGiveaway() and
+     * removeGiveaway(row) - so the "keep exactly one blank trailing row while
+     * editing" logic is implemented directly here instead of delegating to
+     * the giveaways controller.
+     *
+     * Column mapping assumed (based on the Inventory()/Brand() accessor
+     * already referenced - commented out - in the original source, and the
+     * same getIndex03()/getIndex04() blank-check/tooltip convention used by
+     * initActionColumnMCItem() above):
+     *   index01 = row no.            index02 = Inventory().Brand().getDescription()
+     *   index03 = getStockId()       index04 = Inventory().getDescription()
+     *   index05 = getQuantity()      index06 = getRemarks()
+     *   index07 = (action column placeholder, unused)
+     *
+     * UNVERIFIED: getRemarks()/setRemarks(String) on Model_Sales_Quotation_
+     * Version_Giveaways - this file wasn't available to confirm the exact
+     * getter/setter name. If it differs, update this method and the
+     * "tfGawayRemarks" case in txtField_Focus below.
+     */
+    /**
+     * Classifies a giveaway row for display/sorting purposes.
+     * <p>
+     * 0 = "Giveaways" - has an actual stock item (barcode + description).<br>
+     * 1 = "Service"   - no stock item, but has remarks and/or a quantity
+     *     entered directly (e.g. a free installation/service line).<br>
+     * 2 = blank placeholder - neither an item nor service info; this is the
+     *     trailing empty row kept open for new entry.
+     * <p>
+     * UNVERIFIED: assumes getRemarks() exists on
+     * Model_Sales_Quotation_Version_Giveaways (not available to confirm).
+     */
+    private int gawayRowRank(Model_Sales_Quotation_Version_Giveaways row) {
+        try {
+            boolean lbHasStock = row.getStockId() != null && !row.getStockId().trim().isEmpty();
+            String lsDesc = lbHasStock ? row.Inventory().getDescription() : null;
+            boolean lbHasItem = lbHasStock && lsDesc != null && !lsDesc.trim().isEmpty();
+            if (lbHasItem) return 0;
+
+            String lsRemarks = row.getRemarks();
+            Integer lnQty = row.getQuantity();
+            boolean lbHasServiceInfo = (lsRemarks != null && !lsRemarks.trim().isEmpty())
+                    || (lnQty != null && lnQty > 0);
+            return lbHasServiceInfo ? 1 : 2;
+        } catch (Exception e) {
+            return 2;
+        }
+    }
+
+    private void loadTableGawayItem() {
+        JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
+        tblGawayItem.setPlaceholder(loading.loadingPane);
+        loading.progressIndicator.setVisible(true);
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                Platform.runLater(() -> {
+                    try {
+                        detail_data.clear();
+
+                        SalesQoutationVersionGiveaways loGiveaways
+                                = oSalesController.SalesQoutation().Giveaways();
+
+                        /*
+                         * Keep the currently selected giveaway object before sorting.
+                         *
+                         * pnGawayRow is only a display/list index. Once the actual
+                         * backing list is sorted, that index may point to another row.
+                         *
+                         * Keeping the object reference allows us to find its new
+                         * index after sorting.
+                         */
+                        Model_Sales_Quotation_Version_Giveaways loSelectedGiveaway = null;
+
+                        if (pnGawayRow >= 0
+                                && pnGawayRow < loGiveaways.getGiveawayCount()) {
+
+                            loSelectedGiveaway
+                                    = loGiveaways.Giveaway(pnGawayRow);
+                        }
+
+                        /*
+                         * Add one blank row while adding/updating.
+                         *
+                         * Only add a blank row if the last existing row is not
+                         * already a blank placeholder.
+                         */
+                        if (pnEditMode == EditMode.ADDNEW
+                                || pnEditMode == EditMode.UPDATE) {
+
+                            int lnLast = loGiveaways.getGiveawayCount() - 1;
+
+                            boolean lbLastBlank = lnLast >= 0
+                                    && gawayRowRank(loGiveaways.Giveaway(lnLast)) == 2;
+
+                            if (!lbLastBlank) {
+                                poJSON = loGiveaways.addGiveaway();
+                            }
+                        }
+
+                        /*
+                         * Sort the ACTUAL backing list.
+                         *
+                         * Rank:
+                         *
+                         * 0 = Giveaway
+                         * 1 = Service
+                         * 2 = Blank placeholder
+                         *
+                         * Sorting the actual list is important because the table
+                         * row index is also used when accessing Giveaway(row).
+                         */
+                        loGiveaways.Giveaways().sort(
+                                java.util.Comparator.comparingInt(
+                                        SalesQoutationController.this::gawayRowRank
+                                )
+                        );
+
+                        /*
+                         * Find the selected giveaway's NEW index after sorting.
+                         *
+                         * Do not use the old pnGawayRow because sorting may have
+                         * changed the position of the selected record.
+                         */
+                        if (loSelectedGiveaway != null) {
+                            int lnSelectedIndex = -1;
+
+                            for (int lnCtr = 0;
+                                 lnCtr < loGiveaways.getGiveawayCount();
+                                 lnCtr++) {
+
+                                if (loGiveaways.Giveaway(lnCtr)
+                                        == loSelectedGiveaway) {
+
+                                    lnSelectedIndex = lnCtr;
+                                    break;
+                                }
+                            }
+
+                            if (lnSelectedIndex >= 0) {
+                                pnGawayRow = lnSelectedIndex;
+                            }
+                        }
+
+                        /*
+                         * Populate the table backing list using the SAME order
+                         * as the sorted Giveaways() list.
+                         */
+                        for (int lnCtr = 0;
+                             lnCtr < loGiveaways.getGiveawayCount();
+                             lnCtr++) {
+
+                            Model_Sales_Quotation_Version_Giveaways loRow
+                                    = loGiveaways.Giveaway(lnCtr);
+
+                            int lnRank = gawayRowRank(loRow);
+
+                            /*
+                             * Blank trailing row.
+                             */
+                            if (lnRank == 2) {
+                                detail_data.add(
+                                        new ModelTableDetail(
+                                                String.valueOf(lnCtr + 1),
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                ""
+                                        )
+                                );
+
+                                continue;
+                            }
+
+                            boolean lbHasItem = lnRank == 0;
+                            String lsRowType = lbHasItem
+                                    ? "Giveaways"
+                                    : "Service";
+
+                            detail_data.add(
+                                    new ModelTableDetail(
+                                            String.valueOf(lnCtr + 1),
+                                            lsRowType,
+                                            lbHasItem
+                                                    ? loRow.getStockId()
+                                                    : "",
+                                            lbHasItem
+                                                    ? loRow.Inventory().getDescription()
+                                                    : "",
+                                            safe(loRow::getQuantity),
+                                            safe(loRow::getRemarks),
+                                            ""
+                                    )
+                            );
+                        }
+
+                        /*
+                         * Restore the selected row after rebuilding the table.
+                         *
+                         * If the previously selected record still exists,
+                         * select its new position.
+                         *
+                         * Otherwise, select the first available row.
+                         */
+                        if (pnGawayRow >= 0
+                                && pnGawayRow < detail_data.size()) {
+
+                            JFXUtil.selectAndFocusRow(
+                                    tblGawayItem,
+                                    pnGawayRow
+                            );
+
+                        } else if (!detail_data.isEmpty()) {
+
+                            JFXUtil.selectAndFocusRow(
+                                    tblGawayItem,
+                                    0
+                            );
+
+                            pnGawayRow
+                                    = tblGawayItem
+                                    .getSelectionModel()
+                                    .getSelectedIndex();
+                        }
+
+                    } catch (Exception ex) {
+                        Logger.getLogger(
+                                SalesQoutationController.class.getName()
+                        ).log(
+                                Level.SEVERE,
+                                null,
+                                ex
+                        );
+                    }
+                });
+
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                if (detail_data.isEmpty()) {
+                    tblGawayItem.setPlaceholder(
+                            loading.placeholderLabel
+                    );
+                } else {
+                    tblGawayItem.toFront();
+                }
+
+                loading.progressIndicator.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                if (detail_data.isEmpty()) {
+                    tblGawayItem.setPlaceholder(
+                            loading.placeholderLabel
+                    );
+                }
+
+                loading.progressIndicator.setVisible(false);
+            }
+        };
+
+        new Thread(task).start();
+    }
+
     private void setTblMCItem_Clicked(MouseEvent event) {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
             pnMCRow = tblMCItem.getSelectionModel().getSelectedIndex();
@@ -793,90 +1199,35 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                     }
                 }
             }
-
+            updateMCComboState();
         }
     }
-   // empty rows shown at the end while editing
 
-    private void loadTableGaway() {
-        JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
-        tblGawayItem.setPlaceholder(loading.loadingPane);
-        loading.progressIndicator.setVisible(true);
-
-        Task<Void> task = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                Platform.runLater(() -> {
-                    try {
-                        detail_data.clear();
-                        SalesQoutationVersionGiveaways loGive = oSalesController.SalesQoutation().Giveaways();
-
-                        // In add new / update mode: drop old trailing empty rows, then add fresh ones at the end
-                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                            for (int lnRow = loGive.getGiveawayCount() - 1; lnRow >= 0; lnRow--) {
-                                String lsStock = loGive.Giveaway(lnRow).getStockId();
-                                if (lsStock == null || lsStock.isEmpty()) {
-                                    loGive.removeGiveaway(lnRow);
-                                } else {
-                                    break;
-                                }
-                            }
-                            for (int lnCtr = 0; lnCtr < GAWAY_EMPTY_ROWS; lnCtr++) {
-                                poJSON = loGive.addGiveaway();
-                                if ("error".equals((String) poJSON.get("result"))) break;
-                            }
-                        }
-
-                        for (int lnCtr = 0; lnCtr < loGive.getGiveawayCount(); lnCtr++) {
-                            Model_Sales_Quotation_Version_Giveaways loRow = loGive.Giveaway(lnCtr);
-                            Integer lnQty = loRow.getQuantity();
-                            boolean lbBlank = loRow.getStockId() == null || loRow.getStockId().isEmpty();
-
-                            detail_data.add(new ModelTableDetail(
-                                    String.valueOf(lnCtr + 1),
-                                    "",
-                                    lbBlank ? "" : loRow.getStockId(),
-                                    "",   // description: fill in once the row model's lookup is known
-                                    (lbBlank || lnQty == null) ? "" : String.valueOf(lnQty),
-                                    "",
-                                    ""));  // remarks: same
-                        }
-
-                        if (pnGawayRow < 0 || pnGawayRow >= detail_data.size()) {
-                            if (!detail_data.isEmpty()) {
-                                JFXUtil.selectAndFocusRow(tblGawayItem, 0);
-                                pnGawayRow = tblGawayItem.getSelectionModel().getSelectedIndex();
-                            }
-                        } else {
-                            JFXUtil.selectAndFocusRow(tblGawayItem, pnGawayRow);
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+    /*
+     * NEW: no equivalent existed before, so selecting a giveaway row never
+     * loaded it into tfGawayBarrcode/tfGawayDescription/tfGawayQty/
+     * tfGawayRemarks. Mirrors setTblMCItem_Clicked().
+     */
+    private void setTblGawayItem_Clicked(MouseEvent event) {
+        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
+            pnGawayRow = tblGawayItem.getSelectionModel().getSelectedIndex();
+            ModelTableDetail selectedItem = tblGawayItem.getSelectionModel().getSelectedItem();
+            clearGawayItemTextFields();
+            if (selectedItem != null) {
+                if (pnGawayRow >= 0) {
+                    LoadGawayItemRecord();
+                    if (event.getClickCount() == 2) {
+                        tfGawayQty.requestFocus();
                     }
-                });
-                return null;
+                }
             }
-
-            @Override
-            protected void succeeded() {
-                if (detail_data.isEmpty()) tblGawayItem.setPlaceholder(loading.placeholderLabel);
-                else tblGawayItem.toFront();
-                loading.progressIndicator.setVisible(false);
-            }
-
-            @Override
-            protected void failed() {
-                if (detail_data.isEmpty()) tblGawayItem.setPlaceholder(loading.placeholderLabel);
-                loading.progressIndicator.setVisible(false);
-            }
-        };
-        new Thread(task).start();
+        }
     }
 
-//
-//    // =========================================================================
-//    // Button & Event Handlers
-//    // =========================================================================
+
+    // =========================================================================
+    // Button & Event Handlers
+    // =========================================================================
     private void ClickButton() {
         btnBrowse.setOnAction(this::handleButtonAction);
         btnNew.setOnAction(this::handleButtonAction);
@@ -884,13 +1235,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         btnCancel.setOnAction(this::handleButtonAction);
         btnClose.setOnAction(this::handleButtonAction);
         btnAddClient.setOnAction(this::handleButtonAction);
-//        btnRetrieve.setOnAction(this::handleButtonAction);
-//        btnAddAttachment.setOnAction(this::handleButtonAction);
-//        btnRemoveAttachment.setOnAction(this::handleButtonAction);
-//        btnArrowLeft.setOnAction(this::handleButtonAction);
-//        btnArrowRight.setOnAction(this::handleButtonAction);
+        btnUpdate.setOnAction(this::handleButtonAction);
+        btnFollowUp.setOnAction(this::handleButtonAction);
     }
-//
+
     private void handleButtonAction(ActionEvent event) {
         Object source = event.getSource();
 
@@ -899,6 +1247,14 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 Button clickedButton = (Button) source;
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
+                    case "btnFollowUp":
+                        // 1. Guard check: Only allow follow-up during view mode
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Follow up is only available during view mode.");
+                            return;
+                        }
+                        openFollowUpModal();
+                        break;
                     case "btnAddClient":
                         if (pnEditMode == EditMode.ADDNEW) {
                             poJSON = oSalesController.SalesQoutation().addClient();
@@ -906,20 +1262,32 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             ShowMessageFX.Warning(null, pxeModuleName, "Adding for new client must be during new entry of sales inquiry.");
                         }
                         break;
-                        case "btnBrowse":
-                            poJSON = oSalesController.SalesQoutation().searchRecord("",false);
-                            if ("error".equals((String) poJSON.get("result"))) {
-                                ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
-                                return;
-                            }
-                            pnEditMode = oSalesController.SalesQoutation().getEditMode();
-                            initButton(pnEditMode);
+                    case "btnBrowse":
+                        poJSON = oSalesController.SalesQoutation().searchRecord("", false);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        pnMCRow = -1;
+                        pnGawayRow = -1;
+                        initButton(pnEditMode);
 
-                            LoadRecord();
-                            loadTableMCItem();
-                            loadTableGaway();
-
-                            break;
+                        LoadRecord();
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
+                    case "btnUpdate":
+                        poJSON = oSalesController.SalesQoutation().updateRecord();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        initButton(pnEditMode);
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
                     case "btnClose":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", pxeModuleName, null)) {
                             appUnload.unloadForm(ChildAnchorPane, oApp, pxeModuleName);
@@ -937,13 +1305,13 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
 
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        pnMCRow = -1;
+                        pnGawayRow = -1;
                         initButton(pnEditMode);
 
                         LoadRecord();
                         loadTableMCItem();
-                        loadTableGaway();
-
-
+                        loadTableGawayItem();
                         break;
                     case "btnSave":
                         poJSON = oSalesController.SalesQoutation().saveRecord();
@@ -967,21 +1335,20 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
                         break;
                 }
-            } catch ( Exception  ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
                 try {
                     if (oApp != null) {
-
-                        oApp.rollbackTrans(); // 🔥 force rollback
+                        oApp.rollbackTrans();
                     }
                 } catch (SQLException ex1) {
                     Logger.getLogger(ProjectController.class.getName()).log(Level.SEVERE, null, ex1);
                 }
-
             }
         }
     }
+
     // =========================================================================
     // Input Listeners & Key Events
     // =========================================================================
@@ -998,133 +1365,207 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         }
     }
 
-//
+    /*
+     * FIX: tfGawayBarrcode and tfGawayDescription already had F3-search
+     * cases written in txtField_KeyPressed()'s switch below, but neither
+     * field was ever actually wired to that handler - so F3 (and the
+     * generic Enter/Down/Up navigation in the same handler) silently did
+     * nothing on either field. Registered here the same way tfMCItemBrand/
+     * tfMCItemModel already are.
+     */
     private void registerKeyEvents() {
-//        tfFilterCustName.setOnKeyPressed(this::txtField_KeyPressed);
-//        tfFilterSalesperson.setOnKeyPressed(this::txtField_KeyPressed);
         tfCustomerName.setOnKeyPressed(this::txtField_KeyPressed);
         tfPaymentTerms.setOnKeyPressed(this::txtField_KeyPressed);
         tfMCItemBrand.setOnKeyPressed(this::txtField_KeyPressed);
+        tfMCItemModel.setOnKeyPressed(this::txtField_KeyPressed);
         tfDeliveryAddress.setOnKeyPressed(this::txtField_KeyPressed);
+        tfGawayBarrcode.setOnKeyPressed(this::txtField_KeyPressed);
+        tfGawayDescription.setOnKeyPressed(this::txtField_KeyPressed);
     }
-//
-ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
-        (lsID, lsValue) -> {
-            /* Lost Focus */
-            switch (lsID) {
-                case "tfCustomerName":
-                    if (tfCustomerName.getText().trim().isEmpty()) {
-                        tfCustomerName.clear();
-                        tfAddress.clear();
-                        tfContactNo.clear();
-                    } else {
-                        try {
-                            if (oSalesController.SalesQoutation().getModel().Client() != null) {
-                                tfCustomerName.setText(oSalesController.SalesQoutation().getModel().Client().getCompanyName());
-                                tfAddress.setText(oSalesController.SalesQoutation().getModel().ClientAddress().getAddress() + ", "
-                                        + oSalesController.SalesQoutation().getModel().ClientAddress().Barangay().getBarangayName() + ", "
-                                        + oSalesController.SalesQoutation().getModel().ClientAddress().Town().getDescription() + ", "
-                                        + oSalesController.SalesQoutation().getModel().ClientAddress().Town().Province().getDescription() + ", "
-                                        + oSalesController.SalesQoutation().getModel().ClientAddress().Town().getZipCode());
-                                tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
-                            }
-                        } catch (SQLException | GuanzonException e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
-                        }
-                    }
-                    break;
-                case "tfQoutationTitle":
-                    poJSON = oSalesController.SalesQoutation().Version().Master().setTitleName(lsValue);
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                        break;
-                    }
-                    break;
-                case "tfDeliveryRemarks":
-                    poJSON = oSalesController.SalesQoutation().Version().Master().setRemarks(lsValue);
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                        return;
-                    }
-                case "tfMCItemBrand":
-                case "tfMCItemModel":
-                    if (pnMCRow < 0) break;
-                    try {
-                        if (tfMCItemBrand.getText().trim().isEmpty() || tfMCItemModel.getText().trim().isEmpty()) {
-                            tfMCItemBrand.clear();
-                            tfMCItemModel.clear();
-                            oSalesController.SalesQoutation().Version().Detail(pnMCRow).setStockId(null);
-                            loadTableMCItem();
-                        }
-                    } catch (Exception e) {
-                        Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
-                    }
-                    break;
 
-                case "tfMCItemQuantity":
-                    if (pnMCRow < 0) break;
-                    try {
-                        int lnQty = lsValue == null || lsValue.trim().isEmpty() ? 0 : Integer.parseInt(lsValue.trim());
-                        poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setQuantity(lnQty);
+    ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
+            (lsID, lsValue) -> {
+                /* Lost Focus */
+                switch (lsID) {
+                    case "tfCustomerName":
+                        if (tfCustomerName.getText().trim().isEmpty()) {
+                            tfCustomerName.clear();
+                            tfAddress.clear();
+                            tfContactNo.clear();
+                        } else {
+                            try {
+                                if (oSalesController.SalesQoutation().getModel().Client() != null) {
+                                    tfCustomerName.setText(oSalesController.SalesQoutation().getModel().Client().getCompanyName());
+                                    tfAddress.setText(oSalesController.SalesQoutation().getModel().ClientAddress().getAddress() + ", "
+                                            + oSalesController.SalesQoutation().getModel().ClientAddress().Barangay().getBarangayName() + ", "
+                                            + oSalesController.SalesQoutation().getModel().ClientAddress().Town().getDescription() + ", "
+                                            + oSalesController.SalesQoutation().getModel().ClientAddress().Town().Province().getDescription() + ", "
+                                            + oSalesController.SalesQoutation().getModel().ClientAddress().Town().getZipCode());
+                                    tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
+                                }
+                            } catch (SQLException | GuanzonException e) {
+                                Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            }
+                        }
+                        break;
+                    case "tfQoutationTitle":
+                        poJSON = oSalesController.SalesQoutation().Version().Master().setTitleName(lsValue);
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                             break;
                         }
-                        tfMCItemQuantity.setText(String.valueOf(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getQuantity()));
-                        loadTableMCItem();
-                    } catch (NumberFormatException e) {
-                        ShowMessageFX.Warning("Quantity must be a whole number.", pxeModuleName, null);
-                    } catch (Exception e) {
-                        Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
-                    }
-                    break;
-
-                case "tfMCItemDiscount":
-                case "tfMCItemFreight":
-                case "tfMCItemRegisAmt":
-                case "tfMCItemInsuranceAmt":
-                    if (pnMCRow < 0) break;
-                    try {
-                        double lnAmt = lsValue == null || lsValue.trim().isEmpty()
-                                ? 0.00 : Double.parseDouble(lsValue.replace(",", "").trim());
-                        Model_Sales_Quotation_Version_Detail loDet
-                                = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
-                        switch (lsID) {
-                            case "tfMCItemDiscount":     loDet.setDiscount(lnAmt); break;
-                            case "tfMCItemFreight":      loDet.setFreight(lnAmt); break;
-                            case "tfMCItemRegisAmt":     loDet.setRegistrationAmount(lnAmt); break;
-                            case "tfMCItemInsuranceAmt": loDet.setInsuranceAmount(lnAmt); break;
+                        break;
+                    case "tfDeliveryRemarks":
+                        poJSON = oSalesController.SalesQoutation().Version().Master().setRemarks(lsValue);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
                         }
-                        loadTableMCItem();
-                    } catch (NumberFormatException e) {
-                        ShowMessageFX.Warning("Enter a valid amount.", pxeModuleName, null);
-                    } catch (Exception e) {
-                        Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
-                    }
-                    break;
+                        break; // added: it used to fall through into tfMCItemBrand
 
-                case "tfDeliveryAddress":
-                    String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
-                    if (!SalesQoutationStatic.DeliveryType.DELIVERY.equalsIgnoreCase(lsDeliveryMethod)) {
-                        return;
-                    }
-                    poJSON = oSalesController.SalesQoutation().Version().Master().setDeliverTo(lsValue);
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                    }
-                    break;
+                    case "tfMCItemBrand":
+                    case "tfMCItemModel":
+                        if (pnMCRow < 0) break;
+                        try {
+                            if (tfMCItemBrand.getText().trim().isEmpty() || tfMCItemModel.getText().trim().isEmpty()) {
+                                tfMCItemBrand.clear();
+                                tfMCItemModel.clear();
+                                oSalesController.SalesQoutation().Version().Detail(pnMCRow).setStockId(null);
+                                loadTableMCItem();
+                            }
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
 
-                case "tfPaymentRemarks":
-                    poJSON = oSalesController.SalesQoutation().Version().Master().setRemarks1(lsValue);
-                    if ("error".equals((String) poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                    }
-                    break;
+                    case "tfMCItemQuantity":
+                        if (pnMCRow < 0) break;
+                        try {
+                            int lnQty = lsValue == null || lsValue.trim().isEmpty() ? 0 : Integer.parseInt(lsValue.trim());
+                            poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setQuantity(lnQty);
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                break;
+                            }
+                            tfMCItemQuantity.setText(String.valueOf(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getQuantity()));
+                            loadTableMCItem();
+                        } catch (NumberFormatException e) {
+                            ShowMessageFX.Warning("Quantity must be a whole number.", pxeModuleName, null);
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
 
-                default:
-                    break;
-            }
-        });
+                    case "tfMCItemDiscount":
+                    case "tfMCItemFreight":
+                    case "tfMCItemRegisAmt":
+                    case "tfMCItemInsuranceAmt":
+                    case "tfMCItemAddDiscount":
+                        if (pnMCRow < 0) break;
+                        try {
+                            double lnAmt = lsValue == null || lsValue.trim().isEmpty()
+                                    ? 0.00 : Double.parseDouble(lsValue.replace(",", "").trim());
+                            Model_Sales_Quotation_Version_Detail loDet
+                                    = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
+                            String lsFormatted = CustomCommonUtil.setIntegerValueToDecimalFormat(lnAmt, false);
+
+                            switch (lsID) {
+                                case "tfMCItemDiscount":
+                                    poJSON = loDet.setDiscount(lnAmt);
+                                    tfMCItemDiscount.setText(lsFormatted);
+                                    break;
+                                case "tfMCItemFreight":
+                                    poJSON = loDet.setFreight(lnAmt);
+                                    tfMCItemFreight.setText(lsFormatted);
+                                    break;
+                                case "tfMCItemRegisAmt":
+                                    poJSON = loDet.setRegistrationAmount(lnAmt);
+                                    tfMCItemRegisAmt.setText(lsFormatted);
+                                    break;
+                                case "tfMCItemInsuranceAmt":
+                                    poJSON = loDet.setInsuranceAmount(lnAmt);
+                                    tfMCItemInsuranceAmt.setText(lsFormatted);
+                                    break;
+                                case "tfMCItemAddDiscount":
+                                    poJSON = loDet.setAdditionalDiscount(lnAmt);
+                                    tfMCItemAddDiscount.setText(lsFormatted);
+                                    break;
+                            }
+
+                            if (poJSON != null && "error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                break;
+                            }
+                            loadTableMCItem();
+                        } catch (NumberFormatException e) {
+                            ShowMessageFX.Warning("Enter a valid amount.", pxeModuleName, null);
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
+
+                    case "tfDeliveryAddress":
+                        String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
+                        if (!SalesQoutationStatic.DeliveryType.DELIVERY.equalsIgnoreCase(lsDeliveryMethod)) {
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().Version().Master().setDeliverTo(lsValue);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                        }
+                        break;
+
+                    case "tfPaymentRemarks":
+                        poJSON = oSalesController.SalesQoutation().Version().Master().setRemarks1(lsValue);
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                        }
+                        break;
+
+                    /*
+                     * NEW: neither case previously existed, so typing a
+                     * giveaway quantity or remark and tabbing away wrote
+                     * nothing back to the model - the row looked edited in
+                     * the UI but nothing was actually persisted. Mirrors the
+                     * "tfMCItemQuantity" case above.
+                     */
+                    case "tfGawayQty":
+                        if (pnGawayRow < 0) break;
+                        try {
+                            int lnGawayQty = lsValue == null || lsValue.trim().isEmpty() ? 0 : Integer.parseInt(lsValue.trim());
+                            poJSON = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow).setQuantity(lnGawayQty);
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                break;
+                            }
+                            tfGawayQty.setText(String.valueOf(oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow).getQuantity()));
+                            loadTableGawayItem();
+                        } catch (NumberFormatException e) {
+                            ShowMessageFX.Warning("Quantity must be a whole number.", pxeModuleName, null);
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
+
+                    // UNVERIFIED: assumes setRemarks(String) exists on
+                    // Model_Sales_Quotation_Version_Giveaways - adjust if the
+                    // real method name differs.
+                    case "tfGawayRemarks":
+                        if (pnGawayRow < 0) break;
+                        try {
+                            poJSON = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow).setRemarks(lsValue);
+                            if (poJSON != null && "error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                            }
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
             (lsID, lsValue) -> {
@@ -1137,25 +1578,19 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
                             ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
+                        taReason.setText(oSalesController.SalesQoutation().Version().Master().getReasons());
                         break;
-
-                    case "taFollowUpMessage":
-                        poJSON = oSalesController.CustomerInquiryFollowUp().getModel().setMessage(lsValue);
+                    case "taAdditionalRemarks":
+                        poJSON = oSalesController.SalesQoutation().Version().Master().setRemarks2(lsValue);
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
-                        break;
-                    case "taFollowUpRemarks":
-                        poJSON = oSalesController.CustomerInquiryFollowUp().getModel().setRemarks(lsValue);
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                            return;
-                        }
+                        taAdditionalRemarks.setText(oSalesController.SalesQoutation().Version().Master().getRemarks2());
                         break;
                 }
             });
-//
+
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -1179,8 +1614,8 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
                                         + oSalesController.SalesQoutation().getModel().ClientAddress().Town().Province().getDescription() + ", "
                                         + oSalesController.SalesQoutation().getModel().ClientAddress().Town().getZipCode());
                                 tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
-
                                 break;
+
                             case "tfPaymentTerms":
                                 poJSON = oSalesController.SalesQoutation().SearchTerm(lsValue, false);
                                 if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
@@ -1193,7 +1628,7 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
                             case "tfMCItemBrand":
                             case "tfMCItemModel":
                                 int byCode = lsID.equals("tfMCItemBrand") ? 1 : 2;
-                                poJSON = oSalesController.SalesQoutation().SearchMcItem(lsValue, pnMCRow, byCode);
+                                poJSON = oSalesController.SalesQoutation().SearchDetailItem(lsValue, pnMCRow, SalesQoutationStatic.Category.MC_UNIT, byCode);
                                 if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
                                     ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
                                     return;
@@ -1216,9 +1651,35 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
                                 }
                                 tfDeliveryAddress.setText(oSalesController.SalesQoutation().Version().Master().Branch().getBranchName());
                                 break;
+
+                            /*
+                             * FIX: previously called
+                             * oSalesController.SalesQoutation().Giveaways(pnGawayRow)
+                             * - Giveaways() takes no arguments (it returns
+                             * the SalesQoutationVersionGiveaways controller
+                             * itself); the row accessor is
+                             * .Giveaways().Giveaway(pnGawayRow). The result
+                             * was also being written into tfMCItemBrand /
+                             * tfMCItemModel (copy-paste leftover from the MC
+                             * item case above) instead of the actual
+                             * giveaway fields, and it refreshed the MC item
+                             * table instead of the giveaway table.
+                             */
+                            case "tfGawayBarrcode":
+                            case "tfGawayDescription":
+                                int GawaybyCode = lsID.equals("tfGawayBarrcode") ? 1 : 2;
+                                poJSON = oSalesController.SalesQoutation().SearchGawayItem(lsValue, pnGawayRow, null, GawaybyCode);
+                                if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
+                                    ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                                    return;
+                                }
+                                Model_Sales_Quotation_Version_Giveaways loDetGaway = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow);
+                                tfGawayBarrcode.setText(loDetGaway.Inventory().getBarCode());
+                                tfGawayDescription.setText(loDetGaway.Inventory().getDescription());
+                                loadTableGawayItem();
+                                break;
                             default:
                                 break;
-
                         }
                         break;
                     case ENTER:
@@ -1237,6 +1698,10 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
             Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
     private String safe(java.util.concurrent.Callable<Object> fn) {
         try {
             Object o = fn.call();
@@ -1245,6 +1710,25 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
             return "0.00";
         }
     }
+
+    private boolean isMCRowBlank() {
+        try {
+            if (pnMCRow < 0 || pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) return true;
+            String lsStock = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getStockId();
+            return lsStock == null || lsStock.isEmpty();
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    /** Registration/Insurance combos are editable only while editing and only on a row that has an item. */
+    private void updateMCComboState() {
+        boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
+        boolean lbLock = !lbEditing || isMCRowBlank();
+        cmbRegistration.setDisable(lbLock);
+        cmbInsurance.setDisable(lbLock);
+    }
+
     public void clearTextFields() {
         dpQoutationDate.setValue(null);
         dpTransDate.setValue(null);
@@ -1252,16 +1736,37 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
         dpQoutationExpectedDate.setValue(null);
         JFXUtil.clearTextFields(apSearchMaster, anchorQoutation, anchorVersion, anchorOthers, anchorDetails);
         tfVersion.clear();
+        main_data.clear();
+        detail_data.clear();
+        pnMCRow = -1;
+        pnGawayRow = -1;
     }
-    public void  clearMCItemTextFields() {
+
+    public void clearMCItemTextFields() {
+        String lsZero = CustomCommonUtil.setIntegerValueToDecimalFormat(0.00, false);
         tfMCItemBrand.clear();
         tfMCItemModel.clear();
-        tfMCItemDiscount.clear();
-        tfMCItemFreight.clear();
-        tfMCItemRegisAmt.clear();
-        tfMCItemInsuranceAmt.clear();
+        tfMCItemDiscount.setText(lsZero);
+        tfMCItemFreight.setText(lsZero);
+        tfMCItemRegisAmt.setText(lsZero);
+        tfMCItemInsuranceAmt.setText(lsZero);
         tfMCItemQuantity.clear();
+
+        // the constants are codes, not combo indexes, so look the index up in the code arrays
+        cmbRegistration.getSelectionModel().select(
+                Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.EMPTY));
+        cmbInsurance.getSelectionModel().select(
+                Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.EMPTY));
+        updateMCComboState();
+
     }
+    public void clearGawayItemTextFields() {
+        tfGawayBarrcode.clear();
+        tfGawayDescription.clear();
+        tfGawayRemarks.clear();
+        tfGawayQty.clear();
+    }
+
     public void LoadMCItemRecord() {
         if (pnMCRow < 0) return;
         try {
@@ -1273,9 +1778,90 @@ ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
             tfMCItemRegisAmt.setText(safe(loDet::getRegistrationAmount));
             tfMCItemInsuranceAmt.setText(safe(loDet::getInsuranceAmount));
             tfMCItemQuantity.setText(safe(loDet::getQuantity));
+
+            if (loDet.getRegistrationAmount() > 0) {
+                cmbRegistration.getSelectionModel().select(
+                        Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.YES));
+            }
+            if (loDet.getInsuranceAmount() > 0) {
+                cmbInsurance.getSelectionModel().select(
+                        Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.YES));
+            }
         } catch (Exception e) {
             Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
-}
 
+    /*
+     * NEW: no equivalent existed before. Mirrors LoadMCItemRecord().
+     * UNVERIFIED: assumes getRemarks() exists on
+     * Model_Sales_Quotation_Version_Giveaways.
+     */
+    public void LoadGawayItemRecord() {
+        if (pnGawayRow < 0) return;
+        try {
+            Model_Sales_Quotation_Version_Giveaways loDet = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow);
+            tfGawayBarrcode.setText(loDet.getStockId());
+            tfGawayDescription.setText(loDet.Inventory().getDescription());
+            tfGawayQty.setText(safe(loDet::getQuantity));
+            tfGawayRemarks.setText(safe(loDet::getRemarks));
+        } catch (Exception e) {
+            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    private void openFollowUpModal() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ph/com/guanzongroup/integsys/views/SalesQoutationFollowUp.fxml"));
+            Parent root = loader.load();
+// Pass the data to the modal controller
+            // Pass the data to the modal controller
+            SalesQoutationFollowUpController modalController = loader.getController();
+            modalController.setGRider(oApp);
+            modalController.setSalesQuotation(oSalesController.SalesQoutation());
+            modalController.loadForm();   // must be AFTER the setters
+
+            Stage modalStage = new Stage();
+            modalStage.setTitle("Sales Quotation Follow-Up");
+            modalStage.initStyle(StageStyle.UNDECORATED);
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.initOwner(tblMCItem.getScene().getWindow());
+
+            // 1. MAKE THE MAIN ANCHOR MOVABLE
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+
+            root.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+
+            root.setOnMouseDragged(event -> {
+                modalStage.setX(event.getScreenX() - xOffset[0]);
+                modalStage.setY(event.getScreenY() - yOffset[0]);
+            });
+
+            // 2. APPLY SHADOW TO THE MAIN ANCHOR
+            javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
+            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0)); // 40% Opacity black shadow
+            shadow.setRadius(15.0);
+            shadow.setOffsetX(0.0);
+            shadow.setOffsetY(5.0);
+            root.setEffect(shadow);
+
+            // 3. BOUNDARY FIX FOR UNDECORATED SHADOWS
+            // To prevent the shadow from being clipped by the window edges,
+            // the scene is made transparent.
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+
+            modalStage.setScene(scene);
+            modalStage.setResizable(false);
+            modalStage.showAndWait();
+
+        } catch (IOException e) {
+            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, "Failed to load Follow-Up Modal", e);
+            ShowMessageFX.Error("Unable to open follow-up window.", pxeModuleName, null);
+        }
+    }
+}
