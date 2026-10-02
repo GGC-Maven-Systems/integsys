@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -24,8 +25,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
-<?import java.net.URL?>
 
 <AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -454,7 +453,8 @@
                                                             </AnchorPane>
                                                             <GridPane alignment="CENTER" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="35.0">
                                                                <columnConstraints>
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="150.0" />
+                                                                  <ColumnConstraints />
+                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="185.0" />
                                                                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" />
                                                                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" />
                                                                   <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="20.0" prefWidth="20.0" />
@@ -474,30 +474,30 @@
                                                                   <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                </rowConstraints>
                                                                <children>
-                                                                  <ComboBox fx:id="tfPaymentVAT" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                                  <ComboBox fx:id="cmbPaymentForm" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                                  <Label text="Remarks" GridPane.rowIndex="4">
+                                                                  <ComboBox fx:id="cmbPaymentVAT" prefWidth="200.0" visible="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                  <ComboBox fx:id="cmbPaymentForm" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                  <Label text="Remarks" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <TextField fx:id="tfPaymentRemarks" maxHeight="25.0" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.rowIndex="4" />
-                                                                  <Label text="Payment Form" GridPane.rowIndex="2">
+                                                                  <TextField fx:id="tfPaymentRemarks" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="3" />
+                                                                  <Label text="Payment Form" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <Label text="VAT Type" GridPane.rowIndex="3">
+                                                                  <Label text="VAT Type" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <Label text="Term" GridPane.columnIndex="4" GridPane.rowIndex="3">
+                                                                  <Label text="Term" GridPane.columnIndex="5" GridPane.rowIndex="2">
                                                                      <GridPane.margin>
                                                                         <Insets right="10.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <TextField fx:id="tfPaymentTerms" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                                                  <TextField fx:id="tfPaymentTerms" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                </children>
                                                             </GridPane>
                                                          </children>
@@ -612,6 +612,12 @@
                                                                                           <Insets right="10.0" />
                                                                                        </padding>
                                                                                     </Label>
+                                                                                    <Label text="Promo" GridPane.rowIndex="4">
+                                                                                       <padding>
+                                                                                          <Insets right="10.0" />
+                                                                                       </padding>
+                                                                                    </Label>
+                                                                                    <TextField fx:id="tfMCItemPromo" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>
@@ -626,11 +632,12 @@
                                                                                     <TableColumn fx:id="tblRowMCitemNo" editable="false" maxWidth="40.0" minWidth="31.0" prefWidth="31.0" resizable="false" sortable="false" text="No." />
                                                                                     <TableColumn fx:id="tblRowMCitemBrand" editable="false" maxWidth="510.0" minWidth="78.0" prefWidth="78.0" resizable="false" sortable="false" text="Brand" />
                                                                                     <TableColumn fx:id="tblRowMCitemModel" editable="false" maxWidth="485.0" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Model" />
-                                                                                    <TableColumn fx:id="tblRowMCitemDesc" editable="false" maxWidth="449.0" minWidth="100.0" prefWidth="141.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Description" />
+                                                                                    <TableColumn fx:id="tblRowMCitemDesc" editable="false" maxWidth="449.0" minWidth="100.0" prefWidth="135.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Description" />
                                                                                     <TableColumn fx:id="tblRowMCitemColor" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="70.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Color" />
                                                                                     <TableColumn fx:id="tblRowMCitemVariant" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="107.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Variant" />
                                                                                     <TableColumn fx:id="tblRowMCitemSRP" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="122.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="SRP" />
-                                                                                    <TableColumn fx:id="tblRowMCitemDiscount" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="104.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Discount" />
+                                                                                    <TableColumn fx:id="tblRowMCitemDiscount" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="70.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Disc" />
+                                                                                    <TableColumn fx:id="tblRowMCitemAddDiscount" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Add. Disc" />
                                                                                     <TableColumn fx:id="tblRowMCitemFreight" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="90.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Freight" />
                                                                                     <TableColumn fx:id="tblRowMCitemReg" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="66.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Reg" />
                                                                                     <TableColumn fx:id="tblRowMCitemInsurance" editable="false" maxWidth="337.0" minWidth="66.0" prefWidth="66.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Insurance" />
@@ -796,7 +803,7 @@
                               </VBox>
                               <StackPane>
                                  <children>
-                                    <AnchorPane prefHeight="200.0" prefWidth="300.0" style="-fx-border-color: F37C01;">
+                                    <AnchorPane prefHeight="200.0" prefWidth="400.0" style="-fx-border-color: F37C01;">
                                        <children>
                                           <AnchorPane prefHeight="25.0" prefWidth="200.0" style="-fx-background-color: A0A0A0;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
@@ -806,15 +813,16 @@
                                                    </font>
                                                 </Label>
                                              </children></AnchorPane>
-                                          <GridPane layoutX="-40.0" layoutY="26.0" vgap="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="25.0">
+                                          <GridPane layoutX="-40.0" layoutY="26.0" vgap="2.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="25.0">
                                             <columnConstraints>
                                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                             </columnConstraints>
                                             <rowConstraints>
                                                 <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
-                                              <RowConstraints vgrow="SOMETIMES" />
+                                              <RowConstraints maxHeight="1.7976931348623157E308" minHeight="25.0" vgrow="ALWAYS" />
                                               <RowConstraints vgrow="SOMETIMES" />
                                               <RowConstraints vgrow="SOMETIMES" />
                                                 <RowConstraints vgrow="SOMETIMES" />
@@ -837,8 +845,8 @@
                                                       <Insets right="10.0" top="5.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <TextField GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                <TextField GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                                <TextField fx:id="tfSummarySubTotal" alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                                                <TextField fx:id="tfSummaryVat" alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
                                                 <Label text="VAT Ex" GridPane.rowIndex="4" GridPane.valignment="TOP">
                                                    <GridPane.margin>
                                                       <Insets right="10.0" top="5.0" />
@@ -852,10 +860,10 @@
                                                       <Insets right="10.0" top="5.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <TextField GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                                                <TextField GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6" />
-                                                <Separator prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="5" />
-                                                <TextField GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                                                <TextField fx:id="tfSummaryVatEx" alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
+                                                <TextField fx:id="tfSummaryTotal" alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="6" />
+                                                <Separator prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="5" />
+                                                <TextArea fx:id="taSummaryItem" editable="false" maxHeight="1.7976931348623157E308" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
                                              </children>
                                           </GridPane>
                                        </children>

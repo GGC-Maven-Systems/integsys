@@ -249,7 +249,7 @@ public class SalesQoutationFollowUpController implements Initializable {
                         toDisplayDate(loRow.get("dNextFlup")),
                         typeDescription(loRow.get("cFllwUpTp")),
                         loRow.get("sRemarksx") == null ? "" : String.valueOf(loRow.get("sRemarksx")),
-                        "", "", "", "", "", "", "", "", ""));   // ModelTableMain takes 14 values
+                        "", "", "", "", "", "", "", "", "",""));   // ModelTableMain takes 14 values
             }
 
             if (!main_data.isEmpty()) {

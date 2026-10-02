@@ -54,6 +54,7 @@ import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.CustomerInquiryFollowUpStatic;
 import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
+import ph.com.guanzongroup.cas.sales.status.SalesQoutationVersionStatic;
 import ph.com.guanzongroup.integsys.model.ModelCustomerInquiryFollowUpAttachment;
 import ph.com.guanzongroup.integsys.model.ModelSalesReservationDetailx;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
@@ -87,6 +88,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     private String fbDeliveryType = "";
     private String fbPaymentType = "";
     private String fbInsurance = "";
+    private String fbVatType = "";
     private String fbRegistration = "";
     private String psIndustryId = "";
     private String psCompanyId = "";
@@ -111,6 +113,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
 
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
+    private static final double SUMMARY_MAX_HEIGHT = 800;
     // =========================================================================
     // Root Containers
     // =========================================================================
@@ -179,14 +182,12 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     // =========================================================================
     // Payment Information Controls
     // =========================================================================
-    @FXML private ComboBox<?> tfPaymentVAT;
+    @FXML private ComboBox cmbPaymentVAT;
     @FXML private ComboBox cmbPaymentForm;
     @FXML private TextField tfPaymentRemarks;
     @FXML private TextField tfPaymentNoOfDays1;
-
     @FXML private ComboBox cmbInsurance;
     @FXML private ComboBox cmbRegistration;
-
     @FXML private TextField tfPaymentTerms;
 
 
@@ -201,6 +202,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private TextField tfMCItemAddDiscount;
     @FXML private TextField tfMCItemFreight;
     @FXML private TextField tfMCItemQuantity;
+    @FXML private TextField tfMCItemPromo;
 
 
     // =========================================================================
@@ -216,6 +218,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemVariant;
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemSRP;
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemDiscount;
+    @FXML private TableColumn<ModelTableMain, String> tblRowMCitemAddDiscount;
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemFreight;
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemReg;
     @FXML private TableColumn<ModelTableMain, String> tblRowMCitemInsurance;
@@ -245,6 +248,15 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private TableColumn<ModelTableDetail, String> tblRowGawayQty;
     @FXML private TableColumn<ModelTableDetail, String> tblRowGawayRemarks;
     @FXML private TableColumn<ModelTableDetail, String> tblRowGawayAction;
+
+    // =========================================================================
+    // Transaction Summary Controls
+    // =========================================================================
+    @FXML private TextArea taSummaryItem;
+    @FXML private TextField tfSummarySubTotal;
+    @FXML private TextField tfSummaryVat;
+    @FXML private TextField tfSummaryVatEx;
+    @FXML private TextField tfSummaryTotal;
 
     // =========================================================================
     // ScreenInterface Implementation
@@ -371,9 +383,15 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         registerFocusListener(anchorAdditionalRemarks);
         registerKeyEvents();
 
+        taSummaryItem.setEditable(false);
+        taSummaryItem.setWrapText(true);
+        taSummaryItem.setStyle("-fx-font-family: 'Monospaced'; -fx-font-size: 12px;");   // monospace so the amounts line up
+        taSummaryItem.setMaxHeight(SUMMARY_MAX_HEIGHT);
+        taSummaryItem.widthProperty().addListener((obs, o, n) -> resizeSummaryItems());
+
         // register explicitly in case the recursive walk misses nested/skinned containers
         TextField[] laMCFields = {tfMCItemBrand, tfMCItemModel, tfMCItemQuantity,
-                tfMCItemDiscount, tfMCItemFreight, tfMCItemRegisAmt, tfMCItemInsuranceAmt, tfVersion, tfTransNo, tfVersionTransNo};
+                tfMCItemDiscount,tfMCItemAddDiscount, tfMCItemFreight, tfMCItemRegisAmt, tfMCItemInsuranceAmt, tfVersion, tfTransNo, tfVersionTransNo};
         for (TextField tf : laMCFields) {
             tf.focusedProperty().removeListener(txtField_Focus);
             tf.focusedProperty().addListener(txtField_Focus);
@@ -388,6 +406,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         tfMCItemRegisAmt.setEditable(false);
         cmbDeliveryMethod.setItems(SalesQoutationStatic.DELIVERY_TYPE_DESCRIPTION);
         cmbPaymentForm.setItems(SalesQoutationStatic.PAYMENT_TYPE_DESCRIPTION);
+        cmbPaymentVAT.setItems(SalesQoutationVersionStatic.VAT_TYPE_DESCRIPTION);
         cmbInsurance.setItems(SalesQoutationStatic.INSURANCE_DESCRIPTION);
         cmbRegistration.setItems(SalesQoutationStatic.REGISTRATION_DESCRIPTION);
 
@@ -440,38 +459,33 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfMCItemRegisAmt.setEditable(isYes);
         });
 
-        tfPaymentVAT.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable,
-                                Number oldValue,
-                                Number newValue) {
+        cmbPaymentVAT.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.intValue() < 0) return;
 
-                if (newValue != null && newValue.intValue() >= 0) {
-                    fbPaymentType = SalesQoutationStatic.PAYMENT_TYPE_CODE[newValue.intValue()];
-
-                    switch (fbPaymentType) {
-                        case SalesQoutationStatic.PaymentType.TERM:
-                            tfPaymentTerms.setPromptText("Press F3: Search");
-                            tfPaymentTerms.setEditable(true);
-                            break;
-                        case SalesQoutationStatic.PaymentType.CASH:
-                        case SalesQoutationStatic.PaymentType.CASH_BALANCE:
-                        case SalesQoutationStatic.PaymentType.EMPTY:
-                            tfPaymentTerms.setPromptText(null);
-                            tfPaymentTerms.setEditable(false);
-                            oSalesController.SalesQoutation().Version().Master().setTermId("");
-                            break;
-                        default:
-                            tfPaymentTerms.setPromptText(null);
-                            tfPaymentTerms.setEditable(false);
-                            oSalesController.SalesQoutation().Version().Master().setTermId("");
-                            break;
-                    }
-                }
-            }
+            fbVatType = SalesQoutationVersionStatic.VAT_TYPE_CODE[newValue.intValue()];
+            loadTableMCItem();
         });
     }
 
+
+    private void initMCItemFields(){
+        if(pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
+            String lsStockID = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getStockId();
+            String lsPromoCode = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode();
+
+            boolean lbDisable = lsStockID == null || lsStockID.isEmpty()
+                    || (lsPromoCode != null && !lsPromoCode.isEmpty());
+
+            tfMCItemPromo.setDisable(lbDisable);
+            tfMCItemRegisAmt.setDisable(lbDisable);
+            tfMCItemInsuranceAmt.setDisable(lbDisable);
+            tfMCItemDiscount.setDisable(lbDisable);
+            tfMCItemAddDiscount.setDisable(lbDisable);
+            tfMCItemFreight.setDisable(lbDisable);
+            cmbInsurance.setDisable(lbDisable);
+            cmbRegistration.setDisable(lbDisable);
+        }
+    }
     // =========================================================================
     // Load Record
     // =========================================================================
@@ -605,7 +619,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
     private void initTableMCItems() {
         JFXUtil.setColumnCenter(tblRowMCitemNo, tblRowMCitemBrand, tblRowMCitemModel, tblRowMCitemDesc, tblRowMCitemColor, tblRowMCitemVariant);
-        JFXUtil.setColumnRight(tblRowMCitemSRP, tblRowMCitemDiscount, tblRowMCitemFreight, tblRowMCitemReg, tblRowMCitemInsurance, tblRowMCitemQty, tblRowMCitemTotal, tblRowMCitemAction);
+        JFXUtil.setColumnRight(tblRowMCitemSRP, tblRowMCitemDiscount, tblRowMCitemAddDiscount, tblRowMCitemFreight, tblRowMCitemReg, tblRowMCitemInsurance, tblRowMCitemQty, tblRowMCitemTotal, tblRowMCitemAction);
         JFXUtil.setColumnsIndexAndDisableReordering(tblMCItem);
         initActionColumnMCItem();   // after setColumnCenter so it isn't overwritten
 
@@ -818,7 +832,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
                             if (lbBlank) {
                                 main_data.add(new ModelTableMain(String.valueOf(lnCtr + 1),
-                                        "", "", "", "", "", "", "", "", "", "", "", "", ""));
+                                        "", "", "", "", "", "", "", "", "", "", "", "","", ""));
                                 continue;
                             }
 
@@ -832,10 +846,11 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
                             int qty = parseInt(safe(loRow::getQuantity));
 
-
+                            double rowTotal = oSalesController.SalesQoutation().computeMCItemDetail(price,
+                                    qty, discount, adddiscount, freight, reg, ins,String.valueOf(cmbPaymentVAT.getSelectionModel().getSelectedIndex()));
                             // 3. Compute row total: ((Price - Discount - Additional Discount) * Qty) + Charges
-                            double rowTotal = ((price - discount - adddiscount)  + freight + reg + ins)* qty;
-                            grandTotal += rowTotal;
+//                            double rowTotal = ((price - discount - adddiscount)  + freight + reg + ins)* qty;
+//                            grandTotal += rowTotal;
 
                             main_data.add(new ModelTableMain(
                                     String.valueOf(lnCtr + 1),
@@ -846,6 +861,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                     loRow.Inventory().Variant().getDescription(),
                                     safe(() -> loRow.Inventory().getSellingPrice()),
                                     safe(loRow::getDiscount),
+                                    safe(loRow::getAdditionalDiscount),
                                     safe(loRow::getFreight),
                                     safe(loRow::getRegistrationAmount),
                                     safe(loRow::getInsuranceAmount),
@@ -868,6 +884,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
 
                         updateMCComboState();
+                        initMCItemFields();
+                        loadTransactionSummary();
                     } catch (Exception ex) {
                         Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -1305,8 +1323,6 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
 
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
-                        pnMCRow = -1;
-                        pnGawayRow = -1;
                         initButton(pnEditMode);
 
                         LoadRecord();
@@ -1381,6 +1397,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         tfDeliveryAddress.setOnKeyPressed(this::txtField_KeyPressed);
         tfGawayBarrcode.setOnKeyPressed(this::txtField_KeyPressed);
         tfGawayDescription.setOnKeyPressed(this::txtField_KeyPressed);
+        tfMCItemPromo.setOnKeyPressed(this::txtField_KeyPressed);
     }
 
     ChangeListener<Boolean> txtField_Focus = JFXUtil.FocusListener(TextField.class,
@@ -1471,6 +1488,15 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
                             switch (lsID) {
                                 case "tfMCItemDiscount":
+                                    if (lnAmt > 100) {
+                                        ShowMessageFX.Warning("Invalid Discount: Discount percentage cannot exceed 100%.",pxeModuleName, null);
+                                        lnAmt = 100.00;
+                                        lsFormatted = String.format("%.2f", lnAmt);
+                                        tfMCItemDiscount.setText(lsFormatted);
+                                        tfMCItemDiscount.requestFocus();
+                                        tfMCItemRegisAmt.selectAll();
+                                    }
+
                                     poJSON = loDet.setDiscount(lnAmt);
                                     tfMCItemDiscount.setText(lsFormatted);
                                     break;
@@ -1638,7 +1664,21 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 tfMCItemModel.setText(loDet.Inventory().Model().getDescription());
                                 loadTableMCItem();
                                 break;
-
+                            case "tfMCItemPromo":
+                                poJSON = oSalesController.SalesQoutation().SearchMCItemPromo(lsValue, pnMCRow, 1);
+                                if ("error".equalsIgnoreCase(poJSON.get("result").toString())) {
+                                    ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                                    return;
+                                }
+                                Model_Sales_Quotation_Version_Detail loDetx = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
+                                tfMCItemPromo.setText(poJSON.get("PromoDesc").toString());
+                                tfMCItemInsuranceAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getInsuranceAmount(), false));
+                                tfMCItemRegisAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getRegistrationAmount(), false));
+                                tfMCItemDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getDiscount(), false));
+                                tfMCItemAddDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getAdditionalDiscount(), false));
+                                tfMCItemFreight.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getFreight(), false));
+                                loadTableMCItem();
+                                break;
                             case "tfDeliveryAddress":
                                 String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
                                 if (!SalesQoutationStatic.DeliveryType.PICK_UP.equalsIgnoreCase(lsDeliveryMethod)) {
@@ -1747,10 +1787,12 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         tfMCItemBrand.clear();
         tfMCItemModel.clear();
         tfMCItemDiscount.setText(lsZero);
+        tfMCItemAddDiscount.setText(lsZero);
         tfMCItemFreight.setText(lsZero);
         tfMCItemRegisAmt.setText(lsZero);
         tfMCItemInsuranceAmt.setText(lsZero);
         tfMCItemQuantity.clear();
+        tfMCItemPromo.clear();
 
         // the constants are codes, not combo indexes, so look the index up in the code arrays
         cmbRegistration.getSelectionModel().select(
@@ -1778,6 +1820,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfMCItemRegisAmt.setText(safe(loDet::getRegistrationAmount));
             tfMCItemInsuranceAmt.setText(safe(loDet::getInsuranceAmount));
             tfMCItemQuantity.setText(safe(loDet::getQuantity));
+            tfMCItemPromo.setText(loDet.getPromoCode());
+            tfMCItemAddDiscount.setText(safe(loDet::getAdditionalDiscount));
 
             if (loDet.getRegistrationAmount() > 0) {
                 cmbRegistration.getSelectionModel().select(
@@ -1863,5 +1907,93 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, "Failed to load Follow-Up Modal", e);
             ShowMessageFX.Error("Unable to open follow-up window.", pxeModuleName, null);
         }
+    }
+
+    private void loadTransactionSummary() {
+        try {
+            SalesQoutationVersion loVersion = oSalesController.SalesQoutation().Version();
+            loVersion.computeMasterTotals();   // same computation that willSave() uses
+
+            StringBuilder lsItems = new StringBuilder();
+            int lnNo = 0;
+            for (int lnCtr = 0; lnCtr < loVersion.getDetailCount(); lnCtr++) {
+                Model_Sales_Quotation_Version_Detail loRow = loVersion.Detail(lnCtr);
+                if (loRow.getStockId() == null || loRow.getStockId().isEmpty()) continue;   // blank row
+
+                int lnQty        = parseInt(safe(loRow::getQuantity));
+                double lnPrice   = parseDouble(safe(loRow::getUnitPrice));
+                double lnDiscAmt = lnPrice * parseDouble(safe(loRow::getDiscount)) / 100.0;   // per unit, same as computeMasterTotals()
+                double lnAddDisc = parseDouble(safe(loRow::getAdditionalDiscount));
+                double lnFreight = parseDouble(safe(loRow::getFreight));
+                double lnReg     = parseDouble(safe(loRow::getRegistrationAmount));
+                double lnIns     = parseDouble(safe(loRow::getInsuranceAmount));
+
+                // every line is per-unit x qty
+                double lnSrpTotal   = lnPrice * lnQty;
+                double lnDiscTotal  = lnDiscAmt * lnQty;
+                double lnAddTotal   = lnAddDisc * lnQty;
+                double lnFrghtTotal = lnFreight * lnQty;
+                double lnRegTotal   = lnReg * lnQty;
+                double lnInsTotal   = lnIns * lnQty;
+                double lnAmount     = lnSrpTotal - lnDiscTotal - lnAddTotal + lnFrghtTotal + lnRegTotal + lnInsTotal;
+
+                lnNo++;
+                lsItems.append(lnNo).append("  ").append(loRow.Inventory().getDescription())
+                        .append("  x").append(lnQty).append("\n");
+                lsItems.append(summaryLine("SRP", String.format("%,.2f", lnSrpTotal)));
+                if (lnDiscAmt > 0) lsItems.append(summaryLine("Discount", "-" + String.format("%,.2f", lnDiscTotal)));
+                if (lnAddDisc > 0) lsItems.append(summaryLine("Add'l Discount", "-" + String.format("%,.2f", lnAddTotal)));
+                if (lnFreight > 0) lsItems.append(summaryLine("Freight", String.format("%,.2f", lnFrghtTotal)));
+                lsItems.append(summaryLine("Registration", lnReg > 0 ? String.format("%,.2f", lnRegTotal) : "Free"));
+                lsItems.append(summaryLine("Insurance", lnIns > 0 ? String.format("%,.2f", lnInsTotal) : "Free"));
+                lsItems.append(summaryLine("Amount", String.format("%,.2f", lnAmount)));
+                lsItems.append("\n");
+            }
+
+            double lnVatSales    = parseDouble(safe(() -> loVersion.Master().getVatSales()));
+            double lnNonVatSales = parseDouble(safe(() -> loVersion.Master().getNonVatSales()));
+            double lnVat         = parseDouble(safe(() -> loVersion.Master().getVatAmount()));
+            double lnTotal       = parseDouble(safe(() -> loVersion.Master().getTransactionTotal()));
+
+            taSummaryItem.setText(lsItems.toString().trim());
+            taSummaryItem.positionCaret(0);
+            resizeSummaryItems();
+
+            tfSummarySubTotal.setText(String.format("%,.2f", lnVatSales + lnNonVatSales));
+            tfSummaryVat.setText(String.format("%,.2f", lnVat));
+            tfSummaryVatEx.setText(String.format("%,.2f", lnNonVatSales));
+            tfSummaryTotal.setText(String.format("%,.2f", lnTotal));
+        } catch (Exception ex) {
+            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void clearTransactionSummary() {
+        String lsZero = String.format("%,.2f", 0.00);
+        taSummaryItem.clear();
+        resizeSummaryItems();
+        tfSummarySubTotal.setText(lsZero);
+        tfSummaryVat.setText(lsZero);
+        tfSummaryVatEx.setText(lsZero);
+        tfSummaryTotal.setText(lsZero);
+    }
+    /** Sizes taSummaryItem to its text; the scrollbar only appears once the text is taller than SUMMARY_MAX_HEIGHT. */
+    private void resizeSummaryItems() {
+        String lsText = taSummaryItem.getText() == null ? "" : taSummaryItem.getText();
+
+        javafx.scene.text.Text loMeasure = new javafx.scene.text.Text(lsText.isEmpty() ? " " : lsText);
+        loMeasure.setFont(taSummaryItem.getFont());
+        if (taSummaryItem.getWidth() > 0) loMeasure.setWrappingWidth(taSummaryItem.getWidth() - 30);   // minus scrollbar + padding
+
+        double lnHeight = loMeasure.getLayoutBounds().getHeight() + 24;   // + TextArea padding/border
+        lnHeight = Math.max(40, Math.min(lnHeight, SUMMARY_MAX_HEIGHT));
+
+        taSummaryItem.setMinHeight(lnHeight);
+        taSummaryItem.setPrefHeight(lnHeight);
+    }
+
+    /** "     Registration        2,500.00" - label left, amount right-aligned. */
+    private String summaryLine(String fsLabel, String fsValue) {
+        return String.format("     %-15s%14s\n", fsLabel, fsValue);
     }
 }
