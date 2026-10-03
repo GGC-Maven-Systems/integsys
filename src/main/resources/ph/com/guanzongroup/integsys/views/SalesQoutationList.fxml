@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<!--<?import java.net.URL?>-->
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Pagination?>
 <?import javafx.scene.control.TextField?>
@@ -63,13 +62,27 @@
                   </AnchorPane>
                </top>
                <bottom>
-                  <AnchorPane fx:id="apButton" prefHeight="80.0" BorderPane.alignment="CENTER">
+                  <AnchorPane fx:id="apButton" minHeight="100.0" BorderPane.alignment="CENTER">
                      <children>
                         <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
                            <children>
-                              <Button fx:id="btnBrowse" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Browse">
+                              <Button fx:id="btnRetrieve" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Retrieve">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="FOLDER_OPEN" size="20" styleClass="FontIcon" />
+                                    <FontAwesomeIconView glyphName="LIST_ALT" size="20" />
+                                 </graphic>
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnNew" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="New">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
                                  </graphic>
                                  <font>
                                     <Font size="11.0" />
@@ -83,7 +96,31 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnNew1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
+                              <Button fx:id="btnUpdate" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Update">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="EDIT" size="20" />
+                                 </graphic>
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                              </Button>
+                              <Button fx:id="btnSave" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Save">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="SAVE" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnCancel" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Cancel">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="CLOSE" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btnApproved" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -99,7 +136,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnVoid11" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Lost">
+                              <Button fx:id="btnLost" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Lost">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="ARCHIVE" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -107,7 +144,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnVoid1" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
+                              <Button fx:id="btnFollowUp" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="BELL" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -131,14 +168,6 @@
                                     <FontAwesomeIconView glyphName="FILE_PDF_ALT" size="20" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnVoid12" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="FollowUp">
-                                 <graphic>
-                                    <FontAwesomeIconView glyphName="BELL" size="20" styleClass="FontIcon" text="" />
-                                 </graphic>
-                                 <font>
-                                    <Font size="11.0" />
-                                 </font>
-                              </Button>
                               <Button fx:id="btnClose" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Close">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="POWER_OFF" size="20" styleClass="FontIcon" />
@@ -148,9 +177,6 @@
                                  </font>
                               </Button>
                            </children>
-                           <padding>
-                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
-                           </padding>
                         </HBox>
                      </children>
                   </AnchorPane>
@@ -186,6 +212,8 @@
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="120.0" />
+                                                      <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="120.0" />
+                                                      <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="120.0" />
                                                       <ColumnConstraints />
                                                       <ColumnConstraints />
                                                       <ColumnConstraints />
@@ -197,8 +225,8 @@
                                                       <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                      <TextField fx:id="tfClientName" editable="false" maxHeight="25.0" prefWidth="170.0" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="tfAddress" editable="false" maxHeight="25.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                      <TextField fx:id="tfSearchTransNo" editable="false" maxHeight="25.0" prefWidth="170.0" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                      <TextField fx:id="tfSearchCustomer" editable="false" maxHeight="25.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                       <Label text="Transaction No" GridPane.rowIndex="2">
                                                          <GridPane.margin>
                                                             <Insets right="10.0" />
@@ -236,7 +264,7 @@
                                                 <RowConstraints maxHeight="35.0" minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
                                              </rowConstraints>
                                              <children>
-                                                <TreeTableView fx:id="tblViewMainList" editable="false" showRoot="false">
+                                                <TreeTableView fx:id="tblTreeQoutationList" editable="false" showRoot="false">
 
                                                    <columns>
 
@@ -245,18 +273,6 @@
                                                       <!-- ========================================================= -->
 
                                                       <TreeTableColumn fx:id="tblRowNo" maxWidth="45.0" minWidth="45.0" prefWidth="45.0" resizable="false" text="No." />
-
-                                                      <!-- ========================================================= -->
-                                                      <!-- CHECKBOX                                                   -->
-                                                      <!-- ========================================================= -->
-
-                                                      <TreeTableColumn fx:id="tblCheckBox" maxWidth="35.0" minWidth="35.0" prefWidth="35.0" resizable="false">
-
-                                                         <graphic>
-                                                            <CheckBox fx:id="chckSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
-                                                         </graphic>
-
-                                                      </TreeTableColumn>
 
                                                       <!-- ========================================================= -->
                                                       <!-- QUOTATION / PARENT                                         -->

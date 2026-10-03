@@ -154,7 +154,7 @@ public class SalesQoutationFollowUpController implements Initializable {
 
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             tfVersionNo.setText(poController.getModel().getVersion().toString());
-            tfFollowUpBy.setText(poController.FollowUp().getSysUser(poController.FollowUp().getModel().getFollowUpBy()));
+                tfFollowUpBy.setText(poController.FollowUp().getSysUser(poController.FollowUp().getModel().getFollowUpBy()));
             if (poController.getModel().Client() != null) {
                 tfCustomerName.setText(poController.getModel().Client().getCompanyName());
             }

@@ -157,6 +157,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private TextField tfContactNo;
     @FXML private TextField tfAddress;
     @FXML private Label lblStatus;
+    @FXML private Label lblStatusVersion;
 
 
     // =========================================================================
@@ -286,6 +287,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     // =========================================================================
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         initializeObject();
         pnEditMode = oSalesController.SalesQoutation().getEditMode();
         initButton(pnEditMode);
@@ -511,6 +513,33 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                     break;
                 default:
                     lblStatus.setText("");
+                    break;
+            }
+            String VersionStatus = (oSalesController.SalesQoutation().Version().Master().getTransactionStatus());
+            switch (VersionStatus) {
+                case SalesQoutationVersionStatic.OPEN:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.OPEN);
+                    break;
+                case SalesQoutationVersionStatic.CONFIRMED:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.CONFIRMED);
+                    break;
+                case SalesQoutationVersionStatic.SALES:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.SALES);
+                    break;
+                case SalesQoutationVersionStatic.REJECTED:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.REJECTED);
+                    break;
+                case SalesQoutationVersionStatic.VOID:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.VOID);
+                    break;
+                case SalesQoutationVersionStatic.SUPERCEDED:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.SUPERCEDED);
+                    break;
+                case SalesQoutationVersionStatic.EXPIRED:
+                    lblStatusVersion.setText(SalesQoutationVersionStatic.STATUS_DESCRIPTION.EXPIRED);
+                    break;
+                default:
+                    lblStatusVersion.setText("");
                     break;
             }
             tfCustomerName.setText(oSalesController.SalesQoutation().getModel().Client().getCompanyName());
@@ -1255,6 +1284,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         btnAddClient.setOnAction(this::handleButtonAction);
         btnUpdate.setOnAction(this::handleButtonAction);
         btnFollowUp.setOnAction(this::handleButtonAction);
+        btnApproved.setOnAction(this::handleButtonAction);
+        btnVoid.setOnAction(this::handleButtonAction);
+        btnLost.setOnAction(this::handleButtonAction);
+        btnCreateFrom.setOnAction(this::handleButtonAction);
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -1265,6 +1298,92 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 Button clickedButton = (Button) source;
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
+                    case "btnCreateFrom":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Create From is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().createFromVersion();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        pnMCRow = -1;
+                        pnGawayRow = -1;
+                        initButton(pnEditMode);
+
+                        LoadRecord();
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
+
+                    case "btnLost":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Lost is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().lostRecord("");
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        initButton(pnEditMode);
+
+                        LoadRecord();
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
+                    case "btnVoid":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Void is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().voidRecord("");
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        initButton(pnEditMode);
+
+                        LoadRecord();
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
+                    case "btnApproved":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Approval is only available during view mode.");
+                            return;
+                        }
+                        oSalesController.SalesQoutation().Version().setWithParent(false);
+                        poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+//                        poJSON = oSalesController.SalesQoutation().confirmRecord("");
+//                        if ("error".equals((String) poJSON.get("result"))) {
+//                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+//                            return;
+//                        }
+
+                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        clearTextFields();
+                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        initButton(pnEditMode);
+
+                        LoadRecord();
+                        loadTableMCItem();
+                        loadTableGawayItem();
+                        break;
                     case "btnFollowUp":
                         // 1. Guard check: Only allow follow-up during view mode
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -1780,6 +1899,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         detail_data.clear();
         pnMCRow = -1;
         pnGawayRow = -1;
+        lblStatus.setText("UNKNOWN");
+        lblStatusVersion.setText("UNKNOWN");
     }
 
     public void clearMCItemTextFields() {
