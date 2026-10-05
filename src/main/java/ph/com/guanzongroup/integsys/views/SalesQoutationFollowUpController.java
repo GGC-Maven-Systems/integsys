@@ -15,7 +15,9 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.SalesQoutation;
+import ph.com.guanzongroup.cas.sales.status.SalesQoutationVersionStatic;
 import ph.com.guanzongroup.integsys.model.ModelTableMain;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.net.URL;
@@ -53,6 +55,7 @@ public class SalesQoutationFollowUpController implements Initializable {
     private JSONObject poJSON;
 
     @FXML private Button btnCLoseModal;
+    @FXML private Button btnClose;
     @FXML private FontAwesomeIconView faAdd;
     @FXML private HBox hbButtons;
     @FXML private Button btnSave;
@@ -88,6 +91,7 @@ public class SalesQoutationFollowUpController implements Initializable {
         btnSave.setOnAction(this::cmdButton_Click);
         btnCancel.setOnAction(this::cmdButton_Click);
         btnCLoseModal.setOnAction(this::cmdButton_Click);
+        btnClose.setOnAction(this::cmdButton_Click);
 
         for (String[] laType : FOLLOWUP_TYPES) {
             cmbFollowUpType.getItems().add(laType[1]);
@@ -141,26 +145,48 @@ public class SalesQoutationFollowUpController implements Initializable {
                 ShowMessageFX.Warning("No quotation is loaded.", pxeModuleName, null);
                 return false;
             }
-            if (!poController.isLatestVersion()) {
-                ShowMessageFX.Warning("Only the latest version can be followed up.", pxeModuleName, null);
-                return false;
+
+            // Superseded / older versions cannot be followed up, but their history can still be viewed
+            boolean lbViewOnly = !poController.isLatestVersion()
+                    || SalesQoutationVersionStatic.SUPERCEDED.equals(
+                    poController.Version().Master().getTransactionStatus());
+
+            if (!lbViewOnly) {
+                // new follow-up entry only for the latest, active version
+                poJSON = poController.newFollowUp();
+                if (!"success".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                    return false;
+                }
             }
 
-            poJSON = poController.newFollowUp();
-            if (!"success".equals((String) poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
-                return false;
-            }
-
+            // header: same for both modes
             tfTransactionNo.setText(poController.getModel().getTransactionNo());
             tfVersionNo.setText(poController.getModel().getVersion().toString());
-                tfFollowUpBy.setText(poController.FollowUp().getSysUser(poController.FollowUp().getModel().getFollowUpBy()));
             if (poController.getModel().Client() != null) {
                 tfCustomerName.setText(poController.getModel().Client().getCompanyName());
             }
-            dpInquiryDate.setValue(LocalDate.now());
 
-            loadTableFollowUpHistory();
+            if (lbViewOnly) {
+                // no new entry: clear the entry fields and lock them
+                tfFollowUpBy.clear();
+                dpInquiryDate.setValue(null);
+                cmbFollowUpType.getSelectionModel().clearSelection();
+                taRemarks.clear();
+                dpNextFollowUp.setValue(null);
+            } else {
+                tfFollowUpBy.setText(poController.FollowUp().getSysUser(
+                        poController.FollowUp().getModel().getFollowUpBy()));
+                dpInquiryDate.setValue(LocalDate.now());
+            }
+
+            CustomCommonUtil.setVisible(!lbViewOnly, btnCancel, btnSave);
+            CustomCommonUtil.setManaged(!lbViewOnly, btnCancel, btnSave);
+            taRemarks.setDisable(lbViewOnly);
+            cmbFollowUpType.setDisable(lbViewOnly);
+            dpNextFollowUp.setDisable(lbViewOnly);
+
+            loadTableFollowUpHistory();   // history of the version that is loaded
             return true;
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -177,6 +203,7 @@ public class SalesQoutationFollowUpController implements Initializable {
                     saveFollowUp();
                     break;
                 case "btnCancel":
+                case "btnClose":
                 case "btnCLoseModal":
                     CommonUtils.closeStage(btnCLoseModal);
                     break;

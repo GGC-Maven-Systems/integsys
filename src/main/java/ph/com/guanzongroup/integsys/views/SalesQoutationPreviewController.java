@@ -1,13 +1,9 @@
 package ph.com.guanzongroup.integsys.views;
 
-import com.jfoenix.controls.JFXTimePicker;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import javafx.animation.PauseTransition;
-import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,33 +12,23 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.Pair;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.*;
-import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.appdriver.constant.RecordStatus;
-import org.guanzon.appdriver.constant.UserRight;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.SalesQoutation;
@@ -51,12 +37,8 @@ import ph.com.guanzongroup.cas.sales.SalesQoutationVersionGiveaways;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Quotation_Version_Detail;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Quotation_Version_Giveaways;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.CustomerInquiryFollowUpStatic;
-import ph.com.guanzongroup.cas.sales.status.SalesInquiryStatic;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationVersionStatic;
-import ph.com.guanzongroup.integsys.model.ModelCustomerInquiryFollowUpAttachment;
-import ph.com.guanzongroup.integsys.model.ModelSalesReservationDetailx;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.model.ModelTableMain;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -64,17 +46,13 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SalesQoutationController implements Initializable, ScreenInterface {
+public class SalesQoutationPreviewController implements Initializable, ScreenInterface {
     private String pxeModuleName = "Sales Qoutation";
 
     private GRiderCAS oApp;
@@ -84,6 +62,13 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     private int pnEditMode;
     private boolean pbLoaded = false;
     private boolean isFistFormLoad = true;
+
+    // set by the list screen before initialize() when opened as a modal
+    private Stage poModalStage = null;
+    private boolean pbPreload = false;
+    private boolean pbPreloadCreateFrom = false;
+    private String psPreloadQuotationId = "";
+    private String psPreloadVersionId = "";
 
     private String fbDeliveryType = "";
     private String fbPaymentType = "";
@@ -146,6 +131,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     @FXML private Button btnExport;
     @FXML private Button btnClose;
     @FXML private Button btnAddClient;
+    @FXML private  Button btnCloseModal;
     // =========================================================================
     // Customer Information Controls
     // =========================================================================
@@ -282,6 +268,65 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         psCategoryId = fsValue;
     }
 
+    /**
+     * Called by the list screen BEFORE initialize(). The selected transaction is
+     * loaded as soon as the form is ready instead of starting a blank new record.
+     *
+     * @param fbCreateFrom false = open the version for viewing;
+     *                     true  = open it, then createFromVersion() so the edit mode is ADDNEW
+     */
+    public void setPreload(String fsQuotationId, String fsVersionId, boolean fbCreateFrom) {
+        psPreloadQuotationId = fsQuotationId == null ? "" : fsQuotationId;
+        psPreloadVersionId = fsVersionId == null ? "" : fsVersionId;
+        pbPreloadCreateFrom = fbCreateFrom;
+        pbPreload = !psPreloadQuotationId.isEmpty();
+    }
+
+    /** The stage that hosts this form when shown as a modal; null when embedded in a tab. */
+    public void setModalStage(Stage foStage) {
+        poModalStage = foStage;
+    }
+
+    private void closeForm() {
+        if (poModalStage != null) {
+            poModalStage.close();
+        } else {
+            new unloadForm().unloadForm(ChildAnchorPane, oApp, pxeModuleName);
+        }
+    }
+
+    private void loadPreloadedRecord() {
+        try {
+            // quotation row: version id is empty, so the latest version is opened
+            poJSON = oSalesController.SalesQoutation().openRecord(psPreloadQuotationId, psPreloadVersionId);
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                return;
+            }
+
+            if (pbPreloadCreateFrom) {
+                // same call the Create From button makes: copies the loaded version into a NEW record
+                poJSON = oSalesController.SalesQoutation().createFromVersion();
+                if ("error".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                    return;
+                }
+            }
+
+            pnEditMode = oSalesController.SalesQoutation().getEditMode();   // ADDNEW for create-from, READY for view
+            pnMCRow = -1;
+            pnGawayRow = -1;
+            initButton(pnEditMode);
+
+            LoadRecord();
+            loadTableMCItem();
+            loadTableGawayItem();
+        } catch (Exception ex) {
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
     // =========================================================================
     // Initializable Implementation & Lifecycle Methods
     // =========================================================================
@@ -307,7 +352,11 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             oSalesController.SalesQoutation().setRecordStatus(SalesQoutationStatic.OPEN);
             oSalesController.SalesQoutation().setWithUI(true);
 
-            Platform.runLater(() -> btnNew.fire());
+            if (pbPreload) {
+                Platform.runLater(this::loadPreloadedRecord);   // selected transaction instead of a blank new record
+            } else {
+                Platform.runLater(() -> btnNew.fire());
+            }
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
         }
@@ -343,14 +392,14 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 case EditMode.READY:
                     switch (oSalesController.SalesQoutation().getModel().getTransactionStatus()) {
                         case SalesQoutationStatic.OPEN:
-                            CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnCreateFrom, btnUpdate, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
-                            CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnCreateFrom, btnUpdate, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setVisible(true,  btnCreateFrom, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setManaged(true,  btnCreateFrom,  btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
                             break;
                         case SalesQoutationStatic.LOST:
                         case SalesQoutationStatic.SALES:
                         case SalesQoutationStatic.VOID:
-                            CustomCommonUtil.setVisible(true, btnBrowse, btnPrint, btnExport, btnClose);
-                            CustomCommonUtil.setManaged(true, btnBrowse, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setVisible(true,  btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setManaged(true,  btnPrint, btnExport, btnClose);
                             break;
                     }
                     break; // added: READY no longer falls through into UPDATE
@@ -367,8 +416,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 case EditMode.UNKNOWN:
                 default:
                     // Default fallback: show only Browse, New and Close
-                    CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnClose);
-                    CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnClose);
+                    CustomCommonUtil.setVisible(true,  btnClose);
+                    CustomCommonUtil.setManaged(true,  btnClose);
                     break;
             }
         } catch (Exception ex) {
@@ -546,6 +595,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfAddress.setText(oSalesController.SalesQoutation().getModel().ClientAddress().getAddress());
             tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
 
+            tfVersionTransNo.setText(oSalesController.SalesQoutation().Version().Master().getTransactionNo());
+            dpQoutationDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                    SQLUtil.dateFormat(oSalesController.SalesQoutation().Version().Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)));
+
             SalesQoutation loQuo = oSalesController.SalesQoutation();
 
             int lnVersion = (loQuo.getEditMode() == EditMode.ADDNEW || loQuo.isNewVersionPending())
@@ -556,7 +609,6 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
             tfVersion.setText(String.valueOf(lnVersion));
 
-            tfVersion.setText(String.valueOf(oSalesController.SalesQoutation().getModel().getVersion()));
             tfQoutationTitle.setText(oSalesController.SalesQoutation().Version().Master().getTitleName());
             dpQoutationExpectedDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
                     SQLUtil.dateFormat(oSalesController.SalesQoutation().Version().Master().getExpectedDate(), SQLUtil.FORMAT_SHORT_DATE)));
@@ -640,7 +692,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
             }
         } catch (Exception ex) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -728,7 +780,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
             loadTableMCItem();
         } catch (Exception ex) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
     }
@@ -828,7 +880,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
             loadTableGawayItem();
         } catch (Exception ex) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
     }
@@ -922,7 +974,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         initMCItemFields();
                         loadTransactionSummary();
                     } catch (Exception ex) {
-                        Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 });
                 return null;
@@ -1083,8 +1135,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                          * row index is also used when accessing Giveaway(row).
                          */
                         loGiveaways.Giveaways().sort(
-                                java.util.Comparator.comparingInt(
-                                        SalesQoutationController.this::gawayRowRank
+                                Comparator.comparingInt(
+                                        SalesQoutationPreviewController.this::gawayRowRank
                                 )
                         );
 
@@ -1199,7 +1251,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
 
                     } catch (Exception ex) {
                         Logger.getLogger(
-                                SalesQoutationController.class.getName()
+                                SalesQoutationPreviewController.class.getName()
                         ).log(
                                 Level.SEVERE,
                                 null,
@@ -1294,6 +1346,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         btnVoid.setOnAction(this::handleButtonAction);
         btnLost.setOnAction(this::handleButtonAction);
         btnCreateFrom.setOnAction(this::handleButtonAction);
+        btnCloseModal.setOnAction(this::handleButtonAction);
+
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -1304,6 +1358,14 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 Button clickedButton = (Button) source;
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
+                    case "btnCloseModal":
+                        if (ShowMessageFX.YesNo(
+                                "Do you really want to close this record?\nAny data collected will not be kept.",
+                                pxeModuleName,
+                                null)) {
+                            closeForm();
+                        }
+                        break;
                     case "btnCreateFrom":
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Create From is only available during view mode.");
@@ -1432,8 +1494,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         loadTableGawayItem();
                         break;
                     case "btnClose":
-                        if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", pxeModuleName, null)) {
-                            appUnload.unloadForm(ChildAnchorPane, oApp, pxeModuleName);
+                        if (ShowMessageFX.YesNo("Do you really want to close this record? \nAny data collected will not be kept.", pxeModuleName, null)) {
+                            closeForm();   // closes the modal stage, or unloads the tab when embedded
                         }
                         break;
                     case "btnNew":
@@ -1462,11 +1524,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
 
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        pnEditMode = EditMode.READY;
+                        ShowMessageFX.Information(String.valueOf(pnEditMode), pxeModuleName, null);
                         initButton(pnEditMode);
-
                         LoadRecord();
-                        btnNew.fire();
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", pxeModuleName, null)) {
@@ -1477,7 +1538,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         break;
                 }
             } catch (Exception ex) {
-                Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
                 try {
                     if (oApp != null) {
@@ -1546,7 +1607,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                     tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
                                 }
                             } catch (SQLException | GuanzonException e) {
-                                Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                                Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                             }
                         }
                         break;
@@ -1576,7 +1637,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 loadTableMCItem();
                             }
                         } catch (Exception e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
 
@@ -1594,7 +1655,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         } catch (NumberFormatException e) {
                             ShowMessageFX.Warning("Quantity must be a whole number.", pxeModuleName, null);
                         } catch (Exception e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
 
@@ -1651,7 +1712,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         } catch (NumberFormatException e) {
                             ShowMessageFX.Warning("Enter a valid amount.", pxeModuleName, null);
                         } catch (Exception e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
 
@@ -1694,7 +1755,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         } catch (NumberFormatException e) {
                             ShowMessageFX.Warning("Quantity must be a whole number.", pxeModuleName, null);
                         } catch (Exception e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
 
@@ -1709,7 +1770,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
                             }
                         } catch (Exception e) {
-                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
 
@@ -1860,7 +1921,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                 }
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1959,7 +2020,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.YES));
             }
         } catch (Exception e) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -1977,7 +2038,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfGawayQty.setText(safe(loDet::getQuantity));
             tfGawayRemarks.setText(safe(loDet::getRemarks));
         } catch (Exception e) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -2031,7 +2092,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             modalStage.showAndWait();
 
         } catch (IOException e) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, "Failed to load Follow-Up Modal", e);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, "Failed to load Follow-Up Modal", e);
             ShowMessageFX.Error("Unable to open follow-up window.", pxeModuleName, null);
         }
     }
@@ -2091,7 +2152,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfSummaryVatEx.setText(String.format("%,.2f", lnNonVatSales));
             tfSummaryTotal.setText(String.format("%,.2f", lnTotal));
         } catch (Exception ex) {
-            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
