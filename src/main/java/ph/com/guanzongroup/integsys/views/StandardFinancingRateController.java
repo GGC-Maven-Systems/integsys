@@ -167,9 +167,14 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
                     case "btnClose":
                         //define for standalone and for parameter
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            CommonUtils.closeStage(btnClose);
                         } else {
                             return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        } else {
+                            unloadForm appUnload = new unloadForm();
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         }
                         break;
                     case "btnNew":
