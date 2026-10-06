@@ -320,12 +320,12 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
-//                            poController.setBrandIdId(null);
+                            poController.getModel().setModelId(null);
                         }
                         break;
                     case "tfColor":
                         if (lsValue.isEmpty()) {
-//                            poController.setBrandIdId(null);
+                            poController.getModel().setColorId(null);
                         }
                         break;
                     case "tfVariant":
@@ -343,9 +343,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfTransmission":
 //                        poJSON = poController.getModel().set(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
+//                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+//                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+//                        }
                         break;
                     case "tfAuthorizeCapacity":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -367,9 +367,13 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbVehicleType":
+                        poJSON = poController.getModelVariantInsurance().setVehicleType(String.valueOf(selectedIndex));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                     case "cmbBodyType":
-//                        poJSON = poController.getModel().setSource(String.valueOf(selectedIndex));
+                        poJSON = poController.getModelVariantInsurance().setBodyType(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -379,8 +383,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtMaster_Focus, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity, tfSearchVariant);
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -400,11 +404,22 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     break;
                 case F3:
                     switch (lsID) {
-                        //apMaster
-                        case "tfBrand":
-                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                        //apBrowse
+                        case "tfSearchVariant":
+                            poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordMaster();
+                            break;
+                        //apMaster
+                        case "tfBrand":
+                            poJSON = poController.SearchBrand(lsValue, false;
+                            )
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(btnModel);
                             }
                             loadRecordMaster();
                             break;
@@ -412,6 +427,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             poJSON = poController.SearchModel(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfColor);
                             }
                             loadRecordMaster();
                             break;
@@ -419,15 +436,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             poJSON = poController.SearchColor(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfVariant);
                             }
                             loadRecordMaster();
-                            break;
-                        //apBrowse
-                        case "tfSearchVariant":
-                            poJSON = poController.searchRecord(lsValue, false);
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
                             break;
                     }
                     break;
@@ -456,10 +468,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             tfVariant.setText(poController.getModel().getDescription());
             tfYearModel.setText(String.valueOf(poController.getModel().getYearModel()));
 //            tfTransmission.setText(poController.getModel().getTransmission());
-//        JFXUtil.setCmbValue(cmbVehicleType, !poController.getModel().getVehicleType().equals("") ? Integer.valueOf(poController.getModel().getVehicleType()) : -1);
-//        JFXUtil.setCmbValue(cmbBodyType, !poController.getModel().getBodyType().equals("") ? Integer.valueOf(poController.getModel().getBodyType()) : -1);
-            tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
-            cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null)) {
                 poController.getModelVariantInsurance().setBodyType("0");
@@ -473,7 +481,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
-            tfVariant.setText(poController.getModel().getDescription());
+            tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
+            cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
