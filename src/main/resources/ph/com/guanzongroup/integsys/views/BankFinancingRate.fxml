@@ -314,7 +314,7 @@
                                                                               <TableColumn fx:id="tblRateFinancingTerms" maxWidth="104.0" minWidth="104.0" prefWidth="104.0" text="Rate" />
                                                                            </columns>
                                                                         </TableView>
-                                                                        <Button fx:id="btnStandardFinancingRates" mnemonicParsing="false" onAction="#cmdButton_Click" GridPane.columnIndex="6">
+                                                                        <Button fx:id="btnStandardFinancingRates" mnemonicParsing="false" onAction="#cmdButton_Click" style="-fx-cursor: hand;" styleClass="button_process_v4" GridPane.columnIndex="6">
                                                                            <graphic>
                                                                               <FontAwesomeIconView glyphName="PLUS" />
                                                                            </graphic>
