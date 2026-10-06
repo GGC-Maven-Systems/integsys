@@ -280,7 +280,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 break;
             case "btnModel":
                 VehicleModel_EntryController controller2 = new VehicleModel_EntryController(); //Should differ the parameter calling
-                lsFXML = "/ph/com/guanzongroup/integsys/views/Model.fxml";
+                lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleModel_Entry.fxml";
                 controller2.ForDialog(true);
                 if (isForUpdate) {
                     controller2.isForUpdate(true);
@@ -339,7 +339,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         }
                         break;
                     case "tfVariant":
-                        poJSON = poController.getModel().setVariantId(lsValue);
+                        poJSON = poController.getModel().setDescription(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -360,7 +360,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfSearchVariant":
                         if (lsValue.isEmpty()) {
-                            poController.getModelVariantInsurance().setVariantId(lsValue);
                         }
                         break;
                 }
@@ -420,6 +419,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            tfSearchVariant.setText(poController.getModel().getDescription());
                             loadRecordMaster();
                             break;
                         //apMaster
@@ -499,6 +499,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 //            }
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
             cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
+            JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
