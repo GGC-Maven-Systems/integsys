@@ -90,6 +90,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
             poController.setWithUI(true);
+            poController.setIndustryId(psIndustryId);
             Platform.runLater(() -> {
                 btnNew.fire();
             });
@@ -107,7 +108,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
     @Override
     public void setIndustryID(String fsValue) {
-        System.out.println(fsValue);
         this.psIndustryId = fsValue;
     }
 
@@ -418,6 +418,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfBrand);
                             }
                             tfSearchVariant.setText(poController.getModel().getDescription());
                             loadRecordMaster();
