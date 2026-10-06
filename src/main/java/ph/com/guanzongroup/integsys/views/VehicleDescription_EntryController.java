@@ -14,6 +14,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -31,10 +32,9 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
-import ph.com.guanzongroup.cas.sales.AddOnType;
 import ph.com.guanzongroup.cas.sales.VehicleDescription;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.VehicleDescriptionStatus;
+import ph.com.guanzongroup.cas.sales.status.AddOnTypeStatus;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -52,23 +52,25 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     private String psCompanyId = "";
     private boolean pbEntered = false;
     private int pnDetail = 0;
+    private boolean isForDialog = false;
+    private boolean isForUpdate = false;
+    private String lsStandardRateID = "";
     @FXML
-    private AnchorPane AnchorMain, AnchorInputs, apMaster;
+    private AnchorPane AnchorMain, AnchorInputs, apMaster, apBrowse;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel,
-                    btnActivate, btnVoid, btnDeactivate, btnHistory,
-                    btnClose, btnAddBrand, btnAddModel;
-    @FXML
-    private TextField tfVariantID, tfBrand, tfModel, tfVariant,
-                       tfTransmission, tfAuthorizeCapacity, tfSearchVariant;
-    @FXML
-    private ComboBox cmbBodyType, cmbVehicleType;
+    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnDeactivate, btnHistory, btnClose, btnBrand, btnModel, btnColor;
     @FXML
     private Label lblStatus;
-    ObservableList<String> comboboxBodyTypelist = FXCollections.observableArrayList("Sales", "Service");
-    ObservableList<String> comboboxVehicleTypelist = FXCollections.observableArrayList("Sales", "Service");
+    @FXML
+    private TextField tfVariantID, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity, tfSearchVariant;
+    @FXML
+    private ComboBox cmbVehicleType, cmbBodyType;
+    @FXML
+    private CheckBox cbEndOfLife;
+
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("Parts", "Labor", "Other Sources");
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -77,7 +79,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             poController.initialize();
             poJSON = new JSONObject();
             initTextFields();
-            initComboboxes();
             clearTextFields();
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
@@ -127,14 +128,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            tfVariantID.requestFocus();
                             return;
                         }
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnClose":
-                        //define for standalone and for parameter
+                        unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            CommonUtils.closeStage(btnClose);
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         } else {
                             return;
                         }
@@ -142,7 +144,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     case "btnNew":
                         clearTextFields();
 
-                        poJSON = poController.newRecord();
+                        poJSON = poController.NewRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
@@ -201,19 +203,19 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             return;
                         }
                         break;
-//                    case "btnActivate":
-//                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to activate the record?") == false) {
-//                            return;
-//                        }
-//                        poJSON = poController.ActivateRecord("");
-//                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                        } else {
-//                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                        }
-//                        poController.openRecord(poController.getModel().getVariantId());
-//                        pnEditMode = poController.getEditMode();
-//                        break;
+                    case "btnActivate":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to activate the record?") == false) {
+                            return;
+                        }
+                        poJSON = poController.activateRecord();
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        poController.openRecord(poController.getModel().getVariantId());
+                        pnEditMode = poController.getEditMode();
+                        break;
 //                    case "btnVoid":
 //                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to void the record?") == false) {
 //                            return;
@@ -224,7 +226,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 //                        } else {
 //                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
 //                        }
-//                        poController.openRecord(poController.getModel().getVariantId());
+//                        poController.openRecord(poController.getModel().getAddTypeCode());
 //                        pnEditMode = poController.getEditMode();
 //                        break;
                     case "btnDeactivate":
@@ -239,6 +241,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         }
                         poController.openRecord(poController.getModel().getVariantId());
                         pnEditMode = poController.getEditMode();
+                        break;
+                    case "btnBrand":
+                        //opens brand pop up
+                        break;
+                    case "btnModel":
+                        //opens brand pop up
+                        break;
+                    case "btnColor":
+                        //opens brand pop up 
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -256,22 +267,48 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
+                    case "tfBrand":
+                        if (lsValue.isEmpty()) {
+                            poController.setBrandIdId(null);
+                        }
+                        break;
+                    case "tfModel":
+                        if (lsValue.isEmpty()) {
+//                            poController.setBrandIdId(null);
+                        }
+                        break;
+                    case "tfColor":
+                        if (lsValue.isEmpty()) {
+//                            poController.setBrandIdId(null);
+                        }
+                        break;
                     case "tfVariant":
-                        poJSON = poController.getModel().setDescription(lsValue);
+                        poJSON = poController.getModel().setVariantId(lsValue);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfYearModel":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.getModel().setYearModel(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfTransmission":
-                        poJSON = poController.getModelVariantInsurance().setTransmission(lsValue);
+//                        poJSON = poController.getModel().set(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfAuthorizeCapacity":
-                        poJSON = poController.getModelVariantInsurance().setAuthCapx(Integer.valueOf(lsValue));
+//                        poJSON = poController.getModel().setAddTypeName(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfSearchVariant":
+                        if (lsValue.isEmpty()) {
                         }
                         break;
                 }
@@ -282,13 +319,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbVehicleType":
-                        poJSON = poController.getModelVariantInsurance().setVehicleType(String.valueOf(selectedIndex));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
                         break;
                     case "cmbBodyType":
-                        poJSON = poController.getModelVariantInsurance().setBodyType(String.valueOf(selectedIndex));
+//                        poJSON = poController.getModel().setSource(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -298,77 +331,106 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtMaster_Focus, tfVariant);
-
+        JFXUtil.setFocusListener(txtMaster_Focus, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity, tfSearchVariant);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
     }
 
-    private void initComboboxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxBodyTypelist, cmbBodyType));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType);
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxVehicleTypelist, cmbVehicleType));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbVehicleType);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbVehicleType);
-    }
-
     private void txtField_KeyPressed(KeyEvent event) {
-        TextField txtField = (TextField) event.getSource();
-        String lsID = (((TextField) event.getSource()).getId());
-        String lsValue = (txtField.getText() == null ? "" : txtField.getText());
-        poJSON = new JSONObject();
-        int lnRow = pnDetail;
+        try {
+            TextField txtField = (TextField) event.getSource();
+            String lsID = (((TextField) event.getSource()).getId());
+            String lsValue = (txtField.getText() == null ? "" : txtField.getText());
+            poJSON = new JSONObject();
+            int lnRow = pnDetail;
 
-        switch (event.getCode()) {
-            case TAB:
-            case ENTER:
-                pbEntered = true;
-                CommonUtils.SetNextFocus(txtField);
-                event.consume();
-                break;
-            case F3:
-                switch(lsID){
-                    case "tfBrand":
-                
+            switch (event.getCode()) {
+                case TAB:
+                case ENTER:
+                    pbEntered = true;
+                    CommonUtils.SetNextFocus(txtField);
+                    event.consume();
                     break;
-                    case "tfModel":
-                
+                case F3:
+                    switch (lsID) {
+                        //apMaster
+                        case "tfBrand":
+                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfModel":
+                            poJSON = poController.SearchModel(lsValue, false);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfColor":
+//                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        //apBrowse
+                        case "tfSearchVariant":
+//                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                    }
                     break;
-                }
-                break;
-            default:
-                break;
+                default:
+                    break;
+            }
+        } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster);
     }
-    
+
     private void loadRecordMaster() {
         Platform.runLater(() -> {
-            JFXUtil.setStatusValue(lblStatus, VehicleDescriptionStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
+            JFXUtil.setStatusValue(lblStatus, AddOnTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         });
         tfVariantID.setText(poController.getModel().getVariantId());
-       
-        if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null)) {
-            poController.getModelVariantInsurance().setBodyType("0");
-            JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
-        } else {
-            JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
+//        tfBrand.setText(poController.getModel().getBrand());
+//        tfModel.setText(poController.getModel().getModel());
+//        tfColor.setText(poController.getModel().getColor());
+//        tfVariant.setText(poController.getModel().getVariant());
+        tfYearModel.setText(String.valueOf(poController.getModel().getYearModel()));
+//        tfTransmission.setText(poController.getModel().getTransmission());
+//        JFXUtil.setCmbValue(cmbVehicleType, !poController.getModel().getVehicleType().equals("") ? Integer.valueOf(poController.getModel().getVehicleType()) : -1);
+//        JFXUtil.setCmbValue(cmbBodyType, !poController.getModel().getBodyType().equals("") ? Integer.valueOf(poController.getModel().getBodyType()) : -1);
+//        tfAuthorizeCapacity.setText(poController.getModel().getAuthorizeCapacity());
+//        cbEndOfLife.setSelected(poController.getModel().isEndOfLife());
+    }
+
+    private void cmdCheckBox_Click(ActionEvent event) {
+        poJSON = new JSONObject();
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "cbEndOfLife": // this is the id
+                    break;
+            }
         }
-        if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null)) {
-            poController.getModelVariantInsurance().setVehicleType("0");
-            JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
-        } else {
-            JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
-        }
-        tfVariant.setText(poController.getModel().getDescription());
+    }
+
+    private void initComboboxes() {
+//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbBodyType), new JFXUtil.Pairs<>(samplelist, cmbVehicleType));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType);
     }
 
     private boolean isActive() {
         switch (poController.getModel().getRecordStatus()) {
-            case VehicleDescriptionStatus.ACTIVE:
+            case AddOnTypeStatus.ACTIVE:
                 return true;
         }
         return false;
@@ -384,30 +446,27 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-        JFXUtil.setButtonsVisibility(false, btnActivate, btnVoid, btnDeactivate);
+        JFXUtil.setButtonsVisibility(false, btnDeactivate);
         JFXUtil.setDisabled(!lbShow, apMaster);
         if (fnValue != EditMode.READY) {
             return;
         }
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
-            case VehicleDescriptionStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnVoid,btnActivate);
+            case AddOnTypeStatus.OPEN:
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
-            case VehicleDescriptionStatus.ACTIVE:
+            case AddOnTypeStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnVoid);
-                break;
-            case VehicleDescriptionStatus.INACTIVE:
-                JFXUtil.setButtonsVisibility(true, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
-                JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 break;
-            case VehicleDescriptionStatus.VOID:
+            case AddOnTypeStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
-                JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnActivate);
+                JFXUtil.setButtonsVisibility(false, btnDeactivate);
+                break;
+            case AddOnTypeStatus.VOID:
+                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
         }
     }
