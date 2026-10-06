@@ -60,7 +60,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
             btnSave,
             btnUpdate,
             btnCancel,
-            btnActivate,btnHistory,
+            btnActivate, btnHistory,
             btnClose;
 
     @FXML
@@ -75,6 +75,10 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
 
     @FXML
     private CheckBox cbField01, cbField02;
+
+    private boolean isForDialog = false;
+    private boolean isForUpdate = false;
+    private String lsID = "";
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -94,10 +98,47 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
     public void setCategoryID(String fsValue) {
     }
 
+    public void initializeDialog(GRiderCAS oApp1) {
+        oApp = oApp1;
+        LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+        oParameters = new ParamControllers(oApp, logwrapr);
+    }
+
+    public void ForDialog(boolean lbisForDialog) {
+        isForDialog = lbisForDialog;
+    }
+
+    public boolean isForDialog() {
+        return isForDialog;
+    }
+
+    public void openRecordForAdd() {
+        btnNew.fire();
+    }
+
+    public void isForUpdate(boolean lbisForUpdate) {
+        isForUpdate = lbisForUpdate;
+    }
+
+    private boolean isForUpdate() {
+        return isForUpdate;
+    }
+
+    public void openRecordForUpdate(String lsValue) {
+        lsID = lsValue;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            initializeObject();
+            if (isForDialog()) {
+            } else {
+                LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+                oParameters = new ParamControllers(oApp, logwrapr);
+            }
+            oParameters.Model().setRecordStatus("0123");
+            oParameters.Model().setWithUI(true);
+            oParameters.Model().setIndustryId(psIndustryId);
             pnEditMode = oParameters.Model().getEditMode();
             initButton(pnEditMode);
             InitTextFields();
@@ -105,20 +146,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
             initTabAnchor();
 
             Platform.runLater(() -> btnNew.fire());
-            
-            pbLoaded = true;
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
-    private void initializeObject() {
-        try {
-            LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new ParamControllers(oApp, logwrapr);
-            oParameters.Model().setRecordStatus("0123");
-            oParameters.Model().setWithUI(true);
-            oParameters.Model().setIndustryId(psIndustryId);
+            pbLoaded = true;
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -144,7 +173,15 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
                     case "btnClose":
-                        if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
+                        //define for standalone and for parameter
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                        } else {
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        } else {
+                            appUnload = new unloadForm();
                             appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         }
                         break;
@@ -184,13 +221,13 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         }
                         pnEditMode = oParameters.Model().getEditMode();
                         initButton(pnEditMode);
-                        cbField02.setDisable(false); 
+                        cbField02.setDisable(false);
                         initTabAnchor();
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
                             clearAllFields();
-                            initializeObject();
+                            oParameters.Model().initialize();
                             pnEditMode = EditMode.UNKNOWN;
                             initButton(pnEditMode);
                             initTabAnchor();
@@ -207,6 +244,10 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                             Platform.runLater(() -> btnNew.fire());
                         } else {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
                         }
                         break;
                     case "btnActivate":
@@ -217,7 +258,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         switch (Status) {
                             case "0":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-                                    
+
                                     poJsON = oParameters.Model().activateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -231,11 +272,14 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                                    
+
                                     poJsON = oParameters.Model().deactivateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -249,26 +293,29 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                         }
-                            break;
-                        case "btnHistory":
-                            if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
-                                ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
-                                return;
-                            }
+                        break;
+                    case "btnHistory":
+                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
+                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
+                            return;
+                        }
 
-                            try {
-                                oParameters.Model().ShowStatusHistory();
-                            } catch (NullPointerException npe) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                                ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
-                            } catch (Exception ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                                ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
-                            }
-                            break;
+                        try {
+                            oParameters.Model().ShowStatusHistory();
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
+                        break;
                 }
             } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                 Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
@@ -284,7 +331,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
         txtSeeks01.clear();
         cbField01.setSelected(false);
         cbField02.setSelected(false);
-        cbField02.setDisable(true); 
+        cbField02.setDisable(true);
     }
 
     private void initButton(int fnValue) {
@@ -296,7 +343,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
         btnSave.setManaged(lbShow);
         btnUpdate.setVisible(!lbShow);
         btnUpdate.setManaged(!lbShow);
-        
+
         btnActivate.setVisible(!lbShow);
         btnActivate.setManaged(!lbShow);
         btnHistory.setVisible(!lbShow);
@@ -309,8 +356,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
 
         btnClose.setVisible(true);
         btnClose.setManaged(true);
-        
-        if (fnValue == EditMode.UNKNOWN){
+
+        if (fnValue == EditMode.UNKNOWN) {
             btnActivate.setVisible(false);
             btnActivate.setManaged(false);
             btnHistory.setVisible(false);
@@ -453,7 +500,6 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
             txtField02.setText(oParameters.Model().getModel().Brand().getDescription());
             txtField03.setText(oParameters.Model().getModel().getModelCode());
             txtField04.setText(oParameters.Model().getModel().getDescription());
-           
 
             switch (oParameters.Model().getModel().getRecordStatus()) {
                 case "1":

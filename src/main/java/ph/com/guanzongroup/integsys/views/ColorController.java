@@ -127,7 +127,7 @@ public class ColorController implements Initializable, ScreenInterface {
                 LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
                 oParameters = new ParamControllers(oApp, logwrapr);
             }
-
+            oParameters.Model().setWithUI(true);
             oParameters.Brand().setRecordStatus("0123");
             oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
             Platform.runLater(() -> {

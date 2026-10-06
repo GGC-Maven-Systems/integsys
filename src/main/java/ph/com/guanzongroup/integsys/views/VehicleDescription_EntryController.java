@@ -268,7 +268,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
         switch (lsValue) {
             case "btnBrand":
-                //opens brand pop up
                 BrandController controller1 = new BrandController(); //Should differ the parameter calling
                 lsFXML = "/ph/com/guanzongroup/integsys/views/Brand.fxml";
                 controller1.ForDialog(true);
@@ -280,12 +279,17 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 controller = controller1;
                 break;
             case "btnModel":
-                //opens brand pop up
-//                ModelController controller = new ModelController(); //Should differ the parameter calling
-//                lsFXML = "/ph/com/guanzongroup/integsys/views/Model.fxml";
+                VehicleModel_EntryController controller2 = new VehicleModel_EntryController(); //Should differ the parameter calling
+                lsFXML = "/ph/com/guanzongroup/integsys/views/Model.fxml";
+                controller2.ForDialog(true);
+                if (isForUpdate) {
+                    controller2.isForUpdate(true);
+                    controller2.openRecordForUpdate(lsId);
+                }
+                controller2.initializeDialog(oApp);
+                controller = controller2;
                 break;
             case "btnColor":
-                //opens brand pop up         
                 ColorController controller3 = new ColorController(); //Should differ the parameter calling
                 lsFXML = "/ph/com/guanzongroup/integsys/views/Color.fxml";
                 controller3.ForDialog(true);
