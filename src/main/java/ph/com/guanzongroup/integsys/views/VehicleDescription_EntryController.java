@@ -68,24 +68,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     @FXML
     private Label lblStatus;
     @FXML
-    private TextField tfVariantID, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity, tfSearchVariant;
+    private TextField tfVariantID, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity, tfSearchVariant;
     @FXML
-    private ComboBox cmbVehicleType, cmbBodyType;
+    private ComboBox cmbVehicleType, cmbBodyType, cmbTransmission;
     @FXML
     private CheckBox cbEndOfLife;
 
-    ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList(
-            "Car",
-            "Truck",
-            "Van"
-    );
-
-    ObservableList<String> comboboxlistBodyType = FXCollections.observableArrayList(
-            "Sedan",
-            "SUV",
-            "Hatchback",
-            "Pickup"
-    );
+    ObservableList<String> comboboxlistTransmission = FXCollections.observableArrayList("Manual", "Automatic", "CVT", "DCT");
+    ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList("Commercial", "Private");
+    ObservableList<String> comboboxlistBodyType = FXCollections.observableArrayList("Sedan", "SUV", "Hatchback", "MPV");
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -272,18 +263,40 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     String lsId = "";
 
     private void openParameter(String lsValue) {
+        String lsFXML = "";
+        Object controller = new Object();
+
         switch (lsValue) {
             case "btnBrand":
                 //opens brand pop up
+                BrandController controller1 = new BrandController(); //Should differ the parameter calling
+                lsFXML = "/ph/com/guanzongroup/integsys/views/Brand.fxml";
+                controller1.ForDialog(true);
+                if (isForUpdate) {
+                    controller1.isForUpdate(true);
+                    controller1.openRecordForUpdate(lsId);
+                }
+                controller1.initializeDialog(oApp);
+                controller = controller1;
                 break;
             case "btnModel":
                 //opens brand pop up
+//                ModelController controller = new ModelController(); //Should differ the parameter calling
+//                lsFXML = "/ph/com/guanzongroup/integsys/views/Model.fxml";
                 break;
             case "btnColor":
-                //opens brand pop up 
+                //opens brand pop up         
+                ColorController controller3 = new ColorController(); //Should differ the parameter calling
+                lsFXML = "/ph/com/guanzongroup/integsys/views/Color.fxml";
+                controller3.ForDialog(true);
+                if (isForUpdate) {
+                    controller3.isForUpdate(true);
+                    controller3.openRecordForUpdate(lsId);
+                }
+                controller3.initializeDialog(oApp);
+                controller = controller3;
                 break;
         }
-
         poJSON = new JSONObject();
         if (stageParameter != null) {
             stageParameter.closeDialog();
@@ -291,19 +304,12 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         } else {
             stageParameter = new JFXUtil.StageManager();
         }
-        StandardFinancingRateController controller = new StandardFinancingRateController(); //Should differ the parameter calling
-        controller.ForDialog(true);
-        if (isForUpdate) {
-            controller.isForUpdate(true);
-            controller.openRecordForUpdate(lsId);
-        }
-        controller.initializeDialog(oApp);
         try {
             stageParameter.setOnHidden(event -> {
                 stageParameter = null;
                 loadRecordMaster();
             });
-            stageParameter.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource("/ph/com/guanzongroup/integsys/views/StandardFinancingRate.fxml"), controller, "Standard Financing Rate Dialog", true, false, false);
+            stageParameter.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Parameter Dialog", true, false, false);
         } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -341,12 +347,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfTransmission":
-//                        poJSON = poController.getModel().set(lsValue);
-//                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                        }
-                        break;
                     case "tfAuthorizeCapacity":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.getModelVariantInsurance().setAuthCapx(Integer.parseInt(lsValue));
@@ -366,14 +366,20 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
+                    case "cmbTransmission":
+                        poJSON = poController.getModelVariantInsurance().setTransmission(String.valueOf(selectedValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                     case "cmbVehicleType":
-                        poJSON = poController.getModelVariantInsurance().setVehicleType(String.valueOf(selectedIndex));
+                        poJSON = poController.getModelVariantInsurance().setVehicleType(String.valueOf(selectedValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "cmbBodyType":
-                        poJSON = poController.getModelVariantInsurance().setBodyType(String.valueOf(selectedIndex));
+                        poJSON = poController.getModelVariantInsurance().setBodyType(String.valueOf(selectedValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -383,7 +389,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
     }
 
@@ -414,8 +420,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             break;
                         //apMaster
                         case "tfBrand":
-                            poJSON = poController.SearchBrand(lsValue, false;
-                            )
+                            poJSON = poController.SearchBrand(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
@@ -467,7 +472,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             tfColor.setText(poController.getModel().Color().getDescription());
             tfVariant.setText(poController.getModel().getDescription());
             tfYearModel.setText(String.valueOf(poController.getModel().getYearModel()));
-//            tfTransmission.setText(poController.getModel().getTransmission());
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null)) {
                 poController.getModelVariantInsurance().setBodyType("0");
@@ -475,12 +479,20 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             }
+
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null)) {
                 poController.getModelVariantInsurance().setVehicleType("0");
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
+
+//            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null)) {
+//                poController.getModelVariantInsurance().setVehicleType("0");
+//                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
+//            } else {
+//                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
+//            }
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
             cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
         } catch (SQLException | GuanzonException ex) {
@@ -513,9 +525,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     }
 
     private void initComboboxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistBodyType, cmbBodyType), new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType);
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistBodyType, cmbBodyType),
+                new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType), new JFXUtil.Pairs<>(comboboxlistTransmission, cmbTransmission));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType, cmbTransmission);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType, cmbTransmission);
     }
 
     private boolean isActive() {

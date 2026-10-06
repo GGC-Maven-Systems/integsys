@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -25,6 +26,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.LogWrapper;
+import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.cas.parameter.services.ParamControllers;
 import org.json.simple.JSONObject;
@@ -66,6 +68,9 @@ public class ColorController implements Initializable, ScreenInterface {
 
     @FXML
     private CheckBox cbActive;
+    private boolean isForDialog = false;
+    private boolean isForUpdate = false;
+    private String lsID = "";
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -84,34 +89,74 @@ public class ColorController implements Initializable, ScreenInterface {
     public void setCategoryID(String fsValue) {
     }
 
+    public void initializeDialog(GRiderCAS oApp1) {
+        oApp = oApp1;
+        LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+        oParameters = new ParamControllers(oApp, logwrapr);
+    }
+
+    public void ForDialog(boolean lbisForDialog) {
+        isForDialog = lbisForDialog;
+    }
+
+    public boolean isForDialog() {
+        return isForDialog;
+    }
+
+    public void openRecordForAdd() {
+        btnNew.fire();
+    }
+
+    public void isForUpdate(boolean lbisForUpdate) {
+        isForUpdate = lbisForUpdate;
+    }
+
+    private boolean isForUpdate() {
+        return isForUpdate;
+    }
+
+    public void openRecordForUpdate(String lsValue) {
+        lsID = lsValue;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            initializeObject();
+            if (isForDialog()) {
+            } else {
+                LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+                oParameters = new ParamControllers(oApp, logwrapr);
+            }
+
+            oParameters.Brand().setRecordStatus("0123");
+            oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
+            Platform.runLater(() -> {
+                loadRecord();
+                if (isForUpdate()) {
+                    try {
+                        oParameters.Brand().openRecord(lsID);
+                        loadRecord();
+                        pnEditMode = oParameters.Brand().getEditMode();
+                        initButton(pnEditMode);
+                    } catch (SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                } else {
+                    btnNew.fire();
+                }
+            });
             pnEditMode = oParameters.Color().getEditMode();
             initButton(pnEditMode);
             InitTextFields();
             ClickButton();
             pbLoaded = true;
-            
-            
+
             if (oParameters.Color().getEditMode() == EditMode.ADDNEW) {
                 initButton(pnEditMode);
                 loadRecord();
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void initializeObject() {
-        try {
-            LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new ParamControllers(oApp, logwrapr);
-            oParameters.Color().setRecordStatus("0123");
-        } catch (SQLException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
             Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -135,7 +180,15 @@ public class ColorController implements Initializable, ScreenInterface {
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
                     case "btnClose":
-                        if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
+                        //define for standalone and for parameter
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                        } else {
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        } else {
+                            appUnload = new unloadForm();
                             appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         }
                         break;
@@ -175,7 +228,7 @@ public class ColorController implements Initializable, ScreenInterface {
                     case "btnCancel":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
                             clearAllFields();
-                            initializeObject();
+                            oParameters.Color().initialize();
                             pnEditMode = EditMode.UNKNOWN;
                             initButton(pnEditMode);
                         }
@@ -191,13 +244,17 @@ public class ColorController implements Initializable, ScreenInterface {
                             clearAllFields();
                         } else {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
                         }
                         break;
-                   case "btnActivate":
+                    case "btnActivate":
                         String Status = oParameters.Color().getModel().getRecordStatus();
                         String id = oParameters.Color().getModel().getColorId();
                         JSONObject poJsON;
-                        
+
                         switch (Status) {
                             case "0":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
@@ -216,15 +273,17 @@ public class ColorController implements Initializable, ScreenInterface {
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                                   
-                                    
+
                                     System.out.println("EDIT MODE : " + oParameters.Color().getEditMode());
                                     ShowMessageFX.Information(String.valueOf(oParameters.Category().getEditMode()), "Computerized Accounting System", pxeModuleName);
-                                    
+
                                     poJsON = oParameters.Color().deactivateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -238,6 +297,9 @@ public class ColorController implements Initializable, ScreenInterface {
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                         }

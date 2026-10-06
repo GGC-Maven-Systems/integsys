@@ -31,10 +31,12 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.LogWrapper;
+import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.cas.parameter.services.ParamControllers;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.integsys.model.ModelResultSet;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 public class BrandController implements Initializable, ScreenInterface {
 
@@ -73,6 +75,9 @@ public class BrandController implements Initializable, ScreenInterface {
 
     @FXML
     private CheckBox cbField01;
+    private boolean isForDialog = false;
+    private boolean isForUpdate = false;
+    private String lsID = "";
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -91,10 +96,64 @@ public class BrandController implements Initializable, ScreenInterface {
     public void setCategoryID(String fsValue) {
     }
 
+    public void initializeDialog(GRiderCAS oApp1) {
+        oApp = oApp1;
+        LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+        oParameters = new ParamControllers(oApp, logwrapr);
+    }
+
+    public void ForDialog(boolean lbisForDialog) {
+        isForDialog = lbisForDialog;
+    }
+
+    public boolean isForDialog() {
+        return isForDialog;
+    }
+
+    public void openRecordForAdd() {
+        btnNew.fire();
+    }
+
+    public void isForUpdate(boolean lbisForUpdate) {
+        isForUpdate = lbisForUpdate;
+    }
+
+    private boolean isForUpdate() {
+        return isForUpdate;
+    }
+
+    public void openRecordForUpdate(String lsValue) {
+        lsID = lsValue;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            initializeObject();
+            if (isForDialog()) {
+            } else {
+                LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
+                oParameters = new ParamControllers(oApp, logwrapr);
+            }
+
+            oParameters.Brand().setRecordStatus("0123");
+            oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
+            Platform.runLater(() -> {
+                loadRecord();
+                if (isForUpdate()) {
+                    try {
+                        oParameters.Brand().openRecord(lsID);
+                        loadRecord();
+                        pnEditMode = oParameters.Brand().getEditMode();
+                        initButton(pnEditMode);
+                    } catch (SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                } else {
+                    btnNew.fire();
+                }
+            });
+
             pnEditMode = oParameters.Brand().getEditMode();
             initButton(pnEditMode);
             InitTextFields();
@@ -107,17 +166,6 @@ public class BrandController implements Initializable, ScreenInterface {
                 loadRecord();
             }
             pbLoaded = true;
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void initializeObject() {
-        try {
-            LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
-            oParameters = new ParamControllers(oApp, logwrapr);
-            oParameters.Brand().setRecordStatus("0123");
-            oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -142,7 +190,15 @@ public class BrandController implements Initializable, ScreenInterface {
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
                     case "btnClose":
-                        if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
+                        //define for standalone and for parameter
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                        } else {
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        } else {
+                            appUnload = new unloadForm();
                             appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         }
                         break;
@@ -188,7 +244,7 @@ public class BrandController implements Initializable, ScreenInterface {
                     case "btnCancel":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", "Computerized Acounting System", pxeModuleName)) {
                             clearAllFields();
-                            initializeObject();
+                            oParameters.Brand().initialize();
                             pnEditMode = EditMode.UNKNOWN;
                             initButton(pnEditMode);
                             initTabAnchor();
@@ -204,6 +260,10 @@ public class BrandController implements Initializable, ScreenInterface {
                             Platform.runLater(() -> btnNew.fire());
                         } else {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
+                            return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
                         }
                         break;
                     case "btnActivate":
@@ -227,6 +287,9 @@ public class BrandController implements Initializable, ScreenInterface {
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                             case "1":
@@ -244,6 +307,9 @@ public class BrandController implements Initializable, ScreenInterface {
                                     clearAllFields();
                                     loadRecord();
                                     ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
+                                    if (isForDialog()) {
+                                        CommonUtils.closeStage(btnClose);
+                                    }
                                 }
                                 break;
                         }
@@ -276,7 +342,7 @@ public class BrandController implements Initializable, ScreenInterface {
         btnSave.setManaged(lbShow);
         btnUpdate.setVisible(!lbShow);
         btnUpdate.setManaged(!lbShow);
-        
+
         btnActivate.setVisible(!lbShow);
         btnActivate.setManaged(!lbShow);
 
@@ -287,7 +353,7 @@ public class BrandController implements Initializable, ScreenInterface {
 
         btnClose.setVisible(true);
         btnClose.setManaged(true);
-        if (fnValue == EditMode.UNKNOWN){
+        if (fnValue == EditMode.UNKNOWN) {
             btnActivate.setVisible(false);
             btnActivate.setManaged(false);
         }
@@ -341,25 +407,25 @@ public class BrandController implements Initializable, ScreenInterface {
 
     private void txtField_KeyPressed(KeyEvent event) {
 
-            TextField txtField = (TextField) event.getSource();
-            int lnIndex = Integer.parseInt(((TextField) event.getSource()).getId().substring(8, 10));
-            String lsValue = (txtField.getText() == null ? "" : txtField.getText());
-            JSONObject poJson;
-            poJson = new JSONObject();
-            switch (event.getCode()) {
-                case F3:
-                    
-                case ENTER:
-            }
-            switch (event.getCode()) {
-                case ENTER:
-                    CommonUtils.SetNextFocus(txtField);
-                case DOWN:
-                    CommonUtils.SetNextFocus(txtField);
-                    break;
-                case UP:
-                    CommonUtils.SetPreviousFocus(txtField);
-            }
+        TextField txtField = (TextField) event.getSource();
+        int lnIndex = Integer.parseInt(((TextField) event.getSource()).getId().substring(8, 10));
+        String lsValue = (txtField.getText() == null ? "" : txtField.getText());
+        JSONObject poJson;
+        poJson = new JSONObject();
+        switch (event.getCode()) {
+            case F3:
+
+            case ENTER:
+        }
+        switch (event.getCode()) {
+            case ENTER:
+                CommonUtils.SetNextFocus(txtField);
+            case DOWN:
+                CommonUtils.SetNextFocus(txtField);
+                break;
+            case UP:
+                CommonUtils.SetPreviousFocus(txtField);
+        }
     }
     final ChangeListener<? super Boolean> txtField_Focus = (o, ov, nv) -> {
         if (!pbLoaded) {
