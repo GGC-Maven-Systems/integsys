@@ -131,9 +131,9 @@ public class AddOnsController implements Initializable, ScreenInterface {
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnClose":
-                        //define for standalone and for parameter
+                        unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            CommonUtils.closeStage(btnClose);
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         } else {
                             return;
                         }
@@ -314,13 +314,13 @@ public class AddOnsController implements Initializable, ScreenInterface {
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster);
     }
-    
+
     private void loadRecordMaster() {
         Platform.runLater(() -> {
             JFXUtil.setStatusValue(lblStatus, AddOnTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         });
         tfAddOnID.setText(poController.getModel().getAddTypeCode());
-       
+
         if (JFXUtil.isObjectEqualTo(poController.getModel().getSource(), "", null)) {
             poController.getModel().setSource("0");
             JFXUtil.setCmbValue(cmbSource, !poController.getModel().getSource().equals("") ? Integer.valueOf(poController.getModel().getSource()) : -1);
@@ -356,12 +356,12 @@ public class AddOnsController implements Initializable, ScreenInterface {
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
             case AddOnTypeStatus.OPEN:
-                JFXUtil.setButtonsVisibility(true, btnVoid,btnActivate);
+                JFXUtil.setButtonsVisibility(true, btnVoid, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
             case AddOnTypeStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnUpdate,btnActivate, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnVoid);
                 break;
             case AddOnTypeStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnActivate);
