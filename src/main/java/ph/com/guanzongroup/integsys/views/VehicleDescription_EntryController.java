@@ -479,26 +479,26 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             tfVariant.setText(poController.getModel().getDescription());
             tfYearModel.setText(String.valueOf(poController.getModel().getYearModel()));
 
-            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null)) {
-                poController.getModelVariantInsurance().setBodyType("0");
+            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null) && pnEditMode == EditMode.ADDNEW) {
+                poController.getModelVariantInsurance().setBodyType("Sedan");
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             }
 
-            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null)) {
-                poController.getModelVariantInsurance().setVehicleType("0");
+            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null) && pnEditMode == EditMode.ADDNEW) {
+                poController.getModelVariantInsurance().setVehicleType("Commercial");
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
 
-//            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null)) {
-//                poController.getModelVariantInsurance().setVehicleType("0");
-//                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
-//            } else {
-//                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
-//            }
+            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getTransmission(), "", null) && pnEditMode == EditMode.ADDNEW) {
+                poController.getModelVariantInsurance().setTransmission("Manual");
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
+            } else {
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
+            }
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
             cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
             JFXUtil.updateCaretPositions(apMaster);
