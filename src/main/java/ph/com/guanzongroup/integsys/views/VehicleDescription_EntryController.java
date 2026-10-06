@@ -80,6 +80,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             poJSON = new JSONObject();
             initTextFields();
             clearTextFields();
+            initComboboxes();
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
             poController.setWithUI(true);
@@ -366,14 +367,14 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             }
                             break;
                         case "tfColor":
-//                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                            poJSON = poController.SearchColor(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
                         //apBrowse
                         case "tfSearchVariant":
-//                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
+                            poJSON = poController.searchRecord(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -423,7 +424,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     }
 
     private void initComboboxes() {
-//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbBodyType), new JFXUtil.Pairs<>(samplelist, cmbVehicleType));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbBodyType), new JFXUtil.Pairs<>(comboboxlist, cmbVehicleType));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType);
     }
