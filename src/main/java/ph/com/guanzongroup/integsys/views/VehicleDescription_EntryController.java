@@ -238,15 +238,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "btnBrand":
                         //opens brand pop up
-                        openParameter(lsButton);
+                        openParameter(false, lsButton);
                         break;
                     case "btnModel":
                         //opens brand pop up
-                        openParameter(lsButton);
+                        openParameter(false, lsButton);
                         break;
                     case "btnColor":
                         //opens brand pop up 
-                        openParameter(lsButton);
+                        openParameter(false, lsButton);
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -262,7 +262,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     }
     String lsId = "";
 
-    private void openParameter(String lsValue) {
+    private void openParameter(boolean isForUpdate, String lsValue) {
         String lsFXML = "";
         Object controller = new Object();
 
@@ -330,7 +330,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
-                            poController.getModel().setModelId(null);
+                            poJSON = poController.getModel().setModelId(null);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
                         }
                         break;
                     case "tfColor":
@@ -481,23 +484,23 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setBodyType("Sedan");
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             } else {
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             }
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setVehicleType("Commercial");
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             } else {
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getTransmission(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setTransmission("Manual");
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
             } else {
-                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? Integer.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
+                JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getTransmission().equals("") ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
             }
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
             cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
