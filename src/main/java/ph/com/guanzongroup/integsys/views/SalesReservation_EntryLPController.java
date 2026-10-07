@@ -538,6 +538,8 @@ public class SalesReservation_EntryLPController implements Initializable, Screen
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_EntryLPController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_EntryLPController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

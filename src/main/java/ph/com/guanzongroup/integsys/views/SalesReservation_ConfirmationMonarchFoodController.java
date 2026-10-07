@@ -552,6 +552,8 @@ public class SalesReservation_ConfirmationMonarchFoodController implements Initi
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_ConfirmationMonarchFoodController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_ConfirmationMonarchFoodController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

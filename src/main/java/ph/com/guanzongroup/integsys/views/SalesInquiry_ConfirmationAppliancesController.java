@@ -746,7 +746,7 @@ public class SalesInquiry_ConfirmationAppliancesController implements Initializa
                 default:
                     break;
             }
-        } catch (GuanzonException | SQLException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }

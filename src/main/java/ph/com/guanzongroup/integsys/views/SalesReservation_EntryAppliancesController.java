@@ -537,6 +537,8 @@ public class SalesReservation_EntryAppliancesController implements Initializable
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_EntryAppliancesController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_EntryAppliancesController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

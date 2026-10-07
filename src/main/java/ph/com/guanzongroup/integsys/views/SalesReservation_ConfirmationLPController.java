@@ -552,6 +552,8 @@ public class SalesReservation_ConfirmationLPController implements Initializable,
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_ConfirmationLPController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_ConfirmationLPController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

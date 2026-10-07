@@ -225,7 +225,7 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
                         pnEditMode = poSalesInquiryController.SalesInquiry().getEditMode();
                         break;
                     case "btnAddClient":
-                        if(pnEditMode == EditMode.ADDNEW){
+                        if (pnEditMode == EditMode.ADDNEW) {
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
@@ -243,12 +243,12 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
                                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                                 return;
                             }
-                            
+
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             }
-                            
+
                             loadRecordMaster();
                         } else {
                             ShowMessageFX.Warning(null, pxeModuleName, "Adding for new client must be during new entry of sales inquiry.");
@@ -423,7 +423,7 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } 
+        }
     }
 
     public void initTabPane() {
@@ -1306,6 +1306,9 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1556,7 +1559,7 @@ public class SalesInquiry_EntryMCController implements Initializable, ScreenInte
         dragLock.isEnabled = lbShow;
         disableRowCheckbox.set(!lbShow); // set enable/disable in checkboxes in requirements
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW , btnAddClient);
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW, btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);

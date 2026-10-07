@@ -536,6 +536,8 @@ public class SalesReservation_EntrySPMCController implements Initializable, Scre
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_EntrySPMCController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_EntrySPMCController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
