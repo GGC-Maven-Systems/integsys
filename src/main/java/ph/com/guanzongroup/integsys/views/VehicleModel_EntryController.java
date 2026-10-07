@@ -504,11 +504,13 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
             switch (oParameters.Model().getModel().getRecordStatus()) {
                 case "1":
                     btnActivate.setText("Deactivate");
+                    btnActivate.setMinWidth(80);
                     faActivate.setGlyphName("CLOSE");
                     cbField01.setSelected(true);
                     break;
                 case "0":
                     btnActivate.setText("Activate");
+                    btnActivate.setMinWidth(70);
                     faActivate.setGlyphName("CHECK");
                     cbField01.setSelected(false);
                     break;

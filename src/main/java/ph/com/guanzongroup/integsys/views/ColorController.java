@@ -432,11 +432,13 @@ public class ColorController implements Initializable, ScreenInterface {
             switch (oParameters.Color().getModel().getRecordStatus()) {
                 case "1":
                     btnActivate.setText("Deactivate");
+                    btnActivate.setMinWidth(80);
                     faActivate.setGlyphName("CLOSE");
                     cbActive.setSelected(true);
                     break;
                 case "0":
                     btnActivate.setText("Activate");
+                    btnActivate.setMinWidth(70);
                     faActivate.setGlyphName("CHECK");
                     cbActive.setSelected(false);
                     break;
