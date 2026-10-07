@@ -158,6 +158,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             return;
                         }
                         pnEditMode = poController.getEditMode();
+                        JFXUtil.clearTextFields(apBrowse);
                         break;
                     case "btnUpdate":
                         poJSON = poController.updateRecord();
@@ -172,6 +173,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             poController.initialize();
                             clearTextFields();
                             pnEditMode = EditMode.UNKNOWN;
+                            JFXUtil.clearTextFields(apBrowse);
                             break;
                         } else {
                             return;
@@ -422,6 +424,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             } else {
                                 JFXUtil.textFieldMoveNext(tfBrand);
                             }
+                            pnEditMode = poController.getEditMode();
+                            initButton(pnEditMode);
                             tfSearchVariant.setText(poController.getModel().getDescription());
                             loadRecordMaster();
                             break;
@@ -564,21 +568,14 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         }
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
-            case AddOnTypeStatus.OPEN:
-                JFXUtil.setButtonsVisibility(false, btnDeactivate);
-                break;
             case AddOnTypeStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
                 break;
             case AddOnTypeStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
-            case AddOnTypeStatus.VOID:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
-                JFXUtil.setButtonsVisibility(false, btnDeactivate);
-                break;
+
         }
     }
 }
