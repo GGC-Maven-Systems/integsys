@@ -343,9 +343,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfVariant":
                         poJSON = poController.getModel().setDescription(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
                         break;
                     case "tfYearModel":
                         lsValue = JFXUtil.removeComma(lsValue);
