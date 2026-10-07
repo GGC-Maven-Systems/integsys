@@ -240,15 +240,12 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnBrand":
-                        //opens brand pop up
                         openParameter(false, lsButton);
                         break;
                     case "btnModel":
-                        //opens brand pop up
                         openParameter(false, lsButton);
                         break;
                     case "btnColor":
-                        //opens brand pop up 
                         openParameter(false, lsButton);
                         break;
                     default:
@@ -529,10 +526,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         }
                         break;
                 }
-            } catch (SQLException ex) {
-                Logger.getLogger(VehicleDescription_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GuanzonException ex) {
-                Logger.getLogger(VehicleDescription_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         }
     }
@@ -542,14 +538,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType), new JFXUtil.Pairs<>(comboboxlistTransmission, cmbTransmission));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType, cmbTransmission);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType, cmbTransmission);
-    }
-
-    private boolean isActive() {
-        switch (poController.getModel().getRecordStatus()) {
-            case AddOnTypeStatus.ACTIVE:
-                return true;
-        }
-        return false;
     }
 
     private void initButton(int fnValue) {
@@ -576,7 +564,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
-
         }
     }
 }
