@@ -149,7 +149,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
 
             pbLoaded = true;
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -258,7 +259,6 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         switch (Status) {
                             case "0":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-
                                     poJsON = oParameters.Model().activateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -279,7 +279,6 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-
                                     poJsON = oParameters.Model().deactivateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -318,7 +317,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         break;
                 }
             } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-                Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         }
     }
@@ -408,7 +408,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                     CommonUtils.SetPreviousFocus(txtField);
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -443,7 +444,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                     CommonUtils.SetPreviousFocus(txtField);
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -515,16 +517,14 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                     cbField01.setSelected(false);
                     break;
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     @FXML
     void cbField01_Clicked(MouseEvent event) {
-
         try {
             if (cbField01.isSelected()) {
                 oParameters.Model().getModel().setRecordStatus("1");
@@ -532,7 +532,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                 oParameters.Model().getModel().setRecordStatus("0");
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -545,7 +546,8 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                 oParameters.Model().getModel().setEndOfLife("0");
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(VehicleModel_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -558,5 +560,4 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
         boolean isEditable = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
         AnchorInputs.setDisable(!isEditable);
     }
-
 }

@@ -133,7 +133,6 @@ public class BrandController implements Initializable, ScreenInterface {
             } else {
                 LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
                 oParameters = new ParamControllers(oApp, logwrapr);
-
             }
             oParameters.Model().setWithUI(true);
             oParameters.Brand().setRecordStatus("0123");
@@ -168,7 +167,8 @@ public class BrandController implements Initializable, ScreenInterface {
             }
             pbLoaded = true;
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -314,14 +314,10 @@ public class BrandController implements Initializable, ScreenInterface {
                                 }
                                 break;
                         }
-
                 }
-            } catch (SQLException ex) {
-                Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GuanzonException ex) {
-                Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         }
     }
@@ -399,15 +395,13 @@ public class BrandController implements Initializable, ScreenInterface {
                 case UP:
                     CommonUtils.SetPreviousFocus(txtField);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
-
         TextField txtField = (TextField) event.getSource();
         int lnIndex = Integer.parseInt(((TextField) event.getSource()).getId().substring(8, 10));
         String lsValue = (txtField.getText() == null ? "" : txtField.getText());
@@ -484,10 +478,9 @@ public class BrandController implements Initializable, ScreenInterface {
                     cbField01.setSelected(false);
                     break;
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -495,14 +488,13 @@ public class BrandController implements Initializable, ScreenInterface {
     void cbField01_Clicked(MouseEvent event) {
         try {
             if (cbField01.isSelected()) {
-
                 oParameters.Brand().getModel().setRecordStatus("1");
-
             } else {
                 oParameters.Brand().getModel().setRecordStatus("0");
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(BrandController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -515,5 +507,4 @@ public class BrandController implements Initializable, ScreenInterface {
         boolean isEditable = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
         AnchorInputs.setDisable(!isEditable);
     }
-
 }

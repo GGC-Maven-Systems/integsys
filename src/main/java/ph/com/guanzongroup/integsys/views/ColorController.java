@@ -157,7 +157,8 @@ public class ColorController implements Initializable, ScreenInterface {
                 loadRecord();
             }
         } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -280,7 +281,6 @@ public class ColorController implements Initializable, ScreenInterface {
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-
                                     System.out.println("EDIT MODE : " + oParameters.Color().getEditMode());
                                     ShowMessageFX.Information(String.valueOf(oParameters.Category().getEditMode()), "Computerized Accounting System", pxeModuleName);
 
@@ -303,10 +303,10 @@ public class ColorController implements Initializable, ScreenInterface {
                                 }
                                 break;
                         }
-
                 }
             } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-                Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         }
     }
@@ -381,10 +381,9 @@ public class ColorController implements Initializable, ScreenInterface {
                 case UP:
                     CommonUtils.SetPreviousFocus(txtField);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -443,10 +442,9 @@ public class ColorController implements Initializable, ScreenInterface {
                     cbActive.setSelected(false);
                     break;
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(ColorController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 }
