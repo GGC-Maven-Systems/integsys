@@ -491,7 +491,13 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
     private void loadRecordMaster() {
         JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         tfStandardRateID.setText(poController.getModel().getStandardRateId());
-        dpValidFrom.setValue(poController.getModel().getFromDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getFromDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
+
+        String lsValidFrom = CustomCommonUtil.formatDateToShortString(poController.getModel().getFromDate());
+        JFXUtil.setDateValue(dpValidFrom, CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
+
+        String lsValidTo = CustomCommonUtil.formatDateToShortString(poController.getModel().getThruDate());
+        JFXUtil.setDateValue(dpTo, CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+
 
         if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "", null)) {
             poController.getModel().setRateType("0");
@@ -507,7 +513,6 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
             JFXUtil.setDisabled(false, tfDuration);
         }
         tfDuration.setText(String.valueOf(poController.getModel().getDuration()));
-        dpTo.setValue(poController.getModel().getThruDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.getModel().getThruDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
         tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getRate().doubleValue(), false));
     }
 
