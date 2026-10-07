@@ -397,6 +397,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     public void initTextFields() {
         JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
+        JFXUtil.inputIntegersOnly(tfYearModel, tfAuthorizeCapacity);
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
