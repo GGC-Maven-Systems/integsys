@@ -536,6 +536,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         }
                         break;
                 }
+                loadRecordMaster();
             } catch (SQLException | GuanzonException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
