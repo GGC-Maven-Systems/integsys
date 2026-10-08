@@ -45,7 +45,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  * @author Team 1
  */
 public class VehicleDescription_EntryController implements Initializable, ScreenInterface {
-    
+
     private GRiderCAS oApp;
     static VehicleDescription poController;
     private JSONObject poJSON;
@@ -74,11 +74,11 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     private ComboBox cmbVehicleType, cmbBodyType, cmbTransmission;
     @FXML
     private CheckBox cbEndOfLife;
-    
+
     ObservableList<String> comboboxlistTransmission = FXCollections.observableArrayList("Manual", "Automatic", "CVT", "DCT");
     ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList("Private", "Commercial");
     ObservableList<String> comboboxlistBodyType = FXCollections.observableArrayList("Sedan", "SUV", "Hatchback", "MPV");
-    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
@@ -102,27 +102,27 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-    
+
     @Override
     public void setIndustryID(String fsValue) {
         this.psIndustryId = fsValue;
     }
-    
+
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-    
+
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
     }
-    
+
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -153,7 +153,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     case "btnNew":
                         poController.initialize();
                         clearTextFields();
-                        
+
                         poJSON = poController.NewRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -185,7 +185,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
-                        
+
                         try {
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
@@ -254,8 +254,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                loadRecordMaster();
                 initButton(pnEditMode);
+                loadRecordMaster();
             } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                 ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -263,11 +263,11 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         }
     }
     String lsId = "";
-    
+
     private void openParameter(boolean isForUpdate, String lsValue) {
         String lsFXML = "";
         Object controller = new Object();
-        
+
         switch (lsValue) {
             case "btnBrand":
                 BrandController controller1 = new BrandController(); //Should differ the parameter calling
@@ -324,7 +324,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -373,7 +373,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 }
                 loadRecordMaster();
             });
-    
+
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -398,13 +398,13 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 }
                 loadRecordMaster();
             });
-    
+
     public void initTextFields() {
         JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.inputIntegersOnly(tfYearModel, tfAuthorizeCapacity);
     }
-    
+
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -412,7 +412,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             String lsValue = (txtField.getText() == null ? "" : txtField.getText());
             poJSON = new JSONObject();
             int lnRow = pnDetail;
-            
+
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
@@ -473,11 +473,11 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster);
     }
-    
+
     private void loadRecordMaster() {
         try {
             Platform.runLater(() -> {
@@ -487,28 +487,28 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             if (lbStat) {
                 JFXUtil.setDisabled(true, tfBrand, tfModel, tfColor);
             }
-            
+
             tfVariantID.setText(poController.getModel().getVariantId());
             tfBrand.setText(poController.getBrand());
             tfModel.setText(poController.getModel().Model().getDescription());
             tfColor.setText(poController.getModel().Color().getDescription());
             tfVariant.setText(poController.getModel().getDescription());
             tfYearModel.setText(String.valueOf(poController.getModel().getYearModel()));
-            
+
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getBodyType(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setBodyType("Sedan");
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbBodyType, !poController.getModelVariantInsurance().getBodyType().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getBodyType()) : -1);
             }
-            
+
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setVehicleType("Private");
                 JFXUtil.setCmbValue(cmbVehicleType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbVehicleType, !poController.getModelVariantInsurance().getVehicleType().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
-            
+
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getTransmission(), "", null) && pnEditMode == EditMode.ADDNEW) {
                 poController.getModelVariantInsurance().setTransmission("Manual");
                 JFXUtil.setCmbValue(cmbTransmission, !poController.getModelVariantInsurance().getTransmission().equals("") ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
@@ -523,7 +523,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
+
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -541,14 +541,14 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             loadRecordMaster();
         }
     }
-    
+
     private void initComboboxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistBodyType, cmbBodyType),
                 new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType), new JFXUtil.Pairs<>(comboboxlistTransmission, cmbTransmission));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType, cmbTransmission);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType, cmbTransmission);
     }
-    
+
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
