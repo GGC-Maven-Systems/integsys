@@ -329,13 +329,13 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     case "tfBrand":
                         if (lsValue.isEmpty()) {
                             poController.setBrandIdId(null);
-                            poJSON = poController.getModel().setModelId(null);
+                            poController.getModel().setModelId(null);
                             poController.getModel().setColorId(null);
                         }
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
-                            poJSON = poController.getModel().setModelId(null);
+                            poController.getModel().setModelId(null);
                             poController.getModel().setColorId(null);
                         }
                         break;
