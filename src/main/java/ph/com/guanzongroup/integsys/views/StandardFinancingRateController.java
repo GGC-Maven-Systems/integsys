@@ -492,12 +492,12 @@ public class StandardFinancingRateController implements Initializable, ScreenInt
         JFXUtil.setStatusValue(lblStatus, FinancingRateStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         tfStandardRateID.setText(poController.getModel().getStandardRateId());
 
-        String lsValidFrom = CustomCommonUtil.formatDateToShortString(poController.getModel().getFromDate());
-        JFXUtil.setDateValue(dpValidFrom, CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
+        String lsValidFrom = JFXUtil.formatDateToString(poController.getModel().getFromDate());
 
-        String lsValidTo = CustomCommonUtil.formatDateToShortString(poController.getModel().getThruDate());
-        JFXUtil.setDateValue(dpTo, CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+        JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
 
+        String lsValidTo = JFXUtil.formatDateToString(poController.getModel().getThruDate());
+        JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
 
         if (JFXUtil.isObjectEqualTo(poController.getModel().getRateType(), "", null)) {
             poController.getModel().setRateType("0");
