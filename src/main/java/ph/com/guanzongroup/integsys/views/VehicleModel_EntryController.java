@@ -203,6 +203,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         break;
                     case "btnBrowse":
                         String lsValue = (txtSeeks01.getText() == null) ? "" : txtSeeks01.getText();
+                        oParameters.Model().setRecordStatus("0123");
                         poJSON = oParameters.Model().searchRecord(lsValue, false);
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
@@ -252,6 +253,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                         }
                         break;
                     case "btnActivate":
+                        oParameters.Model().setWithUI(true);
                         String Status = oParameters.Model().getModel().getRecordStatus();
                         String id = oParameters.Model().getModel().getModelId();
                         JSONObject poJsON;
