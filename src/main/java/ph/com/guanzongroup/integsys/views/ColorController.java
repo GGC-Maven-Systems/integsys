@@ -38,6 +38,7 @@ public class ColorController implements Initializable, ScreenInterface {
     private final String pxeModuleName = "Color";
     private int pnEditMode;
     private ParamControllers oParameters;
+    private String psIndustryId = "";
     private boolean state = false;
     private boolean pbLoaded = false;
     private int pnInventory = 0;
@@ -79,6 +80,7 @@ public class ColorController implements Initializable, ScreenInterface {
 
     @Override
     public void setIndustryID(String fsValue) {
+        psIndustryId = fsValue;
     }
 
     @Override
@@ -130,6 +132,7 @@ public class ColorController implements Initializable, ScreenInterface {
             oParameters.Model().setWithUI(true);
             oParameters.Brand().setRecordStatus("0123");
             oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
+            oParameters.Color().setIndustryId(psIndustryId);
             Platform.runLater(() -> {
                 loadRecord();
                 if (isForUpdate()) {
@@ -215,6 +218,7 @@ public class ColorController implements Initializable, ScreenInterface {
                             break;
                         }
                         pnEditMode = EditMode.READY;
+                        initButton(pnEditMode);
                         loadRecord();
                         break;
                     case "btnUpdate":
@@ -237,6 +241,7 @@ public class ColorController implements Initializable, ScreenInterface {
                     case "btnSave":
                         oParameters.Color().getModel().setModifyingId(oApp.getUserID());
                         oParameters.Color().getModel().setModifiedDate(oApp.getServerDate());
+                        oParameters.Color().setIndustryId(psIndustryId);
                         JSONObject saveResult = oParameters.Color().saveRecord();
                         if ("success".equals((String) saveResult.get("result"))) {
                             ShowMessageFX.Information((String) saveResult.get("message"), "Computerized Acounting System", pxeModuleName);
@@ -259,13 +264,12 @@ public class ColorController implements Initializable, ScreenInterface {
                         switch (Status) {
                             case "0":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Activate this Parameter?") == true) {
-                                    ShowMessageFX.Information(String.valueOf(oParameters.Color().getEditMode()), "Computerized Accounting System", pxeModuleName);
-                                    oParameters.Color().initialize();
                                     poJsON = oParameters.Color().activateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
                                     }
+                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                     poJsON = oParameters.Color().openRecord(id);
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -273,7 +277,6 @@ public class ColorController implements Initializable, ScreenInterface {
                                     }
                                     clearAllFields();
                                     loadRecord();
-                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                     if (isForDialog()) {
                                         CommonUtils.closeStage(btnClose);
                                     }
@@ -281,14 +284,12 @@ public class ColorController implements Initializable, ScreenInterface {
                                 break;
                             case "1":
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to Deactivate this Parameter?") == true) {
-                                    System.out.println("EDIT MODE : " + oParameters.Color().getEditMode());
-                                    ShowMessageFX.Information(String.valueOf(oParameters.Category().getEditMode()), "Computerized Accounting System", pxeModuleName);
-
                                     poJsON = oParameters.Color().deactivateRecord();
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                         break;
                                     }
+                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                     poJsON = oParameters.Color().openRecord(id);
                                     if ("error".equals(poJsON.get("result"))) {
                                         ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
@@ -296,7 +297,6 @@ public class ColorController implements Initializable, ScreenInterface {
                                     }
                                     clearAllFields();
                                     loadRecord();
-                                    ShowMessageFX.Information((String) poJsON.get("message"), "Computerized Accounting System", pxeModuleName);
                                     if (isForDialog()) {
                                         CommonUtils.closeStage(btnClose);
                                     }
@@ -327,6 +327,9 @@ public class ColorController implements Initializable, ScreenInterface {
         btnUpdate.setVisible(!lbShow);
         btnUpdate.setManaged(!lbShow);
 
+        btnActivate.setVisible(!lbShow);
+        btnActivate.setManaged(!lbShow);
+        
         btnBrowse.setVisible(!lbShow);
         btnBrowse.setManaged(!lbShow);
         btnNew.setVisible(!lbShow);
@@ -334,6 +337,10 @@ public class ColorController implements Initializable, ScreenInterface {
 
         btnClose.setVisible(true);
         btnClose.setManaged(true);
+        if (fnValue == EditMode.UNKNOWN) {
+            btnActivate.setVisible(false);
+            btnActivate.setManaged(false);
+        }
     }
 
     private void InitTextFields() {

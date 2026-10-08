@@ -424,7 +424,7 @@ public class VehicleModel_EntryController implements Initializable, ScreenInterf
                 case F3:
                     switch (lnIndex) {
                         case 02:
-                            poJson = oParameters.Brand().searchRecord(lsValue, false);
+                            poJson = oParameters.Brand().searchRecord(lsValue, false, psIndustryId);
                             if ("error".equalsIgnoreCase(poJson.get("result").toString())) {
                                 ShowMessageFX.Information((String) poJson.get("message"), "Computerized Acounting System", pxeModuleName);
                             }

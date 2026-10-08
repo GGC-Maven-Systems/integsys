@@ -44,6 +44,7 @@ public class BrandController implements Initializable, ScreenInterface {
     private final String pxeModuleName = "Brand";
     private int pnEditMode;
     private ParamControllers oParameters;
+    private String psIndustryId = "";
     private boolean state = false;
     private boolean pbLoaded = false;
     private int pnInventory = 0;
@@ -86,6 +87,7 @@ public class BrandController implements Initializable, ScreenInterface {
 
     @Override
     public void setIndustryID(String fsValue) {
+        psIndustryId = fsValue;
     }
 
     @Override
@@ -221,7 +223,11 @@ public class BrandController implements Initializable, ScreenInterface {
                         break;
                     case "btnBrowse":
                         String lsValue = (txtSeeks01.getText() == null) ? "" : txtSeeks01.getText();
-                        poJSON = oParameters.Brand().searchRecord(lsValue, false);
+                        if(psIndustryId != null && !"".endsWith(psIndustryId)){
+                            poJSON = oParameters.Brand().searchRecord(lsValue, false,psIndustryId);
+                        } else {
+                            poJSON = oParameters.Brand().searchRecord(lsValue, false);
+                        }
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
                             txtSeeks01.clear();
