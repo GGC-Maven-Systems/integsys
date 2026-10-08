@@ -52,6 +52,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     public int pnEditMode;
     private String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     private String psIndustryId = "";
+    private String psCategoryId = "";
     private String psCompanyId = "";
     private boolean pbEntered = false;
     private int pnDetail = 0;
@@ -90,8 +91,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
             poController.setWithUI(true);
-            poController.setIndustryId(psIndustryId);
             Platform.runLater(() -> {
+                poController.setIndustryId(psIndustryId);
+                poController.setCategoryId(psCategoryId);
                 btnNew.fire();
             });
             poController.setRecordStatus("01234");
@@ -118,7 +120,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
     @Override
     public void setCategoryID(String fsValue) {
-        //No category
+        psCategoryId = fsValue;
     }
 
     @FXML
@@ -557,7 +559,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-        JFXUtil.setButtonsVisibility(false, btnActivate,btnDeactivate);
+        JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate);
         JFXUtil.setDisabledExcept(!lbShow, apMaster, btnBrand, btnModel, btnColor);
         if (fnValue != EditMode.READY) {
             return;
