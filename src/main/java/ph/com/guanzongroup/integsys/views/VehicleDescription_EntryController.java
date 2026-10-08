@@ -276,6 +276,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     controller1.openRecordForUpdate(lsId);
                 }
                 controller1.initializeDialog(oApp);
+                controller1.setIndustryID(psIndustryId);
                 controller = controller1;
                 break;
             case "btnModel":
@@ -287,6 +288,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     controller2.openRecordForUpdate(lsId);
                 }
                 controller2.initializeDialog(oApp);
+                controller2.setIndustryID(psIndustryId);
                 controller = controller2;
                 break;
             case "btnColor":
@@ -298,6 +300,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     controller3.openRecordForUpdate(lsId);
                 }
                 controller3.initializeDialog(oApp);
+                controller3.setIndustryID(psIndustryId);
                 controller = controller3;
                 break;
         }
@@ -481,7 +484,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
             boolean lbStat = pnEditMode == EditMode.UPDATE;
             JFXUtil.setDisabled(lbStat, tfBrand, tfModel, tfColor);
-            
+
             tfVariantID.setText(poController.getModel().getVariantId());
             tfBrand.setText(poController.getBrand());
             tfModel.setText(poController.getModel().Model().getDescription());
