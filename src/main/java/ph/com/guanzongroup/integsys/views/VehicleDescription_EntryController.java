@@ -75,7 +75,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     private CheckBox cbEndOfLife;
 
     ObservableList<String> comboboxlistTransmission = FXCollections.observableArrayList("Manual", "Automatic", "CVT", "DCT");
-    ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList("Commercial", "Private");
+    ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList("Private", "Commercial");
     ObservableList<String> comboboxlistBodyType = FXCollections.observableArrayList("Sedan", "SUV", "Hatchback", "MPV");
 
     @Override
@@ -326,11 +326,14 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     case "tfBrand":
                         if (lsValue.isEmpty()) {
                             poController.setBrandIdId(null);
+                            poJSON = poController.getModel().setModelId(null);
+                            poController.getModel().setColorId(null);
                         }
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
                             poJSON = poController.getModel().setModelId(null);
+                            poController.getModel().setColorId(null);
                         }
                         break;
                     case "tfColor":
@@ -475,6 +478,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             Platform.runLater(() -> {
                 JFXUtil.setStatusValue(lblStatus, AddOnTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
             });
+
+            boolean lbStat = pnEditMode == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbStat, tfBrand, tfModel, tfColor);
+            
             tfVariantID.setText(poController.getModel().getVariantId());
             tfBrand.setText(poController.getBrand());
             tfModel.setText(poController.getModel().Model().getDescription());
@@ -490,7 +497,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             }
 
             if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getVehicleType(), "", null) && pnEditMode == EditMode.ADDNEW) {
-                poController.getModelVariantInsurance().setVehicleType("Commercial");
+                poController.getModelVariantInsurance().setVehicleType("Private");
                 JFXUtil.setCmbValue(cmbVehicleType, !poController.getModelVariantInsurance().getVehicleType().equals("") ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             } else {
                 JFXUtil.setCmbValue(cmbVehicleType, !poController.getModelVariantInsurance().getVehicleType().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
