@@ -561,7 +561,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
         JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate);
         JFXUtil.setDisabledExcept(!lbShow, apMaster, btnBrand, btnModel, btnColor);
-        JFXUtil.setDisabled(!lbShow, btnBrand, btnModel, btnColor);
+        JFXUtil.setDisabled(!lbShow, tfBrand, tfModel, tfColor);
         if (fnValue != EditMode.READY) {
             return;
         }
