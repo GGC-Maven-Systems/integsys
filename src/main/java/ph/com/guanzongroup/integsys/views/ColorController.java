@@ -129,9 +129,9 @@ public class ColorController implements Initializable, ScreenInterface {
                 LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
                 oParameters = new ParamControllers(oApp, logwrapr);
             }
-            oParameters.Model().setWithUI(true);
-            oParameters.Brand().setRecordStatus("0123");
-            oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
+            oParameters.Color().setWithUI(true);
+            oParameters.Color().setRecordStatus("0123");
+            oParameters.Color().getModel().setIndustryCode(oApp.getIndustry());
             oParameters.Color().setIndustryId(psIndustryId);
             Platform.runLater(() -> {
                 loadRecord();
@@ -211,6 +211,8 @@ public class ColorController implements Initializable, ScreenInterface {
                         break;
                     case "btnBrowse":
                         String lsValue = (txtSeeks01.getText() == null) ? "" : txtSeeks01.getText();
+                        oParameters.Color().setRecordStatus("0123");
+                        oParameters.Color().setIndustryId(psIndustryId);
                         poJSON = oParameters.Color().searchRecord(lsValue, false);
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Information((String) poJSON.get("message"), "Computerized Acounting System", pxeModuleName);
