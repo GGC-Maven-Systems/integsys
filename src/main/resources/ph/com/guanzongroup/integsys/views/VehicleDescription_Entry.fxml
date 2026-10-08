@@ -57,6 +57,11 @@
                                     <FontAwesomeIconView glyphName="CLOSE" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
+                              <Button fx:id="btnActivate" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" minWidth="75.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Activate">
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                              </Button>
                               <Button fx:id="btnDeactivate" contentDisplay="TOP" graphicTextGap="3.0" layoutX="363.0" layoutY="23.0" maxHeight="70.0" minWidth="75.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Deactivate">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="TIMES" size="20" styleClass="FontIcon" />

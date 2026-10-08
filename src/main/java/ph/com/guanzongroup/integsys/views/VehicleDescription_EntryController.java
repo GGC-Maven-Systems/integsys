@@ -64,7 +64,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnDeactivate, btnHistory, btnClose, btnBrand, btnModel, btnColor;
+    private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnDeactivate, btnHistory, btnClose, btnBrand, btnModel, btnColor;
     @FXML
     private Label lblStatus;
     @FXML
@@ -481,9 +481,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             Platform.runLater(() -> {
                 JFXUtil.setStatusValue(lblStatus, RecordStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
             });
-
             boolean lbStat = pnEditMode == EditMode.UPDATE;
-            JFXUtil.setDisabled(lbStat, tfBrand, tfModel, tfColor);
+            if (lbStat) {
+                JFXUtil.setDisabled(true, tfBrand, tfModel, tfColor);
+            }
 
             tfVariantID.setText(poController.getModel().getVariantId());
             tfBrand.setText(poController.getBrand());
@@ -556,8 +557,8 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(lbShow, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-        JFXUtil.setButtonsVisibility(false, btnDeactivate);
-        JFXUtil.setDisabled(!lbShow, apMaster);
+        JFXUtil.setButtonsVisibility(false, btnActivate,btnDeactivate);
+        JFXUtil.setDisabledExcept(!lbShow, apMaster, btnBrand, btnModel, btnColor);
         if (fnValue != EditMode.READY) {
             return;
         }
@@ -565,8 +566,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         switch (poController.getModel().getRecordStatus()) {
             case RecordStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
+                JFXUtil.setButtonsVisibility(false, btnActivate);
                 break;
             case RecordStatus.INACTIVE:
+                JFXUtil.setButtonsVisibility(true, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
