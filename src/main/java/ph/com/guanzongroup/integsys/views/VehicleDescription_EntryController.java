@@ -32,11 +32,11 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleDescription;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.AddOnTypeStatus;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -479,7 +479,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     private void loadRecordMaster() {
         try {
             Platform.runLater(() -> {
-                JFXUtil.setStatusValue(lblStatus, AddOnTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
+                JFXUtil.setStatusValue(lblStatus, RecordStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
             });
 
             boolean lbStat = pnEditMode == EditMode.UPDATE;
@@ -513,7 +513,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 JFXUtil.setCmbValue(cmbTransmission, !poController.getModelVariantInsurance().getTransmission().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
             }
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
-            cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().Model().getEndOfLife(), "1"));
+            cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().getEndOfLife(), "1"));
             JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -526,21 +526,16 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         poJSON = new JSONObject();
         Object source = event.getSource();
         if (source instanceof CheckBox) {
-            try {
-                CheckBox checkedBox = (CheckBox) source;
-                switch (checkedBox.getId()) {
-                    case "cbEndOfLife": // this is the id
-                        poJSON = poController.getModel().Model().setEndOfLife(checkedBox.isSelected() ? "1" : "0");
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                }
-                loadRecordMaster();
-            } catch (SQLException | GuanzonException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "cbEndOfLife": // this is the id
+                    poJSON = poController.getModel().setEndOfLife(checkedBox.isSelected() ? "1" : "0");
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    }
+                    break;
             }
+            loadRecordMaster();
         }
     }
 
@@ -568,10 +563,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         }
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
-            case AddOnTypeStatus.ACTIVE:
+            case RecordStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 break;
-            case AddOnTypeStatus.INACTIVE:
+            case RecordStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
