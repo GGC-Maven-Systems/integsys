@@ -136,7 +136,7 @@ public class BrandController implements Initializable, ScreenInterface {
                 LogWrapper logwrapr = new LogWrapper("CAS", System.getProperty("sys.default.path.temp") + "cas-error.log");
                 oParameters = new ParamControllers(oApp, logwrapr);
             }
-            oParameters.Model().setWithUI(true);
+            oParameters.Brand().setWithUI(true);
             oParameters.Brand().setRecordStatus("0123");
             oParameters.Brand().getModel().setIndustryCode(oApp.getIndustry());
             Platform.runLater(() -> {
@@ -223,6 +223,7 @@ public class BrandController implements Initializable, ScreenInterface {
                         break;
                     case "btnBrowse":
                         String lsValue = (txtSeeks01.getText() == null) ? "" : txtSeeks01.getText();
+                        oParameters.Brand().setRecordStatus("0123");
                         if(psIndustryId != null && !"".endsWith(psIndustryId)){
                             poJSON = oParameters.Brand().searchRecord(lsValue, false,psIndustryId);
                         } else {
