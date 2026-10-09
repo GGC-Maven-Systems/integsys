@@ -384,8 +384,8 @@
                                                                                 <TextField fx:id="tfTransmission" maxHeight="25.0" maxWidth="139.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                                                                                 <TextField fx:id="tfBaseSRP" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" maxWidth="139.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="3" />
                                                                                 <Button fx:id="btnCopyBasePriceToAllColors" minWidth="-Infinity" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="25.0" prefWidth="180.0" styleClass="button_process_v4" text="Copy Base Price To all Colors" GridPane.columnIndex="5" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
-                                                                                <CheckBox fx:id="cbVehicleType" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" />
-                                                                                <Button fx:id="btnAddVehicleDescription" layoutX="450.0" layoutY="68.0" mnemonicParsing="false" prefWidth="180.0" styleClass="button_process_v4" text="Add Vehicle Description" GridPane.columnIndex="9" GridPane.halignment="LEFT" GridPane.rowIndex="1">
+                                                                                <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" />
+                                                                                <Button fx:id="btnAddVehicleDescription" layoutX="450.0" layoutY="68.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefWidth="180.0" styleClass="button_process_v4" text="Add Vehicle Description" GridPane.columnIndex="9" GridPane.halignment="LEFT" GridPane.rowIndex="1">
                                                                <GridPane.margin>
                                                                   <Insets />
                                                                </GridPane.margin>
@@ -452,13 +452,13 @@
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <Label fx:id="lblTotalVariant" text="888888" GridPane.columnIndex="2" />
+                                                      <Label fx:id="lblTotalVariants" text="888888" GridPane.columnIndex="2" />
                                                       <Label layoutX="24.0" layoutY="20.0" text="Total Colors" GridPane.columnIndex="3">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <Label fx:id="lblTotalColor" layoutX="115.0" layoutY="22.0" prefHeight="6.0" prefWidth="39.0" text="888888" GridPane.columnIndex="5" />
+                                                      <Label fx:id="lblTotalColors" layoutX="115.0" layoutY="22.0" prefHeight="6.0" prefWidth="39.0" text="888888" GridPane.columnIndex="5" />
                                                    </children>
                                                 </GridPane>
                                              </children>
@@ -507,8 +507,8 @@
                                                                   <Font size="12.0" />
                                                                </font>
                                                             </Label>
-                                                                                <TextField fx:id="tfVariantUnnamed" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                                <TextField fx:id="tfColorUnnamed" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                <TextField fx:id="tfVariantPriceHistory" maxHeight="25.0" GridPane.columnIndex="2" />
+                                                                                <TextField fx:id="tfColorPriceHistory" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                                             </children>
                                                       </GridPane>
                                                    </children>
