@@ -564,15 +564,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     loadTableDetail.reload();
                 });
             });
-    ChangeListener<Boolean> txtPriceHistory_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfVariantPriceHistory":
-                        break;
-                    case "tfColorPriceHistory":
-                        break;
-                }
-            });
 
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
@@ -625,6 +616,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+
+            if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getVariantId(), null, "")) {
+
+            }
+
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
             tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
@@ -749,7 +745,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 //            return;
 //        }
 //        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.Detail(pnDetail).getReservationAmount(), tfReservationAmount},}, tfReservationAmount); // default
+//            {poController.Detail(pnDetail).getSRPAmount(), tfBaseSRP},}, tfBaseSRP); // default
     }
 
     //create a dynamic loader of table column of tblViewDetail
@@ -768,7 +764,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
-        JFXUtil.setFocusListener(txtPriceHistory_Focus, apPriceHistory);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail, apPriceHistory);
         JFXUtil.setCommaFormatter(tfVariantPriceHistory, tfColorPriceHistory, tfBaseSRP);
@@ -816,7 +811,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                                 String.valueOf(poController.Detail(lnCtr).Model().getDescription()),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).ModelVariantInsurance().getTransmission(), false)),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariantInsurance().getTransmission()),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
                                                 (poController.Detail(lnCtr).getRecordStatus() ? "Active" : "Inactive"),
                                                 String.valueOf(lnCtr + 1)
@@ -927,6 +922,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         tblTransmission.setCellValueFactory(new TreeItemPropertyValueFactory<>("index06"));
         tblBaseSRP.setCellValueFactory(new TreeItemPropertyValueFactory<>("index07"));
         tblDetailStatus.setCellValueFactory(new TreeItemPropertyValueFactory<>("index08"));
+        JFXUtil.disableColumnReordering(tblViewDetail);
     }
 
     public void initPriceHistoryGrid() {
@@ -982,13 +978,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewPriceHistory.getSelectionModel().getSelectedIndex()).getIndex07());
                         pnPriceHistory = lnRow;
                         loadRecordPriceHistory();
-//                        moveNext(false, false);
                     }
                 }
             }
         });
 
-//        JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehiclePriceList_Detail) item).getIndex01(), highlightedRowsMain);
     }
 
     private void initButton(int fnValue) {

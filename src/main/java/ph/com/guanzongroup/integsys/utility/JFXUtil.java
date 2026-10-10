@@ -55,6 +55,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -913,21 +914,47 @@ public class JFXUtil {
     }
 
     private static void disableReordering(final TableView<?> tableView) {
-
-        TableHeaderRow header
-                = (TableHeaderRow) tableView.lookup("TableHeaderRow");
-
+        TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
         if (header == null) {
             return;
         }
-
         header.setReordering(false);
-
         header.reorderingProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue) {
                 header.setReordering(false);
             }
         });
+    }
+
+    public static <T> void disableColumnReordering(final TreeTableView<T> table) {
+        if (table == null) {
+            return;
+        }
+
+        if (table.getSkin() != null) {
+            install(table);
+        } else {
+            // The skin (and header row) doesn't exist until the table is shown
+            table.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+                if (newSkin != null) {
+                    install(table);
+                }
+            });
+        }
+    }
+
+    private static void install(final TreeTableView<?> table) {
+        Node node = table.lookup("TableHeaderRow");
+        if (node instanceof TableHeaderRow) {
+            final TableHeaderRow header = (TableHeaderRow) node;
+
+            // Whenever a drag-reorder begins, switch it off immediately
+            header.reorderingProperty().addListener((obs, wasReordering, isReordering) -> {
+                if (isReordering) {
+                    header.setReordering(false);
+                }
+            });
+        }
     }
 
     private static void processColumn(final TableColumn<?, ?> column, final int[] counter) {
