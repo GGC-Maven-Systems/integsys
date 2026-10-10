@@ -1,3 +1,7 @@
+/* =====================================================
+   TABLE VIEW (original)
+   ===================================================== */
+
 .table-view{
     -fx-opacity: 1;
     -fx-background-color: transparent;
@@ -143,5 +147,163 @@
 }
 .table-view .virtual-flow .scroll-bar .thumb:pressed,
 .table-view .virtual-flow .scroll-bar .thumb:pressed:hover {
+    -fx-background-color: #979797;
+}
+
+
+/* =====================================================
+   TREE TABLE VIEW (added)
+   ===================================================== */
+
+.tree-table-view{
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+}
+.tree-table-view:focused{
+    -fx-background-color: transparent;
+}
+
+.tree-table-view .tree-table-row-cell:disabled{
+    -fx-opacity: 1;
+}
+
+.tree-table-view .column-header-background .label:disabled{
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.tree-table-view .column-header-background{
+    -fx-background-color: #4d5656;
+}
+
+.tree-table-view .column-header-background .label{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.tree-table-view .filler, .tree-table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 25px;
+}
+
+.tree-table-view .tree-table-cell{
+    -fx-text-fill: black;
+    -fx-font-size: 9pt;
+    -fx-font-family: 'Open Sans','Helvetica Neue',Arial,sans-serif;
+}
+
+.tree-table-view .column-header {
+    -fx-min-height: 25px;
+    -fx-pref-height: 25px;
+    -fx-max-height: 25px;
+}
+
+.tree-table-row-cell{
+    -fx-background-color: -fx-table-cell-border-color, #D0D3D4;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em;
+    -fx-cell-size: 25px;
+}
+.tree-table-row-cell:selected {
+    -fx-background-color: #B3B6B7;
+    -fx-background-insets: 0;
+    -fx-background-radius: 1;
+}
+
+.tree-table-row-cell:empty {
+    -fx-background-color: white;
+}
+
+.tree-table-row-cell:empty .tree-table-cell {
+    -fx-border-width: 0px;
+}
+
+.tree-table-row-cell:filled > .tree-table-cell:selected,
+.tree-table-row-cell:filled:selected > .tree-table-cell {
+    -fx-background: -fx-selection-bar-non-focused;
+}
+
+/* Keep text readable on selected rows */
+.tree-table-row-cell:selected .tree-table-cell {
+    -fx-text-fill: black;
+}
+
+/* Disclosure (expand/collapse) arrow */
+.tree-table-row-cell > .tree-disclosure-node {
+    -fx-padding: 0 0 0 6;
+}
+.tree-table-row-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: #4d5656;
+}
+.tree-table-row-cell:selected > .tree-disclosure-node > .arrow {
+    -fx-background-color: black;
+}
+
+.tree-table-view{
+    -fx-border-color: #000000;
+    -fx-border-width: 1px 1px 1px 1px;
+}
+
+/* Scrollbars */
+
+.tree-table-view > .virtual-flow > .scroll-bar:vertical,
+.tree-table-view > .virtual-flow > .scroll-bar:vertical > .track,
+.tree-table-view > .virtual-flow > .scroll-bar:vertical > .track-background,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal > .track,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal > .track-background {
+    -fx-background-color: transparent;
+}
+
+/* The main scrollbar track */
+.tree-table-view .virtual-flow .scroll-bar:horizontal .track,
+.tree-table-view .virtual-flow .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-radius: 2em;
+}
+
+/* The increment and decrement buttons */
+.tree-table-view .virtual-flow .scroll-bar:horizontal .increment-button,
+.tree-table-view .virtual-flow .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+}
+
+.tree-table-view .virtual-flow .scroll-bar:vertical .increment-button,
+.tree-table-view .virtual-flow .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 0;
+}
+
+/* Hide the arrows */
+.tree-table-view .virtual-flow .scroll-bar .increment-arrow,
+.tree-table-view .virtual-flow .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* The scrollbar thumb (the draggable part) */
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb {
+    -fx-background-color: #C2C4C4;
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+}
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb:hover,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #ababab;
+}
+
+/* When pressed (clicked) */
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb:pressed,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb:pressed,
+.tree-table-view .virtual-flow .scroll-bar .thumb:pressed,
+.tree-table-view .virtual-flow .scroll-bar .thumb:pressed:hover {
     -fx-background-color: #979797;
 }
