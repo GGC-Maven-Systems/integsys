@@ -484,7 +484,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfVariant);
+                                JFXUtil.runWithDelay(.6, ()->{
+                                    tfVariant.requestFocus();
+                                });
                             }
                             break;
                         case "tfVariant":
