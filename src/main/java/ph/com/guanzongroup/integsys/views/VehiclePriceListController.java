@@ -598,14 +598,25 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setDateValue(dpValidTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
     }
 
+    private void setToNull() {
+        try {
+            poController.Detail(pnDetail).ModelVariantInsurance().setVehicleType(null);
+            poController.Detail(pnDetail).ModelVariantInsurance().setBodyType(null);
+            poController.Detail(pnDetail).ModelVariantInsurance().setTransmission(null);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private void loadRecordDetail() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                setToNull();
                 return;
             }
 
             if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getVariantId(), null, "")) {
-
+                setToNull();
             }
 
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
