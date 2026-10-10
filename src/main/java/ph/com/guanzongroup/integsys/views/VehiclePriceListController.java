@@ -484,7 +484,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.runWithDelay(.6, ()->{
+                                JFXUtil.runWithDelay(.6, () -> {
                                     tfVariant.requestFocus();
                                 });
                             }
@@ -755,7 +755,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     //create a dynamic loader of table column of tblViewDetail
     private void initComboboxes() {
         ObservableList<String> pricelistyears = FXCollections.observableArrayList();
-        for (int year = 2000; year <= 2027; year++) {
+        for (int year = 2027; year >= 2000; year--) {
             pricelistyears.add(String.valueOf(year));
         }
 
@@ -763,7 +763,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchPriceListYear, cmbSearchStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchPriceListYear, cmbSearchStatus);
 
-        cmbSearchPriceListYear.getSelectionModel().selectLast();
+        cmbSearchPriceListYear.getSelectionModel().selectFirst();
     }
 
     public void initTextFields() {
