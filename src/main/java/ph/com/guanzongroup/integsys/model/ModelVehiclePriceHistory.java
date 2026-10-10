@@ -36,7 +36,8 @@ public class ModelVehiclePriceHistory {
             String index03,
             String index04,
             String index05,
-            String index06
+            String index06,
+            String index07
     ) {
         this.index01 = new SimpleStringProperty(index01);
         this.index02 = new SimpleStringProperty(index02);
@@ -44,6 +45,7 @@ public class ModelVehiclePriceHistory {
         this.index04 = new SimpleStringProperty(index04);
         this.index05 = new SimpleStringProperty(index05);
         this.index06 = new SimpleStringProperty(index06);
+        this.index07 = new SimpleStringProperty(index07);
     }
 
     public String getIndex01() {
