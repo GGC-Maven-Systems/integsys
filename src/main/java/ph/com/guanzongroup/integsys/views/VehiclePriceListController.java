@@ -98,12 +98,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
 
     JFXUtil.ReloadableTableTask loadTableDetail, loadTablePriceHistory;
-    ObservableList<String> comboboxliststatus = FXCollections.observableArrayList(
-            "OPEN",
-            "APPROVED",
-            "CANCELLED",
-            "VOID"
-    );
+    ObservableList<String> comboboxliststatus = FXCollections.observableArrayList("OPEN", "APPROVED", "CANCELLED", "VOID");
     ObservableList<String> pricelistyears = FXCollections.observableArrayList();
     TreeItem<ModelVehiclePriceList_Detail> root = new TreeItem<>(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", ""));
     JFXUtil.StageManager stageDescription = new JFXUtil.StageManager();
@@ -353,6 +348,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apDetail);
                         break;
                     case "btnRemake":
+                        poJSON = poController.remake(poController.Master().getValidityId());
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            return;
+                        }
                         break;
                     case "btnCopyBasePriceToAllColors":
                         break;
@@ -385,16 +385,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         } catch (ParseException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    private void setAllExpanded(TreeItem<?> item, boolean expanded) {
-        if (item == null || item.isLeaf()) {
-            return;
-        }
-        item.setExpanded(expanded);
-        for (TreeItem<?> child : item.getChildren()) {
-            setAllExpanded(child, expanded);
         }
     }
 
@@ -458,9 +448,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             String lsID = (((TextField) event.getSource()).getId());
             String lsValue = (txtField.getText() == null ? "" : txtField.getText());
             poJSON = new JSONObject();
-            int lnRow = pnDetail;
-//        TableView<?> currentTable = tblViewDetail;
-//        TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
