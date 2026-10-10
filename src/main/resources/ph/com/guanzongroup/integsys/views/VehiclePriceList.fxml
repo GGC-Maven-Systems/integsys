@@ -507,8 +507,8 @@
                                                                   <Font size="12.0" />
                                                                </font>
                                                             </Label>
-                                                                                <TextField fx:id="tfVariantPriceHistory" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                                <TextField fx:id="tfColorPriceHistory" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                <TextField fx:id="tfVariantPriceHistory" disable="true" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
+                                                                                <TextField fx:id="tfColorPriceHistory" disable="true" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                                             </children>
                                                       </GridPane>
                                                    </children>
