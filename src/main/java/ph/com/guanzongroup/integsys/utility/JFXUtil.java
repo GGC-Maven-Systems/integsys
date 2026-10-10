@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -61,6 +62,7 @@ import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -95,6 +97,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -104,7 +107,11 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -112,6 +119,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
@@ -865,22 +873,22 @@ public class JFXUtil {
     }
 
     /* Used for table column value alignment to CENTER */
-    public static void setColumnCenter(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnCenter(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER;");
         }
     }
 
     /* Used for table column value alignment to CENTER-LEFT */
-    public static void setColumnLeft(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnLeft(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER-LEFT;-fx-padding: 0 5 0 5;");
         }
     }
 
     /* Used for table column value alignment to CENTER-RIGHT */
-    public static void setColumnRight(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnRight(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER-RIGHT;-fx-padding: 0 5 0 5;");
         }
     }
@@ -888,46 +896,87 @@ public class JFXUtil {
     /* Auto link & set table values & auto disable column re-alignment */
  /*Requires TableView*/
     public static void setColumnsIndexAndDisableReordering(final TableView<?> tableView) {
-        int counter = 1;
-        for (Object obj : tableView.getColumns()) {
-            if (obj instanceof TableColumn) {
-                @SuppressWarnings("unchecked")
-                final TableColumn<Object, Object> column = (TableColumn<Object, Object>) obj;
 
-                final String indexName = String.format("index%02d", counter++);
-                column.setCellValueFactory(new PropertyValueFactory<>(indexName));
+        int[] counter = {1};
 
-                // disable sorting and editing
-                column.setSortable(false);
-                column.setEditable(false);
-
-                // Directly set cell factory without Label
-                column.setCellFactory(col -> {
-                    TableCell<Object, Object> cell = new TableCell<Object, Object>() {
-                        @Override
-                        protected void updateItem(Object item, boolean empty) {
-                            super.updateItem(item, empty);
-                            if (empty || item == null) {
-                                setText(null);
-                            } else {
-                                String text = item.toString().replaceAll("\\r?\\n", "");
-                                setText(text);
-                            }
-                        }
-                    };
-                    cell.setWrapText(false);
-                    cell.setTextOverrun(OverrunStyle.ELLIPSIS);
-                    return cell;
-                });
-            }
+        for (TableColumn<?, ?> column : tableView.getColumns()) {
+            processColumn(column, counter);
         }
 
-        // disable column reordering
-        tableView.widthProperty().addListener((obs, oldWidth, newWidth) -> {
-            TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
-            if (header != null) {
-                header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
+        // Disable column reordering
+        tableView.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            Platform.runLater(() -> disableReordering(tableView));
+        });
+
+        // Also try immediately
+        Platform.runLater(() -> disableReordering(tableView));
+    }
+
+    private static void disableReordering(final TableView<?> tableView) {
+
+        TableHeaderRow header
+                = (TableHeaderRow) tableView.lookup("TableHeaderRow");
+
+        if (header == null) {
+            return;
+        }
+
+        header.setReordering(false);
+
+        header.reorderingProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                header.setReordering(false);
             }
+        });
+    }
+
+    private static void processColumn(final TableColumn<?, ?> column, final int[] counter) {
+
+        // If this column has children, process the children instead
+        if (!column.getColumns().isEmpty()) {
+            for (TableColumn<?, ?> childColumn : column.getColumns()) {
+                processColumn(childColumn, counter);
+            }
+            return;
+        }
+
+        // Only process leaf/actual data columns
+        final String indexName = String.format("index%02d", counter[0]++);
+
+        @SuppressWarnings("unchecked")
+        final TableColumn<Object, Object> dataColumn
+                = (TableColumn<Object, Object>) column;
+
+        dataColumn.setCellValueFactory(
+                new PropertyValueFactory<Object, Object>(indexName)
+        );
+
+        // Disable sorting and editing
+        dataColumn.setSortable(false);
+        dataColumn.setEditable(false);
+
+        // Cell factory
+        dataColumn.setCellFactory(col -> {
+            TableCell<Object, Object> cell = new TableCell<Object, Object>() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        String text = item.toString()
+                                .replaceAll("\\r?\\n", "");
+
+                        setText(text);
+                    }
+                }
+            };
+
+            cell.setWrapText(false);
+            cell.setTextOverrun(OverrunStyle.ELLIPSIS);
+
+            return cell;
         });
     }
 
@@ -2603,19 +2652,36 @@ public class JFXUtil {
 //                } );
     public static class ReloadableTableTask {
 
-        private final TableView<?> tableView;
-        private final ObservableList<?> data;
+        private final Consumer<Node> placeholderSetter;
+        private final Runnable toFront;
+        private final BooleanSupplier isEmpty;
         private final Runnable content;
 
+        // ---- TableView: usage unchanged ----
         public ReloadableTableTask(TableView<?> tableView, ObservableList<?> data, Runnable content) {
-            this.tableView = tableView;
-            this.data = data;
+            this.placeholderSetter = tableView::setPlaceholder;
+            this.toFront = tableView::toFront;
+            this.isEmpty = () -> data == null || data.isEmpty();
+            this.content = content;
+        }
+
+        // ---- TreeTableView: same shape of usage ----
+        public ReloadableTableTask(TreeTableView<?> treeTableView, ObservableList<?> data, Runnable content) {
+            this.placeholderSetter = treeTableView::setPlaceholder;
+            this.toFront = treeTableView::toFront;
+            this.isEmpty = () -> {
+                if (data != null) {
+                    return data.isEmpty();
+                }
+                TreeItem<?> root = treeTableView.getRoot();
+                return root == null || root.getChildren().isEmpty();
+            };
             this.content = content;
         }
 
         public void reload() {
             LoadScreenComponents loading = createLoadingComponents();
-            tableView.setPlaceholder(loading.loadingPane);
+            placeholderSetter.accept(loading.loadingPane);
             loading.progressIndicator.setVisible(true);
 
             Task<Void> task = new Task<Void>() {
@@ -2629,18 +2695,18 @@ public class JFXUtil {
 
                 @Override
                 protected void succeeded() {
-                    if (data == null || data.isEmpty()) {
-                        tableView.setPlaceholder(loading.placeholderLabel);
+                    if (isEmpty.getAsBoolean()) {
+                        placeholderSetter.accept(loading.placeholderLabel);
                     } else {
-                        tableView.toFront();
+                        toFront.run();
                     }
                     loading.progressIndicator.setVisible(false);
                 }
 
                 @Override
                 protected void failed() {
-                    if (data == null || data.isEmpty()) {
-                        tableView.setPlaceholder(loading.placeholderLabel);
+                    if (isEmpty.getAsBoolean()) {
+                        placeholderSetter.accept(loading.placeholderLabel);
                     }
                     loading.progressIndicator.setVisible(false);
                 }
@@ -3918,37 +3984,50 @@ public class JFXUtil {
         return true;
     }
 
-    public static void setNextBusinessDate(DatePicker... datePickers) {
-
-        LocalDate nextDate = LocalDate.now().plusDays(1);
-
-        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY) {
-            nextDate = LocalDate.now().plusDays(2); // Monday
-        } else if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
-            nextDate = LocalDate.now().plusDays(1); // Monday
-        }
-
-        for (DatePicker datePicker : datePickers) {
-            datePicker.setValue(nextDate);
-        }
+    public static void fireHoverEvent(Button button) {
+        button.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                fireHoverEvent(button, MouseEvent.MOUSE_ENTERED);
+            } else {
+                fireHoverEvent(button, MouseEvent.MOUSE_EXITED);
+            }
+        });
     }
 
-    public static class Data {
-
-        public String value1;
-        public String value2;
-        public String value3;
-        public String value4;
-        public String value5;
-
-        public Data(String value1, String value2, String value3,
-                String value4, String value5) {
-            this.value1 = value1;
-            this.value2 = value2;
-            this.value3 = value3;
-            this.value4 = value4;
-            this.value5 = value5;
-        }
+    private static void fireHoverEvent(Node node, javafx.event.EventType<MouseEvent> type) {
+        MouseEvent hoverEvent = new MouseEvent(
+                type,
+                0, 0, 0, 0,
+                MouseButton.NONE, 0,
+                true, true, true, true,
+                false, true, true, true, true, true,
+                null
+        );
+        Event.fireEvent(node, hoverEvent);
     }
 
+    public static boolean isValidFileName(String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            return false;
+        }
+
+        // Characters invalid/problematic in Windows file names
+        return !fileName.matches(".*[\\\\/:*?\"<>|].*");
+    }
+
+    public static String concatStrings(String... values) {
+        StringBuilder loStringBuilder = new StringBuilder();
+
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) {
+                if (loStringBuilder.length() > 0) {
+                    loStringBuilder.append(" ");
+                }
+
+                loStringBuilder.append(value);
+            }
+        }
+
+        return loStringBuilder.toString();
+    }
 }
