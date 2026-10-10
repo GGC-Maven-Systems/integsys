@@ -361,10 +361,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         break;
                     case "btnExpandAll":
                         expandAll();
-                        break;
+                        return;
                     case "btnCollapseAll":
                         collapseAll();
-                        break;
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -399,20 +399,22 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void expandAll() {
-        TreeItem<ModelVehiclePriceList_Detail> root = tblViewDetail.getRoot();
         if (root == null) {
             return;
         }
-        setAllExpanded(root, true);
+        root.setExpanded(true);
+        for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
+            parent.setExpanded(true);
+        }
     }
 
     private void collapseAll() {
-        TreeItem<ModelVehiclePriceList_Detail> root = tblViewDetail.getRoot();
         if (root == null) {
             return;
         }
-        setAllExpanded(root, false);
-        // Keep the hidden root expanded, otherwise nothing shows when showRoot is false
+        for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
+            parent.setExpanded(false);
+        }
         root.setExpanded(true);
     }
     String lsId = "";
@@ -758,6 +760,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(pricelistyears, cmbSearchPriceListYear), new JFXUtil.Pairs<>(comboboxliststatus, cmbSearchStatus));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchPriceListYear, cmbSearchStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchPriceListYear, cmbSearchStatus);
+
+        cmbSearchPriceListYear.getSelectionModel().selectLast();
     }
 
     public void initTextFields() {
@@ -958,6 +962,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     int lnRow = Integer.parseInt(selected.getIndex09()) - 1;
                     if (isParent) {
                         pnDetail = lnRow;
+                        loadRecordDetail();
                         loadTablePriceHistory.reload();
                     } else {
                         // child row clicked
