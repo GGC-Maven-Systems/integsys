@@ -341,7 +341,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                     anchorAdditionalRemarks.setDisable(false);
                     break;
                 case EditMode.READY:
-                    switch (oSalesController.SalesQoutation().getModel().getTransactionStatus()) {
+                    switch (oSalesController.SalesQoutation().Version().Master().getTransactionStatus()) {
                         case SalesQoutationStatic.OPEN:
                             CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnCreateFrom, btnUpdate, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
                             CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnCreateFrom, btnUpdate, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
@@ -351,6 +351,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         case SalesQoutationStatic.VOID:
                             CustomCommonUtil.setVisible(true, btnBrowse, btnPrint, btnExport, btnClose);
                             CustomCommonUtil.setManaged(true, btnBrowse, btnPrint, btnExport, btnClose);
+                            break;
+                        case SalesQoutationStatic.CONFIRMED:
+                            CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnCreateFrom, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnCreateFrom, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
                             break;
                     }
                     break; // added: READY no longer falls through into UPDATE
@@ -545,7 +549,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfCustomerName.setText(oSalesController.SalesQoutation().getModel().Client().getCompanyName());
             tfAddress.setText(oSalesController.SalesQoutation().getModel().ClientAddress().getAddress());
             tfContactNo.setText(oSalesController.SalesQoutation().getModel().ClientMobile().getMobileNo());
-
+            tfVersionTransNo.setText(oSalesController.SalesQoutation().Version().Master().getTransactionNo());
+            dpQoutationDate.setValue(CustomCommonUtil.parseDateStringToLocalDate(
+                    SQLUtil.dateFormat(oSalesController.SalesQoutation().Version().Master().getTransactionDate(), SQLUtil.FORMAT_SHORT_DATE)));
             SalesQoutation loQuo = oSalesController.SalesQoutation();
 
             int lnVersion = (loQuo.getEditMode() == EditMode.ADDNEW || loQuo.isNewVersionPending())
@@ -913,6 +919,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             if (!main_data.isEmpty()) {
                                 JFXUtil.selectAndFocusRow(tblMCItem, 0);
                                 pnMCRow = tblMCItem.getSelectionModel().getSelectedIndex();
+                                // first row was auto-selected (e.g. after Browse): fill the item fields too
+                                clearMCItemTextFields();
+                                LoadMCItemRecord();
                             }
                         } else {
                             JFXUtil.selectAndFocusRow(tblMCItem, pnMCRow);
@@ -1195,6 +1204,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                     = tblGawayItem
                                     .getSelectionModel()
                                     .getSelectedIndex();
+
+                            // first row was auto-selected (e.g. after Browse): fill the giveaway fields too
+                            clearGawayItemTextFields();
+                            LoadGawayItemRecord();
                         }
 
                     } catch (Exception ex) {
@@ -1294,6 +1307,8 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
         btnVoid.setOnAction(this::handleButtonAction);
         btnLost.setOnAction(this::handleButtonAction);
         btnCreateFrom.setOnAction(this::handleButtonAction);
+        btnPrint.setOnAction(this::handleButtonAction);
+        btnExport.setOnAction(this::handleButtonAction);
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -1325,6 +1340,29 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         loadTableGawayItem();
                         break;
 
+                    case "btnPrint":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Print is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().printTransaction();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        break;
+                    case "btnExport":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Export is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().exportTransaction();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        break;
                     case "btnLost":
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Lost is only available during view mode.");
@@ -1369,7 +1407,12 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             return;
                         }
                         oSalesController.SalesQoutation().Version().setWithParent(false);
-                        poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                        try {
+                            poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                        } finally {
+                            // Version normally runs under SalesQoutation's transaction; leaving it false makes the next Create From / Save begin a nested transaction
+                            oSalesController.SalesQoutation().Version().setWithParent(true);
+                        }
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                             return;
@@ -1473,6 +1516,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             pnEditMode = EditMode.UNKNOWN;
                             initButton(pnEditMode);
                             clearTextFields();
+                            clearTransactionSummary();
                         }
                         break;
                 }
@@ -1939,7 +1983,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     public void LoadMCItemRecord() {
         if (pnMCRow < 0) return;
         try {
+            if (pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) return;
             Model_Sales_Quotation_Version_Detail loDet = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
+            if (loDet.getStockId() == null || loDet.getStockId().isEmpty()) return;   // blank placeholder row
             tfMCItemBrand.setText(loDet.Inventory().Brand().getDescription());
             tfMCItemModel.setText(loDet.Inventory().Model().getDescription());
             tfMCItemDiscount.setText(safe(loDet::getDiscount));
@@ -1971,9 +2017,12 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
     public void LoadGawayItemRecord() {
         if (pnGawayRow < 0) return;
         try {
+            if (pnGawayRow >= oSalesController.SalesQoutation().Giveaways().getGiveawayCount()) return;
             Model_Sales_Quotation_Version_Giveaways loDet = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow);
-            tfGawayBarrcode.setText(loDet.getStockId());
-            tfGawayDescription.setText(loDet.Inventory().getDescription());
+            if (gawayRowRank(loDet) == 2) return;   // blank placeholder row
+            boolean lbHasStock = loDet.getStockId() != null && !loDet.getStockId().trim().isEmpty();
+            tfGawayBarrcode.setText(lbHasStock ? loDet.getStockId() : "");
+            tfGawayDescription.setText(lbHasStock ? loDet.Inventory().getDescription() : "");
             tfGawayQty.setText(safe(loDet::getQuantity));
             tfGawayRemarks.setText(safe(loDet::getRemarks));
         } catch (Exception e) {

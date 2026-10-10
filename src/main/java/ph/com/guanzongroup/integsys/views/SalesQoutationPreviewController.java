@@ -390,7 +390,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                     anchorAdditionalRemarks.setDisable(false);
                     break;
                 case EditMode.READY:
-                    switch (oSalesController.SalesQoutation().getModel().getTransactionStatus()) {
+                    switch (oSalesController.SalesQoutation().Version().Master().getTransactionStatus()) {
                         case SalesQoutationStatic.OPEN:
                             CustomCommonUtil.setVisible(true,  btnCreateFrom, btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
                             CustomCommonUtil.setManaged(true,  btnCreateFrom,  btnApproved, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
@@ -400,6 +400,10 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         case SalesQoutationStatic.VOID:
                             CustomCommonUtil.setVisible(true,  btnPrint, btnExport, btnClose);
                             CustomCommonUtil.setManaged(true,  btnPrint, btnExport, btnClose);
+                            break;
+                        case SalesQoutationStatic.CONFIRMED:
+                            CustomCommonUtil.setVisible(true, btnCreateFrom, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
+                            CustomCommonUtil.setManaged(true,  btnCreateFrom, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
                             break;
                     }
                     break; // added: READY no longer falls through into UPDATE
@@ -1347,6 +1351,8 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
         btnLost.setOnAction(this::handleButtonAction);
         btnCreateFrom.setOnAction(this::handleButtonAction);
         btnCloseModal.setOnAction(this::handleButtonAction);
+        btnExport.setOnAction(this::handleButtonAction);
+        btnPrint.setOnAction(this::handleButtonAction);
 
     }
 
@@ -1358,6 +1364,29 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                 Button clickedButton = (Button) source;
                 unloadForm appUnload = new unloadForm();
                 switch (clickedButton.getId()) {
+                    case "btnPrint":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Print is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().printTransaction();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        break;
+                    case "btnExport":
+                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Export is only available during view mode.");
+                            return;
+                        }
+                        poJSON = oSalesController.SalesQoutation().exportTransaction();
+                        if ("error".equals((String) poJSON.get("result"))) {
+                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                            return;
+                        }
+                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        break;
                     case "btnCloseModal":
                         if (ShowMessageFX.YesNo(
                                 "Do you really want to close this record?\nAny data collected will not be kept.",
@@ -1431,7 +1460,12 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             return;
                         }
                         oSalesController.SalesQoutation().Version().setWithParent(false);
-                        poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                        try {
+                            poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                        } finally {
+                            // Version normally runs under SalesQoutation's transaction; leaving it false makes the next Create From / Save begin a nested transaction
+                            oSalesController.SalesQoutation().Version().setWithParent(true);
+                        }
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                             return;
@@ -1517,15 +1551,15 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         loadTableGawayItem();
                         break;
                     case "btnSave":
+                        String Reload = oSalesController.SalesQoutation().getModel().getTransactionNo();
                         poJSON = oSalesController.SalesQoutation().saveRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
-
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                        poJSON = oSalesController.SalesQoutation().searchRecord(Reload, true);
                         pnEditMode = EditMode.READY;
-                        ShowMessageFX.Information(String.valueOf(pnEditMode), pxeModuleName, null);
                         initButton(pnEditMode);
                         LoadRecord();
                         break;
@@ -1534,6 +1568,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             pnEditMode = EditMode.UNKNOWN;
                             initButton(pnEditMode);
                             clearTextFields();
+                            clearTransactionSummary();
                         }
                         break;
                 }

@@ -39,6 +39,7 @@ import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.LogWrapper;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.SalesQoutation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
@@ -74,6 +75,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
     private static final double MODAL_WIDTH_PX = 0;
     private static final double MODAL_HEIGHT_PX = 900;
 
+    private int pnEditMode;
     private GRiderCAS oApp;
     private SalesControllers oSalesController;
     private final unloadForm poUnload = new unloadForm();
@@ -106,6 +108,8 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
     @FXML private Button btnApproved; // add this button (fx:id="btnApproved") to the list FXML
     @FXML private Button btnVoid; // add this button (fx:id="btnVoid") to the list FXML
     @FXML private Button btnLost    ; // add this button (fx:id="btnVoid") to the list FXML
+    @FXML private Button btnPrint;
+    @FXML private Button btnExport;
     @FXML private Button btnFollowUp;
 
     @FXML private TextField tfSearchTransNo;
@@ -181,12 +185,16 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         JFXUtil.setButtonsVisibility(!paQuotations.isEmpty(), btnNew,btnUpdate,btnSave,btnCancel);
         btnRetrieve.setOnAction(this::cmdButton_Click);
         btnClose.setOnAction(this::cmdButton_Click);
+
         if (btnApproved != null) btnApproved.setOnAction(this::cmdButton_Click);
         if (btnCreateFrom != null) btnCreateFrom.setOnAction(this::cmdButton_Click);
 
         if (btnVoid != null) btnVoid.setOnAction(this::cmdButton_Click);
         if (btnLost != null) btnLost.setOnAction(this::cmdButton_Click);
         if (btnFollowUp != null) btnFollowUp.setOnAction(this::cmdButton_Click);
+
+        if (btnPrint != null) btnPrint.setOnAction(this::cmdButton_Click);
+        if (btnExport != null) btnExport.setOnAction(this::cmdButton_Click);
     }
 
     private void initSearchFields() {
@@ -349,6 +357,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         loRow.status = str(quotation.get("xStatus"));
         loRow.customer = str(quotation.get("sCompnyNm"));
         loRow.created = str(quotation.get("dTransact"));
+        loRow.confirmDate = str(quotation.get("dConfirmd"));   // empty unless the quotation is confirmed
         if (!versions.isEmpty()) {
             JSONObject loLatest = versions.get(0);
             loRow.amount = formatAmount(loLatest.get("nTranTotl"));
@@ -370,6 +379,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         loRow.amount = formatAmount(version.get("nTranTotl"));
         loRow.created = str(version.get("dTransact"));
         loRow.validUntil = str(version.get("dValdThru"));
+        loRow.confirmDate = str(version.get("dConfirmd"));
         return loRow;
     }
 
@@ -381,6 +391,27 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         String lsButton = ((Button) event.getSource()).getId();
         JSONObject poJSON = new JSONObject();
         switch (lsButton) {
+            case "btnPrint":
+                if (!openSelectedRecord()) {
+                    return;
+                }
+                poJSON = oSalesController.SalesQoutation().printTransaction();
+                if ("error".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Error((String) poJSON.get("message"), MODULE_NAME, null);
+                    return;
+                }
+                break;
+            case "btnExport":
+                if (!openSelectedRecord()) {
+                    return;
+                }
+                poJSON = oSalesController.SalesQoutation().exportTransaction();
+                if ("error".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Error((String) poJSON.get("message"), MODULE_NAME, null);
+                    return;
+                }
+                ShowMessageFX.Information((String) poJSON.get("message"), MODULE_NAME, null);
+                break;
             case "btnRetrieve":
                 retrieveQuotations();
                 break;
@@ -556,7 +587,12 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
             }
 
             oSalesController.SalesQoutation().Version().setWithParent(false);
-            poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+            try {
+                poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+            } finally {
+                // Version normally runs under SalesQoutation's transaction; leaving it false makes the next Create From / Save begin a nested transaction
+                oSalesController.SalesQoutation().Version().setWithParent(true);
+            }
             if ("error".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Error((String) poJSON.get("message"), MODULE_NAME, null);
                 return;
@@ -600,6 +636,34 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         openPreviewModal(loRow.quotationId, loRow.versionId, createFrom);
     }
 
+    /**
+     * Loads the row selected in the tree table into the quotation model so it can be
+     * printed or exported without opening the preview. A quotation (parent) row loads
+     * its latest version; a version row loads that version.
+     *
+     * @return true if a record is loaded and ready, false if nothing was selected or loading failed
+     *         (the user has already been told why).
+     */
+    private boolean openSelectedRecord() {
+        TreeItem<QuotationRow> loItem = tblTreeQoutationList.getSelectionModel().getSelectedItem();
+        if (loItem == null || loItem.getValue() == null) {
+            ShowMessageFX.Warning(null, MODULE_NAME, "Please select a quotation or version first.");
+            return false;
+        }
+        QuotationRow loRow = loItem.getValue();
+
+        try {
+            JSONObject loJSON = oSalesController.SalesQoutation().openRecord(loRow.quotationId, loRow.versionId);
+            if (!"success".equals((String) loJSON.get("result"))) {
+                ShowMessageFX.Error((String) loJSON.get("message"), MODULE_NAME, null);
+                return false;
+            }
+            return true;
+        } catch (SQLException | GuanzonException ex) {
+            logAndShow(ex);
+            return false;
+        }
+    }
 
     private void openPreviewModal(String fsQuotationId, String fsVersionId, boolean fbCreateFrom) {
         try {
