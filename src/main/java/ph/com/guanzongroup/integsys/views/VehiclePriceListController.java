@@ -921,21 +921,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         tblTransmission.setCellValueFactory(new TreeItemPropertyValueFactory<>("index06"));
         tblBaseSRP.setCellValueFactory(new TreeItemPropertyValueFactory<>("index07"));
         tblDetailStatus.setCellValueFactory(new TreeItemPropertyValueFactory<>("index08"));
-//        JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
-//Row is equivalent to tableview model
-//
-//        TreeItem<Row> parent1 = new TreeItem<>(new Row("Order #1001", "Parent", "300.00"));
-//        parent1.getChildren().add(new TreeItem<>(new Row("Item A", "Child", "100.00")));
-//        parent1.getChildren().add(new TreeItem<>(new Row("Item B", "Child", "200.00")));
-//
-//        TreeItem<Row> parent2 = new TreeItem<>(new Row("Order #1002", "Parent", "150.00"));
-//        parent2.getChildren().add(new TreeItem<>(new Row("Item C", "Child", "150.00")));
-//
-//        root.getChildren().addAll(parent1, parent2);
-//        parent1.setExpanded(true);   
-//
-//        tblViewDetail.setRoot(root);
-//        tblViewDetail.setShowRoot(false);
     }
 
     public void initPriceHistoryGrid() {
