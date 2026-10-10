@@ -79,29 +79,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     ObservableList<String> comboboxlistVehicleType = FXCollections.observableArrayList("Private", "Commercial");
     ObservableList<String> comboboxlistBodyType = FXCollections.observableArrayList("Sedan", "SUV", "Hatchback", "MPV");
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        try {
-            poController = new SalesControllers(oApp, null).VehicleDescription();
-            poController.initialize();
-            poJSON = new JSONObject();
-            initTextFields();
-            clearTextFields();
-            initComboboxes();
-            pnEditMode = EditMode.UNKNOWN;
-            initButton(pnEditMode);
-            poController.setWithUI(true);
-            Platform.runLater(() -> {
-                poController.setIndustryId(psIndustryId);
-                poController.setCategoryId(psCategoryId);
-                btnNew.fire();
-            });
-            poController.setRecordStatus("01234");
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
+    private String lsID = "";
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -121,6 +99,76 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
+    }
+
+    public void initializeDialog(GRiderCAS oApp1) {
+        oApp = oApp1;
+        poController = new SalesControllers(oApp, null).VehicleDescription();
+    }
+
+    public void ForDialog(boolean lbisForDialog) {
+        isForDialog = lbisForDialog;
+    }
+
+    public boolean isForDialog() {
+        return isForDialog;
+    }
+
+    public void openRecordForAdd() {
+        btnNew.fire();
+    }
+
+    public void isForUpdate(boolean lbisForUpdate) {
+        isForUpdate = lbisForUpdate;
+    }
+
+    private boolean isForUpdate() {
+        return isForUpdate;
+    }
+
+    public void openRecordForUpdate(String lsValue) {
+        lsID = lsValue;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        try {
+            if (isForDialog()) {
+            } else {
+                poController = new SalesControllers(oApp, null).VehicleDescription();
+            }
+
+            poController.initialize();
+            poJSON = new JSONObject();
+            initTextFields();
+            clearTextFields();
+            initComboboxes();
+            pnEditMode = EditMode.UNKNOWN;
+            initButton(pnEditMode);
+            poController.setWithUI(true);
+            Platform.runLater(() -> {
+                poController.setIndustryId(psIndustryId);
+                poController.setCategoryId(psCategoryId);
+
+                if (isForUpdate()) {
+                    try {
+                        poController.OpenRecord(lsID);
+                        loadRecordMaster();
+                        pnEditMode = poController.getEditMode();
+                        initButton(pnEditMode);
+                    } catch (SQLException | GuanzonException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                    }
+                } else {
+                    btnNew.fire();
+                }
+            });
+            poController.setRecordStatus("01234");
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
     }
 
     @FXML
@@ -145,9 +193,14 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         } else {
                             return;
+                        }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        } else {
+                            appUnload = new unloadForm();
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
                         }
                         break;
                     case "btnNew":
@@ -214,6 +267,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         } else {
                             return;
                         }
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        }
                         break;
                     case "btnActivate":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to activate the record?") == false) {
@@ -222,11 +278,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         poJSON = poController.ActivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         poController.openRecord(poController.getModel().getVariantId());
                         pnEditMode = poController.getEditMode();
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        }
                         break;
                     case "btnDeactivate":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to deactivate the record?") == false) {
@@ -235,11 +295,15 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         poJSON = poController.DeactivateRecord("");
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         poController.openRecord(poController.getModel().getVariantId());
                         pnEditMode = poController.getEditMode();
+                        if (isForDialog()) {
+                            CommonUtils.closeStage(btnClose);
+                        }
                         break;
                     case "btnBrand":
                         openParameter(false, lsButton);

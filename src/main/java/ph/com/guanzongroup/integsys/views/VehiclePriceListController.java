@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelVehiclePriceList_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -54,6 +55,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONArray;
@@ -97,14 +99,14 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
     JFXUtil.ReloadableTableTask loadTableDetail, loadTablePriceHistory;
     ObservableList<String> comboboxliststatus = FXCollections.observableArrayList(
-            ValidityPeriodStatus.OPEN,
-            ValidityPeriodStatus.APPROVED,
-            ValidityPeriodStatus.CANCELLED,
-            ValidityPeriodStatus.VOID
+            "OPEN",
+            "APPROVED",
+            "CANCELLED",
+            "VOID"
     );
     ObservableList<String> pricelistyears = FXCollections.observableArrayList();
     TreeItem<ModelVehiclePriceList_Detail> root = new TreeItem<>(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", ""));
-
+    JFXUtil.StageManager stageDescription = new JFXUtil.StageManager();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail, apPriceHistory;
     @FXML
@@ -355,10 +357,13 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     case "btnCopyBasePriceToAllColors":
                         break;
                     case "btnAddVehicleDescription":
+                        openParameter(false, "");
                         break;
                     case "btnExpandAll":
+                        expandAll();
                         break;
                     case "btnCollapseAll":
+                        collapseAll();
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -378,6 +383,68 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ParseException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void setAllExpanded(TreeItem<?> item, boolean expanded) {
+        if (item == null || item.isLeaf()) {
+            return;
+        }
+        item.setExpanded(expanded);
+        for (TreeItem<?> child : item.getChildren()) {
+            setAllExpanded(child, expanded);
+        }
+    }
+
+    private void expandAll() {
+        TreeItem<ModelVehiclePriceList_Detail> root = tblViewDetail.getRoot();
+        if (root == null) {
+            return;
+        }
+        setAllExpanded(root, true);
+    }
+
+    private void collapseAll() {
+        TreeItem<ModelVehiclePriceList_Detail> root = tblViewDetail.getRoot();
+        if (root == null) {
+            return;
+        }
+        setAllExpanded(root, false);
+        // Keep the hidden root expanded, otherwise nothing shows when showRoot is false
+        root.setExpanded(true);
+    }
+    String lsId = "";
+
+    private void openParameter(boolean isForUpdate, String lsValue) {
+        String lsFXML = "";
+        Object controller = new Object();
+        VehicleDescription_EntryController controller1 = new VehicleDescription_EntryController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleDescription_Entry.fxml";
+        controller1.ForDialog(true);
+        if (isForUpdate) {
+            controller1.isForUpdate(true);
+            controller1.openRecordForUpdate(lsId);
+        }
+        controller1.initializeDialog(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageDescription != null) {
+            stageDescription.closeDialog();
+            stageDescription = new JFXUtil.StageManager();
+        } else {
+            stageDescription = new JFXUtil.StageManager();
+        }
+        try {
+            stageDescription.setOnHidden(event -> {
+                stageDescription = null;
+                loadRecordMaster();
+            });
+            stageDescription.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Description Dialog", true, false, false);
+        } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -406,18 +473,24 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             poJSON = poController.SearchBrand(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfModel);
                             }
                             break;
                         case "tfModel":
                             poJSON = poController.SearchModel(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfVariant);
                             }
                             break;
                         case "tfVariant":
                             poJSON = poController.SearchModelVariant(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfBaseSRP);
                             }
                             break;
                     }
@@ -707,9 +780,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     Platform.runLater(() -> {
                         int lnCtr;
                         try {
-//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                poController.ReloadDetail();
-//                            }
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadDetail();
+                            }
                             root.getChildren().clear();
                             tblViewDetail.setRoot(null);
                             TreeItem<ModelVehiclePriceList_Detail> currentParent = null;
@@ -774,6 +847,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(VehiclePriceListController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
                 }
@@ -836,8 +911,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void initDetailsGrid() {
-        JFXUtil.setColumnCenter(tblRowNo);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblTransmission, tblBaseSRP, tblDetailStatus);
+        JFXUtil.setColumnCenter(tblRowNo, tblDetailStatus);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblTransmission, tblBaseSRP);
         tblRowNo.setCellValueFactory(new TreeItemPropertyValueFactory<>("index01"));
         tblBrand.setCellValueFactory(new TreeItemPropertyValueFactory<>("index02"));
         tblModel.setCellValueFactory(new TreeItemPropertyValueFactory<>("index03"));
