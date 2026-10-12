@@ -45,7 +45,9 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.event.EventHandler;
@@ -54,6 +56,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
@@ -97,7 +100,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-
+// key = variant description (the parent group), value = expanded or not
+    private final Map<String, Boolean> poExpandedState = new HashMap<>();
     JFXUtil.ReloadableTableTask loadTableDetail, loadTablePriceHistory;
     ObservableList<String> comboboxliststatus = FXCollections.observableArrayList("OPEN", "APPROVED", "CANCELLED", "VOID");
     ObservableList<String> pricelistyears = FXCollections.observableArrayList();
@@ -401,7 +405,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         root.setExpanded(true);
         for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
             parent.setExpanded(true);
+            poExpandedState.put(parent.getValue().getIndex04(), true);
         }
+        pbIsExpanded = true;
     }
 
     private void collapseAll() {
@@ -410,8 +416,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         }
         for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
             parent.setExpanded(false);
+            poExpandedState.put(parent.getValue().getIndex04(), false);
         }
         root.setExpanded(true);
+        pbIsExpanded = false;
     }
     String lsId = "";
 
@@ -519,10 +527,17 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 case "tblViewDetail":
                     newIndex = !isMovedDown ? JFXUtil.moveToPreviousRow(currentTable)
                             : JFXUtil.moveToNextRow(currentTable);
-                    if (!details_data.isEmpty()) {
-                        pnDetail = newIndex;
-                        loadRecordDetail();
+                    TreeItem<ModelVehiclePriceList_Detail> selected = tblViewDetail.getTreeItem(newIndex);
+
+                    if (selected != null) {
+                        ModelVehiclePriceList_Detail model = selected.getValue();
+                        int lnDetailIndex = Integer.parseInt(model.getIndex09()) - 1; // back to 0-based
+                        if (!details_data.isEmpty()) {
+                            pnDetail = lnDetailIndex;
+                            loadRecordDetail();
+                        }
                     }
+
                     break;
             }
         }
@@ -815,6 +830,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadDetail();
                             }
+                            for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
+                                poExpandedState.put(parent.getValue().getIndex04(), parent.isExpanded()); // use the getter that returns the Variant description
+                            }
+
                             root.getChildren().clear();
                             tblViewDetail.setRoot(null);
                             TreeItem<ModelVehiclePriceList_Detail> currentParent = null;
@@ -854,6 +873,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 if (lbNewParent) {
                                     currentParent = item;
                                     lsCurrentVariantId = lsVariantId;
+
+                                    // Restore previous state; default to pbIsExpanded for new/unknown parents
+                                    currentParent.setExpanded(poExpandedState.getOrDefault(lsVariantId, pbIsExpanded));
+
                                     root.getChildren().add(currentParent);
                                 } else {
                                     currentParent.getChildren().add(item);
@@ -861,13 +884,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             }
                             tblViewDetail.setRoot(root);
                             tblViewDetail.setShowRoot(false);
-                            if (pbIsExpanded) {
-                                expandAll();
-                            } else {
-                                collapseAll();
-                            }
-                            TreeItem<ModelVehiclePriceList_Detail> item2 = getDetailRowFilter(tblViewDetail.getRoot(), pnDetail+1, 9);
-                            int lnRow = tblViewDetail.getRow(item);
+
+                            TreeItem<ModelVehiclePriceList_Detail> item2 = getDetailRowFilter(tblViewDetail.getRoot(), pnDetail + 1, 9);
+                            int lnRow = tblViewDetail.getRow(item2);
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -879,8 +898,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewDetail.getSelectionModel().select(pnDetail);
-                                tblViewDetail.getFocusModel().focus(pnDetail);
+                                tblViewDetail.getSelectionModel().select(lnRow);
+                                tblViewDetail.getFocusModel().focus(lnRow);
                                 loadRecordDetail();
                             }
                             loadRecordDetail();
@@ -999,6 +1018,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         tblBaseSRP.setCellValueFactory(new TreeItemPropertyValueFactory<>("index07"));
         tblDetailStatus.setCellValueFactory(new TreeItemPropertyValueFactory<>("index08"));
         JFXUtil.disableColumnReordering(tblViewDetail);
+
     }
 
     public void initPriceHistoryGrid() {
