@@ -349,6 +349,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apDetail);
                         break;
                     case "btnRemake":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to remake this transaction?") == false) {
+                            return;
+                        }
                         poJSON = poController.remake(poController.Master().getValidityId());
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -491,12 +494,12 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     });
                     break;
                 case UP:
-//                    JFXUtil.altSwitch(lsID, new Object[][]{
-//                        {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(true, true)},});
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBrand", "tfModel", "tfColor", "tfBaseSRP"}, (Runnable) () -> moveNext(true, true)},});
                     break;
                 case DOWN:
-//                    JFXUtil.altSwitch(lsID, new Object[][]{
-//                        {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(false, true)},});
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfBrand", "tfModel", "tfColor", "tfBaseSRP"}, (Runnable) () -> moveNext(false, true)},});
                     break;
                 default:
                     break;
@@ -512,8 +515,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
-                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
-                            : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
+                    newIndex = !isMovedDown ? JFXUtil.moveToPreviousRow(currentTable)
+                            : JFXUtil.moveToNextRow(currentTable);
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -548,6 +551,12 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         poJSON = poController.Detail(pnDetail).setSRPAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(.6, () -> {
+                                moveNext(false, true);
+                                pbEntered = false;
+                            });
                         }
                         break;
                 }
@@ -592,7 +601,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void loadRecordMaster() {
-
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
         tfValidityID.setText(poController.Master().getValidityId());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
@@ -608,6 +616,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             poController.Detail(pnDetail).ModelVariantInsurance().setTransmission(null);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -644,7 +653,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             tfVariantPriceHistory.setText(selected.getIndex01()); //  get from selected from model
             tfColorPriceHistory.setText(selected.getIndex01());
         }
-
     }
 
     boolean pbSuccess = true;
@@ -740,17 +748,24 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
-//                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.Detail(pnDetail).getSRPAmount(), tfBaseSRP},}, tfBaseSRP); // default
+        try {
+            if (continueNext) {
+                apDetail.requestFocus();
+                pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetail)
+                        : JFXUtil.moveToNextRow(tblViewDetail);
+            }
+            loadRecordDetail();
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Detail(pnDetail).Brand().getDescription(), tfBrand},
+                {poController.Detail(pnDetail).Model().getDescription(), tfModel},
+                {poController.Detail(pnDetail).ModelVariant().Color().getDescription(), tfColor},
+                {poController.Detail(pnDetail).getSRPAmount(), tfBaseSRP},}, tfBaseSRP); // default
+        } catch (GuanzonException | SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     //create a dynamic loader of table column of tblViewDetail
@@ -759,20 +774,16 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         for (int year = Year.now().getValue() + 1; year >= 2000; year--) {
             pricelistyears.add(String.valueOf(year));
         }
-
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(pricelistyears, cmbSearchPriceListYear), new JFXUtil.Pairs<>(comboboxliststatus, cmbSearchStatus));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchPriceListYear, cmbSearchStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchPriceListYear, cmbSearchStatus);
-
         cmbSearchPriceListYear.getSelectionModel().select(1);
     }
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
-
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail, apPriceHistory);
         JFXUtil.setCommaFormatter(tfVariantPriceHistory, tfColorPriceHistory, tfBaseSRP);
-
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewPriceHistory);
         JFXUtil.adjustColumnForScrollbar(tblViewPriceHistory);
     }
@@ -826,6 +837,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                                 String.valueOf(lnCtr + 1)
                                         )
                                 );
+                                details_data.add(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", ""));
+
                                 if (lbNewParent) {
                                     currentParent = item;
                                     lsCurrentVariantId = lsVariantId;
@@ -858,7 +871,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(VehiclePriceListController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 }
@@ -922,7 +936,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
     private void initDetailsGrid() {
         JFXUtil.setColumnCenter(tblRowNo, tblDetailStatus);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblTransmission, tblBaseSRP);
+        JFXUtil.setColumnRight(tblBaseSRP);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblTransmission);
         tblRowNo.setCellValueFactory(new TreeItemPropertyValueFactory<>("index01"));
         tblBrand.setCellValueFactory(new TreeItemPropertyValueFactory<>("index02"));
         tblModel.setCellValueFactory(new TreeItemPropertyValueFactory<>("index03"));
@@ -968,7 +983,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     boolean isParent = selectedItem.getParent() == tblViewDetail.getRoot();
                     int lnRow = Integer.parseInt(selected.getIndex09()) - 1;
                     pnDetail = lnRow;
-                    loadRecordDetail();
+                    moveNext(false, false);
                     loadTablePriceHistory.reload();
 //                    if (isParent) {
 //                    } else {
@@ -991,7 +1006,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 }
             }
         });
-
     }
 
     private void initButton(int fnValue) {

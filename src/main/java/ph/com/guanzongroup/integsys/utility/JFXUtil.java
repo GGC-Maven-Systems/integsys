@@ -100,7 +100,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TablePositionBase;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TableSelectionModel;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -511,31 +513,41 @@ public class JFXUtil {
 
     /*Move the current row of TableView to next row and returns next index value*/
  /*Requires TableView*/
-    public static int moveToNextRow(TableView table) {
-        TableView<?> currentTable = table;
-        TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-        if (focusedCell != null) {
-            int nextRow = (focusedCell.getRow() + 1) % table.getItems().size();
-            table.getSelectionModel().select(nextRow);
-            return nextRow;
-        } else {
-            return 0;
-        }
+    public static int moveToNextRow(Control table) {
+        return move(table, +1);
     }
 
     /*Move the current row of TableView to previous row and returns next index value*/
  /*Requires TableView*/
-    public static int moveToPreviousRow(TableView table) {
-        TableView<?> currentTable = table;
-        TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-        if (focusedCell != null) {
-            int previousRow = (focusedCell.getRow() - 1 + table.getItems().size()) % table.getItems().size();
-            table.getSelectionModel().select(previousRow);
-            return previousRow;
+    public static int moveToPreviousRow(Control table) {
+        return move(table, -1);
+    }
+
+    private static int move(Control control, int step) {
+        TablePositionBase<?> focused;
+        int rowCount;
+        TableSelectionModel<?> sm;
+
+        if (control instanceof TableView) {
+            TableView<?> tv = (TableView<?>) control;
+            focused = tv.getFocusModel().getFocusedCell();
+            rowCount = tv.getItems().size();
+            sm = tv.getSelectionModel();
+        } else if (control instanceof TreeTableView) {
+            TreeTableView<?> ttv = (TreeTableView<?>) control;
+            focused = ttv.getFocusModel().getFocusedCell();
+            rowCount = ttv.getExpandedItemCount();
+            sm = ttv.getSelectionModel();
         } else {
-            return 0;
+            throw new IllegalArgumentException("Expected TableView or TreeTableView");
         }
 
+        if (focused == null || rowCount == 0) {
+            return 0;
+        }
+        int next = (focused.getRow() + step + rowCount) % rowCount;
+        sm.select(next);
+        return next;
     }
 
     /* Use when pagination is present in tableView */
