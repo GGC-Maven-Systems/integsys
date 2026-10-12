@@ -958,15 +958,15 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     // Parent or child?
                     boolean isParent = selectedItem.getParent() == tblViewDetail.getRoot();
                     int lnRow = Integer.parseInt(selected.getIndex09()) - 1;
-                    if (isParent) {
-                        pnDetail = lnRow;
-                        loadRecordDetail();
-                        loadTablePriceHistory.reload();
-                    } else {
-                        // child row clicked
-                        // TreeItem<ModelVehiclePriceList_Detail> parentItem = selectedItem.getParent();
-                        // ModelVehiclePriceList_Detail parentData = parentItem.getValue();
-                    }
+                    pnDetail = lnRow;
+                    loadRecordDetail();
+                    loadTablePriceHistory.reload();
+//                    if (isParent) {
+//                    } else {
+//                        // child row clicked
+//                        // TreeItem<ModelVehiclePriceList_Detail> parentItem = selectedItem.getParent();
+//                        // ModelVehiclePriceList_Detail parentData = parentItem.getValue();
+//                    }
                 }
             }
         });
