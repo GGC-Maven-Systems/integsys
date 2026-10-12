@@ -622,18 +622,26 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void loadRecordMaster() {
-        String lsStat = "Void";
-        if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
-            lsStat = "Cancel";
-        }
-        btnVoid.setText(lsStat);
-        JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
-        tfValidityID.setText(poController.Master().getValidityId());
-        String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
-        JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
-        String lsValidTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
-        JFXUtil.setDateValue(dpValidTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+        try {
+            String lsStat = "Void";
+            if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
+                lsStat = "Cancel";
+            }
+            btnVoid.setText(lsStat);
+            JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
+            tfValidityID.setText(poController.Master().getValidityId());
+            String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
+            JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
+            String lsValidTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
+            JFXUtil.setDateValue(dpValidTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+            lblTotalVariants.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalVariant(), false));
+            lblTotalColors.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalColor(), false));
 
+        } catch (GuanzonException ex) {
+            Logger.getLogger(VehiclePriceListController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(VehiclePriceListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void setToNull() {
@@ -665,7 +673,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             tfVehicleType.setText(poController.Detail(pnDetail).ModelVariantInsurance().getVehicleType());
             tfBodyType.setText(poController.Detail(pnDetail).ModelVariantInsurance().getBodyType());
             tfTransmission.setText(poController.Detail(pnDetail).ModelVariantInsurance().getTransmission());
-            tfBaseSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
+            tfBaseSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
