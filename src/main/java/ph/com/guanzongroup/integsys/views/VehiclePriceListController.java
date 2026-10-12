@@ -89,7 +89,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     boolean lbresetpredicate = false;
     boolean pbEntered = false;
     boolean pbKeyPressed = false;
-
+    boolean pbIsExpanded = true;
     private ObservableList<ModelVehiclePriceList_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehiclePriceHistory> pricehistory_data = FXCollections.observableArrayList();
     private FilteredList<ModelVehiclePriceList_Detail> filteredDataDetail;
@@ -364,9 +364,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         openParameter(false, "");
                         break;
                     case "btnExpandAll":
+                        pbIsExpanded = true;
                         expandAll();
                         return;
                     case "btnCollapseAll":
+                        pbIsExpanded = false;
                         collapseAll();
                         return;
                     default:
@@ -607,6 +609,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsValidTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpValidTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
+
     }
 
     private void setToNull() {
@@ -753,6 +756,14 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 apDetail.requestFocus();
                 pnDetail = isUp ? JFXUtil.moveToPreviousRow(tblViewDetail)
                         : JFXUtil.moveToNextRow(tblViewDetail);
+                TreeItem<ModelVehiclePriceList_Detail> selected = tblViewDetail.getTreeItem(pnDetail);
+
+                if (selected != null) {
+                    ModelVehiclePriceList_Detail model = selected.getValue();
+                    int lnDetailIndex = Integer.parseInt(model.getIndex09()) - 1; // back to 0-based
+                    pnDetail = lnDetailIndex;
+                }
+
             }
             loadRecordDetail();
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -784,7 +795,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail, apPriceHistory);
         JFXUtil.setCommaFormatter(tfVariantPriceHistory, tfColorPriceHistory, tfBaseSRP);
-        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewPriceHistory);
+        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail, tblViewPriceHistory);
         JFXUtil.adjustColumnForScrollbar(tblViewPriceHistory);
     }
 
@@ -811,6 +822,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             String lsCurrentVariantId = null;
                             int lnParentCtr = 0;
                             int lnChildCtr = 0;
+                            root.setExpanded(true);
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
 //                                    continue;
@@ -849,7 +861,13 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             }
                             tblViewDetail.setRoot(root);
                             tblViewDetail.setShowRoot(false);
-
+                            if (pbIsExpanded) {
+                                expandAll();
+                            } else {
+                                collapseAll();
+                            }
+                            TreeItem<ModelVehiclePriceList_Detail> item2 = getDetailRowFilter(tblViewDetail.getRoot(), pnDetail+1, 9);
+                            int lnRow = tblViewDetail.getRow(item);
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -932,6 +950,40 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     );
                 }
         );
+    }
+
+    public static <T> TreeItem<T> getDetailRowFilter(TreeItem<T> root, int lnpn, int columnIndex) {
+        if (root == null) {
+            return null;
+        }
+
+        String getterName = String.format("getIndex%02d", columnIndex);
+
+        try {
+            for (TreeItem<T> child : root.getChildren()) {
+                T model = child.getValue();
+
+                if (model != null) {
+                    String value = (String) model.getClass()
+                            .getMethod(getterName)
+                            .invoke(model);
+
+                    if (String.valueOf(lnpn).equals(value)) {
+                        return child;
+                    }
+                }
+
+                // search the children of this node too
+                TreeItem<T> found = getDetailRowFilter(child, lnpn, columnIndex);
+                if (found != null) {
+                    return found;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null; // not found
     }
 
     private void initDetailsGrid() {
