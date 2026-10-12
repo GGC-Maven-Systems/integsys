@@ -11,6 +11,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.ZoneId;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -627,6 +628,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             tfTransmission.setText(poController.Detail(pnDetail).ModelVariantInsurance().getTransmission());
             tfBaseSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
+            JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -634,8 +636,12 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void loadRecordPriceHistory() {
-        tfVariantPriceHistory.setText(""); // will just get from selected from model
-        tfColorPriceHistory.setText("");
+        ModelVehiclePriceHistory selected = (ModelVehiclePriceHistory) tblViewPriceHistory.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            tfVariantPriceHistory.setText(selected.getIndex01()); //  get from selected from model
+            tfColorPriceHistory.setText(selected.getIndex01());
+        }
+
     }
 
     boolean pbSuccess = true;
@@ -747,7 +753,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     //create a dynamic loader of table column of tblViewDetail
     private void initComboboxes() {
         ObservableList<String> pricelistyears = FXCollections.observableArrayList();
-        for (int year = 2027; year >= 2000; year--) {
+        for (int year = Year.now().getValue() + 1; year >= 2000; year--) {
             pricelistyears.add(String.valueOf(year));
         }
 
@@ -755,7 +761,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchPriceListYear, cmbSearchStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchPriceListYear, cmbSearchStatus);
 
-        cmbSearchPriceListYear.getSelectionModel().selectFirst();
+        cmbSearchPriceListYear.getSelectionModel().select(1);
     }
 
     public void initTextFields() {
