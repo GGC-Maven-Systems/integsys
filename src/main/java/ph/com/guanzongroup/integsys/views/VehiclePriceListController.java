@@ -116,7 +116,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnVoid, btnRemake, btnHistory, btnClose, btnCopyBasePriceToAllColors, btnAddVehicleDescription, btnExpandAll, btnCollapseAll;
+    private Button btnPrint, btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnVoid, btnRemake, btnHistory, btnClose, btnCopyBasePriceToAllColors, btnAddVehicleDescription, btnExpandAll, btnCollapseAll;
     @FXML
     private TextField tfValidityID, tfBrand, tfModel, tfVariant, tfColor, tfYearModel, tfVehicleType, tfBodyType, tfTransmission, tfBaseSRP, tfVariantPriceHistory, tfColorPriceHistory;
     @FXML
@@ -361,6 +361,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             return;
                         }
+                        pnEditMode = poController.getEditMode();
                         break;
                     case "btnCopyBasePriceToAllColors":
                         break;
@@ -374,6 +375,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     case "btnCollapseAll":
                         pbIsExpanded = false;
                         collapseAll();
+                        return;
+                    case "btnPrint":
+                        poController.printTransaction();
                         return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -1093,6 +1097,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
+        JFXUtil.setButtonsVisibility(false, btnPrint);
         if (fnValue != EditMode.READY) {
             return;
         }
@@ -1105,6 +1110,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 break;
             case ValidityPeriodStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
+                JFXUtil.setButtonsVisibility(true, btnPrint);
                 break;
         }
     }
