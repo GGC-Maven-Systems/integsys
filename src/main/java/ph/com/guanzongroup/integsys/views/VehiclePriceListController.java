@@ -528,11 +528,14 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     case "tfBrand":
                         if (lsValue.isEmpty()) {
                             poController.Detail(pnDetail).setBrandId(null);
+                            poController.Detail(pnDetail).setModelId(null);
+                            poController.Detail(pnDetail).setVariantId(null);
                         }
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
                             poController.Detail(pnDetail).setModelId(null);
+                            poController.Detail(pnDetail).setVariantId(null);
                         }
                         break;
                     case "tfVariant":
