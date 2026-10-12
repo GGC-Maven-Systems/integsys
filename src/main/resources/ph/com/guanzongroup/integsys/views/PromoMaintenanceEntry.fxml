@@ -791,7 +791,7 @@
                                                    <children>
                                                       <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="2147483647">
                                                          <children>
-                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="SALESMAN BENIFITS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="SALESMAN BENEFITS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <font>
                                                                   <Font name="System Bold" size="14.0" />
                                                                </font>
