@@ -705,7 +705,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         String lsTextFieldID = loTextField.getId();
         String lsValue = loTextField.getText();
         if (lsValue == null) {
-            return;
+            lsValue = "";
         }
         Model loSelected;
         try {
@@ -780,29 +780,17 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                         }
                         break;
                     case "tfReferenceNo":
-                        if (lsValue.isEmpty()) {
-                            return;
-                        }
-
                         poAppController.getMaster().setReferNo(lsValue);
                         loadTransactionMaster();
 
                         break;
 
                     case "tfSubject":
-                        if (lsValue.isEmpty()) {
-                            return;
-                        }
-
                         poAppController.getMaster().setPromoDescription(lsValue);
                         loadTransactionMaster();
 
                         break;
                     case "tfRemarks":
-                        if (lsValue.isEmpty()) {
-                            return;
-                        }
-
                         poAppController.getMaster().setRemarks(lsValue);
                         loadTransactionMaster();
 
@@ -1476,6 +1464,9 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         String lsStatus = lbHasTransaction ? poAppController.getMaster().getTransactionStatus() : "";
         boolean lbRestrictedStatus = "2".equals(lsStatus) || "3".equals(lsStatus) || "4".equals(lsStatus)
                 || "5".equals(lsStatus) || "1".equals(lsStatus);
+        boolean lbIsReplaced = SalesPromotionStatus.REPLACED.equals(lsStatus)
+                || SalesPromotionStatus.VOID.equals(lsStatus)
+                || SalesPromotionStatus.CANCELLED.equals(lsStatus);
 
         // Always visible
         initButtonControls(true, "btnClose");
@@ -1493,6 +1484,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnPreview", "btnDuplicate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate");
+        initButtonControls(!lbEditing && lbHasTransaction && !lbIsReplaced, "btnVoid"); 
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
