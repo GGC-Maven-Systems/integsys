@@ -282,7 +282,7 @@
                                                                         <Label text="Area" GridPane.rowIndex="5" />
                                                                         <Label text="Province" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                                                                         <Label text="Shop Type" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-                                                                        <Label text="Tansaction  Type" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+                                                                        <Label text="Transaction  Type" GridPane.columnIndex="4" GridPane.rowIndex="5" />
                                                                         <Label text="Status" GridPane.columnIndex="8" GridPane.rowIndex="3" />
                                                                         <Label text="Promo Type" GridPane.columnIndex="8" GridPane.rowIndex="4" />
                                                                         <Label text="Promo Source" GridPane.columnIndex="8" GridPane.rowIndex="5" />
