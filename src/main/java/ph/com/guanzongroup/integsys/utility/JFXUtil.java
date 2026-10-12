@@ -931,19 +931,47 @@ public class JFXUtil {
             return;
         }
 
+        // ---- Disable sorting ----
+        table.getSortOrder().clear();
+
+        for (TreeTableColumn<T, ?> column : table.getColumns()) {
+            applyNoSort(column);
+        }
+
+        // Columns added later
+        table.getColumns().addListener((ListChangeListener<TreeTableColumn<T, ?>>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (TreeTableColumn<T, ?> column : change.getAddedSubList()) {
+                        applyNoSort(column);
+                    }
+                }
+            }
+        });
+
+        // ---- Disable reordering ----
         if (table.getSkin() != null) {
-            install(table);
+            installNoReorder(table);
         } else {
             // The skin (and header row) doesn't exist until the table is shown
             table.skinProperty().addListener((obs, oldSkin, newSkin) -> {
                 if (newSkin != null) {
-                    install(table);
+                    installNoReorder(table);
                 }
             });
         }
     }
 
-    private static void install(final TreeTableView<?> table) {
+    private static <T> void applyNoSort(TreeTableColumn<T, ?> column) {
+        column.setSortable(false);
+
+        // Nested (grouped) columns
+        for (TreeTableColumn<T, ?> child : column.getColumns()) {
+            applyNoSort(child);
+        }
+    }
+
+    private static void installNoReorder(final TreeTableView<?> table) {
         Node node = table.lookup("TableHeaderRow");
         if (node instanceof TableHeaderRow) {
             final TableHeaderRow header = (TableHeaderRow) node;
