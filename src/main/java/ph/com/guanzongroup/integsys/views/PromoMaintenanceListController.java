@@ -661,6 +661,11 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
                             return;
                         }
                         if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
+                            poAppController.openTransaction(poAppController.getMaster().getPromoID());
+                            reloadTableModel();
+                            getLoadedTransaction();
+                            pnEditMode = poAppController.getEditMode();
+                            initButtonDisplay(poAppController.getEditMode());
                             return;
                         }
                         if (ShowMessageFX.YesNo(null, psFormName, "Do you want to open preview of this Promo?") == true) {
@@ -691,6 +696,11 @@ public class PromoMaintenanceListController implements Initializable, ScreenInte
                     }
                     if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
                         if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
+                            poAppController.openTransaction(poAppController.getMaster().getPromoID());
+                            reloadTableModel();
+                            getLoadedTransaction();
+                            pnEditMode = poAppController.getEditMode();
+                            initButtonDisplay(poAppController.getEditMode());
                             return;
                         }
                         if (ShowMessageFX.YesNo(null, psFormName, "Do you want to open preview of this Promo?") == true) {

@@ -539,6 +539,11 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
                     }
                     if (ShowMessageFX.YesNo(null, psFormName, "Do you want to confirm transaction?") == true) {
                         if (!isJSONSuccess(poAppController.CloseTransaction(), "Initialize Close Transaction")) {
+                            poAppController.openTransaction(poAppController.getMaster().getPromoID());
+                            reloadTableModel();
+                            getLoadedTransaction();
+                            pnEditMode = poAppController.getEditMode();
+                            initButtonDisplay(poAppController.getEditMode());
                             return;
                         }
                         if (ShowMessageFX.YesNo(null, psFormName, "Do you want to open preview of this Promo?") == true) {
@@ -1484,7 +1489,7 @@ public class PromoMaintenanceEntryController implements Initializable, ScreenInt
         initButtonControls(!lbEditing && lbHasTransaction, "btnUpdate", "btnVoid", "btnPreview", "btnDuplicate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbIsApproved, "btnUpdate");
         initButtonControls(!lbEditing && lbHasTransaction && !lbRestrictedStatus, "btnUpdate");
-        initButtonControls(!lbEditing && lbHasTransaction && !lbIsReplaced, "btnVoid"); 
+        initButtonControls(!lbEditing && lbHasTransaction && !lbIsReplaced, "btnVoid");
 
         // Disable panes during editing
         apMaster.setDisable(!lbEditing);
