@@ -588,9 +588,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void loadRecordMaster() {
-        Platform.runLater(() -> {
-            lblStatus.setText(poController.getStatus(poController.Master().getRecordStatus()).toUpperCase());
-        });
+
+        JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
         tfValidityID.setText(poController.Master().getValidityId());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
@@ -611,7 +610,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     private void loadRecordDetail() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-                setToNull();
                 return;
             }
 
@@ -770,6 +768,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.adjustColumnForScrollbar(tblViewPriceHistory);
     }
 
+    private String getData(Object value) {
+        return value == null ? "" : value.toString().trim();
+    }
+
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -805,11 +807,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 item = new TreeItem<>(
                                         new ModelVehiclePriceList_Detail(
                                                 lsRowNo,
-                                                String.valueOf(poController.Detail(lnCtr).Brand().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).Model().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariantInsurance().getTransmission()),
+                                                getData(poController.Detail(lnCtr).Brand().getDescription()),
+                                                getData(poController.Detail(lnCtr).Model().getDescription()),
+                                                getData(poController.Detail(lnCtr).ModelVariant().getDescription()),
+                                                getData(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
+                                                getData(poController.Detail(lnCtr).ModelVariantInsurance().getTransmission()),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
                                                 (poController.Detail(lnCtr).getRecordStatus() ? "Active" : "Inactive"),
                                                 String.valueOf(lnCtr + 1)
@@ -990,10 +992,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnRemake, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster);
+        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         if (fnValue != EditMode.READY) {
