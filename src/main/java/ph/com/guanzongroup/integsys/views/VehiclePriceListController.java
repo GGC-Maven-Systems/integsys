@@ -622,6 +622,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     private void loadRecordMaster() {
+        String lsStat = "Void";
+        if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
+            lsStat = "Cancel";
+        }
+        btnVoid.setText(lsStat);
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
         tfValidityID.setText(poController.Master().getValidityId());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
