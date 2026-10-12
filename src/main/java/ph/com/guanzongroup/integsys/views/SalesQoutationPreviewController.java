@@ -398,8 +398,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         case SalesQoutationStatic.LOST:
                         case SalesQoutationStatic.SALES:
                         case SalesQoutationStatic.VOID:
-                            CustomCommonUtil.setVisible(true,  btnPrint, btnExport, btnClose);
-                            CustomCommonUtil.setManaged(true,  btnPrint, btnExport, btnClose);
+                        case SalesQoutationVersionStatic.SUPERCEDED:
+                            CustomCommonUtil.setVisible(true,  btnPrint, btnExport, btnFollowUp,btnClose);
+                            CustomCommonUtil.setManaged(true,  btnPrint, btnExport, btnFollowUp,btnClose);
                             break;
                         case SalesQoutationStatic.CONFIRMED:
                             CustomCommonUtil.setVisible(true, btnCreateFrom, btnVoid, btnLost, btnFollowUp, btnPrint, btnExport, btnClose);
@@ -1406,9 +1407,8 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             return;
                         }
                         ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                        clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
-                        pnMCRow = -1;
-                        pnGawayRow = -1;
                         initButton(pnEditMode);
 
                         LoadRecord();
@@ -1427,7 +1427,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
 
@@ -1446,7 +1446,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
 
@@ -1558,7 +1558,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(Reload, true);
+                        poJSON = oSalesController.SalesQoutation().openRecord(Reload);
                         pnEditMode = EditMode.READY;
                         initButton(pnEditMode);
                         LoadRecord();

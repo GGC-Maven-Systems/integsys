@@ -1350,6 +1350,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
+                        ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                         break;
                     case "btnExport":
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -1364,6 +1365,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
                         break;
                     case "btnLost":
+                        if (!ShowMessageFX.YesNo("Are you sure you want to tagged this as Lost this record?", pxeModuleName, null)) {
+                            return;
+                        }
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Lost is only available during view mode.");
                             return;
@@ -1374,7 +1378,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
 
@@ -1383,6 +1387,9 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         loadTableGawayItem();
                         break;
                     case "btnVoid":
+                        if (!ShowMessageFX.YesNo("Are you sure you want to void this record?", pxeModuleName, null)) {
+                            return;
+                        }
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Void is only available during view mode.");
                             return;
@@ -1393,7 +1400,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             return;
                         }
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
 
@@ -1409,22 +1416,27 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         oSalesController.SalesQoutation().Version().setWithParent(false);
                         try {
                             poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                            ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                                return;
+                            }
+                            ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
                         } finally {
                             // Version normally runs under SalesQoutation's transaction; leaving it false makes the next Create From / Save begin a nested transaction
                             oSalesController.SalesQoutation().Version().setWithParent(true);
                         }
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
-                            return;
-                        }
+
 //                        poJSON = oSalesController.SalesQoutation().confirmRecord("");
 //                        if ("error".equals((String) poJSON.get("result"))) {
 //                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
 //                            return;
 //                        }
 
-                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+
+
+                        poJSON = oSalesController.SalesQoutation().openRecord(oSalesController.SalesQoutation().getModel().getTransactionNo());
+//                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
                         clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
@@ -1498,6 +1510,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         loadTableGawayItem();
                         break;
                     case "btnSave":
+                        String Reload = oSalesController.SalesQoutation().getModel().getTransactionNo();
                         poJSON = oSalesController.SalesQoutation().saveRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
@@ -1505,11 +1518,10 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         }
 
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        pnEditMode = oSalesController.SalesQoutation().getEditMode();
+                        poJSON = oSalesController.SalesQoutation().openRecord(Reload);
+                        pnEditMode = EditMode.READY;
                         initButton(pnEditMode);
-
                         LoadRecord();
-                        btnNew.fire();
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.YesNo("Do you really want to cancel this record? \nAny data collected will not be kept.", pxeModuleName, null)) {

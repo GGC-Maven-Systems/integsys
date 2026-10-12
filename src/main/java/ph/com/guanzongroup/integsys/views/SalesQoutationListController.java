@@ -12,16 +12,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -43,6 +34,8 @@ import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.SalesQoutation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
+import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
+import ph.com.guanzongroup.cas.sales.status.SalesQoutationVersionStatic;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.IOException;
@@ -75,6 +68,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
     private static final double MODAL_WIDTH_PX = 0;
     private static final double MODAL_HEIGHT_PX = 900;
 
+    private String fbStatusType = "";
     private int pnEditMode;
     private GRiderCAS oApp;
     private SalesControllers oSalesController;
@@ -111,6 +105,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
     @FXML private Button btnPrint;
     @FXML private Button btnExport;
     @FXML private Button btnFollowUp;
+    @FXML private ComboBox cmbStatus;
 
     @FXML private TextField tfSearchTransNo;
     @FXML private TextField tfSearchCustomer;
@@ -163,13 +158,13 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
             oSalesController = new SalesControllers(oApp, logwrapr);
             oSalesController.SalesQoutation().initialize();
             oSalesController.SalesQoutation().setWithUI(true);
-
+            cmbStatus.setItems(SalesQoutationStatic.STATUS_TYPE_DESCRIPTION);
+            fbStatusType = SalesQoutationStatic.OPEN;
+            initComboBoxField();
             initButtons();
             initSearchFields();
             initTreeTable();
-
             initPagination();
-
             Platform.runLater(() -> {
                 oSalesController.SalesQoutation().getModel().setIndustryCode(psIndustryId);
                 oSalesController.SalesQoutation().getModel().setCategoryCode(psCategoryId);
@@ -198,18 +193,35 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
     }
 
     private void initSearchFields() {
-        // ENTER inside a search field retrieves the list using the typed filters
-        // (set editable="true" on these fields in the FXML so they can be typed in)
+        // ENTER retrieves the list using the typed filters
+        // Lost focus also retrieves the list
         for (TextField loField : new TextField[]{tfSearchTransNo, tfSearchCustomer}) {
+
             loField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
                 if (event.getCode() == KeyCode.ENTER) {
                     retrieveQuotations();
                     event.consume();
                 }
             });
+
+            loField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue) {
+                    retrieveQuotations();
+                }
+            });
         }
     }
+    private void initComboBoxField() {
+        cmbStatus.setItems(SalesQoutationStatic.STATUS_TYPE_DESCRIPTION);
+        cmbStatus.getSelectionModel().selectFirst();
 
+        cmbStatus.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.intValue() < 0) return;
+
+            fbStatusType = SalesQoutationStatic.STATUS_TYPE_CODE[newValue.intValue()];
+            retrieveQuotations();
+        });
+    }
     // ------------------------------------------------------------------
     // tree table
     // ------------------------------------------------------------------
@@ -309,7 +321,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
         try {
             paQuotations = oSalesController.SalesQoutation().getQuotationList(
                     psIndustryId, psCategoryId,
-                    tfSearchTransNo.getText(), tfSearchCustomer.getText(), "");
+                    tfSearchTransNo.getText(), tfSearchCustomer.getText(), fbStatusType);
 
             int lnPages = Math.max(1, (int) Math.ceil(paQuotations.size() / (double) ROWS_PER_PAGE));
             pagination.setPageCount(lnPages);

@@ -130,7 +130,7 @@
                                     <Font size="11.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnApproved" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approved">
+                              <Button fx:id="btnApproved" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Confirm">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>

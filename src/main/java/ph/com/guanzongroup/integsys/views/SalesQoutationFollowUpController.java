@@ -149,7 +149,11 @@ public class SalesQoutationFollowUpController implements Initializable {
             // Superseded / older versions cannot be followed up, but their history can still be viewed
             boolean lbViewOnly = !poController.isLatestVersion()
                     || SalesQoutationVersionStatic.SUPERCEDED.equals(
-                    poController.Version().Master().getTransactionStatus());
+                    poController.Version().Master().getTransactionStatus())
+                    || (!SalesQoutationVersionStatic.OPEN.equals(
+                    poController.Version().Master().getTransactionStatus())
+                    && !SalesQoutationVersionStatic.CONFIRMED.equals(
+                    poController.Version().Master().getTransactionStatus()));
 
             if (!lbViewOnly) {
                 // new follow-up entry only for the latest, active version
