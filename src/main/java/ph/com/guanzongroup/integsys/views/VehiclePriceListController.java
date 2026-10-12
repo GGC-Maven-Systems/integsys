@@ -991,8 +991,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnRemake, btnSearch);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnRemake);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
