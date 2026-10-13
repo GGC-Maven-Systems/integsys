@@ -855,7 +855,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                 case UP:
                     CommonUtils.SetPreviousFocus(txtField);
             }
-        } catch (GuanzonException | SQLException | CloneNotSupportedException ex) {
+        } catch (Exception  ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }

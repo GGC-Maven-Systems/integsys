@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="apMainAnchor" minWidth="1377.0" prefHeight="789.0" prefWidth="1468.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane id="AnchorPane" fx:id="apMainAnchor" minWidth="1377.0" prefHeight="789.0" prefWidth="1468.0" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -410,7 +410,7 @@
                                           </AnchorPane>
                                        </content>
                                     </Tab>
-                                  <Tab closable="false" style="-fx-font-weight: bold;" text="Requirements">
+                                  <Tab closable="false" disable="true" style="-fx-font-weight: bold;" text="Requirements">
                                        <content>
                                           <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                              <children>

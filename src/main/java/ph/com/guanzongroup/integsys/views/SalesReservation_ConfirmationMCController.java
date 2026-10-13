@@ -503,6 +503,8 @@ public class SalesReservation_ConfirmationMCController implements Initializable,
         } catch (ExceptionInInitializerError | NullPointerException | SQLException | GuanzonException | CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_ConfirmationCarController.class
                     .getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_ConfirmationMCController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

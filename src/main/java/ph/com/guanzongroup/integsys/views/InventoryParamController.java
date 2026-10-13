@@ -417,7 +417,7 @@ public class InventoryParamController implements Initializable, ScreenInterface 
                         return;
                     }
 
-                    if (!isJSONSuccess(poAppController.saveRecord(), "Initialize Save Record")) {
+                    if (!isJSONSuccess(poAppController.SaveRecord(), "Initialize Save Record")) {
                         return;
                     }
                     getLoadedRecord();

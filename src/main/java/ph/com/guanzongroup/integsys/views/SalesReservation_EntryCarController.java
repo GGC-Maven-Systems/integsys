@@ -496,6 +496,8 @@ public class SalesReservation_EntryCarController implements Initializable, Scree
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_EntryCarController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_EntryCarController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
