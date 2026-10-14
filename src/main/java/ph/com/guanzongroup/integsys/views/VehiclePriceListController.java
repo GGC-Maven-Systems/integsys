@@ -275,6 +275,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 poController.AddDetail();
                                 loadTableDetail.reload();
+                                loadTablePriceHistory.reload();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
@@ -517,6 +518,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                         poController.Detail(pnDetail).setVariantId("");
                                         poController.Detail(pnDetail).setSRPAmount(0.00);
                                         loadTableDetail.reload();
+                                        loadTablePriceHistory.reload();
                                     } else {
                                         return;
                                     }
@@ -542,6 +544,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                         poController.Detail(pnDetail).setVariantId("");
                                         poController.Detail(pnDetail).setSRPAmount(0.00);
                                         loadTableDetail.reload();
+                                        loadTablePriceHistory.reload();
                                     } else {
                                         return;
                                     }
@@ -663,6 +666,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 poController.Detail(pnDetail).setModelId("");
                                 poController.Detail(pnDetail).setVariantId("");
                                 poController.Detail(pnDetail).setSRPAmount(0.00);
+                                loadTablePriceHistory.reload();
                             }
                         }
                         break;
@@ -691,12 +695,14 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             poController.Detail(pnDetail).setModelId("");
                             poController.Detail(pnDetail).setVariantId("");
                             poController.Detail(pnDetail).setSRPAmount(0.00);
+                            loadTablePriceHistory.reload();
                         }
                         break;
                     case "tfVariant":
                         if (lsValue.isEmpty()) {
                             poController.Detail(pnDetail).setVariantId("");
                         }
+                        loadTablePriceHistory.reload();
                         break;
                     case "tfBaseSRP":
                         lsValue = JFXUtil.removeComma(lsValue);
