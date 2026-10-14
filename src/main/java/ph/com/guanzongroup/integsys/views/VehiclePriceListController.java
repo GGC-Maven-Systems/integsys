@@ -567,6 +567,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             } else {
                                 JFXUtil.textFieldMoveNext(tfBaseSRP);
                             }
+                            loadTablePriceHistory.reload();
                             break;
                     }
                     JFXUtil.runWithDelay(.5, () -> {
@@ -623,6 +624,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     if (!details_data.isEmpty()) {
                         pnDetail = lnDetailIndex;
                         loadRecordDetail();
+                        loadTablePriceHistory.reload();
                     }
                     break;
             }
@@ -771,17 +773,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             lblTotalVariants.setText(String.valueOf(poController.getTotalVariant()));
             lblTotalColors.setText(String.valueOf(poController.getTotalColor()));
         } catch (GuanzonException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    private void setToNull() {
-        try {
-            poController.Detail(pnDetail).ModelVariantInsurance().setVehicleType(null);
-            poController.Detail(pnDetail).ModelVariantInsurance().setBodyType(null);
-            poController.Detail(pnDetail).ModelVariantInsurance().setTransmission(null);
-        } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -952,6 +943,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 {poController.Detail(pnDetail).Model().getDescription(), tfModel},
                 {poController.Detail(pnDetail).ModelVariant().Color().getDescription(), tfColor},
                 {poController.Detail(pnDetail).getSRPAmount(), tfBaseSRP},}, tfBaseSRP); // default
+            loadTablePriceHistory.reload();
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1048,7 +1040,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                     currentParent.getChildren().add(item);
                                 }
 
-                                //store agein as a prepared and then will dynamically added in details_data
                                 if (!poController.Detail(lnCtr).getRecordStatus()) {
                                     JFXUtil.highlightByKey(tblViewDetail, String.valueOf(poController.Detail(lnCtr).getVariantId()), "#FAA0A0", highlightedRowsMain);
                                 }
@@ -1094,7 +1085,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         int lnCtr = 0;
                         pricehistory_data.clear();
                         plOrderNoPartial.clear();
-//                        try {
                         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                             return;
                         }
@@ -1133,10 +1123,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             tblViewPriceHistory.getFocusModel().focus(pnPriceHistory);
                             loadRecordPriceHistory();
                         }
-//                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        }
                     }
                     );
                 }
