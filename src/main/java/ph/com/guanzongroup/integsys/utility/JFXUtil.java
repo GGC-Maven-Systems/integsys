@@ -326,123 +326,108 @@ public class JFXUtil {
             }
         }
     }
-    
-    
-/* Dynamic Highlighter for TreeTableView */
 
-public static <T> void highlightByKey(
-        TreeTableView<T> table,
-        String key,
-        String color,
-        Map<String, List<String>> highlightMap) {
+    /* Dynamic Highlighter for TreeTableView */
+    public static <T> void highlightByKey(
+            TreeTableView<T> table,
+            String key,
+            String color,
+            Map<String, List<String>> highlightMap) {
 
-    List<String> colors = highlightMap.computeIfAbsent(
-            key, k -> new ArrayList<String>());
+        List<String> colors = highlightMap.computeIfAbsent(
+                key, k -> new ArrayList<String>());
 
-    if (!colors.contains(color)) {
-        colors.add(color);
+        if (!colors.contains(color)) {
+            colors.add(color);
+            table.refresh();
+        }
+    }
+
+    /* Disable highlight for a particular key */
+    public static <T> void disableHighlightByKey(TreeTableView<T> table, String key, Map<String, List<String>> highlightMap) {
+        highlightMap.remove(key);
         table.refresh();
     }
-}
 
-/* Disable highlight for a particular key */
-public static <T> void disableHighlightByKey(
-        TreeTableView<T> table,
-        String key,
-        Map<String, List<String>> highlightMap) {
+    /* Disable all highlights */
+    public static <T> void disableAllHighlight(TreeTableView<T> table, Map<String, List<String>> highlightMap) {
+        highlightMap.clear();
+        table.refresh();
+    }
 
-    highlightMap.remove(key);
-    table.refresh();
-}
+    /* Disable highlights by color */
+    public static <T> void disableAllHighlightByColor(TreeTableView<T> table, String color, Map<String, List<String>> highlightMap) {
+        highlightMap.forEach((key, colors)
+                -> colors.removeIf(c -> c.equals(color)));
+        highlightMap.entrySet().removeIf(
+                entry -> entry.getValue().isEmpty());
+        table.refresh();
+    }
 
-/* Disable all highlights */
-public static <T> void disableAllHighlight(
-        TreeTableView<T> table,
-        Map<String, List<String>> highlightMap) {
+    /* Apply row highlighting; call once during initialization */
+    public static <T> void applyRowHighlighting(
+            final TreeTableView<T> treeTableView,
+            final Function<T, String> keyExtractor,
+            final Map<String, List<String>> highlightMap) {
 
-    highlightMap.clear();
-    table.refresh();
-}
+        treeTableView.setRowFactory(
+                tv -> new TreeTableRow<T>() {
+            @Override
+            protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
 
-/* Disable highlights by color */
-public static <T> void disableAllHighlightByColor(
-        TreeTableView<T> table,
-        String color,
-        Map<String, List<String>> highlightMap) {
+                if (empty || item == null) {
+                    setStyle("");
+                    return;
+                }
 
-    highlightMap.forEach((key, colors) ->
-            colors.removeIf(c -> c.equals(color)));
+                String key = keyExtractor.apply(item);
+                List<String> colors = highlightMap.get(key);
 
-    highlightMap.entrySet().removeIf(
-            entry -> entry.getValue().isEmpty());
-
-    table.refresh();
-}
-
-/* Apply row highlighting; call once during initialization */
-public static <T> void applyRowHighlighting(
-        final TreeTableView<T> treeTableView,
-        final Function<T, String> keyExtractor,
-        final Map<String, List<String>> highlightMap) {
-
-    treeTableView.setRowFactory(
-            tv -> new TreeTableRow<T>() {
-        @Override
-        protected void updateItem(T item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty || item == null) {
-                setStyle("");
-                return;
+                if (colors != null && !colors.isEmpty()) {
+                    setStyle("-fx-background-color: "
+                            + colors.get(colors.size() - 1) + ";");
+                } else {
+                    setStyle("");
+                }
             }
+        });
+    }
 
-            String key = keyExtractor.apply(item);
-            List<String> colors = highlightMap.get(key);
+    /* Retain final highlights and remove temporary highlights */
+    public static void showRetainedHighlight(
+            boolean isRetained,
+            TreeTableView<?> tblView,
+            String color,
+            List<Pair<String, String>> plPartial,
+            List<Pair<String, String>> plFinal,
+            Map<String, List<String>> highlightedRows,
+            boolean resetpartial) {
 
-            if (colors != null && !colors.isEmpty()) {
-                setStyle("-fx-background-color: "
-                        + colors.get(colors.size() - 1) + ";");
-            } else {
-                setStyle("");
+        if (isRetained) {
+            plFinal.removeIf(finalPair
+                    -> plPartial.stream().anyMatch(partialPair
+                            -> partialPair.getKey().equals(finalPair.getKey())));
+
+            for (Pair<String, String> pair : plPartial) {
+                if (!"0".equals(pair.getValue())) {
+                    plFinal.add(new Pair<>(pair.getKey(), pair.getValue()));
+                }
             }
         }
-    });
-}
 
-/* Retain final highlights and remove temporary highlights */
-public static void showRetainedHighlight(
-        boolean isRetained,
-        TreeTableView<?> tblView,
-        String color,
-        List<Pair<String, String>> plPartial,
-        List<Pair<String, String>> plFinal,
-        Map<String, List<String>> highlightedRows,
-        boolean resetpartial) {
+        if (resetpartial) {
+            disableAllHighlightByColor(tblView, color, highlightedRows);
+            plPartial.clear();
+        }
 
-    if (isRetained) {
-        plFinal.removeIf(finalPair ->
-                plPartial.stream().anyMatch(partialPair ->
-                        partialPair.getKey().equals(finalPair.getKey())));
-
-        for (Pair<String, String> pair : plPartial) {
+        for (Pair<String, String> pair : plFinal) {
             if (!"0".equals(pair.getValue())) {
-                plFinal.add(new Pair<>(pair.getKey(), pair.getValue()));
+                highlightByKey(
+                        tblView, pair.getKey(), color, highlightedRows);
             }
         }
     }
-
-    if (resetpartial) {
-        disableAllHighlightByColor(tblView, color, highlightedRows);
-        plPartial.clear();
-    }
-
-    for (Pair<String, String> pair : plFinal) {
-        if (!"0".equals(pair.getValue())) {
-            highlightByKey(
-                    tblView, pair.getKey(), color, highlightedRows);
-        }
-    }
-}
 
 
     /* Experimental function unused*/
