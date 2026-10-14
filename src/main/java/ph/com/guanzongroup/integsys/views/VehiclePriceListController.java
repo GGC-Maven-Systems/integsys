@@ -1189,8 +1189,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     public void initPriceHistoryGrid() {
-        JFXUtil.setColumnCenter(tblUpdatedBy, tblDateUpdated, tblPriceStatus);
-        JFXUtil.setColumnLeft(tblEffectiveFrom, tblEffectiveTo);
+        JFXUtil.setColumnCenter(tblDateUpdated, tblPriceStatus,tblEffectiveFrom, tblEffectiveTo);
+        JFXUtil.setColumnLeft(tblUpdatedBy );
         JFXUtil.setColumnRight(tblPrice);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewPriceHistory);
         tblViewPriceHistory.setItems(pricehistory_data);

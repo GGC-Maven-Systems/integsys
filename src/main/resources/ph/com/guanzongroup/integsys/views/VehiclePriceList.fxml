@@ -412,16 +412,22 @@
                                                    <top>
                                                       <GridPane BorderPane.alignment="CENTER">
                                                          <columnConstraints>
-                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="80.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="5.0" />
+                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="127.0" minWidth="-Infinity" prefWidth="90.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="5.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="806.0" />
                                                          </columnConstraints>
                                                          <rowConstraints>
                                                             <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="35.0" vgrow="SOMETIMES" />
                                                          </rowConstraints>
                                                          <children>
-                                                         <Button fx:id="btnExpandAll" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="25.0" styleClass="button_process_v4" text="Expand All" />
-                                                                              <Button fx:id="btnCollapseAll" layoutX="38.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="25.0" styleClass="button_process_v4" text="Collapse All" GridPane.columnIndex="2" />
+                                                         <Button fx:id="btnExpandAll" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="25.0" styleClass="button_process_v4" text="Expand All">
+                                                               <graphic>
+                                                                  <FontAwesomeIconView glyphName="ANGLE_DOUBLE_UP" size="16" />
+                                                               </graphic></Button>
+                                                                              <Button fx:id="btnCollapseAll" contentDisplay="RIGHT" layoutX="38.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="25.0" styleClass="button_process_v4" text="Collapse All" GridPane.columnIndex="2">
+                                                               <graphic>
+                                                                  <FontAwesomeIconView glyphName="ANGLE_DOUBLE_DOWN" size="16" />
+                                                               </graphic></Button>
                                                                           </children>
                                                       </GridPane>
                                                    </top>
@@ -539,7 +545,7 @@
                                                    <children>
                                                       <TableView fx:id="tblViewPriceHistory" GridPane.columnSpan="2" GridPane.rowIndex="1">
                                                          <columns>
-                                                            <TableColumn fx:id="tblPrice" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Price" />
+                                                            <TableColumn fx:id="tblPrice" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Price" />
                                                             <TableColumn fx:id="tblEffectiveFrom" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Effective From" />
                                                             <TableColumn fx:id="tblEffectiveTo" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Effective To" />
                                                             <TableColumn fx:id="tblPriceStatus" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Status" />
