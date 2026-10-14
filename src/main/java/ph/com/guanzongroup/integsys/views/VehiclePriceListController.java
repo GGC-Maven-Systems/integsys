@@ -56,9 +56,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -105,7 +107,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     JFXUtil.ReloadableTableTask loadTableDetail, loadTablePriceHistory;
     ObservableList<String> comboboxliststatus = FXCollections.observableArrayList("OPEN", "APPROVED", "CANCELLED", "VOID");
     ObservableList<String> pricelistyears = FXCollections.observableArrayList();
-    TreeItem<ModelVehiclePriceList_Detail> root = new TreeItem<>(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", "",""));
+    TreeItem<ModelVehiclePriceList_Detail> root = new TreeItem<>(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", "", ""));
     JFXUtil.StageManager stageDescription = new JFXUtil.StageManager();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail, apPriceHistory;
@@ -125,7 +127,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     private CheckBox cbActive;
     @FXML
     private TreeTableView tblViewDetail;
-    
+
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML
     private TreeTableColumn tblRowNo, tblBrand, tblModel, tblVariant, tblColor, tblTransmission, tblBaseSRP, tblDetailStatus;
@@ -354,20 +356,20 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         break;
                     case "btnRemake":
                         String lsStatus = "void";
-                        if(ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())){
+                        if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
                             lsStatus = "cancel";
                         }
                         if (ShowMessageFX.YesNo(null, pxeModuleName,
                                 "Are you sure you want to remake this transaction?"
-//                                + "\nPlease note that the current transaction will be "+lsStatus+"."
-                            ) == false) {
+                        //                                + "\nPlease note that the current transaction will be "+lsStatus+"."
+                        ) == false) {
                             return;
                         }
-                        
+
                         if (ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())
-                            || ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
+                                || ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
                             if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                    "Do you want to "+lsStatus+" the current transaction?") == true) {
+                                    "Do you want to " + lsStatus + " the current transaction?") == true) {
                                 if (ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())) {
                                     poJSON = poController.VoidTransaction();
                                 } else {
@@ -381,7 +383,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 }
                             }
                         }
-                        
+
                         poJSON = poController.remake(poController.Master().getValidityId());
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -389,11 +391,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         }
                         pnEditMode = poController.getEditMode();
                         break;
-                    case "btnCopyBasePriceToAllColors":
-                        break;
                     case "btnAddVehicleDescription":
                         openParameter(false, "");
-                        break;
+                        return;
                     case "btnExpandAll":
                         pbIsExpanded = true;
                         expandAll();
@@ -477,7 +477,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         try {
             stageDescription.setOnHidden(event -> {
                 stageDescription = null;
-                loadRecordMaster();
             });
             stageDescription.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Description Dialog", true, false, false);
         } catch (IOException ex) {
@@ -559,7 +558,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             break;
                         case "tfVariant":
                             poJSON = poController.SearchModelVariant(lsValue, false, pnDetail);
-                            if(!JFXUtil.isObjectEqualTo(poJSON.get("row"), null, "")){
+                            if (!JFXUtil.isObjectEqualTo(poJSON.get("row"), null, "")) {
                                 pnDetail = (Integer) poJSON.get("row");
                             }
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -589,29 +588,48 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
-        @Override
-        protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
-            int newIndex = 0;
-            switch (currentTableID) {
+
+    private void tableKeyEvents(KeyEvent event) {
+        Object source = event.getSource();
+
+        boolean moveDown = event.getCode() == KeyCode.TAB || event.getCode() == KeyCode.DOWN;
+        boolean moveUp = event.getCode() == KeyCode.UP;
+        if (!(moveDown || moveUp)) {
+            return;
+        }
+        if (source instanceof TreeTableView<?>) {
+            TreeTableView<?> currentTree = (TreeTableView<?>) source;
+            // TreeTableView focus model returns TreeTablePosition, not TablePosition
+            TreeTablePosition<?, ?> focusedCell = currentTree.getFocusModel().getFocusedCell();
+            if (focusedCell == null) {
+                return;
+            }
+            switch (currentTree.getId()) {
                 case "tblViewDetail":
-                    newIndex = !isMovedDown ? JFXUtil.moveToPreviousRow(currentTable)
-                            : JFXUtil.moveToNextRow(currentTable);
+                    int newIndex = moveDown
+                            ? JFXUtil.moveToNextRow(currentTree)
+                            : JFXUtil.moveToPreviousRow(currentTree);
+
                     TreeItem<ModelVehiclePriceList_Detail> selected = tblViewDetail.getTreeItem(newIndex);
-
-                    if (selected != null) {
-                        ModelVehiclePriceList_Detail model = selected.getValue();
-                        int lnDetailIndex = Integer.parseInt(model.getIndex09()) - 1; // back to 0-based
-                        if (!details_data.isEmpty()) {
-                            pnDetail = lnDetailIndex;
-                            loadRecordDetail();
-                        }
+                    if (selected == null) {
+                        return;
                     }
-
+                    ModelVehiclePriceList_Detail model = selected.getValue();
+                    if (model == null || model.getIndex09() == null) {
+                        return; // e.g. root or grouping node with no data
+                    }
+                    int lnDetailIndex = Integer.parseInt(model.getIndex09()) - 1; // back to 0-based
+                    if (!details_data.isEmpty()) {
+                        pnDetail = lnDetailIndex;
+                        loadRecordDetail();
+                    }
                     break;
             }
+            event.consume();
+
         }
-    };
+    }
+
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -638,6 +656,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                         return;
                                     }
                                 }
+                                poController.Detail(pnDetail).setBrandId("");
+                                poController.Detail(pnDetail).setModelId("");
+                                poController.Detail(pnDetail).setVariantId("");
+                                poController.Detail(pnDetail).setSRPAmount(0.00);
                             }
                         }
                         break;
@@ -663,6 +685,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                     }
                                 }
                             }
+                            poController.Detail(pnDetail).setModelId("");
+                            poController.Detail(pnDetail).setVariantId("");
+                            poController.Detail(pnDetail).setSRPAmount(0.00);
                         }
                         break;
                     case "tfVariant":
@@ -734,14 +759,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
                 lsStat = "Cancel";
             }
-            
-            boolean lbStat = pnEditMode == EditMode.UPDATE;
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-                JFXUtil.setDisabled(lbStat, tfBrand, tfModel, tfVariant);
-            } else {
-                lbStat = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
-                JFXUtil.setDisabled(lbStat && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getVariantId(), null, "") , tfBrand, tfModel, tfVariant);
-            }
 
             btnVoid.setText(lsStat);
             JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
@@ -774,6 +791,13 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
+            boolean lbStat = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
+            if (lbStat) {
+                JFXUtil.setDisabled(lbStat && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getVariantId(), null, ""), tfBrand, tfModel, tfVariant);
+            } else {
+                JFXUtil.setDisabled(!lbShow1, tfBrand, tfModel, tfVariant);
+            }
 
             if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getVariantId(), null, "")) {
                 tfVehicleType.setText("");
@@ -784,7 +808,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                 tfBodyType.setText(poController.Detail(pnDetail).ModelVariantInsurance().getBodyType());
                 tfTransmission.setText(poController.Detail(pnDetail).ModelVariantInsurance().getTransmission());
             }
-            
+
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
             tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
@@ -949,7 +973,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail, apPriceHistory);
         JFXUtil.setCommaFormatter(tfBaseSRP);
-        JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail, tblViewPriceHistory);
+        JFXUtil.setKeyEventFilter(this::tableKeyEvents, tblViewDetail, tblViewPriceHistory);
         JFXUtil.adjustColumnForScrollbar(tblViewPriceHistory);
     }
 
@@ -1009,7 +1033,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                                 getData(poController.Detail(lnCtr).getVariantId())
                                         )
                                 );
-                                details_data.add(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", "",""));
+                                details_data.add(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", "", ""));
 
                                 if (lbNewParent) {
                                     currentParent = item;
@@ -1022,12 +1046,12 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 } else {
                                     currentParent.getChildren().add(item);
                                 }
-                                
+
                                 //store agein as a prepared and then will dynamically added in details_data
                                 if (!poController.Detail(lnCtr).getRecordStatus()) {
                                     JFXUtil.highlightByKey(tblViewDetail, String.valueOf(poController.Detail(lnCtr).getVariantId()), "#FAA0A0", highlightedRowsMain);
                                 }
-                                
+
                             }
                             tblViewDetail.setRoot(root);
                             tblViewDetail.setShowRoot(false);
@@ -1041,13 +1065,11 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                     tblViewDetail.getSelectionModel().select(0);
                                     tblViewDetail.getFocusModel().focus(0);
                                     pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
-                                    loadRecordDetail();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
                                 tblViewDetail.getSelectionModel().select(lnRow);
                                 tblViewDetail.getFocusModel().focus(lnRow);
-                                loadRecordDetail();
                             }
                             loadRecordDetail();
                             loadRecordMaster();
@@ -1080,7 +1102,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                                 JSONObject obj = (JSONObject) requestObj;
                                 pricehistory_data.add(
                                         new ModelVehiclePriceHistory(
-                                                !JFXUtil.isObjectEqualTo(obj.get("nSRPAmntx"), "", null) ? CustomCommonUtil.setIntegerValueToDecimalFormat(obj.get("nSRPAmntx").toString(), true) : "",
+                                                !JFXUtil.isObjectEqualTo(obj.get("nSRPAmntx"), "", null) ? CustomCommonUtil.setIntegerValueToDecimalFormat(obj.get("nSRPAmntx").toString(), false) : "",
                                                 obj.get("dFromDate") != null ? obj.get("dFromDate").toString() : "",
                                                 obj.get("dThruDate") != null ? obj.get("dThruDate").toString() : "",
                                                 !JFXUtil.isObjectEqualTo(obj.get("cRecdStat"), "", null) ? obj.get("cRecdStat").toString() : "",
@@ -1238,7 +1260,10 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnRemake);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
+        JFXUtil.setDisabled(!lbShow1, apMaster);
+
+        JFXUtil.setDisabled(!lbShow1, tfBrand, tfModel, tfVariant, tfBaseSRP, cbActive);
+
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         JFXUtil.setButtonsVisibility(false, btnPrint);
