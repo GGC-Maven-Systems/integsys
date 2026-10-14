@@ -84,6 +84,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
     private static final int GAWAY_EMPTY_ROWS = 1;
     private int pnMCRow = -1;
     private static final int MC_ITEMS_EMPTY_ROWS = 1;
+    private boolean pbSyncingMCCombos = false;
     // =========================================================================
     // Table Data
     // =========================================================================
@@ -496,6 +497,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             oSalesController.SalesQoutation().Version().Master().setPaymentForm(fbPaymentType);
             if (!lbTerm) {
                 oSalesController.SalesQoutation().Version().Master().setTermId("");
+                tfPaymentTerms.setText("");
             }
         });
 
@@ -505,6 +507,11 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             fbInsurance = SalesQoutationStatic.INSURANCE_CODE[newValue.intValue()];
             boolean isYes = SalesQoutationStatic.InsuranceType.YES.equals(fbInsurance);
             tfMCItemInsuranceAmt.setEditable(isYes);
+            if (!isYes) {
+                poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setInsuranceAmount(0.0);
+                tfMCItemInsuranceAmt.setText("0.0");
+                loadTableMCItem();
+            }
         });
 
         cmbRegistration.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
@@ -513,6 +520,11 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             fbRegistration = SalesQoutationStatic.REGISTRATION_CODE[newValue.intValue()];
             boolean isYes = SalesQoutationStatic.Registration.YES.equals(fbRegistration);
             tfMCItemRegisAmt.setEditable(isYes);
+            if (!isYes) {
+                poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setRegistrationAmount(0.0);
+                tfMCItemRegisAmt.setText("0.0");
+                loadTableMCItem();
+            }
         });
 
         cmbPaymentVAT.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
@@ -532,14 +544,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             boolean lbDisable = lsStockID == null || lsStockID.isEmpty()
                     || (lsPromoCode != null && !lsPromoCode.isEmpty());
 
-            tfMCItemPromo.setDisable(lbDisable);
-            tfMCItemRegisAmt.setDisable(lbDisable);
-            tfMCItemInsuranceAmt.setDisable(lbDisable);
             tfMCItemDiscount.setDisable(lbDisable);
             tfMCItemAddDiscount.setDisable(lbDisable);
             tfMCItemFreight.setDisable(lbDisable);
-            cmbInsurance.setDisable(lbDisable);
-            cmbRegistration.setDisable(lbDisable);
         }
     }
     // =========================================================================
@@ -1675,7 +1682,26 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
                         }
                         break;
+                    case "tfMCItemPromo":
+                        if (pnMCRow < 0) break;
+                        try {
+                            if (tfMCItemPromo.getText().trim().isEmpty()) {
+                                String lsPromo = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode();
+                                if (lsPromo == null || lsPromo.isEmpty()) break;   // row has no promo: keep manually typed discounts
+                                poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setPromoCode(null);
+                                poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setDiscount(0.0);
+                                poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setAdditionalDiscount(0.0);
+                                tfMCItemDiscount.setText("0.0");
+                                tfMCItemAddDiscount.setText("0.0");
+                                loadTableMCItem();
+                                return;
+                            }
+                            tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode());
 
+                        } catch (Exception e) {
+                            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
+                        }
+                        break;
                     case "tfMCItemQuantity":
                         if (pnMCRow < 0) break;
                         try {
@@ -2018,10 +2044,17 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
         tfMCItemPromo.clear();
 
         // the constants are codes, not combo indexes, so look the index up in the code arrays
-        cmbRegistration.getSelectionModel().select(
-                Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.EMPTY));
-        cmbInsurance.getSelectionModel().select(
-                Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.EMPTY));
+        pbSyncingMCCombos = true;
+        try {
+            cmbRegistration.getSelectionModel().select(
+                    Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.EMPTY));
+            cmbInsurance.getSelectionModel().select(
+                    Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.EMPTY));
+        } finally {
+            pbSyncingMCCombos = false;
+        }
+        tfMCItemRegisAmt.setEditable(false);
+        tfMCItemInsuranceAmt.setEditable(false);
         updateMCComboState();
 
     }
@@ -2046,13 +2079,20 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             tfMCItemPromo.setText(loDet.getPromoCode());
             tfMCItemAddDiscount.setText(safe(loDet::getAdditionalDiscount));
 
-            if (loDet.getRegistrationAmount() > 0) {
-                cmbRegistration.getSelectionModel().select(
-                        Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.YES));
-            }
-            if (loDet.getInsuranceAmount() > 0) {
-                cmbInsurance.getSelectionModel().select(
-                        Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.YES));
+            pbSyncingMCCombos = true;
+            try {
+                boolean lbReg = loDet.getRegistrationAmount() > 0;
+                boolean lbIns = loDet.getInsuranceAmount() > 0;
+
+                cmbRegistration.getSelectionModel().select(Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE)
+                        .indexOf(lbReg ? SalesQoutationStatic.Registration.YES : SalesQoutationStatic.Registration.EMPTY));
+                cmbInsurance.getSelectionModel().select(Arrays.asList(SalesQoutationStatic.INSURANCE_CODE)
+                        .indexOf(lbIns ? SalesQoutationStatic.InsuranceType.YES : SalesQoutationStatic.InsuranceType.EMPTY));
+
+                tfMCItemRegisAmt.setEditable(lbReg);
+                tfMCItemInsuranceAmt.setEditable(lbIns);
+            } finally {
+                pbSyncingMCCombos = false;
             }
         } catch (Exception e) {
             Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, e);
@@ -2142,33 +2182,61 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             for (int lnCtr = 0; lnCtr < loVersion.getDetailCount(); lnCtr++) {
                 Model_Sales_Quotation_Version_Detail loRow = loVersion.Detail(lnCtr);
                 if (loRow.getStockId() == null || loRow.getStockId().isEmpty()) continue;   // blank row
-
-                int lnQty        = parseInt(safe(loRow::getQuantity));
-                double lnPrice   = parseDouble(safe(loRow::getUnitPrice));
-                double lnDiscAmt = lnPrice * parseDouble(safe(loRow::getDiscount)) / 100.0;   // per unit, same as computeMasterTotals()
+                int lnQty = parseInt(safe(loRow::getQuantity));
+                double lnPrice = parseDouble(safe(loRow::getUnitPrice));
+                double lnDiscount = parseDouble(safe(loRow::getDiscount));
                 double lnAddDisc = parseDouble(safe(loRow::getAdditionalDiscount));
                 double lnFreight = parseDouble(safe(loRow::getFreight));
-                double lnReg     = parseDouble(safe(loRow::getRegistrationAmount));
-                double lnIns     = parseDouble(safe(loRow::getInsuranceAmount));
+                double lnReg = parseDouble(safe(loRow::getRegistrationAmount));
+                double lnIns = parseDouble(safe(loRow::getInsuranceAmount));
 
-                // every line is per-unit x qty
-                double lnSrpTotal   = lnPrice * lnQty;
-                double lnDiscTotal  = lnDiscAmt * lnQty;
-                double lnAddTotal   = lnAddDisc * lnQty;
+// ============================================
+// GROSS SALES AND DISCOUNTS
+// ============================================
+                double lnSrpTotal = lnPrice * lnQty;
+
+// Percentage discount
+                double lnDiscTotal = lnSrpTotal * (lnDiscount / 100.0);
+
+// Additional discount (fixed amount per unit)
+                double lnAddTotal = lnAddDisc * lnQty;
+
+// Net sales after discounts
+                double lnNetSales = lnSrpTotal - lnDiscTotal - lnAddTotal;
+
+                if (lnNetSales < 0) {
+                    lnNetSales = 0;
+                }
+
+// ============================================
+// ADDITIONAL CHARGES
+// ============================================
                 double lnFrghtTotal = lnFreight * lnQty;
-                double lnRegTotal   = lnReg * lnQty;
-                double lnInsTotal   = lnIns * lnQty;
-                double lnAmount     = lnSrpTotal - lnDiscTotal - lnAddTotal + lnFrghtTotal + lnRegTotal + lnInsTotal;
+                double lnRegTotal = lnReg * lnQty;
+                double lnInsTotal = lnIns * lnQty;
+
+// Final item amount before VAT extraction
+                double lnAmount = lnNetSales
+                        + lnFrghtTotal
+                        + lnRegTotal
+                        + lnInsTotal;
 
                 lnNo++;
                 lsItems.append(lnNo).append("  ").append(loRow.Inventory().getDescription())
                         .append("  x").append(lnQty).append("\n");
                 lsItems.append(summaryLine("SRP", String.format("%,.2f", lnSrpTotal)));
-                if (lnDiscAmt > 0) lsItems.append(summaryLine("Discount", "-" + String.format("%,.2f", lnDiscTotal)));
+                if (lnDiscount > 0) lsItems.append(summaryLine("Discount", "-" + String.format("%,.2f", lnDiscTotal)));
                 if (lnAddDisc > 0) lsItems.append(summaryLine("Add'l Discount", "-" + String.format("%,.2f", lnAddTotal)));
                 if (lnFreight > 0) lsItems.append(summaryLine("Freight", String.format("%,.2f", lnFrghtTotal)));
-                lsItems.append(summaryLine("Registration", lnReg > 0 ? String.format("%,.2f", lnRegTotal) : "Free"));
-                lsItems.append(summaryLine("Insurance", lnIns > 0 ? String.format("%,.2f", lnInsTotal) : "Free"));
+                if (lnReg > 0) {
+                    lsItems.append(summaryLine("Registration",
+                            String.format("%,.2f", lnRegTotal)));
+                }
+
+                if (lnIns > 0) {
+                    lsItems.append(summaryLine("Insurance",
+                            String.format("%,.2f", lnInsTotal)));
+                }
                 lsItems.append(summaryLine("Amount", String.format("%,.2f", lnAmount)));
                 lsItems.append("\n");
             }
@@ -2178,16 +2246,18 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             double lnVat         = parseDouble(safe(() -> loVersion.Master().getVatAmount()));
             double lnTotal       = parseDouble(safe(() -> loVersion.Master().getTransactionTotal()));
 
+
             taSummaryItem.setText(lsItems.toString().trim());
             taSummaryItem.positionCaret(0);
             resizeSummaryItems();
 
-            tfSummarySubTotal.setText(String.format("%,.2f", lnVatSales + lnNonVatSales));
+            tfSummarySubTotal.setText(
+                    String.format("%,.2f", lnVatSales + lnNonVatSales));
             tfSummaryVat.setText(String.format("%,.2f", lnVat));
             tfSummaryVatEx.setText(String.format("%,.2f", lnNonVatSales));
             tfSummaryTotal.setText(String.format("%,.2f", lnTotal));
         } catch (Exception ex) {
-            Logger.getLogger(SalesQoutationPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
