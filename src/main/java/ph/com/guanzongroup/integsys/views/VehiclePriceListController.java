@@ -417,6 +417,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 //                }
                 loadRecordDetail();
                 loadTableDetail.reload();
+                loadTablePriceHistory.reload();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -997,7 +998,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                             for (TreeItem<ModelVehiclePriceList_Detail> parent : root.getChildren()) {
                                 poExpandedState.put(parent.getValue().getIndex04(), parent.isExpanded()); // use the getter that returns the Variant description
                             }
-
+                            details_data.clear();
                             root.getChildren().clear();
                             tblViewDetail.setRoot(null);
                             TreeItem<ModelVehiclePriceList_Detail> currentParent = null;
@@ -1094,6 +1095,9 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         pricehistory_data.clear();
                         plOrderNoPartial.clear();
 //                        try {
+                        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                            return;
+                        }
                         JSONObject loJSON = poController.loadVariantPriceList(pnDetail);
                         JSONArray loJSONArray = (JSONArray) loJSON.get("data");
                         if (loJSONArray != null && !loJSONArray.isEmpty()) {
@@ -1189,8 +1193,8 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
     }
 
     public void initPriceHistoryGrid() {
-        JFXUtil.setColumnCenter(tblDateUpdated, tblPriceStatus,tblEffectiveFrom, tblEffectiveTo);
-        JFXUtil.setColumnLeft(tblUpdatedBy );
+        JFXUtil.setColumnCenter(tblDateUpdated, tblPriceStatus, tblEffectiveFrom, tblEffectiveTo);
+        JFXUtil.setColumnLeft(tblUpdatedBy);
         JFXUtil.setColumnRight(tblPrice);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewPriceHistory);
         tblViewPriceHistory.setItems(pricehistory_data);
@@ -1198,7 +1202,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 
     public void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apDetail);
+        JFXUtil.clearTextFields(apMaster, apDetail, apPriceHistory);
     }
 
     public void loadRecordSearch() {
