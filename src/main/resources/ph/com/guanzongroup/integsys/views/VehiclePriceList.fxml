@@ -549,7 +549,7 @@
                                                             <TableColumn fx:id="tblEffectiveFrom" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Effective From" />
                                                             <TableColumn fx:id="tblEffectiveTo" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Effective To" />
                                                             <TableColumn fx:id="tblPriceStatus" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Status" />
-                                                            <TableColumn fx:id="tblUpdatedBy" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Updated By" />
+                                                            <TableColumn fx:id="tblUpdatedBy" maxWidth="160.0" minWidth="160.0" prefWidth="160.0" text="Updated By" />
                                                             <TableColumn fx:id="tblDateUpdated" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" text="Date Updated" />
                                                          </columns>
                                                       </TableView>
