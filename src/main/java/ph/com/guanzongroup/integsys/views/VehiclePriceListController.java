@@ -1073,6 +1073,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                         int lnCtr = 0;
                         pricehistory_data.clear();
                         plOrderNoPartial.clear();
+                        JFXUtil.clearTextFields(apPriceHistory);
                         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                             return;
                         }
