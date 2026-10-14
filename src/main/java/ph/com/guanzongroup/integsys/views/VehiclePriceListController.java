@@ -739,23 +739,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
         }
     }
 
-    EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
-            (cmbId, selectedIndex, selectedValue) -> {
-                switch (cmbId) {
-                    case "cmbSearchPriceListYear":
-                        //reload for filter
-                        break;
-                    case "cmbSearchStatus":
-                        //reload for filter
-                        break;
-                }
-            });
-
-    private void loadRecordBrowse() {
-        cmbSearchPriceListYear.getSelectionModel().clearSelection();
-        cmbSearchStatus.getSelectionModel().clearSelection();
-    }
-
     private void loadRecordMaster() {
         try {
             String lsStat = "Void";
@@ -957,7 +940,6 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
             pricelistyears.add(String.valueOf(year));
         }
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(pricelistyears, cmbSearchPriceListYear), new JFXUtil.Pairs<>(comboboxliststatus, cmbSearchStatus));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchPriceListYear, cmbSearchStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchPriceListYear, cmbSearchStatus);
         cmbSearchPriceListYear.getSelectionModel().select(1);
     }
