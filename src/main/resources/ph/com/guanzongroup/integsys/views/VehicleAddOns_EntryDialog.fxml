@@ -56,7 +56,7 @@
                                     <FontAwesomeIconView glyphName="CLOSE" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
-                              <Button fx:id="btnActivate" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approve">
+                              <Button fx:id="btnApprove" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approve">
                                  <graphic>
                                     <FontAwesomeIconView fx:id="faActivate" glyphName="CHECK" size="20" styleClass="FontIcon" />
                                  </graphic>
@@ -128,7 +128,7 @@
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                                        <TextField fx:id="tfStandardRateID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
+                                                        <TextField fx:id="tfValidityID" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" />
                                           <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                              <children>
                                                 <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="140.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -153,22 +153,22 @@
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="tfDuration21" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="5" />
-                                          <TextField fx:id="tfDuration22" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3" />
-                                          <DatePicker GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                          <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+                                          <TextField fx:id="tfAddOnType" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3" />
+                                          <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                           <Label layoutX="82.0" layoutY="54.0" text="To" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                              <font>
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                          <DatePicker layoutX="145.0" layoutY="49.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                          <TextField fx:id="tfDuration221" disable="true" layoutX="145.0" layoutY="77.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="4" />
+                                          <DatePicker fx:id="dpTo" layoutX="145.0" layoutY="49.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                                          <TextField fx:id="tfDescription" disable="true" layoutX="145.0" layoutY="77.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="4" />
                                           <Label layoutX="301.0" layoutY="138.0" text="SRP" GridPane.rowIndex="5">
                                              <font>
                                                 <Font size="12.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="tfDuration211" alignment="CENTER_RIGHT" disable="true" layoutX="349.0" layoutY="133.0" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                          <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" layoutX="349.0" layoutY="133.0" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                     </children>
                                     </GridPane>
                                             </children>
