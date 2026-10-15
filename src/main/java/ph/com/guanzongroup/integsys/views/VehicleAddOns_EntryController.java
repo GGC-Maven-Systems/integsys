@@ -340,7 +340,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                             return;
                         }
                         break;
-
+                    case "btnSearch":
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster);
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -385,9 +387,15 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 case F3:
                     switch (lsID) {
                         case "tfAddOnType":
-                            poController.SearchAddOnType("", false);
+                            poJSON = poController.SearchAddOnType("", false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                return;
+                            }
+                            poJSON = poController.populateVehicleList();
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                return;
                             }
                             loadTableDetail.reload();
                             break;
@@ -395,11 +403,11 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     break;
                 case UP:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(true, true)},});
+                        {new String[]{"tfAmount"}, (Runnable) () -> moveNext(true, true)},});
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfReservationAmount"}, (Runnable) () -> moveNext(false, true)},});
+                        {new String[]{"tfAmount"}, (Runnable) () -> moveNext(false, true)},});
                     break;
                 default:
                     break;
@@ -407,6 +415,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(VehicleAddOns_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -431,7 +441,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 switch (lsID) {
                     case "tfAddOnType":
                         if (lsValue.isEmpty()) {
-                            poController.Detail(pnDetail).setAddOnType("");
+                            poController.Master().setValidityDescription("");
                         }
                         loadRecordMaster();
                         break;
@@ -477,6 +487,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
+        tfAddOnType.setText(poController.Master().getValidityDescription());
     }
 
     private void loadRecordDetail() {
@@ -484,11 +495,10 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            tfAddOnType.setText(poController.Detail(pnDetail).getAddOnType());
             tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
             tfDescription.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
-//        cbActive.setSelected(poController.Detail(pnDetail).isActive());
+            cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), true));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -656,17 +666,17 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
-//                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.Detail(pnDetail).getReservationAmount(), tfReservationAmount},}, tfReservationAmount); // default
+        if (continueNext) {
+            apDetail.requestFocus();
+            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
+                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
+        }
+        loadRecordDetail();
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
+        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+            {poController.Detail(pnDetail).getAmount(), tfAmount},}, tfAmount); // default
     }
 
     public void initTextFields() {
@@ -676,7 +686,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.setCommaFormatter(tfAmount);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
-        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster);
     }
 
     public void initLoadTable() {
