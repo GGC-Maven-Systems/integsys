@@ -443,7 +443,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                             }
                             break;
                     }
-                } catch (SQLException | GuanzonException ex) {
+                } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
