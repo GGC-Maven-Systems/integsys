@@ -353,7 +353,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 //                    loadRecordDetail();
 //                    loadTableDetail.reload();
 //                }
-                loadRecordDetail();
                 loadTableDetail.reload();
                 initButton(pnEditMode);
             }
@@ -729,7 +728,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                 tblViewDetail.getFocusModel().focus(pnDetail);
                                 loadRecordDetail();
                             }
-                            loadRecordDetail();
+                            loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -749,8 +748,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail);
-        loadRecordDetail();
-        loadTableDetail.reload();
     }
 
     private void resetCheckboxSelection() {
