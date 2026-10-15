@@ -376,9 +376,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-//                if (tfReservationAmount.isFocused()) {
-                    pbEntered = true;
-//                }
+                    if (tfAmount.isFocused()) {
+                        pbEntered = true;
+                    }
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;
@@ -420,8 +420,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
-                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex02())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex02());
+                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -491,9 +491,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             }
             tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
             tfDescription.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
-            tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
+            tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
-            tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), true));
+            tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), false));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -662,8 +662,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     public void moveNext(boolean isUp, boolean continueNext) {
         if (continueNext) {
             apDetail.requestFocus();
-            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex02())
-                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex02());
+            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
+                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
         }
         loadRecordDetail();
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -721,6 +721,10 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
 
+    private String getData(String lsValue) {
+        return JFXUtil.isObjectEqualTo(lsValue, null, "") ? "" : lsValue;
+    }
+
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -730,6 +734,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     // Setting data to table detail
                     Platform.runLater(() -> {
                         int lnCtr;
+                        pbEntered = false;
                         details_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
@@ -737,12 +742,13 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                 details_data.add(
                                         new ModelVehicleAddOns_Detail(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
-                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
+                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription())),
+                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription())),
+                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription())),
+                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription())),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false))
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false)),
+                                                String.valueOf(lnCtr)
                                         ));
                             }
 
@@ -816,7 +822,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex02());
+                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                         pnDetail = lnRow;
                         loadRecordDetail();
                         moveNext(false, false);
@@ -827,17 +833,18 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleAddOns_Detail) item).getIndex01(), highlightedRowsMain);
     }
 
+
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, cbActiveAll);
+        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         if (fnValue != EditMode.READY) {
