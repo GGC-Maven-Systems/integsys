@@ -115,7 +115,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     @FXML
     private TableView tblViewDetail;
     @FXML
-    private TableColumn tblNo1, tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblAmount;
+    private TableColumn tblNo1, tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblAmount, tblStatus;
 
     LocalDate ValidFrom;
 
@@ -742,8 +742,17 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         }
                         break;
                     case "tfAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poController.Detail(lnCtr).setAmount(Double.parseDouble(lsValue));
+                        if (firstValue == null) {
+                            // First value found
+                            firstValue = currentValue;
+                        } else {
+                            // Compare with the first value
+                            if (!Objects.equals(firstValue, currentValue)) {
+                                isConsistent = false;
+                                ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously update with an inactive status included");
+                                return;
+                            }
+                        }
                         break;
                 }
             }
@@ -760,6 +769,14 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         poController.Detail(number).setRecordStatus(lbcb);
                     }
 
+                }
+            case "tfAmount":
+                if (isConsistent) {
+                    for (int i = 0; i < listCount.size(); i++) {
+                        int number = listCount.get(i);
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poController.Detail(number).setAmount(Double.parseDouble(lsValue));
+                    }
                 }
                 break;
         }
@@ -835,9 +852,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     }
 
     public void initDetailsGrid() {
-        JFXUtil.setColumnCenter(tblNo1, tblNo);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
-        JFXUtil.setColumnRight(tblAmount);
+        JFXUtil.setColumnCenter(tblNo1, tblNo, tblStatus);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
+        JFXUtil.setColumnRight(tblAmount, tblSRP);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
@@ -883,7 +900,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex10());
                         pnDetail = lnRow;
                         loadRecordDetail();
-                        moveNext(false, false);
+//                        moveNext(false, false);
                     }
                 }
             }
