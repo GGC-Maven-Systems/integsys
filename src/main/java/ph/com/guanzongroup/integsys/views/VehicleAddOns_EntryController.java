@@ -433,13 +433,19 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     };
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfAddOnType":
-                        if (lsValue.isEmpty()) {
-                            poController.Master().setValidityDescription("");
-                        }
-                        loadRecordMaster();
-                        break;
+                try {
+                    switch (lsID) {
+                        case "tfAddOnType":
+                            if (lsValue.isEmpty()) {
+                                poController.Master().setValidityDescription("");
+                                poController.populateVehicleList();
+                                loadTableDetail.reload();
+                            }
+                            break;
+                    }
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
 
