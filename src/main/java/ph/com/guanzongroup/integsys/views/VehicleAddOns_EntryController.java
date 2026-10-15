@@ -133,10 +133,10 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             }
             initLoadTable();
+            initDetailsGrid();
+            initCheckboxes();
             initTextFields();
             initDatepickers();
-            initCheckboxes();
-            initDetailsGrid();
             initTableOnClick();
             clearTextFields();
             loadRecordDetail();
