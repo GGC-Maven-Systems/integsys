@@ -304,7 +304,7 @@
                                                          </GridPane.margin>
                                                       </Label>
                                                                         <TextField fx:id="tfAddOnID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
-                                                                        <TextField fx:id="tfDescription" layoutX="558.0" layoutY="40.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                                        <TextField fx:id="tfDescription" disable="true" layoutX="558.0" layoutY="40.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
                                                                         <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" styleClass="DisabledTextField" GridPane.columnIndex="8" GridPane.rowIndex="2" />
                                                                         <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="11" GridPane.halignment="RIGHT" />
                                                                         <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="2" />
@@ -334,10 +334,11 @@
                                                                   <TableColumn fx:id="tblNo" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
                                                                   <TableColumn fx:id="tblBrand" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Brand" />
                                                                   <TableColumn fx:id="tblModel" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Model" />
-                                                                  <TableColumn fx:id="tblVariant" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
-                                                                  <TableColumn fx:id="tblColor" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
-                                                                  <TableColumn fx:id="tblSRP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                                  <TableColumn fx:id="tblAmount" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Amount" />
+                                                                  <TableColumn fx:id="tblVariant" maxWidth="180.0" minWidth="180.0" prefWidth="180.0" text="Variant" />
+                                                                  <TableColumn fx:id="tblColor" maxWidth="180.0" minWidth="180.0" prefWidth="180.0" text="Color" />
+                                                                  <TableColumn fx:id="tblSRP" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="SRP" />
+                                                                  <TableColumn fx:id="tblAmount" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="Amount" />
+                                                                  <TableColumn fx:id="tblStatus" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Status" />
                                                                </columns>
                                                             </TableView>
                                                          </children>

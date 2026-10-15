@@ -57,7 +57,7 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <DatePicker GridPane.columnIndex="2" />
+                                    <DatePicker fx:id="dpAsOf" GridPane.columnIndex="2" />
                                  </children>
                               </GridPane>
                            </children>
@@ -137,9 +137,6 @@
                                                 <TableColumn fx:id="tblVariant" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
                                                 <TableColumn fx:id="tblColor" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
                                                 <TableColumn fx:id="tblSRP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                <TableColumn fx:id="tblsamp" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="LTO" />
-                                                <TableColumn fx:id="tblsamp1" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Rustproof" />
-                                                <TableColumn fx:id="tblsamp11" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Permashine" />
                                              </columns>
                                           </TableView>
                                        </children>
