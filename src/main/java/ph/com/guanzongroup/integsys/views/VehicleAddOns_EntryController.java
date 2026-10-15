@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
@@ -420,8 +421,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
-                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
+                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex10())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10());
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -448,15 +449,20 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     case "tfDescription":
                         break;
                     case "tfAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setAmount(Double.parseDouble(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        poController.Detail(pnDetail).getAmount();
-                        if (pbEntered) {
-                            moveNext(false, true);
-                            pbEntered = false;
+                        if (isContainsChecked()) {
+                            processAction("tfAmount", CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(lsValue)));
+                            return;
+                        } else {
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setAmount(Double.parseDouble(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            poController.Detail(pnDetail).getAmount();
+                            if (pbEntered) {
+                                moveNext(false, true);
+                                pbEntered = false;
+                            }
                         }
                         break;
                 }
@@ -489,8 +495,14 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbisActive = poController.Detail(pnDetail).getRecordStatus();
+            JFXUtil.setDisabled(!lbisActive, tfAmount);
+
             tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
-            tfDescription.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
+            tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
+                    poController.Detail(pnDetail).ModelVariant().Model().getDescription(),
+                    poController.Detail(pnDetail).ModelVariant().getDescription(),
+                    poController.Detail(pnDetail).ModelVariant().Color().getDescription()));
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), false));
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getAmount().doubleValue(), false));
@@ -519,11 +531,15 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     loadTableDetail.reload();
                     break;
                 case "cbActive": // this is the id
-                    poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
-                    if (!JFXUtil.isJSONSuccess(poJSON)) {
-                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    if (isContainsChecked()) {
+                        processAction("cbActive", checkedBox.isSelected() ? "1" : "0");
+                    } else {
+                        poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        loadTableDetail.reload();
                     }
-                    loadTableDetail.reload();
                     break;
             }
         }
@@ -662,8 +678,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     public void moveNext(boolean isUp, boolean continueNext) {
         if (continueNext) {
             apDetail.requestFocus();
-            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
-                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
+            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex10())
+                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex10());
         }
         loadRecordDetail();
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -673,40 +689,81 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             {poController.Detail(pnDetail).getAmount(), tfAmount},}, tfAmount); // default
     }
 
-    private void processAction(String action) {
+    public boolean isContainsChecked() {
+        return checkedItem != null && checkedItem.contains("1");
+    }
+
+    private void processAction(String identifier, String lsValue) {
+        boolean lbcb = false;
         String lsMessage = "";
         lsMessage = "remove";
+        switch (identifier) {
+            case "cbActive":
+                lbcb = lsValue.equals("1");
+                lsMessage = "activate/deactivate";
+                break;
+            case "tfAmount":
+                lsMessage = "change amount of the";
+                break;
+        }
+
         if (checkedItem.stream().anyMatch("1"::equals)) {
         } else {
             ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + lsMessage + ".");
             return;
         }
-
         if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
             return;
         }
+        String firstValue = null;
+        boolean isConsistent = true;
         checkedItems.clear();
-        List<String> list = new ArrayList<>();
+        List<Integer> listCount = new ArrayList<>();
         for (Object item : tblViewDetail.getItems()) {
             ModelVehicleAddOns_Detail item1 = (ModelVehicleAddOns_Detail) item;
             String lschecked = item1.getIndex01();
-            int lnReference = Integer.valueOf(item1.getIndex07()) - 1;
+            int lnCtr = Integer.valueOf(item1.getIndex10());
             if (lschecked.equals("1")) {
-                list.add(item1.getIndex06());
-//                checkedItems.add(poController.CashFundLedgerList(lnReference));
+                listCount.add(Integer.parseInt(item1.getIndex10()));
+                String currentValue = item1.getIndex09();
+                // checkedItems.add();
+                switch (identifier) {
+                    case "cbActive":
+                        if (firstValue == null) {
+                            // First value found
+                            firstValue = currentValue;
+                        } else {
+                            // Compare with the first value
+                            if (!Objects.equals(firstValue, currentValue)) {
+                                isConsistent = false;
+                                ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously update different statuses");
+                                return;
+                            }
+                        }
+                        break;
+                    case "tfAmount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poController.Detail(lnCtr).setAmount(Double.parseDouble(lsValue));
+                        break;
+                }
             }
         }
         if (checkedItem.isEmpty()) {
             return;
         }
 
-//        switch (action) {
-//            case "btnRemoveLedger":
-//                    poController.RemovePettyCashLedger(checkedItems);
-//                break;
-//            default:
-//                break;
-//        }
+        switch (identifier) {
+            case "cbActive":
+                if (isConsistent) {
+                    for (int i = 0; i < listCount.size(); i++) {
+                        int number = listCount.get(i);
+                        poController.Detail(number).setRecordStatus(lbcb);
+                    }
+
+                }
+                break;
+        }
+
         resetCheckboxSelection();
         pnEditMode = poController.getEditMode();
         loadTableDetail.reload();
@@ -748,6 +805,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                                 getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription())),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false)),
+                                                poController.Detail(lnCtr).getRecordStatus() ? "Active" : "Inactive",
                                                 String.valueOf(lnCtr)
                                         ));
                             }
@@ -822,7 +880,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex10());
                         pnDetail = lnRow;
                         loadRecordDetail();
                         moveNext(false, false);
@@ -832,7 +890,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         });
         JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleAddOns_Detail) item).getIndex01(), highlightedRowsMain);
     }
-
 
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
