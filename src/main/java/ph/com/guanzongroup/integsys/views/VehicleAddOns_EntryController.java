@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
@@ -93,6 +95,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
 
+    BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
+    ArrayList<String> checkedItem = new ArrayList<>();
+    ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail, apDetail11;
@@ -130,10 +135,12 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             initLoadTable();
             initTextFields();
             initDatepickers();
+            initCheckboxes();
             initDetailsGrid();
             initTableOnClick();
             clearTextFields();
             loadRecordDetail();
+
             loadTableDetail.reload();
             pnEditMode = poController.getEditMode();
             poController.setWithUI(true);
@@ -382,7 +389,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
-                            loadRecordMaster();
+                            loadTableDetail.reload();
                             break;
                     }
                     break;
@@ -424,6 +431,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 switch (lsID) {
                     case "tfAddOnType":
                         if (lsValue.isEmpty()) {
+                            poController.Detail(pnDetail).setAddOnType("");
                         }
                         loadRecordMaster();
                         break;
@@ -469,7 +477,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
-//        tfAddOnType.setText(poController.Master().getAddOnType());
     }
 
     private void loadRecordDetail() {
@@ -477,6 +484,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            tfAddOnType.setText(poController.Detail(pnDetail).getAddOnType());
             tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
             tfDescription.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
@@ -496,6 +504,15 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
                 case "cbActiveAll": // this is the id
+                    //set to 1 all of column 2 row data value to enable checked
+                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
+                        if (checkedBox.isSelected()) {
+                            checkedItem.set(lnCtr, "1");
+                        } else {
+                            checkedItem.set(lnCtr, "0");
+                        }
+                    }
+                    loadTableDetail.reload();
                     break;
                 case "cbActive": // this is the id
                     poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
@@ -582,6 +599,29 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 }
             });
 
+    private void initCheckboxes() {
+        JFXUtil.addCheckboxColumns(ModelVehicleAddOns_Detail.class, tblViewDetail, disableRowCheckbox,
+                (row, rowIndex, colIndex, newVal) -> {
+                    boolean lbisTrue = newVal;
+                    switch (colIndex) {
+                        case 0:
+                            checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
+                            //set external temporary data of index to save as reference
+                            // if detected unchecked then must update
+                            pnDetail = rowIndex;
+                            Platform.runLater(() -> {
+                                loadTableDetail.reload();
+                                JFXUtil.runWithDelay(0.30, () -> {
+                                    if (lbisTrue) {
+                                        JFXUtil.selectAndFocusRow(tblViewDetail, rowIndex);
+                                    }
+                                });
+                            });
+                            break;
+                    }
+                }, 0);//starts 0,1,2 
+    }
+
     private void initDatepickers() {
         // DatePicker setup
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpValidFrom, dpTo);
@@ -652,8 +692,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         try {
 //                            poController.loadRecord(tfSearchBank.getText());
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                                checkedItems(lnCtr);
                                 details_data.add(
-                                        new ModelVehicleAddOns_Detail("",
+                                        new ModelVehicleAddOns_Detail(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
@@ -696,10 +737,28 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     }
 
     public void clearTextFields() {
+        resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail);
         loadRecordDetail();
         loadTableDetail.reload();
+    }
+
+    private void resetCheckboxSelection() {
+        cbActiveAll.setSelected(false);
+        if (!checkedItem.isEmpty()) {
+            checkedItem.clear();
+        }
+    }
+
+    private void checkedItems(int lnCtr) {
+        try {
+            if (checkedItem.get(lnCtr) == null) {
+                checkedItem.add("0");
+            }
+        } catch (Exception e) {
+            checkedItem.add("0");
+        }
     }
 
     public void loadRecordSearch() {
@@ -738,7 +797,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster);
+        JFXUtil.setDisabled(!lbShow1, apMaster, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         if (fnValue != EditMode.READY) {
