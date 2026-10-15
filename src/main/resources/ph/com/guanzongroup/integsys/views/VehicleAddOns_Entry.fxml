@@ -190,13 +190,13 @@
                     <center>
                         <AnchorPane BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="apTransactionInfo" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                             <children>
                                           <HBox fx:id="hboxid" prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                              <children>
                                                 <VBox maxWidth="1500.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                                          <AnchorPane fx:id="apMaster1" maxWidth="1261.0" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apMaster" maxWidth="1261.0" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -218,31 +218,31 @@
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                   <Label text="Validity ID">
+                                                                      <Label text="Validity ID">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                                          <Label layoutX="10.0" layoutY="44.0" text="Valid From" GridPane.rowIndex="2">
+                                                                        <Label layoutX="10.0" layoutY="44.0" text="Valid From" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                          <Label layoutX="91.0" layoutY="56.0" text="Add On Type" GridPane.columnIndex="6" GridPane.rowIndex="2">
+                                                                        <Label layoutX="91.0" layoutY="46.0" text="To" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                          <Label layoutX="91.0" layoutY="46.0" text="To" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                        <Label layoutX="91.0" layoutY="56.0" text="Add On Type" GridPane.columnIndex="6" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                          <TextField fx:id="tfValidityID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                          <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                          <TextField fx:id="tfValidityPeriod" promptText="Press F3: Search" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                                                          <DatePicker fx:id="dpTo" layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                                          <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="9">
+                                                                        <TextField fx:id="tfValidityID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
+                                                                        <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                        <DatePicker fx:id="dpTo" layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                                                                        <TextField fx:id="tfAddOnType" promptText="Press F3: Search" GridPane.columnIndex="8" GridPane.rowIndex="2" />
+                                                                        <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="9">
                                                          <children>
                                                                                 <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="13.0" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <font>
@@ -251,11 +251,11 @@
                                                             </Label>
                                                          </children>
                                                       </AnchorPane>
-                                                                      </children>
+                                                                    </children>
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="apMaster3" maxWidth="1261.0" style="-fx-border-color: FF8201;">
+                                          <AnchorPane fx:id="apDetail" maxWidth="1261.0" style="-fx-border-color: FF8201;">
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                    <columnConstraints>
@@ -279,17 +279,23 @@
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                   <Label text="Add On ID">
+                                                                        <Label text="Add On ID">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                            <Label layoutX="58.0" layoutY="17.0" text="Description" GridPane.rowIndex="2">
+                                                                        <Label layoutX="58.0" layoutY="17.0" text="Description" GridPane.rowIndex="2">
                                                          <font>
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                            <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="11">
+                                                                        <Label layoutX="526.0" layoutY="15.0" text="SRP" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                                                                        <Label text="Amount" GridPane.columnIndex="9" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                                        <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="11">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
@@ -297,18 +303,12 @@
                                                             <Insets right="25.0" />
                                                          </GridPane.margin>
                                                       </Label>
-                                                                            <Label text="Amount" GridPane.columnIndex="9" GridPane.rowIndex="2">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                            <Label layoutX="526.0" layoutY="15.0" text="SRP" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                                                            <TextField fx:id="tfFinancingID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" GridPane.columnIndex="2" />
-                                                                            <TextField fx:id="tfDescription" layoutX="558.0" layoutY="40.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
-                                                                            <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="11" GridPane.halignment="RIGHT" />
-                                                                            <TextField fx:id="tfReservationAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="2" />
-                                                                            <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                                                                        </children>
+                                                                        <TextField fx:id="tfAddOnID" disable="true" layoutX="154.0" layoutY="70.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" />
+                                                                        <TextField fx:id="tfDescription" layoutX="558.0" layoutY="40.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+                                                                        <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="2" />
+                                                                        <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" GridPane.columnIndex="11" GridPane.halignment="RIGHT" />
+                                                                        <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="584.0" layoutY="41.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                                                    </children>
                                                 </GridPane>
                                              </children>
                                           </AnchorPane>
@@ -328,7 +328,7 @@
                                                                <columns>
                                                                   <TableColumn fx:id="tblNo1" maxWidth="30.0" minWidth="30.0" prefWidth="30.0">
                                                                      <graphic>
-                                                                        <CheckBox fx:id="cbActive1" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" />
+                                                                        <CheckBox fx:id="cbActiveAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" selected="true" />
                                                                      </graphic>
                                                                   </TableColumn>
                                                                   <TableColumn fx:id="tblNo" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
@@ -337,7 +337,7 @@
                                                                   <TableColumn fx:id="tblVariant" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Variant" />
                                                                   <TableColumn fx:id="tblColor" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Color" />
                                                                   <TableColumn fx:id="tblSRP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="SRP" />
-                                                                  <TableColumn fx:id="tblReservationAmount" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Amount" />
+                                                                  <TableColumn fx:id="tblAmount" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Amount" />
                                                                </columns>
                                                             </TableView>
                                                          </children>
