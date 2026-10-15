@@ -289,6 +289,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                             return;
                         }
                         pnEditMode = poController.Master().getEditMode();
+                        poController.populateVehicleList();
                         break;
                     case "btnApprove":
                         poJSON = new JSONObject();
@@ -391,11 +392,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                 ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 return;
                             }
-                            poJSON = poController.populateVehicleList();
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                                return;
-                            }
+                            poController.populateVehicleList();
                             loadTableDetail.reload();
                             break;
                     }
@@ -425,8 +422,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
-                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
-                            : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
+                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex02())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex02());
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -678,6 +675,45 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             {poController.Detail(pnDetail).getAmount(), tfAmount},}, tfAmount); // default
     }
 
+    private void processAction(String action) {
+        String lsMessage = "";
+        lsMessage = "remove";
+        if (checkedItem.stream().anyMatch("1"::equals)) {
+        } else {
+            ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + lsMessage + ".");
+            return;
+        }
+
+        if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
+            return;
+        }
+        checkedItems.clear();
+        List<String> list = new ArrayList<>();
+        for (Object item : tblViewDetail.getItems()) {
+            ModelVehicleAddOns_Detail item1 = (ModelVehicleAddOns_Detail) item;
+            String lschecked = item1.getIndex01();
+            int lnReference = Integer.valueOf(item1.getIndex07()) - 1;
+            if (lschecked.equals("1")) {
+                list.add(item1.getIndex06());
+//                checkedItems.add(poController.CashFundLedgerList(lnReference));
+            }
+        }
+        if (checkedItem.isEmpty()) {
+            return;
+        }
+
+//        switch (action) {
+//            case "btnRemoveLedger":
+//                    poController.RemovePettyCashLedger(checkedItems);
+//                break;
+//            default:
+//                break;
+//        }
+        resetCheckboxSelection();
+        pnEditMode = poController.getEditMode();
+        loadTableDetail.reload();
+    }
+
     public void initTextFields() {
         JFXUtil.setFocusListener(txtMaster_Focus, apMaster);
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
@@ -698,7 +734,6 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         int lnCtr;
                         details_data.clear();
                         try {
-//                            poController.loadRecord(tfSearchBank.getText());
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 checkedItems(lnCtr);
                                 details_data.add(
@@ -742,6 +777,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
         JFXUtil.setColumnRight(tblAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
+        tblViewDetail.setItems(details_data);
     }
 
     public void clearTextFields() {
