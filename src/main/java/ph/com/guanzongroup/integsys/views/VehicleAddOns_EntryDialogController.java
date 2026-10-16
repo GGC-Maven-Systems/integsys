@@ -33,6 +33,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javax.script.ScriptException;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleAddOns;
@@ -59,15 +60,15 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     private String psAddOnTypeId = "";
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster;
     @FXML
-    private Label lblSource, lblStatus;
+    private Label lblStatus;
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnClose;
     @FXML
-    private TextField tfValidityID, tfAddOnType, tfAddOnID, tfDescription, tfSRP, tfAmount;
+    private TextField tfValidityID, tfAddOnType, tfDescription, tfSRP, tfAmount; //tfAddOnID
     @FXML
     private DatePicker dpValidFrom, dpTo;
     
@@ -90,10 +91,8 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
             clearTextFields();
             loadRecordDetail();
 
-            pnEditMode = poController.getEditMode();
-            poController.setWithUI(true);
-            initButton(pnEditMode);
             Platform.runLater(() -> {
+                poController.setWithUI(true);
                 poController.Master().setCompanyId(psCompanyId);
                 poController.setCompanyId(psCompanyId);
 //            poController.setIndustryId(psIndustryId);
@@ -105,7 +104,10 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                     return;
                 }
                 
-                pnDetail = poController.getDetailCount() -1;
+                pnDetail = poController.getRow(psVariantId, psAddOnTypeId);
+                loadRecordMaster();
+                pnEditMode = poController.getEditMode();
+                initButton(pnEditMode);
             });
 //            JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
@@ -151,18 +153,14 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnClose":
-                        unloadForm appUnload = new unloadForm();
-                        if (ShowMessageFX.OkayCancel(null, "Close Dialog", "Are you sure you want to close this dialog?") == true) {
-                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
-                        } else {
-                            return;
-                        }
+                        CommonUtils.closeStage(btnClose);
                         break;
                     case "btnNew":
                         //Clear data
-                        poController.Detail().clear();
+                        poController.InitTransaction();
+                        poController.setCompanyId(psCompanyId);
                         clearTextFields();
-
+                        
                         poJSON = poController.NewTransaction();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -174,7 +172,10 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                         poController.ReloadDetail();
                         poController.Detail(poController.getDetailCount() -1).setVariantId(psVariantId);
                         poController.Detail(poController.getDetailCount() -1).setAddOnType(psAddOnTypeId);
-                        pnDetail = poController.getDetailCount() -1;
+                        poController.Detail(poController.getDetailCount() -1).setSRPAmount(poController.Detail(poController.getDetailCount() -1).ModelVariant().getSellingPrice());
+                        poController.Master().setValidityDescription(poController.Detail(poController.getDetailCount() -1).AddOnType().getAddTypeName());
+                        
+                        pnDetail = poController.getRow(psVariantId, psAddOnTypeId);
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnUpdate":
@@ -218,6 +219,11 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                         //Validator
                         poJSON = new JSONObject();
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?") == true) {
+                            if(poController.Detail(pnDetail).getAmount() <= 0.0000){
+                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid add on amount.");
+                                return;
+                            }
+                            
                             poJSON = poController.SaveTransaction();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -302,7 +308,8 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-
+                
+                loadRecordMaster();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -325,6 +332,10 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                         }
                         break;
                 }
+                
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordMaster();
+                });
             });
 
     private void loadRecordMaster() {
@@ -344,6 +355,8 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
         tfAddOnType.setText(poController.Master().getValidityDescription());
+        
+        loadRecordDetail();
     }
 
     private void loadRecordDetail() {
@@ -354,7 +367,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
             boolean lbisActive = poController.Detail(pnDetail).getRecordStatus();
             JFXUtil.setDisabled(!lbisActive, tfAmount);
 
-            tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
+//            tfAddOnID.setText(poController.Detail(pnDetail).getAddOnId());
             tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().Model().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().getDescription(),
@@ -484,6 +497,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     }
 
     public void initTextFields() {
+        JFXUtil.setFocusListener(txtDetail_Focus, apMaster);
         JFXUtil.setCommaFormatter(tfAmount);
     }
 
@@ -492,16 +506,16 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     }
 
     public void clearTextFields() {
-        JFXUtil.clearTextFields(apMaster, apDetail);
+        JFXUtil.clearTextFields(apMaster);
     }
     
     public void loadRecordSearch() {
-        try {
-            lblSource.setText(poController.Master().Company().getCompanyName());
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
+//        try {
+//            lblSource.setText(poController.Master().Company().getCompanyName());
+//        } catch (SQLException | GuanzonException ex) {
+//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//        }
     }
 
     private void initButton(int fnValue) {
@@ -510,11 +524,11 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
-        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
-
-        JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
+        JFXUtil.setButtonsVisibility(false, btnBrowse);
+        JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         if (fnValue != EditMode.READY) {

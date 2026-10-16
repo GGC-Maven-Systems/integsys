@@ -456,6 +456,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         break;
                     case "tfAmount":
                         if (isContainsChecked()) {
+                            lsValue = JFXUtil.removeComma(lsValue);
                             processAction("tfAmount", CustomCommonUtil.setIntegerValueToDecimalFormat(Double.parseDouble(lsValue)));
                             return;
                         } else {
@@ -818,6 +819,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         details_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                                if(JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")){
+                                    continue;
+                                }
                                 checkedItems(lnCtr);
                                 details_data.add(
                                         new ModelVehicleAddOns_Detail(checkedItem.get(lnCtr),

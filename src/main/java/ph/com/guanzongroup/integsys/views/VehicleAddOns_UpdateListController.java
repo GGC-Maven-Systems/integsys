@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelVehicleAddOns_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
-import javafx.event.EventHandler;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TablePosition;
 import javafx.stage.Stage;
@@ -95,7 +95,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
     @FXML
     private TableView tblViewDetail;
     @FXML
-    private TableColumn tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP;
+    private TableColumn tblNo, tblBrand, tblModel, tblVariant, tblColor, tblSRP, tblsamp;
     LocalDate ValidFrom;
 
     /**
@@ -121,14 +121,11 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             poController.setWithUI(true);
             initButton(pnEditMode);
             Platform.runLater(() -> {
-//            psIndustryId = "";
-//            poController.setIndustryId(psIndustryId);
                 poController.Master().setCompanyId(psCompanyId);
-//            poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
+//            poController.setIndustryId(psIndustryId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-//            poController.setPurpose(PurchaseOrderReceivingStatus.Purpose.REPLACEMENT);
                 loadRecordSearch();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
@@ -176,43 +173,13 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                             return;
                         }
                         break;
-
-                    case "btnCancel":
-                        if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
-                            //Clear data
-                            poController.InitTransaction();
-                            poController.Master().setCompanyId(psCompanyId);
-                            pnEditMode = EditMode.UNKNOWN;
-                            break;
-                        } else {
-                            return;
-                        }
-                    case "btnHistory":
-                        if (pnEditMode != EditMode.READY && pnEditMode != EditMode.UPDATE) {
-                            ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
-                            return;
-                        }
-
-                        try {
-                            poController.ShowStatusHistory();
-                        } catch (NullPointerException npe) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error("No transaction status history to load!", pxeModuleName, null);
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
-                        }
-                        break;
-
                     case "btnBrowse":
-                        poController.Master().setRecordStatus("01234");
-                        poJSON = poController.SearchTransaction("", true);
+                        poController.Master().setRecordStatus("01");//retrieve open / approved only
+                        poJSON = poController.loadVehicleList();
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        pnEditMode = poController.Master().getEditMode();
-                        poController.populateVehicleList();
                         break;
                     case "btnPrint":
                         break;
@@ -221,15 +188,10 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         break;
                 }
 
-//                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
-//                } else {
-//                    loadRecordDetail();
-//                    loadTableDetail.reload();
-//                }
                 loadTableDetail.reload();
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException  ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -245,6 +207,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         controller1.setAddOnTypeId(lsAddOnTypeId);
         controller1.setVariantId(lsVariantId);
         controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
         controller = controller1;
 
         poJSON = new JSONObject();
@@ -314,7 +277,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         }
         return String.join(", ", array.get(row).get(column));
     }
-
+    
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -327,31 +290,47 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         pbEntered = false;
                         details_data.clear();
                         try {
-                            if (pnEditMode != EditMode.UNKNOWN) {
-                                reInitializeColumns();
-                            }
-                            for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                            reInitializeColumns();
+                            int lnDynamicColumnCount = 0;
+                            array.clear();
+                            for (lnCtr = 0; lnCtr < poController.getVehicleListCount(); lnCtr++) {
                                 details_data.add(
-                                        new ModelVehicleAddOns_Detail("",
+                                        new ModelVehicleAddOns_Detail(
                                                 String.valueOf(lnCtr + 1),
-                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription())),
-                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription())),
-                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription())),
-                                                getData(String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription())),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getSRPAmount(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getAmount(), false)),
-                                                String.valueOf(lnCtr)
+                                                getData(String.valueOf(poController.VehicleList(lnCtr).Model().Brand().getDescription())),
+                                                getData(String.valueOf(poController.VehicleList(lnCtr).Model().getDescription())),
+                                                getData(String.valueOf(poController.VehicleList(lnCtr).getDescription())),
+                                                getData(String.valueOf(poController.VehicleList(lnCtr).Color().getDescription())),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.VehicleList(lnCtr).getSellingPrice(), false)),
+                                                String.valueOf(lnCtr), //fixed column (this is not visible)
+                                                "",
+                                                "",
+                                                ""
                                         ));
                                 JSONArray loJSONArray = poController.loadUniqueAddOnTypeId(dpAsOf.getEditor().getText());
+                                lnDynamicColumnCount = loJSONArray.size();
                                 for (int lnRow = 0; lnRow < loJSONArray.size(); lnRow++) { //sample is it have size of 3
                                     JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
                                     String lsAddTypeId = (String) loJSONObject.get("sAddTypex");
-                                    getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(poController.Detail(lnCtr).getVariantId(),
+                                    getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(poController.VehicleList(lnCtr).getVariantId(),
                                             lsAddTypeId, dpAsOf.getEditor().getText()), false)));
                                 }
                             }
-
+                            
+                            //then re-add in here
+                            int lnCount = 6;
+                            for (lnCtr = 0; lnCtr < poController.getVehicleListCount(); lnCtr++) {
+                                if (JFXUtil.isObjectEqualTo(poController.VehicleList(lnCtr).getDescription(), null, "")) {
+                                    continue;
+                                }
+                                lnCount = 6;
+                                //well need to define the number of loJSONArray
+                                for (int lnMAcount = 0; lnMAcount < lnDynamicColumnCount; lnMAcount++) {
+                                    lnCount += 1;
+                                    details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
+                                }
+                            }
+                            
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -391,28 +370,23 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
 
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
-            try {
-                if (details_data.size() > 0) {
-                    if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                        ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
-                        if (selected != null) {
-                            int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
-                            pnDetail = lnRow - 1;
-                            TablePosition position = null;
-                            if (!tblViewDetail.getSelectionModel().getSelectedCells().isEmpty()) {
-                                position = (TablePosition) tblViewDetail.getSelectionModel().getSelectedCells().get(0);
-                            }
-                            if (position != null) {
-                                TableColumn column = (TableColumn) position.getTableColumn();
-                                openParameter(column.getId(), poController.Detail(pnDetail).ModelVariant().getVariantId());
+            if (details_data.size() > 0) {
+                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
+                    ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
+                        pnDetail = lnRow - 1;
+                        TablePosition position = null;
+                        if (!tblViewDetail.getSelectionModel().getSelectedCells().isEmpty()) {
+                            position = (TablePosition) tblViewDetail.getSelectionModel().getSelectedCells().get(0);
+                        }
+                        if (position != null) {
+                            TableColumn column = (TableColumn) position.getTableColumn();
+                            openParameter(column.getId(), poController.VehicleList(pnDetail).getVariantId());
 
-                            }
                         }
                     }
                 }
-            } catch (SQLException | GuanzonException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
             }
         });
     }
@@ -444,6 +418,24 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             tableView.getColumns().add(lnIndex, column);
         }
     }
+    
+    public static void disableTableColumnReordering(final TableView<?> tableView) {
+        Platform.runLater(() -> {
+            TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
+            if (header == null) {
+                return;
+            }
+            header.setReordering(false);
+            if (!header.reorderingProperty().isBound()) {
+                header.reorderingProperty().addListener(
+                        (obs, oldValue, newValue) -> {
+                            if (newValue) {
+                                header.setReordering(false);
+                            }
+                        });
+            }
+        });
+    }
 
     private void reInitializeColumns() {
         try {
@@ -451,7 +443,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             JSONArray laArray = poController.loadUniqueAddOnTypeId(dpAsOf.getEditor().getText());
             addColumnsAfterSixth(tblViewDetail, laArray);
             Platform.runLater(() -> {
-//                disableTableColumnReordering(tblViewDetail);
+                disableTableColumnReordering(tblViewDetail);
                 tblViewDetail.refresh();
             });
 
