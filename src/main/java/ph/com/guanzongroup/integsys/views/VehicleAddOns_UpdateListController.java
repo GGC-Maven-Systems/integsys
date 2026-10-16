@@ -177,7 +177,6 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         break;
                     case "btnRetrieve":
                         poController.Master().setRecordStatus("01");//retrieve open / approved only
-                        poController.Detail().clear();
                         poJSON = poController.loadVehicleList();
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
