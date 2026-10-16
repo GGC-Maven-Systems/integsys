@@ -11,7 +11,9 @@ import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TablePosition;
 import javafx.stage.Stage;
-import javax.script.ScriptException;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONArray;
 import ph.com.guanzongroup.cas.sales.VehicleAddOns;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
@@ -91,7 +93,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnBrowse, btnPrint, btnClose;
+    private Button btnRetrieve, btnPrint, btnClose;
     @FXML
     private TableView tblViewDetail;
     @FXML
@@ -173,8 +175,9 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                             return;
                         }
                         break;
-                    case "btnBrowse":
+                    case "btnRetrieve":
                         poController.Master().setRecordStatus("01");//retrieve open / approved only
+                        poController.Detail().clear();
                         poJSON = poController.loadVehicleList();
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -191,13 +194,17 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                 loadTableDetail.reload();
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException  ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
     private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+        if (lsAddOnTypeId.isEmpty()) {
+            ShowMessageFX.Warning(null, pxeModuleName, "Blank Add On Type Id, unable to display dialog!");
+            return;
+        }
         String lsFXML = "";
         Object controller = new Object();
         VehicleAddOns_EntryDialogController controller1 = new VehicleAddOns_EntryDialogController(); //Should differ the parameter calling
@@ -245,8 +252,16 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
     };
 
     private void initDatepickers() {
-        // DatePicker setup
-        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpAsOf);
+        try {
+            // DatePicker setup
+            JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpAsOf);
+            SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
+            String lsServerDate = sdfFormat.format(oApp.getServerDate());
+            LocalDate currentDate = LocalDate.parse(lsServerDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
+            dpAsOf.setValue(currentDate);
+        } catch (SQLException ex) {
+            Logger.getLogger(VehicleAddOns_UpdateListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void initTextFields() {
@@ -277,13 +292,12 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         }
         return String.join(", ", array.get(row).get(column));
     }
-    
+
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
                 details_data,
                 () -> {
-                    pbEntered = false;
                     // Setting data to table detail
                     Platform.runLater(() -> {
                         int lnCtr;
@@ -316,7 +330,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                                             lsAddTypeId, dpAsOf.getEditor().getText()), false)));
                                 }
                             }
-                            
+
                             //then re-add in here
                             int lnCount = 6;
                             for (lnCtr = 0; lnCtr < poController.getVehicleListCount(); lnCtr++) {
@@ -330,7 +344,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-                            
+
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -354,7 +368,8 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
 
     public void initDetailsGrid() {
         JFXUtil.setColumnCenter(tblNo);
-        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
+        JFXUtil.setColumnRight(tblSRP);
+        JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
@@ -370,20 +385,22 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
 
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
-            if (details_data.size() > 0) {
-                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
-                    if (selected != null) {
-                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
-                        pnDetail = lnRow - 1;
-                        TablePosition position = null;
-                        if (!tblViewDetail.getSelectionModel().getSelectedCells().isEmpty()) {
-                            position = (TablePosition) tblViewDetail.getSelectionModel().getSelectedCells().get(0);
-                        }
-                        if (position != null) {
+            if (details_data.size() > 0 && event.getClickCount() == 1) {
+                ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    TablePosition position = null;
+                    if (!tblViewDetail.getSelectionModel().getSelectedCells().isEmpty()) {
+                        position = (TablePosition) tblViewDetail.getSelectionModel().getSelectedCells().get(0);
+                    }
+                    if (position != null) {
+                        // Get clicked column index
+                        int lnColumnIndex = position.getColumn();
+                        // Only trigger for columns after the 6th column
+                        if (lnColumnIndex > 5) {
+                            int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex01());
+                            pnDetail = lnRow - 1;
                             TableColumn column = (TableColumn) position.getTableColumn();
                             openParameter(column.getId(), poController.VehicleList(pnDetail).getVariantId());
-
                         }
                     }
                 }
@@ -418,7 +435,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             tableView.getColumns().add(lnIndex, column);
         }
     }
-    
+
     public static void disableTableColumnReordering(final TableView<?> tableView) {
         Platform.runLater(() -> {
             TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
