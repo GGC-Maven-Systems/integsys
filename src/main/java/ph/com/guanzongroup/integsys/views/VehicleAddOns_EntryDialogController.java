@@ -58,6 +58,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     private String psCompanyId = "";
     private String psVariantId = "";
     private String psAddOnTypeId = "";
+    private String psAsOfDate = "";
 
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster;
@@ -98,7 +99,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
 //            poController.setIndustryId(psIndustryId);
 //            poController.setCategoryId(psCategoryId);
                 loadRecordSearch();
-                poJSON = poController.OpenAddOn(psVariantId, psAddOnTypeId);
+                poJSON = poController.OpenAddOn(psVariantId, psAddOnTypeId,psAsOfDate);
                 if ("error".equals((String) poJSON.get("result"))) {
                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                     return;
@@ -140,6 +141,9 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     }
     public void setAddOnTypeId(String fsValue) {
         psAddOnTypeId = fsValue;
+    }
+    public void setAsOfDate(String fsValue) {
+        psAsOfDate = fsValue;
     }
 
     @FXML
