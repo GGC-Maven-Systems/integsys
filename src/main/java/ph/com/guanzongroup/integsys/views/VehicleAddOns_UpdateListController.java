@@ -42,6 +42,7 @@ import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TablePosition;
 import javafx.stage.Stage;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -184,6 +185,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         }
                         break;
                     case "btnPrint":
+                        poController.printTransaction(dpAsOf.getEditor().getText().toString());
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -371,6 +373,50 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
+
+    }
+
+    private void enableCellHighlight(TableView<?> tableView) {
+        final String selectedStyle
+                = "-fx-border-color: #555555;"
+                + "-fx-border-width: 1.5px;"
+                + "-fx-border-style: solid;";
+
+        final TableCell<?, ?>[] selectedCell = {null};
+        for (int i = 0; i < tableView.getColumns().size(); i++) {
+            TableColumn column = tableView.getColumns().get(i);
+            column.setCellFactory(col -> new TableCell() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    setText(empty || item == null ? null : item.toString());
+                    setGraphic(null);
+
+                    if (selectedCell[0] == this) {
+                        setStyle(selectedStyle);
+                    } else {
+                        setStyle("");
+                    }
+                }
+
+                {
+                    setOnMouseClicked(event -> {
+                        if (isEmpty()) {
+                            return;
+                        }
+                        if (selectedCell[0] != null) {
+                            selectedCell[0].setStyle("");
+                        }
+                        selectedCell[0] = null;
+                        if (tableView.getVisibleLeafIndex(column) >= 6) {
+                            selectedCell[0] = this;
+                            setStyle(selectedStyle);
+                        }
+                    });
+                }
+            });
+        }
     }
 
     public void loadRecordSearch() {
@@ -467,6 +513,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
             JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
             tblViewDetail.setItems(details_data);
+            enableCellHighlight(tblViewDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
