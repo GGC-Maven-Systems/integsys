@@ -41,9 +41,12 @@ import java.util.List;
 import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.event.Event;
+import javafx.scene.Node;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
 import javafx.stage.Stage;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONArray;
@@ -185,7 +188,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         }
                         break;
                     case "btnPrint":
-                        if(poController.getVehicleListCount() <= 0){
+                        if (poController.getVehicleListCount() <= 0) {
                             ShowMessageFX.Warning(null, pxeModuleName, "No detail to be print.");
                         } else {
                             if (ShowMessageFX.OkayCancel(null, pxeModuleName,
@@ -437,9 +440,28 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         }
     }
 
+    private boolean isEmptyRowClicked(Event event) {
+        // Validate that the click is within an actual table row
+        Node node = (Node) event.getTarget();
+        while (node != null && !(node instanceof TableRow)) {
+            node = node.getParent();
+        }
+        if (node == null) {
+            return true; // Clicked outside an actual row
+        }
+        TableRow<?> row = (TableRow<?>) node;
+        if (row.isEmpty()) {
+            return true; // Clicked on an empty row
+        }
+        return false;
+    }
+
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0 && event.getClickCount() == 1) {
+                if (isEmptyRowClicked(event)) {
+                    return;
+                }
                 ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     TablePosition position = null;
