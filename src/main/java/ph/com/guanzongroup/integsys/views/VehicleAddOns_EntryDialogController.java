@@ -312,6 +312,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                         break;
                     case "btnDetailed":
                         openParameter(poController.Master().getValidityId());
+                        CommonUtils.closeStage(btnClose);
                         return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
