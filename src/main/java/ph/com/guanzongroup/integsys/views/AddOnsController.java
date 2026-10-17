@@ -184,16 +184,28 @@ public class AddOnsController implements Initializable, ScreenInterface {
                     case "btnSave":
                         //Validator
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the transaction?") == true) {
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to save the record?") == true) {
                             poJSON = poController.saveRecord();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 loadRecordMaster();
                                 return;
                             } else {
-                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-                                // Print Transaction Prompt
-                                poController.initialize();
+                                ShowMessageFX.Information(null, pxeModuleName,"Record saved successfully.");
+                                poJSON = poController.openRecord(poController.getModel().getAddTypeCode());
+                                if ("success".equals((String) poJSON.get("result"))) {
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate the record?") == false) {
+                                        pnEditMode = poController.getEditMode();
+                                        break;
+                                    }
+                                    poJSON = poController.ActivateRecord("");
+                                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                    } else {
+                                        ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                    }
+                                    poController.openRecord(poController.getModel().getAddTypeCode());
+                                }
                                 pnEditMode = poController.getEditMode();
                             }
                         } else {
