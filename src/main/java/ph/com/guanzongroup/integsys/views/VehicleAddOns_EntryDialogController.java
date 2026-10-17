@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
@@ -32,6 +33,7 @@ import org.json.simple.JSONObject;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
+import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -53,7 +55,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass(), "Vehicle Add On Dialog");
     static VehicleAddOns poController;
     public int pnEditMode;
-
+    JFXUtil.StageManager stageAddOn = new JFXUtil.StageManager();
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psVariantId = "";
@@ -67,7 +69,7 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnClose;
+    private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnClose, btnDetailed;
     @FXML
     private TextField tfValidityID, tfAddOnType, tfDescription, tfSRP, tfAmount; //tfAddOnID
     @FXML
@@ -308,6 +310,9 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
                             return;
                         }
                         break;
+                    case "btnDetailed":
+                        openParameter(poController.Master().getValidityId());
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -324,6 +329,41 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
+    
+    private void openParameter(String fsValidId) {
+        if (fsValidId == null || "".equals(fsValidId)) {
+            ShowMessageFX.Warning(null, pxeModuleName, "No valid id, unable to display dialog!");
+            return;
+        }
+        String lsFXML = "";
+        Object controller = new Object();
+        VehicleAddOns_EntryController controller1 = new VehicleAddOns_EntryController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleAddOns_Entry.fxml";
+
+        controller1.setGRider(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
+        controller1.setValidityID(fsValidId);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageAddOn != null) {
+            stageAddOn.closeDialog();
+            stageAddOn = new JFXUtil.StageManager();
+        } else {
+            stageAddOn = new JFXUtil.StageManager();
+        }
+        try {
+            stageAddOn.setOnHidden(event -> {
+                stageAddOn = null;
+            });
+            stageAddOn.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Add Ons Dialog", true, false, false);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
 
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -531,13 +571,16 @@ public class VehicleAddOns_EntryDialogController implements Initializable, Scree
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
-        JFXUtil.setButtonsVisibility(false, btnBrowse);
+        JFXUtil.setButtonsVisibility(false, btnBrowse, btnDetailed);
         JFXUtil.setDisabled(!lbShow1, apMaster);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
 
         if (fnValue != EditMode.READY) {
             return;
         }
+        
+        poJSON = poController.isSingleEntry();
+        JFXUtil.setButtonsVisibility(!"success".equals((String) poJSON.get("result")), btnDetailed);
         switch (poController.Master().getRecordStatus()) {
             case ValidityPeriodStatus.OPEN:
                 break;

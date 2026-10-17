@@ -66,6 +66,11 @@
                                     <FontAwesomeIconView fx:id="faActivate1" glyphName="TIMES" size="20" styleClass="FontIcon" />
                                  </graphic>
                               </Button>
+                              <Button fx:id="btnDetailed" contentDisplay="TOP" graphicTextGap="3.0" layoutX="470.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Detailed">
+                                 <graphic>
+                                    <FontAwesomeIconView fx:id="faActivate11" glyphName="LIST" size="20" styleClass="FontIcon" />
+                                 </graphic>
+                              </Button>
                               <Button fx:id="btnHistory" contentDisplay="TOP" graphicTextGap="3.0" layoutX="170.0" layoutY="23.0" maxHeight="70.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="BOOK" size="20" styleClass="FontIcon" />

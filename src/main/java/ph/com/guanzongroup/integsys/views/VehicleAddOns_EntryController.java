@@ -80,7 +80,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-    private String psSupplierId = "";
+    private String psValidityId = "";
     boolean lbresetpredicate = false;
     boolean pbEntered = false;
     boolean pbKeyPressed = false;
@@ -146,16 +146,18 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
             poController.setWithUI(true);
             initButton(pnEditMode);
             Platform.runLater(() -> {
-//            psIndustryId = "";
 //            poController.setIndustryId(psIndustryId);
                 poController.Master().setCompanyId(psCompanyId);
-//            poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
-//            poController.setPurpose(PurchaseOrderReceivingStatus.Purpose.REPLACEMENT);
                 loadRecordSearch();
-                btnNew.fire();
+                
+                if(psValidityId != null && !"".equals(psValidityId)){
+                    btnBrowse.fire();
+                } else {
+                    btnNew.fire();
+                }
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
@@ -184,6 +186,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
         psCategoryId = fsValue;
     }
 
+    public void setValidityID(String fsValue) {
+        psValidityId = fsValue;
+    }
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -195,13 +200,17 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnClose":
-                        unloadForm appUnload = new unloadForm();
-                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                        if(psValidityId != null && !"".equals(psValidityId)){
+                            CommonUtils.closeStage(btnClose);
                         } else {
-                            return;
+                            unloadForm appUnload = new unloadForm();
+                            if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                                appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                            } else {
+                                return;
+                            }
                         }
-                        break;
+                        return;
                     case "btnNew":
                         //Clear data
                         poController.Detail().clear();
@@ -282,7 +291,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         break;
                     case "btnBrowse":
                         poController.Master().setRecordStatus("01234");
-                        poJSON = poController.SearchTransaction("", true);
+                        poJSON = poController.SearchTransaction(psValidityId, true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             tfValidityID.requestFocus();
@@ -941,6 +950,10 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
+        
+        if(psValidityId != null && !"".equals(psValidityId)){
+            JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse,btnNew);
+        }
 
         if (fnValue != EditMode.READY) {
             return;
