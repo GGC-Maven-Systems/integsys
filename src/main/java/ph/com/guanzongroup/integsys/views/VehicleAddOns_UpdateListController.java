@@ -185,8 +185,16 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                         }
                         break;
                     case "btnPrint":
-                        poController.printTransaction(dpAsOf.getEditor().getText().toString());
-                        break;
+                        if(poController.getVehicleListCount() <= 0){
+                            ShowMessageFX.Warning(null, pxeModuleName, "No detail to be print.");
+                        } else {
+                            if (ShowMessageFX.OkayCancel(null, pxeModuleName,
+                                    "Are you sure you want to print the Vehicle Add-Ons report?"
+                                    + "\n\nPlease note that entries that have not yet been APPROVED will not be included.") == true) {
+                                poController.printTransaction(dpAsOf.getEditor().getText());
+                            }
+                        }
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -214,6 +222,7 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         controller1.setGRider(oApp);
         controller1.setAddOnTypeId(lsAddOnTypeId);
         controller1.setVariantId(lsVariantId);
+        controller1.setAsOfDate(dpAsOf.getEditor().getText());
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
         controller = controller1;
