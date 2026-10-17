@@ -788,7 +788,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 if (isConsistent) {
                     for (int i = 0; i < listCount.size(); i++) {
                         int number = listCount.get(i);
-                        if (poController.Detail(number).getEditMode() == EditMode.UPDATE) {
+                        if (poController.Detail(number).getEditMode() == EditMode.UPDATE
+                                && JFXUtil.isObjectEqualTo(poController.Detail(number).getRecordStatus(), RecordStatus.INACTIVE)) {
                             continue;
                         }
                         lsValue = JFXUtil.removeComma(lsValue);
