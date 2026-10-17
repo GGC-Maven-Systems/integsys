@@ -481,38 +481,16 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         }
     }
 
-    public static void disableTableColumnReordering(final TableView<?> tableView) {
-        Platform.runLater(() -> {
-            TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
-            if (header == null) {
-                return;
-            }
-            header.setReordering(false);
-            if (!header.reorderingProperty().isBound()) {
-                header.reorderingProperty().addListener(
-                        (obs, oldValue, newValue) -> {
-                            if (newValue) {
-                                header.setReordering(false);
-                            }
-                        });
-            }
-        });
-    }
-
     private void reInitializeColumns() {
         try {
             removeColumnsAfterSixth(tblViewDetail);
             JSONArray laArray = poController.loadUniqueAddOnTypeId(dpAsOf.getEditor().getText());
             addColumnsAfterSixth(tblViewDetail, laArray);
             Platform.runLater(() -> {
-                disableTableColumnReordering(tblViewDetail);
                 tblViewDetail.refresh();
             });
 
-            JFXUtil.setColumnCenter(tblNo);
-            JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor, tblSRP);
-            JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
-            tblViewDetail.setItems(details_data);
+            initDetailsGrid();
             enableCellHighlight(tblViewDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
