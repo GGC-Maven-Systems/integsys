@@ -56,6 +56,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleAddOns;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
@@ -635,6 +636,11 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
+                            if (!checkedItem.isEmpty() && checkedItem.stream().allMatch(item -> "1".equals(item))) {
+                                cbActiveAll.setSelected(true);
+                            } else {
+                                cbActiveAll.setSelected(false);
+                            }
                             pnDetail = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableDetail.reload();
@@ -777,10 +783,14 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     }
 
                 }
+                break;
             case "tfAmount":
                 if (isConsistent) {
                     for (int i = 0; i < listCount.size(); i++) {
                         int number = listCount.get(i);
+                        if (poController.Detail(number).getEditMode() == EditMode.UPDATE) {
+                            continue;
+                        }
                         lsValue = JFXUtil.removeComma(lsValue);
                         poController.Detail(number).setAmount(Double.parseDouble(lsValue));
                     }
@@ -819,7 +829,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         details_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                if(JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")){
+                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
                                     continue;
                                 }
                                 checkedItems(lnCtr);
