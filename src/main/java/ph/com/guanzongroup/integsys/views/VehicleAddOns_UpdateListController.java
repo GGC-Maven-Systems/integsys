@@ -42,6 +42,7 @@ import java.util.Map;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
@@ -268,12 +269,23 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         try {
             // DatePicker setup
             JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpAsOf);
+
             SimpleDateFormat sdfFormat = new SimpleDateFormat(SQLUtil.FORMAT_SHORT_DATE);
             String lsServerDate = sdfFormat.format(oApp.getServerDate());
             LocalDate currentDate = LocalDate.parse(lsServerDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
             dpAsOf.setValue(currentDate);
+
+            dpAsOf.getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue) {
+                    // Lost focus
+                    if (dpAsOf.getEditor().getText().isEmpty()) {
+                        dpAsOf.setValue(currentDate);
+                    }
+                }
+            });
         } catch (SQLException ex) {
-            Logger.getLogger(VehicleAddOns_UpdateListController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -385,7 +397,6 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
-
     }
 
     private void setCellSelected(TableCell<?, ?> cell, boolean selected) {
