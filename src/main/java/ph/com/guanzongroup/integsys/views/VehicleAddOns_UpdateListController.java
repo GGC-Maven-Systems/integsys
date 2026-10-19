@@ -388,13 +388,17 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
 
     }
 
-    private void enableCellHighlight(TableView<?> tableView) {
-        final String selectedStyle
-                = "-fx-border-color: #555555;"
-                + "-fx-border-width: 1.5px;"
-                + "-fx-border-style: solid;";
+    private void setCellSelected(TableCell<?, ?> cell, boolean selected) {
+        // remove first so the class is never added twice
+        cell.getStyleClass().remove("selected-cell");
+        if (selected) {
+            cell.getStyleClass().add("selected-cell");
+        }
+    }
 
+    private void enableCellHighlight(TableView<?> tableView) {
         final TableCell<?, ?>[] selectedCell = {null};
+
         for (int i = 0; i < tableView.getColumns().size(); i++) {
             TableColumn column = tableView.getColumns().get(i);
             column.setCellFactory(col -> new TableCell() {
@@ -405,11 +409,8 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                     setText(empty || item == null ? null : item.toString());
                     setGraphic(null);
 
-                    if (selectedCell[0] == this) {
-                        setStyle(selectedStyle);
-                    } else {
-                        setStyle("");
-                    }
+                    // cells get reused, so always sync the class with the selection state
+                    setCellSelected(this, selectedCell[0] == this);
                 }
 
                 {
@@ -418,12 +419,12 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                             return;
                         }
                         if (selectedCell[0] != null) {
-                            selectedCell[0].setStyle("");
+                            setCellSelected(selectedCell[0], false);
                         }
                         selectedCell[0] = null;
                         if (tableView.getVisibleLeafIndex(column) >= 6) {
                             selectedCell[0] = this;
-                            setStyle(selectedStyle);
+                            setCellSelected(this, true);
                         }
                     });
                 }
@@ -520,7 +521,6 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
             Platform.runLater(() -> {
                 tblViewDetail.refresh();
             });
-
             initDetailsGrid();
             enableCellHighlight(tblViewDetail);
         } catch (SQLException | GuanzonException ex) {
