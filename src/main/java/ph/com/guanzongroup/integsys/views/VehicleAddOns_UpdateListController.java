@@ -279,7 +279,10 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                 if (!newValue) {
                     // Lost focus
                     if (dpAsOf.getEditor().getText().isEmpty()) {
-                        dpAsOf.setValue(currentDate);
+                        Platform.runLater(() -> {
+                            dpAsOf.setValue(currentDate);
+                            dpAsOf.getEditor().setText(dpAsOf.getConverter().toString(currentDate));
+                        });
                     }
                 }
             });
