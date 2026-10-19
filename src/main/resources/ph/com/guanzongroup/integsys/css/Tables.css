@@ -307,3 +307,9 @@
 .tree-table-view .virtual-flow .scroll-bar .thumb:pressed:hover {
     -fx-background-color: #979797;
 }
+
+.table-cell.selected-cell {
+    -fx-border-color: #555555;
+    -fx-border-width: 1.5px;
+    -fx-border-style: solid;
+}
