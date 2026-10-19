@@ -643,7 +643,6 @@
                                                                         <TableColumn fx:id="tblAmountFreebies" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Amount" />
                                                                         <TableColumn fx:id="tblQtyFreebies" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Qty" />
                                                                         <TableColumn fx:id="tblTotalFreebies" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total" />
-                                                                        <TableColumn fx:id="tblDescriptionFreebies" maxWidth="270.0" minWidth="270.0" prefWidth="270.0" text="Description" />
                                                                      </columns>
                                                                   </TableView>
                                                                                         <TextField fx:id="tfDescription" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
