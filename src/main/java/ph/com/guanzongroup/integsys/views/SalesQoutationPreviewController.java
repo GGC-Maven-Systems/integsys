@@ -502,6 +502,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
         });
 
         cmbInsurance.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (pbSyncingMCCombos) return;
             if (newValue == null || newValue.intValue() < 0) return;
 
             fbInsurance = SalesQoutationStatic.INSURANCE_CODE[newValue.intValue()];
@@ -515,6 +516,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
         });
 
         cmbRegistration.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+            if (pbSyncingMCCombos) return;
             if (newValue == null || newValue.intValue() < 0) return;
 
             fbRegistration = SalesQoutationStatic.REGISTRATION_CODE[newValue.intValue()];
@@ -977,6 +979,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             if (!main_data.isEmpty()) {
                                 JFXUtil.selectAndFocusRow(tblMCItem, 0);
                                 pnMCRow = tblMCItem.getSelectionModel().getSelectedIndex();
+                                // first row was auto-selected (e.g. after Browse): fill the item fields too
+                                clearMCItemTextFields();
+                                LoadMCItemRecord();
                             }
                         } else {
                             JFXUtil.selectAndFocusRow(tblMCItem, pnMCRow);
@@ -1424,6 +1429,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         break;
 
                     case "btnLost":
+                        if (!ShowMessageFX.YesNo("Are you sure you want to mark this record as Lost?", pxeModuleName, null)) {
+                            return;
+                        }
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Lost is only available during view mode.");
                             return;
@@ -1443,6 +1451,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         loadTableGawayItem();
                         break;
                     case "btnVoid":
+                        if (!ShowMessageFX.YesNo("Are you sure you want to void this record?", pxeModuleName, null)) {
+                            return;
+                        }
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Void is only available during view mode.");
                             return;
@@ -1469,22 +1480,23 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         oSalesController.SalesQoutation().Version().setWithParent(false);
                         try {
                             poJSON = oSalesController.SalesQoutation().Version().ConfirmTransaction("");
+                            if ("error".equals((String) poJSON.get("result"))) {
+                                ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+                                return;
+                            }
+                            ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
                         } finally {
                             // Version normally runs under SalesQoutation's transaction; leaving it false makes the next Create From / Save begin a nested transaction
                             oSalesController.SalesQoutation().Version().setWithParent(true);
                         }
-                        if ("error".equals((String) poJSON.get("result"))) {
-                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
-                            return;
-                        }
+
 //                        poJSON = oSalesController.SalesQoutation().confirmRecord("");
 //                        if ("error".equals((String) poJSON.get("result"))) {
 //                            ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
 //                            return;
 //                        }
 
-                        ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
-                        poJSON = oSalesController.SalesQoutation().searchRecord(oSalesController.SalesQoutation().getModel().getTransactionNo(), true);
+                        poJSON = oSalesController.SalesQoutation().openRecord(oSalesController.SalesQoutation().getModel().getTransactionNo());
                         clearTextFields();
                         pnEditMode = oSalesController.SalesQoutation().getEditMode();
                         initButton(pnEditMode);
@@ -1559,6 +1571,17 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         break;
                     case "btnSave":
                         String Reload = oSalesController.SalesQoutation().getModel().getTransactionNo();
+                        if (cmbRegistration.getSelectionModel().getSelectedIndex() == 0
+                                && (tfMCItemRegisAmt.getText().isEmpty() || tfMCItemRegisAmt.getText().equals("0.00"))) {
+                            ShowMessageFX.Warning("Registration amount is required.", pxeModuleName, null);
+                            return;
+                        }
+                        if (cmbInsurance.getSelectionModel().getSelectedIndex() == 0
+                                && (tfMCItemInsuranceAmt.getText().isEmpty() || tfMCItemInsuranceAmt.getText().equals("0.00"))) {
+                            ShowMessageFX.Warning("Insurance amount is required.", pxeModuleName, null);
+                            return;
+                        }
+
                         poJSON = oSalesController.SalesQoutation().saveRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
@@ -2068,7 +2091,9 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
     public void LoadMCItemRecord() {
         if (pnMCRow < 0) return;
         try {
+            if (pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) return;
             Model_Sales_Quotation_Version_Detail loDet = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
+            if (loDet.getStockId() == null || loDet.getStockId().isEmpty()) return;   // blank placeholder row
             tfMCItemBrand.setText(loDet.Inventory().Brand().getDescription());
             tfMCItemModel.setText(loDet.Inventory().Model().getDescription());
             tfMCItemDiscount.setText(safe(loDet::getDiscount));
@@ -2107,9 +2132,12 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
     public void LoadGawayItemRecord() {
         if (pnGawayRow < 0) return;
         try {
+            if (pnGawayRow >= oSalesController.SalesQoutation().Giveaways().getGiveawayCount()) return;
             Model_Sales_Quotation_Version_Giveaways loDet = oSalesController.SalesQoutation().Giveaways().Giveaway(pnGawayRow);
-            tfGawayBarrcode.setText(loDet.getStockId());
-            tfGawayDescription.setText(loDet.Inventory().getDescription());
+            if (gawayRowRank(loDet) == 2) return;   // blank placeholder row
+            boolean lbHasStock = loDet.getStockId() != null && !loDet.getStockId().trim().isEmpty();
+            tfGawayBarrcode.setText(lbHasStock ? loDet.getStockId() : "");
+            tfGawayDescription.setText(lbHasStock ? loDet.Inventory().getDescription() : "");
             tfGawayQty.setText(safe(loDet::getQuantity));
             tfGawayRemarks.setText(safe(loDet::getRemarks));
         } catch (Exception e) {

@@ -1379,7 +1379,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         ShowMessageFX.Information((String) poJSON.get("message"), pxeModuleName, null);
                         break;
                     case "btnLost":
-                        if (!ShowMessageFX.YesNo("Are you sure you want to tagged this as Lost this record?", pxeModuleName, null)) {
+                        if (!ShowMessageFX.YesNo("Are you sure you want to mark this record as Lost?", pxeModuleName, null)) {
                             return;
                         }
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -1524,6 +1524,17 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         break;
                     case "btnSave":
                         String Reload = oSalesController.SalesQoutation().getModel().getTransactionNo();
+                        if (cmbRegistration.getSelectionModel().getSelectedIndex() == 0
+                                && (tfMCItemRegisAmt.getText().isEmpty() || tfMCItemRegisAmt.getText().equals("0.00"))) {
+                            ShowMessageFX.Warning("Registration amount is required.", pxeModuleName, null);
+                            return;
+                        }
+                        if (cmbInsurance.getSelectionModel().getSelectedIndex() == 0
+                                && (tfMCItemInsuranceAmt.getText().isEmpty() || tfMCItemInsuranceAmt.getText().equals("0.00"))) {
+                            ShowMessageFX.Warning("Insurance amount is required.", pxeModuleName, null);
+                            return;
+                        }
+
                         poJSON = oSalesController.SalesQoutation().saveRecord();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);

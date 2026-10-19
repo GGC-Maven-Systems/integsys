@@ -528,7 +528,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
                 return;
             }
 
-            if (!ShowMessageFX.YesNo(null, MODULE_NAME, "Are you sure you want to confirm this quotation?")) {
+            if (!ShowMessageFX.YesNo(null, MODULE_NAME, "Are you sure you want to mark this record as Lost?")) {
                 return;
             }
 
@@ -561,7 +561,7 @@ public class SalesQoutationListController implements Initializable, ScreenInterf
                 return;
             }
 
-            if (!ShowMessageFX.YesNo(null, MODULE_NAME, "Are you sure you want to confirm this quotation?")) {
+            if (!ShowMessageFX.YesNo(null, MODULE_NAME, "Are you sure you want to void this record?")) {
                 return;
             }
 
