@@ -447,9 +447,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchModelVariant(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            } else {
-                                JFXUtil.textFieldMoveNext(tfAddOns);
-                            }
+                            } 
                             loadRecordMaster();
                             break;
 
@@ -788,6 +786,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
+            JFXUtil.updateCaretPositions(apMaster);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -807,6 +806,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             }
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
             tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
+            JFXUtil.updateCaretPositions(apAddOns);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -841,6 +841,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getGrossMonthlyInstallment().doubleValue(), true));
             tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
             tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
+            JFXUtil.updateCaretPositions(apAdditionalInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
