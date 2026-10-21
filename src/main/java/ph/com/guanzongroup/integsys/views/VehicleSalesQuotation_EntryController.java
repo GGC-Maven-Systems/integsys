@@ -839,7 +839,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
             tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getMonthlyAmount().doubleValue(), true));
             tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getPromptPaymentDiscount().doubleValue(), true));
-            tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getGrossMonthlyInstallment().doubleValue(), true));
+            tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getGrossMonthlyInstallment().doubleValue(), true));
             tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
             tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
             JFXUtil.updateCaretPositions(apAdditionalInfo);
