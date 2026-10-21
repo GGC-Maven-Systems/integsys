@@ -153,13 +153,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             initButton(pnEditMode);
             Platform.runLater(() -> {
                 poController.setIndustryId(psIndustryId);
-                poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 poController.setCompanyId(psCompanyId);
                 poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
                 loadRecordSearch();
+                if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
 
+                } else {
+                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
+                }
                 btnNew.fire();
+
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
@@ -403,30 +407,35 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordMaster();
                             break;
                         case "tfFinancingRate":
                             poJSON = poController.SearchClient(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordMaster();
                             break;
                         case "tfBrand":
                             poJSON = poController.SearchBrand(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordMaster();
                             break;
                         case "tfModel":
                             poJSON = poController.SearchModel(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordMaster();
                             break;
                         case "tfVariant":
                             poJSON = poController.SearchModelVariant(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordMaster();
                             break;
 
                         //apAddOns
@@ -435,12 +444,14 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadTableAddOns.reload();
                             break;
                         case "tfAccessories":
                             poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordAddOns();
                             break;
 
                         //apAdditionalInfo
@@ -462,13 +473,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     break;
                 case UP:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNextAddOns(true, true)},
+                        {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(true, true)},
                         {new String[]{"tfAmount"}, (Runnable) () -> moveNextFreebies(true, true)},});
 
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNextAddOns(false, true)},
+                        {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(false, true)},
                         {new String[]{"tfAmount"}, (Runnable) () -> moveNextFreebies(false, true)},});
                     break;
                 default:
@@ -491,17 +502,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
         protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
-            int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
+            int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewAddOns":
                     if (!addOns_data.isEmpty()) {
-                        pnAddOns = newIndex;
+                        pnAddOns = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordAddOns();
                     }
                     break;
                 case "tblViewFreebies":
                     if (!freebies_data.isEmpty()) {
-                        pnFreebies = newIndex;
+                        pnFreebies = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
                         loadRecordAddOns();
                     }
                     break;
@@ -725,6 +736,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordMaster() {
         try {
+
             Platform.runLater(() -> {
                 lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()).toUpperCase());
 
@@ -734,7 +746,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 btnVoid.setText(lsStat);
             });
-
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
@@ -922,7 +936,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-                {poController.AddOnList(pnAddOns).AddOnMaster().getAddOnType(), tfAddOns},}, tfAccessories); // default
+                {poController.AddOnList(pnAddOns).AddOnMaster().getAddOnType(), tfAddOns},
+                {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
+                {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
