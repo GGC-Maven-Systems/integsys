@@ -248,7 +248,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             //Clear data
                             poController.InitTransaction();
                             clearTextFields();
-                            poController.Detail(pnDetail).setCompanyId(psCompanyId);
+                            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                            } else {
+                                poController.Detail(pnDetail).setCompanyId(psCompanyId);
+                            }
                             pnEditMode = EditMode.UNKNOWN;
                             break;
                         } else {
@@ -811,6 +814,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     private void loadRecordPricing() {
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
         tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
         tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
         tfReservationAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), true));
@@ -823,8 +829,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordAdditionalInfo() {
         try {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
             poController.computeFields();
-
             tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
