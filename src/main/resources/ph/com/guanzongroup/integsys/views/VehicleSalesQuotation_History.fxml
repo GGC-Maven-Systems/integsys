@@ -514,8 +514,8 @@
                                                                                                 <TextField fx:id="tfAmountToFinance" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="68.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3" />
                                                                                                 <TextField fx:id="tfNetMonthlyInstallment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="4" />
                                                                                                 <TextField fx:id="tfPromptPaymentDiscount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="5" />
-                                                                                                <TextField fx:id="tfGrossMonthlyInstallment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="6" />
-                                                                                                <TextField fx:id="tfPromissoryNoteAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="243.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="7" />
+                                                                                                <TextField fx:id="tfGrossMonthlyInstallment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="6" />
+                                                                                                <TextField fx:id="tfPromissoryNoteAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="243.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="7" />
                                                                                                 <TextField fx:id="tfRate" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                                                                                             </children>
                                                                   </GridPane>
@@ -523,7 +523,7 @@
                                                             </AnchorPane>
                                                          </children>
                                                       </HBox>
-                                                      <AnchorPane fx:id="apFreebies" minHeight="250.0" style="-fx-border-color: FF8201;">
+                                                      <AnchorPane fx:id="apFreebies" minHeight="210.0" style="-fx-border-color: FF8201;">
                                                          <children>
                                                             <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                <columnConstraints>
