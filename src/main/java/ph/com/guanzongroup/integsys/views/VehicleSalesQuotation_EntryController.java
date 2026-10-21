@@ -158,12 +158,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 poController.setWithUI(true);
                 loadRecordSearch();
                 if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-
                 } else {
                     poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
                 btnNew.fire();
-
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
@@ -406,6 +404,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchClient(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfFinancingRate);
                             }
                             loadRecordMaster();
                             break;
@@ -413,6 +413,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchClient(lsValue, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfBrand);
                             }
                             loadRecordMaster();
                             break;
@@ -420,6 +422,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchBrand(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfModel);
                             }
                             loadRecordMaster();
                             break;
@@ -427,6 +431,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchModel(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfVariant);
                             }
                             loadRecordMaster();
                             break;
@@ -434,6 +440,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchModelVariant(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfAddOns);
                             }
                             loadRecordMaster();
                             break;
@@ -443,6 +451,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, true);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfAmount);
                             }
                             loadTableAddOns.reload();
                             break;
@@ -450,6 +460,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfAmount);
                             }
                             loadRecordAddOns();
                             break;
@@ -495,7 +507,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -736,7 +749,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordMaster() {
         try {
-
             Platform.runLater(() -> {
                 lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()).toUpperCase());
 
@@ -807,6 +819,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordAdditionalInfo() {
         try {
+            poController.computeFields();
+
             tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
@@ -815,10 +829,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getGrossMonthlyInstallment().doubleValue(), true));
             tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
             tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
-        } catch (SQLException ex) {
-            Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -941,6 +954,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
