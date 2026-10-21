@@ -33,6 +33,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -143,6 +144,7 @@ public class LoginController implements Initializable, ScreenInterface {
         initComboBox();
         initTextFields();
         TriggerWindowEvent();
+        
     }
 
     public void TriggerWindowEvent() {
@@ -172,34 +174,49 @@ public class LoginController implements Initializable, ScreenInterface {
             if (event.getCode() == KeyCode.F12) {
                 LoginControllerHolder.getMainController().eventf12(LoginControllerHolder.getMainController().getTab());
             }
-        }
-        );
-
+        });
     }
     EventHandler<KeyEvent> tabKeyHandler = event -> {
-        if (event.getCode() != KeyCode.TAB) {
-            return;
-        }
         Node source = (Node) event.getSource();
         String fieldId = source.getId();
-        event.consume(); // prevent default focus traversal
-        switch (fieldId) {
-            case "tfUsername":
-                if (pfPassword.isVisible()) {
-                    pfPassword.requestFocus();
-                } else {
-                    tfPassword.requestFocus();
+        switch (event.getCode()) {
+            case SPACE:
+                switch (fieldId) {
+                    case "cmbIndustry":
+                    case "cmbCompany":
+                        ((ComboBox<?>) source).show();
+                        event.consume(); // stop it from bubbling to the scene's Enter handler
+                        return;
                 }
-                break;
-            case "pfPassword":
-            case "tfPassword":
-                cmbIndustry.requestFocus();
-                break;
-            case "cmbIndustry":
-                cmbCompany.requestFocus();
-                break;
-            case "cmbCompany":
-                tfUsername.requestFocus();
+                return; // don't fall through to TAB logic below
+            case TAB:
+                event.consume(); // prevent default focus traversal
+                switch (fieldId) {
+                    case "tfUsername":
+                        if (pfPassword.isVisible()) {
+                            pfPassword.requestFocus();
+                        } else {
+                            tfPassword.requestFocus();
+                        }
+                        break;
+                    case "pfPassword":
+                    case "tfPassword":
+                        if (!cmbIndustry.isVisible()) {
+                            btnSignIn.requestFocus();
+                        } else {
+                            cmbIndustry.requestFocus();
+                        }
+                        break;
+                    case "cmbIndustry":
+                        cmbCompany.requestFocus();
+                        break;
+                    case "cmbCompany":
+                        btnSignIn.requestFocus();
+                        break;
+                    case "btnSignIn":
+                        tfUsername.requestFocus();
+                        break;
+                }
                 break;
         }
     };
@@ -210,6 +227,8 @@ public class LoginController implements Initializable, ScreenInterface {
         tfPassword.setOnKeyPressed(tabKeyHandler);
         cmbCompany.setOnKeyPressed(tabKeyHandler);
         cmbIndustry.setOnKeyPressed(tabKeyHandler);
+        btnSignIn.setOnKeyPressed(tabKeyHandler);
+        JFXUtil.fireHoverEvent(btnSignIn);
     }
 
     public void setMainController(DashboardController controller) {
@@ -257,7 +276,7 @@ public class LoginController implements Initializable, ScreenInterface {
             double lnDuration = 0.8;
             if ("success".equals((String) poJSON.get("result"))) {
                 lnDuration = 1.5;
-                JFXUtil.playUpwardFadeOut(0.6, .70, bpBorderMain,apRoot1, apRoot2, vboxmain, rootPane);
+                JFXUtil.playUpwardFadeOut(0.6, .70, bpBorderMain, apRoot1, apRoot2, vboxmain, rootPane);
             }
             PauseTransition wait = new PauseTransition(Duration.seconds(lnDuration));
             wait.setOnFinished(done -> {
