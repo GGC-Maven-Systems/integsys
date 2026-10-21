@@ -109,7 +109,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnVoid, btnHistory, btnClose;
     @FXML
-    private TextField tfTransactionNo, tfBranch, tfClient, tfAddress, tfContactNo, tfEmail, tfInquiryNo, tfSalesPerson, tfFinancingRate, tfBrand, tfModel, tfVariant, tfYear, tfColor, tfAddOns, tfAccessories, tfAmount, tfQuantity, tfSRP, tfDownpayment, tfReservationAmt, tfTPL, tfComprehensive, tfLTO, tfCHMODocStmp, tfTotalAmount, tfBank, tfTerms, tfAmountToFinance, tfNetMonthlyInstallment, tfPromptPaymentDiscount, tfGrossMonthlyInstallment, tfPromissoryNoteAmount, tfRate, tfDescription, tfAmountFreebies, tfQuantityFreebies;
+    private TextField tfTransactionNo, tfBranch, tfClient, tfAddress, tfContactNo, tfEmail, tfInquiryNo, tfSalesPerson, tfFinancingRate, tfModel, tfYear, tfColor, tfBrand, tfVariant, tfAddOns, tfAccessories, tfAmount, tfQuantity, tfSRP, tfDownpayment, tfReservationAmt, tfTPL, tfComprehensive, tfLTO, tfCHMODocStmp, tfTotalAmount, tfBank, tfTerms, tfAmountToFinance, tfNetMonthlyInstallment, tfPromptPaymentDiscount, tfGrossMonthlyInstallment, tfPromissoryNoteAmount, tfRate, tfDescription, tfAmountFreebies, tfQuantityFreebies;
     @FXML
     private DatePicker dpTransactionDate, dpInquiryDate;
     @FXML
@@ -447,7 +447,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.SearchModelVariant(lsValue, false, pnAddOns);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            } 
+                            }
                             loadRecordMaster();
                             break;
 
@@ -546,10 +546,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poController.Master().setClientId("");
                         }
                         break;
-                    case "tfInquiryNo":
-                        break;
                     case "tfFinancingRate":
-                        if (lsValue.isEmpty()) {
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfBrand":
