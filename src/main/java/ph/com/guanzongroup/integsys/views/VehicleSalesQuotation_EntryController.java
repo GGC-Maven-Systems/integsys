@@ -159,11 +159,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 poController.setWithUI(true);
                 loadRecordSearch();
 
-                if (psValidityId != null && !"".equals(psValidityId)) {
-                    btnBrowse.fire();
-                } else {
-                    btnNew.fire();
-                }
+                btnNew.fire();
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
@@ -432,6 +428,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
+
                         //apAddOns
                         case "tfAddOns":
                             poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, true);
@@ -440,17 +437,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             break;
                         case "tfAccessories":
-
+                            poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
+
                         //apAdditionalInfo
                         case "tfBank":
+                            poJSON = poController.Searchbank(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordAdditionalInfo();
                             break;
+
                         //apFreebies
                         case "tfDescription":
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -538,6 +539,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                         break;
                 }
+                loadRecordMaster();
             });
 
     ChangeListener<Boolean> txtAddOns_Focus = JFXUtil.FocusListener(TextField.class,
@@ -545,24 +547,38 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 switch (lsID) {
                     case "tfAddOns":
                         if (lsValue.isEmpty()) {
+                            poController.AddOnList(pnAddOns).setAddOnId("");
                         }
                         break;
                     case "tfAccessories":
                         if (lsValue.isEmpty()) {
+                            poController.AddOnList(pnAddOns).setAddOnId("");
                         }
                         break;
                     case "tfAmount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.AddOnList(pnAddOns).setAmount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                     case "tfQuantity":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.AddOnList(pnAddOns).setQuantity(Integer.parseInt(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                 }
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableAddOns.reload();
+                });
             });
 
     ChangeListener<Boolean> txtPricing_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfSRP":
-                        lsValue = JFXUtil.removeComma(lsValue);
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setSRPAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -619,30 +635,58 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                         break;
                 }
+                loadRecordPricing();
             });
 
     ChangeListener<Boolean> txtAdditionalInfo_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfBank":
-                        if (lsValue.isEmpty()) {
-                        }
-                        break;
-                    case "tfTerms":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        break;
-                    case "tfAmountToFinance":
-                        break;
-                    case "tfNetMonthlyInstallment":
-                        break;
-                    case "tfPromptPaymentDiscount":
-                        break;
-                    case "tfGrossMonthlyInstallment":
-                        break;
-                    case "tfPromissoryNoteAmount":
-                        break;
-                    case "tfRate":
-                        break;
+                try {
+                    switch (lsID) {
+                        case "tfBank":
+                            if (lsValue.isEmpty()) {
+                                poController.Detail(pnDetail).FinancingRate().setBankId("");
+                            }
+                            break;
+                        case "tfTerms":
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setDuration(Integer.parseInt(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfAmountToFinance":
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfNetMonthlyInstallment":
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setMonthlyAmount(Double.parseDouble(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfPromptPaymentDiscount":
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                        case "tfRate":
+                            lsValue = JFXUtil.removeComma(lsValue);
+                            poJSON = poController.Detail(pnDetail).setRateValue(Double.parseDouble(lsValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                    }
+                    loadRecordAdditionalInfo();
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
 
@@ -658,6 +702,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "tfQuantityFreebies":
                         break;
                 }
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableFreebies.reload();
+                });
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -666,6 +713,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "taRemarks":
                         break;
                 }
+                loadRecordMaster();
             });
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
@@ -690,12 +738,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
-//            tfBranch.setText(poController.Master().Branch().getBranchName());
+            tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
             tfClient.setText(poController.Master().Client().getCompanyName());
             tfAddress.setText(poController.Master().ClientAddress().getAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
-//            tfEmail.setText(poController.Master().SalesInquiry().cl);
-//            tfInquiryNo.setText(poController.Master().);
+            tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
+            tfInquiryNo.setText(poController.Detail(pnDetail).SalesInquiry().getIndustryId());
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
@@ -719,8 +767,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
 //        cbSelectAll.setSelected(poController.AddOnList(pnAddOns).is);
-            tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().getAddOnType());
-//        tfAccessories.setText(poController.AddOnList(pnAddOns).AddOnMaster().getad);
+            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getSource(), "0")) {
+                tfAccessories.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+            } else {
+                tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+            }
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
             tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
         } catch (SQLException | GuanzonException ex) {
@@ -733,22 +784,28 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
         tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
         tfReservationAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), true));
-//        tfTPL.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).get().doubleValue(), true));
-//        tfComprehensive.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
-//        tfLTO.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
-//        tfCHMODocStmp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
+        tfTPL.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTPLAmount().doubleValue(), true));
+        tfComprehensive.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getComprehensiveAmount().doubleValue(), true));
+        tfLTO.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getLTOAmount().doubleValue(), true));
+        tfCHMODocStmp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCHMOAmount().doubleValue(), true));
         tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
     }
 
     private void loadRecordAdditionalInfo() {
-//        tfBank.setText(poController.Master().Bank().getBankName());
-//        tfTerms.setText(poController.Master().getTerms());
-        tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
-        tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
-//        tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
-//        tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
-        tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
-        tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
+        try {
+            tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
+            tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
+            tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
+            tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getMonthlyAmount().doubleValue(), true));
+            tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getPromptPaymentDiscount().doubleValue(), true));
+            tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getGrossMonthlyInstallment().doubleValue(), true));
+            tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
+            tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
+        } catch (SQLException ex) {
+            Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (GuanzonException ex) {
+            Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void loadRecordFreebies() {
@@ -854,17 +911,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     public void moveNextAddOns(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apAddOns.requestFocus();
-//            pnAddOns = isUp ? Integer.parseInt(addOns_data.get(JFXUtil.moveToPreviousRow(tblViewAddOns)).getIndex10())
-//                    : Integer.parseInt(addOns_data.get(JFXUtil.moveToNextRow(tblViewAddOns)).getIndex10());
-//        }
-//        loadRecordAddOns();
-//        if (pnAddOns < 0 || pnAddOns > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.Detail(pnAddOns).getAmount(), tfAmount},}, tfAmount); // default
+        try {
+            if (continueNext) {
+                apAddOns.requestFocus();
+                pnAddOns = isUp ? Integer.parseInt(addOns_data.get(JFXUtil.moveToPreviousRow(tblViewAddOns)).getIndex07())
+                        : Integer.parseInt(addOns_data.get(JFXUtil.moveToNextRow(tblViewAddOns)).getIndex07());
+            }
+            loadRecordAddOns();
+            if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.AddOnList(pnAddOns).AddOnMaster().getAddOnType(), tfAddOns},}, tfAccessories); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void moveNextFreebies(boolean isUp, boolean continueNext) {
