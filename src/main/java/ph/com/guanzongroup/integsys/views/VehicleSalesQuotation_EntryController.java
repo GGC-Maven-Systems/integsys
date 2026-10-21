@@ -369,6 +369,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 //                    loadTableAddOns.reload();
 //                }
                 loadTableAddOns.reload();
+                loadTableFreebies.reload();
+                loadRecordMaster();
+                loadRecordAdditionalInfo();
+                loadRecordPricing();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -1137,7 +1141,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 tblViewAddOns.getFocusModel().focus(pnAddOns);
                                 loadRecordAddOns();
                             }
-                            loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1184,7 +1187,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 tblViewFreebies.getFocusModel().focus(pnFreebies);
                                 loadRecordAddOns();
                             }
-                            loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1250,7 +1252,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex10());
                         pnAddOns = lnRow;
                         loadRecordAddOns();
-//                        moveNext(false, false);
+                        moveNextAddOns(false, false);
                     }
                 }
             }
