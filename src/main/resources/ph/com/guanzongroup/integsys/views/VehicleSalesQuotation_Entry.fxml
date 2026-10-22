@@ -319,7 +319,7 @@
                                                                         <Separator prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="4" GridPane.rowIndex="6" />
                                                                         <TextField fx:id="tfInquiryNo" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                                                         <DatePicker fx:id="dpInquiryDate" disable="true" layoutX="125.0" layoutY="50.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
-                                                                        <ComboBox fx:id="cmbModeOfPayment" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
+                                                                        <ComboBox fx:id="cmbModeOfPayment" disable="true" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
                                                                         <TextField fx:id="tfSalesPerson" disable="true" layoutX="738.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="7" />
                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="12">
                                                          <children>

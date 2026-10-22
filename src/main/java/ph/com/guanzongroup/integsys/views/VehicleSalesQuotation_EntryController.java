@@ -1381,10 +1381,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private void checkedItems(int lnCtr) {
         try {
             if (checkedItem.get(lnCtr) == null) {
-                checkedItem.add("0");
+                checkedItem.add("1");
             }
         } catch (Exception e) {
-            checkedItem.add("0");
+            checkedItem.add("1");
         }
     }
 
