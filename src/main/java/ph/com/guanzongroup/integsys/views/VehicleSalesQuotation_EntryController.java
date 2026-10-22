@@ -526,6 +526,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poJSON = poController.Searchbank(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfTerms);
                             }
                             loadRecordAdditionalInfo();
                             break;
@@ -604,6 +606,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case "tfClient":
                             if (lsValue.isEmpty()) {
                                 poController.Master().setClientId("");
+                                poController.Master().setAddressId("");
+                                poController.Master().setContactId("");
                             }
                             break;
                         case "tfFinancingRate":
@@ -940,11 +944,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
 //        cbSelectAll.setSelected(poController.AddOnList(pnAddOns).is);
+            boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
+            JFXUtil.setDisabled(!lbShow1, tfAccessories, tfAddOns);
+
             if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getSource(), "0")) { //if "parts" = "0"
                 tfAccessories.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+                JFXUtil.setDisabled(true, tfAddOns);
             } else {
-                tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+                if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getSource(), null, "")) {
+                    JFXUtil.setDisabled(!lbShow1, tfAccessories, tfAddOns);
+                } else {
+                    tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+                    JFXUtil.setDisabled(true, tfAccessories);
+                }
             }
+
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
             tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
             JFXUtil.updateCaretPositions(apAddOns);
