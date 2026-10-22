@@ -428,9 +428,24 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 JFXUtil.textFieldMoveNext(tfBrand);
                             }
-                            loadRecordMaster();
+                            reloadRecords();
                             break;
                         case "tfBrand":
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the brand?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
+                                        poController.Detail(pnDetail).setVariantId("");
+                                        poController.Detail(pnDetail).setModelId("");
+                                        poController.Detail(pnDetail).setBrandId("");
+                                        reloadRecords();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
                             poJSON = poController.SearchBrand(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -440,6 +455,20 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfModel":
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the model?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
+                                        poController.Detail(pnDetail).setVariantId("");
+                                        poController.Detail(pnDetail).setModelId("");
+                                        reloadRecords();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
                             poJSON = poController.SearchModel(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -449,11 +478,24 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfVariant":
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                    pbKeyPressed = true;
+                                    if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                            "Are you sure you want to change the variant?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
+                                        poController.Detail(pnDetail).setVariantId("");
+                                        reloadRecords();
+                                    } else {
+                                        return;
+                                    }
+                                    pbKeyPressed = false;
+                                }
+                            }
                             poJSON = poController.SearchModelVariant(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
-                            loadRecordMaster();
+                            reloadRecords();
                             break;
 
                         //apAddOns
@@ -545,6 +587,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         }
     };
 
+    private void reloadRecords() {
+        loadRecordMaster();
+        loadTableAddOns.reload();
+        loadTableFreebies.reload();
+        loadRecordPricing();
+        loadRecordAdditionalInfo();
+    }
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 try {
@@ -556,24 +605,86 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             break;
                         case "tfFinancingRate":
                             if (lsValue.isEmpty()) {
-                                poController.Detail(pnDetail).FinancingRate().setRateId("");
+                                poJSON = poController.Detail(pnDetail).FinancingRate().setRateId("");
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                }
                             }
-                            break;
+                            reloadRecords();
+                            return;
                         case "tfBrand":
                             if (lsValue.isEmpty()) {
+                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                    if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
+                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")
+                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the brand?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
+                                                poController.Detail(pnDetail).setVariantId("");
+                                                poController.Detail(pnDetail).setModelId("");
+                                                poController.Detail(pnDetail).setBrandId("");
+                                                reloadRecords();
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        } else {
+                                            loadRecordMaster();
+                                            return;
+                                        }
+                                    }
+                                }
                                 poController.Detail(pnDetail).setBrandId("");
                             }
                             break;
                         case "tfModel":
                             if (lsValue.isEmpty()) {
+                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                    if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
+                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the model?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
+                                                poController.Detail(pnDetail).setVariantId("");
+                                                poController.Detail(pnDetail).setModelId("");
+                                                reloadRecords();
+                                            } else {
+                                                loadRecordMaster();
+                                                return;
+                                            }
+                                        } else {
+                                            loadRecordMaster();
+                                            return;
+                                        }
+                                    }
+                                }
                                 poController.Detail(pnDetail).setModelId("");
                             }
                             break;
                         case "tfVariant":
                             if (lsValue.isEmpty()) {
+                                if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                    if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                        if (!pbKeyPressed) {
+                                            if (ShowMessageFX.YesNo(null, pxeModuleName,
+                                                    "Are you sure you want to change the variant?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
+                                                poController.Detail(pnDetail).setVariantId("");
+                                                reloadRecords();
+                                            } else {
+                                                reloadRecords();
+                                                return;
+                                            }
+                                        } else {
+                                            reloadRecords();
+                                            return;
+                                        }
+                                    }
+                                }
                                 poController.Detail(pnDetail).setVariantId("");
                             }
-                            break;
+                            reloadRecords();
+                            return;
                     }
                     loadRecordMaster();
                 } catch (SQLException | GuanzonException ex) {
@@ -647,35 +758,35 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                     case "tfTPL":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.Detail(pnDetail).setTPLAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfComprehensive":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.Detail(pnDetail).setComprehensiveAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfLTO":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.Detail(pnDetail).setLTOAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfCHMODocStmp":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.Detail(pnDetail).setCHMOAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfTotalAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.Detail(pnDetail).setTotalAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -763,6 +874,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "taRemarks":
+                        poJSON = poController.Detail(pnDetail).setRemarks(lsValue);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                 }
                 loadRecordMaster();
@@ -789,6 +904,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            poController.computeFields();
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
@@ -797,7 +913,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfAddress.setText(poController.Master().ClientAddress().getAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
-            tfInquiryNo.setText(poController.Detail(pnDetail).SalesInquiry().getSourceNo());
+            tfInquiryNo.setText(poController.Detail(pnDetail).getSourceNo());
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
