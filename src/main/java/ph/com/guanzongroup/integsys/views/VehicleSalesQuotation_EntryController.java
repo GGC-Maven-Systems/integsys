@@ -784,13 +784,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfTotalAmount":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setTotalAmount(Double.parseDouble(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
+//                    case "tfTotalAmount":
+//                        lsValue = JFXUtil.removeComma(lsValue);
+//                        poJSON = poController.Detail(pnDetail).setTotalAmount(Double.parseDouble(lsValue));
+//                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+//                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+//                        }
+//                        break;
                 }
                 loadRecordPricing();
             });
@@ -811,20 +811,20 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
-                        case "tfAmountToFinance":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                        case "tfNetMonthlyInstallment":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setMonthlyAmount(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
+//                        case "tfAmountToFinance":
+//                            lsValue = JFXUtil.removeComma(lsValue);
+//                            poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
+//                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+//                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+//                            }
+//                            break;
+//                        case "tfNetMonthlyInstallment":
+//                            lsValue = JFXUtil.removeComma(lsValue);
+//                            poJSON = poController.Detail(pnDetail).setMonthlyAmount(Double.parseDouble(lsValue));
+//                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+//                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+//                            }
+//                            break;
                         case "tfPromptPaymentDiscount":
                             lsValue = JFXUtil.removeComma(lsValue);
                             poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
@@ -977,8 +977,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getMonthlyAmount().doubleValue(), true));
             tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getPromptPaymentDiscount().doubleValue(), true));
             tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getGrossMonthlyInstallment().doubleValue(), true));
-            tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
-            tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), true));
+            tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getPromissoryNoteAmt().doubleValue(), true));
+            tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), false));
             JFXUtil.updateCaretPositions(apAdditionalInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1265,7 +1265,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
-                                                getData(String.valueOf(poController.AddOnList(lnCtr).AddOnMaster().getAddOnType())),
+                                                getData(String.valueOf(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName())),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
