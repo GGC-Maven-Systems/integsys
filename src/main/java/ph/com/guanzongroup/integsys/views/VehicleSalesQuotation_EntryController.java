@@ -83,7 +83,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private String psCategoryId = "";
     private String psValidityId = "";
     boolean lbresetpredicate = false;
-    boolean pbEntered = false;
+    boolean pbEnteredAddOns = false, pbEnteredFreebies = false;
     boolean pbKeyPressed = false;
 
     private ObservableList<ModelVehicleQuotation_AddOns> addOns_data = FXCollections.observableArrayList();
@@ -400,8 +400,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
-                    if (tfAmount.isFocused()) {
-                        pbEntered = true;
+                    if (tfQuantity.isFocused()) {
+                        pbEnteredAddOns = true;
+                    }
+                    if (tfQuantityFreebies.isFocused()) {
+                        pbEnteredAddOns = true;
                     }
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
@@ -605,6 +608,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        JFXUtil.runWithDelay(0.40, () -> {
+                            if (pbEnteredAddOns) {
+                                moveNextAddOns(false, true);
+                                pbEnteredAddOns = false;
+                            }
+                        });
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
@@ -737,6 +746,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "tfAmountFreebies":
                         break;
                     case "tfQuantityFreebies":
+                        JFXUtil.runWithDelay(0.40, () -> {
+                            if (pbEnteredFreebies) {
+                                moveNextFreebies(false, true);
+                                pbEnteredFreebies = false;
+                            }
+                        });
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
@@ -1121,10 +1136,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 tblViewAddOns,
                 addOns_data,
                 () -> {
-                    pbEntered = false;
+                    pbEnteredAddOns = false;
                     Platform.runLater(() -> {
                         int lnCtr;
-                        pbEntered = false;
+                        pbEnteredAddOns = false;
                         addOns_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
@@ -1168,10 +1183,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 tblViewFreebies,
                 freebies_data,
                 () -> {
-                    pbEntered = false;
+                    pbEnteredAddOns = false;
                     Platform.runLater(() -> {
                         int lnCtr;
-                        pbEntered = false;
+                        pbEnteredFreebies = false;
                         freebies_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
