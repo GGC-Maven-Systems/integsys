@@ -387,7 +387,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void txtField_KeyPressed(KeyEvent event) {
         try {
-            //        try {
             TextField txtField = (TextField) event.getSource();
             String lsID = (((TextField) event.getSource()).getId());
             String lsValue = (txtField.getText() == null ? "" : txtField.getText());
@@ -552,12 +551,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 default:
                     break;
             }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } catch (CloneNotSupportedException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -823,20 +816,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
-//                        case "tfAmountToFinance":
-//                            lsValue = JFXUtil.removeComma(lsValue);
-//                            poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
-//                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                            }
-//                            break;
-//                        case "tfNetMonthlyInstallment":
-//                            lsValue = JFXUtil.removeComma(lsValue);
-//                            poJSON = poController.Detail(pnDetail).setMonthlyAmount(Double.parseDouble(lsValue));
-//                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                            }
-//                            break;
                         case "tfPromptPaymentDiscount":
                             lsValue = JFXUtil.removeComma(lsValue);
                             poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
@@ -997,9 +976,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
-            tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getMonthlyAmount().doubleValue(), true));
-            tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getPromptPaymentDiscount().doubleValue(), true));
-            tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnAddOns).getGrossMonthlyInstallment().doubleValue(), true));
+            tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
+            tfPromptPaymentDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getPromptPaymentDiscount().doubleValue(), true));
+            tfGrossMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getGrossMonthlyInstallment().doubleValue(), true));
             tfPromissoryNoteAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getPromissoryNoteAmt().doubleValue(), true));
             tfRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getRateValue().doubleValue(), false));
             JFXUtil.updateCaretPositions(apAdditionalInfo);
