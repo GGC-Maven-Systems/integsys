@@ -485,7 +485,7 @@
                                                                                                 <TextField fx:id="tfComprehensive" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                                                                 <TextField fx:id="tfLTO" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                                                                                                 <TextField fx:id="tfCHMODocStmp" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                                                                                <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                                                                <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                                                                                             </children>
                                                                   </GridPane>
                                                                </children>
