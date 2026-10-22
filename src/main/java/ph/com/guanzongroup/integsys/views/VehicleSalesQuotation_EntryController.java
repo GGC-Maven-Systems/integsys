@@ -597,7 +597,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         loadTableFreebies.reload();
         loadRecordPricing();
         loadRecordAdditionalInfo();
-        
+
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
@@ -1278,9 +1278,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         addOns_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
-                                if (JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).getAddOnId(), null, "")) {
-                                    continue;
-                                }
                                 checkedItems(lnCtr);
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
