@@ -641,7 +641,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case "tfModel":
                             if (lsValue.isEmpty()) {
                                 if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                    if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
+                                    if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")
                                     && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
@@ -904,7 +904,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            poController.computeFields();
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
@@ -971,7 +970,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-//            poController.computeFields();
+            poController.computeFields();
             tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
