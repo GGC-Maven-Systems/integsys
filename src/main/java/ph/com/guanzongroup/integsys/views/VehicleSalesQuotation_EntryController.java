@@ -597,6 +597,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         loadTableFreebies.reload();
         loadRecordPricing();
         loadRecordAdditionalInfo();
+        
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
+        poController.Detail(pnDetail).setSRPAmount(0.0000);
+        poController.Detail(pnDetail).setDownPayment(0.0000);
+        poController.Detail(pnDetail).setReservationAmount(0.0000);
     }
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -610,13 +617,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             break;
                         case "tfFinancingRate":
-                            if (lsValue.isEmpty()) {
-                                poJSON = poController.Detail(pnDetail).FinancingRate().setRateId("");
-                                if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                                }
-                            }
-                            reloadRecords();
                             return;
                         case "tfBrand":
                             if (lsValue.isEmpty()) {
@@ -924,7 +924,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
             tfSalesPerson.setText(poController.Detail(pnDetail).SalesInquiry().SalesPerson().getFullName());
 
-            tfFinancingRate.setText(poController.Detail(pnDetail).FinancingRate().getRateId());
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
             tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
@@ -1376,7 +1375,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setColumnLeft(tblDescriptionFreebies);
         JFXUtil.setColumnRight(tblAmountFreebies, tblQtyFreebies, tblTotalFreebies);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewFreebies);
-        tblViewFreebies.setItems(addOns_data);
+        tblViewFreebies.setItems(freebies_data);
     }
 
     public void clearTextFields() {
