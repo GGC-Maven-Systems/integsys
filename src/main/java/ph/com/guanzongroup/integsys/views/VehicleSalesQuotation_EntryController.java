@@ -60,6 +60,7 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
+import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Freebies;
 
 /**
@@ -100,6 +101,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
+    ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks;
     @FXML
@@ -417,7 +419,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfFinancingRate":
-                            poJSON = poController.SearchClient(lsValue, false);
+                            poJSON = poController.SearchVehicleFinancing(lsValue, true, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
@@ -540,36 +542,39 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfClient":
-                        if (lsValue.isEmpty()) {
-                            poController.Master().setClientId("");
-                        }
-                        break;
-                    case "tfFinancingRate":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setFinancingAmount(Double.parseDouble(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "tfBrand":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnDetail).setBrandId("");
-                        }
-                        break;
-                    case "tfModel":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnDetail).setModelId("");
-                        }
-                        break;
-                    case "tfVariant":
-                        if (lsValue.isEmpty()) {
-                            poController.Detail(pnDetail).setVariantId("");
-                        }
-                        break;
+                try {
+                    switch (lsID) {
+                        case "tfClient":
+                            if (lsValue.isEmpty()) {
+                                poController.Master().setClientId("");
+                            }
+                            break;
+                        case "tfFinancingRate":
+                            if (lsValue.isEmpty()) {
+                                poController.Detail(pnDetail).FinancingRate().setRateId("");
+                            }
+                            break;
+                        case "tfBrand":
+                            if (lsValue.isEmpty()) {
+                                poController.Detail(pnDetail).setBrandId("");
+                            }
+                            break;
+                        case "tfModel":
+                            if (lsValue.isEmpty()) {
+                                poController.Detail(pnDetail).setModelId("");
+                            }
+                            break;
+                        case "tfVariant":
+                            if (lsValue.isEmpty()) {
+                                poController.Detail(pnDetail).setVariantId("");
+                            }
+                            break;
+                    }
+                    loadRecordMaster();
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
-                loadRecordMaster();
             });
 
     ChangeListener<Boolean> txtAddOns_Focus = JFXUtil.FocusListener(TextField.class,
@@ -781,7 +786,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
             tfSalesPerson.setText(poController.Detail(pnDetail).SalesInquiry().SalesPerson().getFullName());
 
-            tfFinancingRate.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
+            tfFinancingRate.setText(poController.Detail(pnDetail).FinancingRate().getRateId());
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
             tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
@@ -940,7 +945,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void initComboboxes() {
         // ComboBox setup
-//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbModeOfPayment));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment);
     }
@@ -1096,7 +1101,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setFocusListener(txtFreebies_Focus, apFreebies);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
-        JFXUtil.inputDecimalOnly(tfFinancingRate, tfRate);
+        JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.setCommaFormatter(tfAmount, tfReservationAmt, tfTotalAmount, tfAmountToFinance, tfPromissoryNoteAmount, tfAmountFreebies);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies);
 
