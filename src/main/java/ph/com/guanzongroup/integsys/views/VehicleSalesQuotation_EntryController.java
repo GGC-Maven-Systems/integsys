@@ -431,7 +431,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfBrand":
-                            poJSON = poController.SearchBrand(lsValue, false, pnAddOns);
+                            poJSON = poController.SearchBrand(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
@@ -440,7 +440,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfModel":
-                            poJSON = poController.SearchModel(lsValue, false, pnAddOns);
+                            poJSON = poController.SearchModel(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
@@ -449,7 +449,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordMaster();
                             break;
                         case "tfVariant":
-                            poJSON = poController.SearchModelVariant(lsValue, false, pnAddOns);
+                            poJSON = poController.SearchModelVariant(lsValue, false, pnDetail);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
