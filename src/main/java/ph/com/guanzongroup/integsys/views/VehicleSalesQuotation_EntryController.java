@@ -780,7 +780,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfAddress.setText(poController.Master().ClientAddress().getAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
-            tfInquiryNo.setText(poController.Detail(pnDetail).SalesInquiry().getIndustryId());
+            tfInquiryNo.setText(poController.Detail(pnDetail).SalesInquiry().getSourceNo());
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
