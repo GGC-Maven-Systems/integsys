@@ -319,7 +319,7 @@
                                                                         <Separator prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="4" GridPane.rowIndex="6" />
                                                                         <TextField fx:id="tfInquiryNo" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                                                                         <DatePicker fx:id="dpInquiryDate" disable="true" layoutX="125.0" layoutY="50.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
-                                                                        <ComboBox fx:id="cmbModeOfPayment" disable="true" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
+                                                                        <ComboBox fx:id="cmbModeOfPayment" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
                                                                         <TextField fx:id="tfSalesPerson" disable="true" layoutX="738.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="7" />
                                                                         <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="12">
                                                          <children>
@@ -401,7 +401,7 @@
                                                                   <TableColumn fx:id="tblTotalAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total" />
                                                               </columns>
                                                             </TableView>
-                                                                                <TextField fx:id="tfAddOns" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="415.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                <TextField fx:id="tfAddOns" disable="true" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="415.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                                                 <TextField fx:id="tfAccessories" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
                                                                                 <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                                                 <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
@@ -485,7 +485,7 @@
                                                                                                 <TextField fx:id="tfComprehensive" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                                                                                 <TextField fx:id="tfLTO" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                                                                                                 <TextField fx:id="tfCHMODocStmp" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                                                                                <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                                                                <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                                                                                             </children>
                                                                   </GridPane>
                                                                </children>

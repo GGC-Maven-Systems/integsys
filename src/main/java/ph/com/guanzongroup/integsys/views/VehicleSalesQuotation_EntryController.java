@@ -941,22 +941,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnAddOns < 0 || pnAddOns > poController.getDetailCount() - 1) {
                 return;
             }
-//        cbSelectAll.setSelected(poController.AddOnList(pnAddOns).is);
-            boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
-            JFXUtil.setDisabled(!lbShow1, tfAccessories, tfAddOns);
 
-            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getSource(), "0")) { //if "parts" = "0"
-                tfAccessories.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
-                JFXUtil.setDisabled(true, tfAddOns);
+            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
+                tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
             } else {
-                if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getSource(), null, "")) {
-                    JFXUtil.setDisabled(!lbShow1, tfAccessories, tfAddOns);
-                } else {
-                    tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
-                    JFXUtil.setDisabled(true, tfAccessories);
-                }
+                tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
-
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
             tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
             JFXUtil.updateCaretPositions(apAddOns);
@@ -1434,7 +1424,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
             }
         });
-//        JFXUtil.applyRowHighlighting(tblViewAddOns, item -> ((ModelVehicleQuotation_AddOns) item).getIndex01(), highlightedRowsMain);
+//        JFXUtil.handleDisabledNodeClick(apAddOns, pnEditMode, nodeID -> {
+//            if (JFXUtil.isObjectEqualTo(nodeID, "tfAddOns", "tfAccessories")) {
+//                ShowMessageFX.Information(null, pxeModuleName, "");
+//            }
+//        });
     }
 
     private void initButton(int fnValue) {
