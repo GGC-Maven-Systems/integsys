@@ -433,8 +433,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case "tfBrand":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
-                                        && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")
-                                        && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                        && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
                                     pbKeyPressed = true;
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the brand?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
@@ -543,13 +542,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 case UP:
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(true, true)},
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNextFreebies(true, true)},});
+                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(true, true)},});
 
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(false, true)},
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNextFreebies(false, true)},});
+                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(false, true)},});
                     break;
                 default:
                     break;
