@@ -228,10 +228,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-//                        poJSON = poController.populateVehicleList();
-//                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                        }
                         poController.initFields();
                         pnEditMode = poController.getEditMode();
                         break;
@@ -440,6 +436,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                         poController.Detail(pnDetail).setVariantId("");
                                         poController.Detail(pnDetail).setModelId("");
                                         poController.Detail(pnDetail).setBrandId("");
+                                        resetAmounts();
                                         reloadRecords();
                                     } else {
                                         return;
@@ -464,6 +461,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                             "Are you sure you want to change the model?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
                                         poController.Detail(pnDetail).setVariantId("");
                                         poController.Detail(pnDetail).setModelId("");
+                                        resetAmounts();
                                         reloadRecords();
                                     } else {
                                         return;
@@ -486,6 +484,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     if (ShowMessageFX.YesNo(null, pxeModuleName,
                                             "Are you sure you want to change the variant?\nPlease note that doing so will delete all the other existing details.\n\nDo you wish to proceed?") == true) {
                                         poController.Detail(pnDetail).setVariantId("");
+                                        resetAmounts();
                                         reloadRecords();
                                     } else {
                                         return;
@@ -591,19 +590,23 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         }
     };
 
+    private void resetAmounts() {
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+        } else {
+            poController.Detail(pnDetail).setSRPAmount(0.0000);
+            poController.Detail(pnDetail).setDownPayment(0.0000);
+            poController.Detail(pnDetail).setReservationAmount(0.0000);
+        }
+    }
+
     private void reloadRecords() {
+
         loadRecordMaster();
         loadTableAddOns.reload();
         loadTableFreebies.reload();
         loadRecordPricing();
         loadRecordAdditionalInfo();
 
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
-        }
-        poController.Detail(pnDetail).setSRPAmount(0.0000);
-        poController.Detail(pnDetail).setDownPayment(0.0000);
-        poController.Detail(pnDetail).setReservationAmount(0.0000);
     }
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -630,6 +633,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                                 poController.Detail(pnDetail).setVariantId("");
                                                 poController.Detail(pnDetail).setModelId("");
                                                 poController.Detail(pnDetail).setBrandId("");
+                                                resetAmounts();
                                                 reloadRecords();
                                             } else {
                                                 loadRecordMaster();
@@ -654,6 +658,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                                     "Are you sure you want to change the model?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
                                                 poController.Detail(pnDetail).setVariantId("");
                                                 poController.Detail(pnDetail).setModelId("");
+                                                resetAmounts();
                                                 reloadRecords();
                                             } else {
                                                 loadRecordMaster();
@@ -676,13 +681,14 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                     "Are you sure you want to change the variant?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
                                                 poController.Detail(pnDetail).setVariantId("");
+                                                resetAmounts();
                                                 reloadRecords();
                                             } else {
                                                 reloadRecords();
                                                 return;
                                             }
                                         } else {
-                                            reloadRecords();
+                                            loadRecordMaster();
                                             return;
                                         }
                                     }
@@ -1017,8 +1023,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     //set to 1 all of column 2 row data value to enable checked
                     for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
                         if (checkedBox.isSelected()) {
+                            poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "1");
                         } else {
+                            poController.AddOnList(lnCtr).setAmount(0.00);
+                            poController.AddOnList(lnCtr).setQuantity(0);
+                            poController.AddOnList(lnCtr).setTotalAmount(0.00);
+                            poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "0");
                         }
                     }
@@ -1063,6 +1074,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     boolean lbisTrue = newVal;
                     switch (colIndex) {
                         case 0:
+                            poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
+                            if (!lbisTrue) {
+                                poController.AddOnList(rowIndex).setAmount(0.00);
+                                poController.AddOnList(rowIndex).setQuantity(0);
+                                poController.AddOnList(rowIndex).setTotalAmount(0.00);
+                            }
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
@@ -1269,6 +1286,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         try {
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 checkedItems(lnCtr);
+                                if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active
+                                    checkedItem.set(lnCtr, "1");
+                                } else {
+                                    checkedItem.set(lnCtr, "0");
+                                }
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
@@ -1381,10 +1403,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private void checkedItems(int lnCtr) {
         try {
             if (checkedItem.get(lnCtr) == null) {
-                checkedItem.add("1");
+                checkedItem.add("0");
             }
         } catch (Exception e) {
-            checkedItem.add("1");
+            checkedItem.add("0");
         }
     }
 
