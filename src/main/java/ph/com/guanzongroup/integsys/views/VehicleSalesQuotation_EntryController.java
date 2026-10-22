@@ -944,13 +944,20 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordAddOns() {
         try {
-            if (pnAddOns < 0 || pnAddOns > poController.getDetailCount() - 1) {
+            if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
+            boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
+            JFXUtil.setDisabled(!lbShow1, tfAccessories);
 
             if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
+                JFXUtil.setDisabled(false, tfAccessories);
                 tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
             } else {
+                if (lbShow1) {
+                    JFXUtil.setDisabled(true, tfAccessories);
+
+                }
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
@@ -1294,7 +1301,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
-                                                getData(String.valueOf(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName())),
+                                                getData(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName()),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
@@ -1332,7 +1339,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         int lnCtr;
                         pbEnteredFreebies = false;
                         freebies_data.clear();
-                        try {
+//                        try {
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
@@ -1340,7 +1347,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 checkedItems(lnCtr);
                                 freebies_data.add(
                                         new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
-                                                getData(String.valueOf(poController.AddOnList(lnCtr).AddOnMaster().getAddOnType())),
+                                                getData(""),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
@@ -1363,10 +1370,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 tblViewFreebies.getFocusModel().focus(pnFreebies);
                                 loadRecordAddOns();
                             }
-                        } catch (SQLException | GuanzonException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        }
+//                        } catch (SQLException | GuanzonException ex) {
+//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//                        }
                     });
                 });
     }
