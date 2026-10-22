@@ -1348,9 +1348,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 freebies_data.add(
                                         new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
                                                 getData(""),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
                                                 String.valueOf(lnCtr)
                                         ));
                             }
