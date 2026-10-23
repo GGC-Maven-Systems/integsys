@@ -904,7 +904,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
             tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
             tfClient.setText(poController.Master().Client().getCompanyName());
-            tfAddress.setText(poController.Master().ClientAddress().getAddress());
+            tfAddress.setText(poController.getFullAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
             tfInquiryNo.setText(poController.Detail(pnDetail).getSourceNo());
