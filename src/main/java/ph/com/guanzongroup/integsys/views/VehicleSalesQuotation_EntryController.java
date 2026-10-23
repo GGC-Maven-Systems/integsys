@@ -935,6 +935,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
+            poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
@@ -1010,6 +1011,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
             }
+            poController.computeFields();
             tfDescription.setText(poController.FreebiesList(pnFreebies).Inventory().getDescription());
             tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
         } catch (SQLException | GuanzonException ex) {
@@ -1032,9 +1034,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "1");
                         } else {
-                            poController.AddOnList(lnCtr).setAmount(0.00);
                             poController.AddOnList(lnCtr).setQuantity(0);
-                            poController.AddOnList(lnCtr).setTotalAmount(0.00);
                             poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "0");
                         }
@@ -1118,9 +1118,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
                             if (!lbisTrue) {
-                                poController.AddOnList(rowIndex).setAmount(0.00);
                                 poController.AddOnList(rowIndex).setQuantity(0);
-                                poController.AddOnList(rowIndex).setTotalAmount(0.00);
                             }
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
