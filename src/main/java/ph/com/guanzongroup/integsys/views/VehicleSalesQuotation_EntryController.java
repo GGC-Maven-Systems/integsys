@@ -167,6 +167,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 btnNew.fire();
             });
+            loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
