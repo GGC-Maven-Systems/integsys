@@ -1136,7 +1136,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableAddOns.reload();
-                                JFXUtil.runWithDelay(0.30, () -> {
+                                loadRecordAddOns();
+                                JFXUtil.runWithDelay(0.40, () -> {
                                     if (lbisTrue) {
                                         JFXUtil.selectAndFocusRow(tblViewAddOns, rowIndex);
                                     }
