@@ -932,6 +932,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordAddOns() {
         try {
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
+                JFXUtil.setDisabled(true, cbSelectAll);
+            } else {
+                disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
+                JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
+            }
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
@@ -1529,7 +1536,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
+        disableRowCheckbox.set(addOns_data.isEmpty());
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
