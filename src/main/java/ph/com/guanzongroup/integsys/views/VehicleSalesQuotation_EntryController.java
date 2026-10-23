@@ -517,7 +517,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
-                            loadRecordAddOns();
+                            loadTableAddOns.reload();
                             break;
 
                         //apAdditionalInfo
@@ -541,7 +541,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 JFXUtil.textFieldMoveNext(tfQuantityFreebies);
                             }
-                            loadRecordFreebies();
+                            loadTableFreebies.reload();
                             break;
                     }
                     break;
@@ -1007,7 +1007,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
             }
-            tfDescription.setText(poController.FreebiesList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName());
+            tfDescription.setText(poController.FreebiesList(pnFreebies).Inventory().getDescription());
             tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1059,7 +1059,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 poJSON = new JSONObject();
                 String lsTransDate = sdfFormat.format(poController.Master().getTransactionDate());
                 LocalDate ldTransactionDate = LocalDate.parse(lsTransDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
-//                try {
                 switch (datePicker.getId()) {
                     case "dpTransactionDate":
                         break;
@@ -1106,9 +1105,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     default:
                         break;
                 }
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                }
             });
 
     private void initCheckboxes() {
@@ -1333,6 +1329,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         pbEnteredAddOns = false;
                         addOns_data.clear();
                         try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadAddOnList();
+                            }
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if (pnEditMode == EditMode.READY
                                         && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")) {
@@ -1381,6 +1380,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -1394,13 +1396,16 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         pbEnteredFreebies = false;
                         freebies_data.clear();
                         try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadFreebiesList();
+                            }
                             for (lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
                                 freebies_data.add(
                                         new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
-                                                getData(poController.FreebiesList(lnCtr).AddOnMaster().AddOnType().getAddTypeName()),
+                                                getData(poController.FreebiesList(lnCtr).Inventory().getDescription()),
                                                 String.valueOf(poController.FreebiesList(lnCtr).getQuantity()),
                                                 "",
                                                 "",
@@ -1425,6 +1430,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
