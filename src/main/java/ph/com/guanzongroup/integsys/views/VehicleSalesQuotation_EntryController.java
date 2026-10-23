@@ -524,7 +524,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfTerms);
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    tfTerms.requestFocus();
+                                });
                             }
                             loadRecordAdditionalInfo();
                             break;
@@ -610,6 +612,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 poController.Master().setClientId("");
                                 poController.Master().setAddressId("");
                                 poController.Master().setContactId("");
+
+                                poController.Detail(pnDetail).setSourceNo("");
+                                String lsInquiryDate = JFXUtil.formatDateToString(oApp.getServerDate());
+                                JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
+                                JFXUtil.setCmbValue(cmbModeOfPayment, -1);
+                                poController.Detail(pnDetail).SalesInquiry().setClientId("");
                             }
                             break;
                         case "tfFinancingRate":
@@ -1104,10 +1112,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
-            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-                {poController.AddOnList(pnAddOns).AddOnMaster().getAddOnType(), tfAddOns},
-                {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
-                {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
+            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
+                JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                    {poController.AddOnList(pnAddOns).Inventory().getDescription(), tfAccessories},
+                    {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
+                    {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
+            } else {
+                JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                    {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
+                    {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
+            }
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
