@@ -797,40 +797,36 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     ChangeListener<Boolean> txtAdditionalInfo_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                try {
-                    switch (lsID) {
-                        case "tfBank":
-                            if (lsValue.isEmpty()) {
-                                poController.Detail(pnDetail).setQuotationRate("");
-                            }
-                            break;
-                        case "tfTerms":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setDuration(Integer.parseInt(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                        case "tfPromptPaymentDiscount":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                        case "tfRate":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setRateValue(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                    }
-                    loadRecordAdditionalInfo();
-                } catch (SQLException | GuanzonException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                switch (lsID) {
+                    case "tfBank":
+                        if (lsValue.isEmpty()) {
+                            poController.Detail(pnDetail).setQuotationRate("");
+                        }
+                        break;
+                    case "tfTerms":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setDuration(Integer.parseInt(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfPromptPaymentDiscount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfRate":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setRateValue(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
+                loadRecordAdditionalInfo();
+
             });
 
     ChangeListener<Boolean> txtFreebies_Focus = JFXUtil.FocusListener(TextField.class,
