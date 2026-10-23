@@ -1334,7 +1334,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if (pnEditMode == EditMode.READY
-                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")) {
+                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")
+                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).Inventory().getStockId(), null, "")) {
                                     continue;
                                 }
                                 checkedItems(lnCtr);
@@ -1400,9 +1401,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 poController.ReloadFreebiesList();
                             }
                             for (lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
-//                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
-//                                    continue;
-//                                }
+                                if (pnEditMode == EditMode.READY
+                                        && JFXUtil.isObjectEqualTo(poController.FreebiesList(lnCtr).Inventory().getStockId(), null, "")) {
+                                    continue;
+                                }
                                 freebies_data.add(
                                         new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
                                                 getData(poController.FreebiesList(lnCtr).Inventory().getDescription()),
@@ -1504,7 +1506,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         tblViewFreebies.setOnMouseClicked(event -> {
             if (freebies_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelVehicleQuotation_AddOns selected = (ModelVehicleQuotation_AddOns) tblViewFreebies.getSelectionModel().getSelectedItem();
+                    ModelVehicleQuotation_Freebies selected = (ModelVehicleQuotation_Freebies) tblViewFreebies.getSelectionModel().getSelectedItem();
                     if (selected != null) {
                         int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
                         pnFreebies = lnRow;
