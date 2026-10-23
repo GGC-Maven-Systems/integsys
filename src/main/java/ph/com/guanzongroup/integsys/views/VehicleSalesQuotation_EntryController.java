@@ -740,13 +740,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     ChangeListener<Boolean> txtPricing_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
-                    case "tfSRP":
-                        lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(pnDetail).setSRPAmount(Double.parseDouble(lsValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
                     case "tfDownpayment":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setDownPayment(Double.parseDouble(lsValue));
@@ -928,14 +921,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             }
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAccessories);
-
+            JFXUtil.clearNodes(tfAccessories, tfAddOns);
             if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
                 JFXUtil.setDisabled(false, tfAccessories);
                 tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
             } else {
                 if (lbShow1) {
                     JFXUtil.setDisabled(true, tfAccessories);
-
                 }
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
@@ -1271,16 +1263,28 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         addOns_data.clear();
                         try {
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
+                                if (pnEditMode == EditMode.READY
+                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")) {
+                                    continue;
+                                }
                                 checkedItems(lnCtr);
                                 if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active
                                     checkedItem.set(lnCtr, "1");
                                 } else {
                                     checkedItem.set(lnCtr, "0");
                                 }
+
+                                String lsDescription = "";
+                                if (JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).getAddOnId(), null, "")) {
+                                    lsDescription = poController.AddOnList(lnCtr).Inventory().getDescription();
+                                } else {
+                                    lsDescription = poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName();
+                                }
+
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
                                                 String.valueOf(lnCtr + 1),
-                                                getData(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName()),
+                                                getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
@@ -1319,36 +1323,36 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         pbEnteredFreebies = false;
                         freebies_data.clear();
 //                        try {
-                            for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                        for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
-                                checkedItems(lnCtr);
-                                freebies_data.add(
-                                        new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
-                                                getData(""),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
-                                                String.valueOf(lnCtr)
-                                        ));
-                            }
+                            checkedItems(lnCtr);
+                            freebies_data.add(
+                                    new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
+                                            getData(""),
+                                            String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
+                                            String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
+                                            String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(0, false)),
+                                            String.valueOf(lnCtr)
+                                    ));
+                        }
 
-                            if (pnFreebies < 0 || pnFreebies
-                                    >= freebies_data.size()) {
-                                if (!freebies_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    tblViewFreebies.getSelectionModel().select(0);
-                                    tblViewFreebies.getFocusModel().focus(0);
-                                    pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
-                                    loadRecordAddOns();
-                                }
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewFreebies.getSelectionModel().select(pnFreebies);
-                                tblViewFreebies.getFocusModel().focus(pnFreebies);
+                        if (pnFreebies < 0 || pnFreebies
+                                >= freebies_data.size()) {
+                            if (!freebies_data.isEmpty()) {
+                                /* FOCUS ON FIRST ROW */
+                                tblViewFreebies.getSelectionModel().select(0);
+                                tblViewFreebies.getFocusModel().focus(0);
+                                pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
                                 loadRecordAddOns();
                             }
+                        } else {
+                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                            tblViewFreebies.getSelectionModel().select(pnFreebies);
+                            tblViewFreebies.getFocusModel().focus(pnFreebies);
+                            loadRecordAddOns();
+                        }
 //                        } catch (SQLException | GuanzonException ex) {
 //                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
 //                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1376,7 +1380,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     public void clearTextFields() {
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apAddOns, apAdditionalInfo, apFreebies);
+        JFXUtil.clearTextFields(apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
     }
 
     private void resetCheckboxSelection() {
@@ -1454,7 +1458,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
-
+        boolean lbShow4 = fnValue == EditMode.UPDATE;
+        if (lbShow4) {
+            JFXUtil.setDisabled(lbShow4, apMaster);
+        }
         if (fnValue != EditMode.READY) {
             return;
         }
