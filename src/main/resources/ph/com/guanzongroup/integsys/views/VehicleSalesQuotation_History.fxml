@@ -368,7 +368,7 @@
                                                                   <TableColumn fx:id="tblTotalAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total" />
                                                               </columns>
                                                             </TableView>
-                                                                                <TextField fx:id="tfAddOns" disable="true" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="415.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                <TextField fx:id="tfAddOns" disable="true" maxHeight="26.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="454.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                                                 <TextField fx:id="tfAccessories" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
                                                                                 <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                                                 <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
