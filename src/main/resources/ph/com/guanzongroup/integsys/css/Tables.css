@@ -145,3 +145,435 @@
 .table-view .virtual-flow .scroll-bar .thumb:pressed:hover {
     -fx-background-color: #979797;
 }
+
+
+/* ================================================================
+   TREE TABLE VIEW
+   Sales Quotation Master / Version List
+   JavaFX 8
+   ================================================================ */
+
+
+/* ================================================================
+   MAIN TREE TABLE
+   ================================================================ */
+
+.tree-table-view {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+
+    -fx-border-color: #000000;
+    -fx-border-width: 1px 1px 1px 1px;
+}
+
+.tree-table-view:focused {
+    -fx-background-color: transparent;
+}
+
+
+/* ================================================================
+   DISABLED ROWS
+   ================================================================ */
+
+.tree-table-view .tree-table-row-cell:disabled {
+    -fx-opacity: 1;
+}
+
+
+/* ================================================================
+   DISABLED HEADER LABEL
+   ================================================================ */
+
+.tree-table-view .column-header-background .label:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+
+/* ================================================================
+   COLUMN HEADER BACKGROUND
+   ================================================================ */
+
+.tree-table-view .column-header-background {
+    -fx-background-color: #4d5656;
+}
+
+
+/* ================================================================
+   COLUMN HEADER LABEL
+   ================================================================ */
+
+.tree-table-view .column-header-background .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+
+/* ================================================================
+   COLUMN HEADER / FILLER
+   ================================================================ */
+
+.tree-table-view .filler,
+.tree-table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 25px;
+}
+
+
+/* ================================================================
+   COLUMN HEADER HEIGHT
+   ================================================================ */
+
+.tree-table-view .column-header {
+    -fx-min-height: 25px;
+    -fx-pref-height: 25px;
+    -fx-max-height: 25px;
+}
+
+
+/* ================================================================
+   TREE TABLE CELLS
+   ================================================================ */
+
+.tree-table-view .tree-table-cell {
+    -fx-text-fill: black;
+    -fx-font-size: 9pt;
+    -fx-font-family: 'Open Sans','Helvetica Neue',Arial,sans-serif;
+}
+
+
+/* ================================================================
+   TREE TABLE ROW
+   ================================================================ */
+
+.tree-table-row-cell {
+    -fx-background-color: -fx-table-cell-border-color, #D0D3D4;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em;
+    -fx-cell-size: 25px;
+}
+
+
+/* ================================================================
+   SELECTED TREE TABLE ROW
+   ================================================================ */
+
+.tree-table-row-cell:selected {
+    -fx-background-color: #B3B6B7;
+    -fx-background-insets: 0;
+    -fx-background-radius: 1;
+}
+
+
+/* ================================================================
+   SELECTED CELL
+   ================================================================ */
+
+.tree-table-row-cell:filled > .tree-table-cell:selected,
+.tree-table-row-cell:filled:selected > .tree-table-cell {
+    -fx-background: -fx-selection-bar-non-focused;
+}
+
+
+/* ================================================================
+   EMPTY ROW
+   ================================================================ */
+
+.tree-table-row-cell:empty {
+    -fx-background-color: white;
+}
+
+.tree-table-row-cell:empty .tree-table-cell {
+    -fx-border-width: 0px;
+}
+
+
+/* ================================================================
+   TREE DISCLOSURE NODE
+   Expand / Collapse arrow
+   ================================================================ */
+
+.tree-table-view .tree-disclosure-node {
+    -fx-padding: 0 5 0 0;
+}
+
+
+/* ================================================================
+   TREE DISCLOSURE ARROW
+   ================================================================ */
+
+.tree-table-view .tree-disclosure-node .arrow {
+    -fx-background-color: #4d5656;
+}
+
+
+/* ================================================================
+   EXPANDED DISCLOSURE ARROW
+   ================================================================ */
+
+.tree-table-view .tree-disclosure-node:expanded .arrow {
+    -fx-background-color: #4d5656;
+}
+
+
+/* ================================================================
+   DISCLOSURE NODE WHEN SELECTED
+   ================================================================ */
+
+.tree-table-row-cell:selected .tree-disclosure-node .arrow {
+    -fx-background-color: #000000;
+}
+
+
+/* ================================================================
+   VIRTUAL FLOW SCROLLBARS
+   ================================================================ */
+
+.tree-table-view > .virtual-flow > .scroll-bar:vertical,
+.tree-table-view > .virtual-flow > .scroll-bar:vertical > .track,
+.tree-table-view > .virtual-flow > .scroll-bar:vertical > .track-background,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal > .track,
+.tree-table-view > .virtual-flow > .scroll-bar:horizontal > .track-background {
+    -fx-background-color: transparent;
+}
+
+
+/* ================================================================
+   MAIN SCROLLBAR TRACK
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .track,
+.tree-table-view .virtual-flow .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-radius: 2em;
+}
+
+
+/* ================================================================
+   HORIZONTAL SCROLLBAR INCREMENT / DECREMENT BUTTON
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .increment-button,
+.tree-table-view .virtual-flow .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+}
+
+
+/* ================================================================
+   VERTICAL SCROLLBAR INCREMENT / DECREMENT BUTTON
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:vertical .increment-button,
+.tree-table-view .virtual-flow .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 0;
+}
+
+
+/* ================================================================
+   HIDE SCROLLBAR ARROWS
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar .increment-arrow,
+.tree-table-view .virtual-flow .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+
+/* ================================================================
+   SCROLLBAR THUMB
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb {
+    -fx-background-color: #C2C4C4;
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+}
+
+
+/* ================================================================
+   SCROLLBAR THUMB PRESSED
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb:pressed,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: #979797;
+}
+
+
+/* ================================================================
+   SCROLLBAR THUMB HOVER
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar:horizontal .thumb:hover,
+.tree-table-view .virtual-flow .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #ababab;
+}
+
+
+/* ================================================================
+   SCROLLBAR THUMB PRESSED + HOVER
+   ================================================================ */
+
+.tree-table-view .virtual-flow .scroll-bar .thumb:pressed,
+.tree-table-view .virtual-flow .scroll-bar .thumb:pressed:hover {
+    -fx-background-color: #979797;
+}
+
+
+/* ================================================================
+   FOCUSED TREE TABLE
+   ================================================================ */
+
+.tree-table-view:focused .tree-table-row-cell:selected {
+    -fx-background-color: #B3B6B7;
+}
+
+
+/* ================================================================
+   ROW HOVER
+   ================================================================ */
+
+.tree-table-row-cell:hover {
+    -fx-background-color: #D0D3D4;
+}
+
+
+/* ================================================================
+   SELECTED + HOVER
+   ================================================================ */
+
+.tree-table-row-cell:selected:hover {
+    -fx-background-color: #B3B6B7;
+}
+
+
+/* ================================================================
+   TREE TABLE CELL BORDER
+   ================================================================ */
+
+.tree-table-view .tree-table-cell {
+    -fx-border-color: transparent;
+    -fx-border-width: 0px;
+}
+
+
+/* ================================================================
+   PARENT QUOTATION ROW
+   ================================================================ */
+
+.tree-table-row-cell:expanded,
+.tree-table-row-cell:collapsed {
+    -fx-font-weight: normal;
+}
+
+
+/* ================================================================
+   VERSION CHILD ROW
+   ================================================================ */
+
+.tree-table-row-cell .tree-table-cell {
+    -fx-font-weight: normal;
+}
+
+
+/* ================================================================
+   TREE INDENTATION AREA
+   ================================================================ */
+
+.tree-table-row-cell .tree-disclosure-node {
+    -fx-padding: 0 5 0 0;
+}
+
+
+/* ================================================================
+   HEADER BOTTOM BORDER
+   ================================================================ */
+
+.tree-table-view .column-header-background {
+    -fx-border-color: #4d5656;
+    -fx-border-width: 0 0 1px 0;
+}
+
+
+/* ================================================================
+   CORNER
+   ================================================================ */
+
+.tree-table-view .corner {
+    -fx-background-color: #4d5656;
+}
+
+
+/* ================================================================
+   TABLE BACKGROUND
+   ================================================================ */
+
+.tree-table-view .virtual-flow {
+    -fx-background-color: transparent;
+}
+
+
+/* ================================================================
+   ROW HEIGHT
+   ================================================================ */
+
+.tree-table-view .tree-table-row-cell {
+    -fx-cell-size: 25px;
+    -fx-padding: 0;
+}
+
+
+/* ================================================================
+   HEADER TEXT ALIGNMENT
+   ================================================================ */
+
+.tree-table-view .column-header .label {
+    -fx-alignment: CENTER_LEFT;
+}
+
+
+/* ================================================================
+   TREE COLUMN FIRST CELL
+   ================================================================ */
+
+.tree-table-view .tree-table-row-cell .tree-table-cell:first-child {
+    -fx-padding: 0 5 0 5;
+}
+
+
+/* ================================================================
+   FOCUSED CELL
+   ================================================================ */
+
+.tree-table-view:focused .tree-table-cell:focused {
+    -fx-background-color: transparent;
+}
+
+
+/* ================================================================
+   REMOVE DEFAULT FOCUS BORDER
+   ================================================================ */
+
+.tree-table-view:focused {
+    -fx-background-insets: 0;
+}
+
+
+/* ================================================================
+   FINAL BORDER
+   ================================================================ */
+
+.tree-table-view {
+    -fx-border-color: #000000;
+    -fx-border-width: 1px;
+}
