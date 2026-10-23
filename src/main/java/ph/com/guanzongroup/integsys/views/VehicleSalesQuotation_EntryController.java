@@ -535,9 +535,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                         //apFreebies
                         case "tfDescription":
+                            poJSON = poController.SearchFreebies(lsValue, false, pnFreebies);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            } else {
+                                JFXUtil.textFieldMoveNext(tfQuantityFreebies);
                             }
+                            loadRecordFreebies();
                             break;
                     }
                     break;
