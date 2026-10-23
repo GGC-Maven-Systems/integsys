@@ -944,7 +944,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
             } else {
                 if (lbShow1) {
-                    JFXUtil.setDisabled(true, tfAddOns);
+                    JFXUtil.setDisabled(false, tfAddOns);
                     JFXUtil.setDisabled(true, tfAccessories);
                 }
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
