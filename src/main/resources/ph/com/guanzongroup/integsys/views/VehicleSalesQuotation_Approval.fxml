@@ -381,72 +381,82 @@
                                               </AnchorPane>
                                           <HBox spacing="5.0" VBox.vgrow="ALWAYS">
                                              <children>
-                                                <AnchorPane fx:id="apAddOns" layoutX="10.0" layoutY="10.0" style="-fx-border-color: FF8201;" HBox.hgrow="ALWAYS">
+                                                   <AnchorPane layoutX="10.0" layoutY="10.0" style="-fx-border-color: FF8201;" HBox.hgrow="ALWAYS">
                                                    <children>
-                                                      <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                         <columnConstraints>
-                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="139.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
-                                                         </columnConstraints>
-                                                         <rowConstraints>
-                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                         </rowConstraints>
+                                                      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                          <children>
-                                                         <Label text="Add-Ons / Accessories" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
-                                                               <font>
-                                                                  <Font name="System Bold" size="12.0" />
-                                                               </font>
-                                                            </Label>
-                                                                                <Label text="Add-Ons" GridPane.rowIndex="1">
-                                                               <font>
-                                                                  <Font size="12.0" />
-                                                               </font>
-                                                            </Label>
-                                                                                <Label layoutX="66.0" layoutY="45.0" text="Accessories" GridPane.rowIndex="2">
-                                                               <font>
-                                                                  <Font size="12.0" />
-                                                               </font>
-                                                            </Label>
-                                                                                <Label layoutX="64.0" layoutY="75.0" text="Amount" GridPane.rowIndex="3">
-                                                               <font>
-                                                                  <Font size="12.0" />
-                                                               </font>
-                                                            </Label>
-                                                                                <Label layoutX="49.0" layoutY="45.0" text="Quantity" GridPane.columnIndex="4" GridPane.rowIndex="3">
-                                                               <font>
-                                                                  <Font size="12.0" />
-                                                               </font>
-                                                            </Label>
-                                                                                <TableView fx:id="tblViewAddOns" GridPane.columnSpan="7" GridPane.rowIndex="5">
-                                                               <columns>
+                                                            <AnchorPane fx:id="apAddOns">
+                                                               <children>
+                                                                  <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="139.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
+                                                                     </rowConstraints>
+                                                                     <children>
+                                                                     <Label text="Add-Ons / Accessories" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
+                                                                           <font>
+                                                                              <Font name="System Bold" size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                            <Label text="Add-Ons" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                            <Label layoutX="66.0" layoutY="45.0" text="Accessories" GridPane.rowIndex="2">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                            <Label layoutX="64.0" layoutY="75.0" text="Amount" GridPane.rowIndex="3">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                            <Label layoutX="49.0" layoutY="45.0" text="Quantity" GridPane.columnIndex="4" GridPane.rowIndex="3">
+                                                                           <font>
+                                                                              <Font size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                                            <TextField fx:id="tfAddOns" maxHeight="26.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="454.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                            <TextField fx:id="tfAccessories" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
+                                                                                            <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                                            <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
+                                                                                        </children>
+                                                                  </GridPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                                                <TableView fx:id="tblViewAddOns" prefHeight="700.0" prefWidth="559.0">
+                                                              <columns>
                                                                   <TableColumn prefWidth="26.0">
                                                                      <graphic>
                                                                         <CheckBox fx:id="cbSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
                                                                      </graphic>
                                                                   </TableColumn>
-                                                                  <TableColumn fx:id="tblNoAddOns" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
-                                                                  <TableColumn fx:id="tblDescriptionAddOns" maxWidth="290.0" minWidth="290.0" prefWidth="290.0" text="Description" />
+                                                                <TableColumn fx:id="tblNoAddOns" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
+                                                                  <TableColumn fx:id="tblDescriptionAddOns" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Description" />
                                                                   <TableColumn fx:id="tblAmountAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Amount" />
                                                                   <TableColumn fx:id="tblQtyAddOns" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Qty" />
                                                                   <TableColumn fx:id="tblTotalAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total" />
-                                                               </columns>
+                                                              </columns>
+                                                               <VBox.margin>
+                                                                  <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                               </VBox.margin>
                                                             </TableView>
-                                                                                <TextField fx:id="tfAddOns" maxHeight="26.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="498.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                                                <TextField fx:id="tfAccessories" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
-                                                                                <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                                <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                                                                            </children>
-                                                      </GridPane>
+                                                         </children>
+                                                      </VBox>
                                                    </children>
                                                 </AnchorPane>
                                                 <VBox spacing="5.0">
@@ -612,52 +622,62 @@
                                                             </AnchorPane>
                                                          </children>
                                                       </HBox>
-                                                      <AnchorPane fx:id="apFreebies" minHeight="210.0" style="-fx-border-color: FF8201;">
+                                                        <AnchorPane minHeight="210.0" style="-fx-border-color: FF8201;">
                                                          <children>
-                                                            <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                               <columnConstraints>
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="130.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
-                                                               </columnConstraints>
-                                                               <rowConstraints>
-                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                               </rowConstraints>
+                                                            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <children>
-                                                               <Label text="Freebies" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label layoutX="66.0" layoutY="45.0" text="Description" GridPane.rowIndex="1">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <Label text="Quantity" GridPane.rowIndex="2">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                                        <TableView fx:id="tblViewFreebies" GridPane.columnSpan="7" GridPane.rowIndex="4">
+                                                                  <AnchorPane fx:id="apFreebies" prefHeight="200.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                           <columnConstraints>
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="130.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                           </columnConstraints>
+                                                                           <rowConstraints>
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
+                                                                           </rowConstraints>
+                                                                           <children>
+                                                                           <Label text="Freebies" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Description" GridPane.rowIndex="1">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                                                    <Label text="Quantity" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                                                    <TextField fx:id="tfDescription" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
+                                                                                                    <TextField fx:id="tfQuantityFreebies" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                                                </children>
+                                                                        </GridPane>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                                                        <TableView fx:id="tblViewFreebies">
                                                                      <columns>
                                                                         <TableColumn fx:id="tblNoFreebies" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
-                                                                        <TableColumn fx:id="tblDescriptionFreebies" maxWidth="450.0" minWidth="450.0" prefWidth="450.0" text="Description" />
+                                                                        <TableColumn fx:id="tblDescriptionFreebies" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
                                                                         <TableColumn fx:id="tblQtyFreebies" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Qty" />
                                                                      </columns>
+                                                                     <VBox.margin>
+                                                                        <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                                     </VBox.margin>
                                                                   </TableView>
-                                                                                        <TextField fx:id="tfDescription" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
-                                                                                        <TextField fx:id="tfQuantityFreebies" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                                    </children>
-                                                            </GridPane>
+                                                               </children>
+                                                            </VBox>
                                                          </children>
                                                       </AnchorPane>
                                                       <AnchorPane fx:id="apRemarks" style="-fx-border-color: FF8201;" VBox.vgrow="ALWAYS">
