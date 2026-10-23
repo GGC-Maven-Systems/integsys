@@ -121,7 +121,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     @FXML
     private TableView tblViewAddOns, tblViewFreebies;
     @FXML
-    private CheckBox cbSelectAll;
+    private CheckBox cbSelectAll, cbActive;
     @FXML
     private TableColumn tblNoAddOns, tblDescriptionAddOns, tblAmountAddOns, tblQtyAddOns, tblTotalAddOns, tblNoFreebies, tblDescriptionFreebies, tblQtyFreebies;
     @FXML
@@ -1015,9 +1015,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
             }
-            JFXUtil.setDisabled(poController.FreebiesList(pnAddOns).getEditMode() == EditMode.UPDATE, tfDescription, tfQuantityFreebies);
+            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription, tfQuantityFreebies);
             tfDescription.setText(poController.FreebiesList(pnFreebies).Inventory().getDescription());
             tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
+            cbActive.setSelected(poController.FreebiesList(pnFreebies).getRecordStatus());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1045,15 +1046,15 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     }
                     loadTableAddOns.reload();
                     break;
-                case "cbActive": // this is the id
-                    if (isContainsChecked()) {
-                        processAction("cbActive", checkedBox.isSelected() ? "1" : "0");
+                case "cbActive":
+                    if (poController.Detail(pnFreebies).getEditMode() == EditMode.ADDNEW) {
+                        poController.FreebiesList().remove(pnFreebies);
                     } else {
-                        poJSON = poController.Detail(pnAddOns).setRecordStatus(checkedBox.isSelected());
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        loadTableAddOns.reload();
+                        poController.FreebiesList(pnFreebies).setRecordStatus(cbActive.isSelected());
+                    }
+                    loadTableFreebies.reload();
+                    if (!checkedBox.isSelected()) {
+                        moveNextFreebies(false, true);
                     }
                     break;
             }
@@ -1337,12 +1338,14 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadAddOnList();
                             }
+                            int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if (pnEditMode == EditMode.READY
                                         && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")
                                         && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).Inventory().getStockId(), null, "")) {
                                     continue;
                                 }
+                                lnCount += 1;
                                 checkedItems(lnCtr);
                                 if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
                                     checkedItem.set(lnCtr, "1");
@@ -1359,7 +1362,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
-                                                String.valueOf(lnCtr + 1),
+                                                String.valueOf(lnCount),
                                                 getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
@@ -1405,13 +1408,18 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadFreebiesList();
                             }
+                            int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
+                                if (!poController.FreebiesList(lnCtr).getRecordStatus()) { // if inactive
+                                    continue;
+                                }
+                                lnCount += 1;
                                 if (pnEditMode == EditMode.READY
                                         && JFXUtil.isObjectEqualTo(poController.FreebiesList(lnCtr).Inventory().getStockId(), null, "")) {
                                     continue;
                                 }
                                 freebies_data.add(
-                                        new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
+                                        new ModelVehicleQuotation_Freebies(String.valueOf(lnCount),
                                                 getData(poController.FreebiesList(lnCtr).Inventory().getDescription()),
                                                 String.valueOf(poController.FreebiesList(lnCtr).getQuantity()),
                                                 "",
@@ -1419,20 +1427,20 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-
-                            if (pnFreebies < 0 || pnFreebies
+                            int lnTempRow = JFXUtil.getDetailRow(freebies_data, pnFreebies, 06); //this method is used only when Reverse is applied
+                            if (lnTempRow < 0 || lnTempRow
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    tblViewFreebies.getSelectionModel().select(0);
-                                    tblViewFreebies.getFocusModel().focus(0);
-                                    pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0);
+                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
+                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewFreebies.getSelectionModel().select(pnFreebies);
-                                tblViewFreebies.getFocusModel().focus(pnFreebies);
+                                tblViewFreebies.getSelectionModel().select(lnTempRow);
+                                tblViewFreebies.getFocusModel().focus(lnTempRow);
                                 loadRecordFreebies();
                             }
                         } catch (SQLException | GuanzonException ex) {
