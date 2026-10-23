@@ -891,6 +891,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 btnVoid.setText(lsStat);
             });
+            //if update then disable other nodes
+            //if update only enable the expected and valid thru
+
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
@@ -898,9 +901,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
 
-            String lsExpectedDate = JFXUtil.formatDateToString(poController.Detail(pnAddOns).getExpectedDate());
+            String lsExpectedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getExpectedDate());
             JFXUtil.setDateValue(dpExpectedDate, JFXUtil.isObjectEqualTo(lsExpectedDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsExpectedDate, "yyyy-MM-dd"));
-            String lsValidThru = JFXUtil.formatDateToString(poController.Detail(pnAddOns).getValidThruDate());
+            String lsValidThru = JFXUtil.formatDateToString(poController.Detail(pnDetail).getValidThruDate());
             JFXUtil.setDateValue(dpValidThru, JFXUtil.isObjectEqualTo(lsValidThru, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidThru, "yyyy-MM-dd"));
 
             tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
@@ -1184,8 +1187,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     public void moveNextFreebies(boolean isUp, boolean continueNext) {
         if (continueNext) {
             apFreebies.requestFocus();
-            pnFreebies = isUp ? Integer.parseInt(freebies_data.get(JFXUtil.moveToPreviousRow(tblViewFreebies)).getIndex07())
-                    : Integer.parseInt(freebies_data.get(JFXUtil.moveToNextRow(tblViewFreebies)).getIndex07());
+            pnFreebies = isUp ? Integer.parseInt(freebies_data.get(JFXUtil.moveToPreviousRow(tblViewFreebies)).getIndex06())
+                    : Integer.parseInt(freebies_data.get(JFXUtil.moveToNextRow(tblViewFreebies)).getIndex06());
         }
         loadRecordAddOns();
         if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
@@ -1533,14 +1536,15 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
-
+        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient, tfFinancingRate, tfBrand, tfModel, tfVariant);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
+
         boolean lbShow4 = fnValue == EditMode.UPDATE;
         if (lbShow4) {
-            JFXUtil.setDisabled(lbShow4, apMaster);
+            JFXUtil.setDisabledExcept(true, apMaster, dpExpectedDate, dpValidThru);
         }
         if (fnValue != EditMode.READY) {
             return;
