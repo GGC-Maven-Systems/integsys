@@ -1390,7 +1390,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         pbEnteredFreebies = false;
                         freebies_data.clear();
                         try {
-                            for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                            for (lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
@@ -1411,13 +1411,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     tblViewFreebies.getSelectionModel().select(0);
                                     tblViewFreebies.getFocusModel().focus(0);
                                     pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
-                                    loadRecordAddOns();
+                                    loadRecordFreebies();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
                                 tblViewFreebies.getSelectionModel().select(pnFreebies);
                                 tblViewFreebies.getFocusModel().focus(pnFreebies);
-                                loadRecordAddOns();
+                                loadRecordFreebies();
                             }
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
