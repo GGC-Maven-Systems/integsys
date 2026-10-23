@@ -954,6 +954,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
 
+            JFXUtil.setDisabled(poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE, tfAddOns, tfAccessories);
             //dfine the addonid and stockid if available
             //if none enable the searching for add ons and accessories
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
@@ -1011,7 +1012,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
             }
-            poController.computeFields();
+            JFXUtil.setDisabled(poController.FreebiesList(pnAddOns).getEditMode() == EditMode.UPDATE, tfDescription, tfQuantityFreebies);
             tfDescription.setText(poController.FreebiesList(pnFreebies).Inventory().getDescription());
             tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
         } catch (SQLException | GuanzonException ex) {
@@ -1534,7 +1535,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient, tfFinancingRate, tfBrand, tfModel, tfVariant);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
