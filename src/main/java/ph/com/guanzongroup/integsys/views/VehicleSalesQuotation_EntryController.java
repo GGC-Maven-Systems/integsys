@@ -1047,7 +1047,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     loadTableAddOns.reload();
                     break;
                 case "cbActive":
-                    if (poController.Detail(pnFreebies).getEditMode() == EditMode.ADDNEW) {
+                    if (poController.FreebiesList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
                         poController.FreebiesList().remove(pnFreebies);
                     } else {
                         poController.FreebiesList(pnFreebies).setRecordStatus(cbActive.isSelected());
