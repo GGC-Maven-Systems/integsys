@@ -1364,7 +1364,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
                             return;
                         }
-                        ShowMessageFX.Error((String) poJSON.get("message"), pxeModuleName, null);
+
                         break;
                     case "btnExport":
                         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
