@@ -801,7 +801,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     switch (lsID) {
                         case "tfBank":
                             if (lsValue.isEmpty()) {
-                                poController.Detail(pnDetail).FinancingRate().setBankId("");
+                                poController.Detail(pnDetail).setQuotationRate("");
                             }
                             break;
                         case "tfTerms":
