@@ -219,6 +219,17 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
                         break;
+                    case "btnPrint":
+                        try {
+                            poController.printTransaction();
+                        } catch (NullPointerException npe) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                            ShowMessageFX.Error(MiscUtil.getException(npe), pxeModuleName, null);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                        }
+                        break;
                     case "btnBrowse":
                         poController.Master().setTransactionStatus("01234");
                         poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(), true);
