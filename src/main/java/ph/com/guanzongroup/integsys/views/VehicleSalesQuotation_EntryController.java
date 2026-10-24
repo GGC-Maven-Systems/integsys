@@ -320,7 +320,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
 
-                            poJSON = poController.OpenTransaction(poController.Master().getTransactionStatus());
+                            poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 btnCancel.fire();
