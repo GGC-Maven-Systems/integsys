@@ -50,6 +50,7 @@ import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -65,6 +66,7 @@ import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
 import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Freebies;
+import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Main;
 
 /**
  * FXML Controller class
@@ -76,8 +78,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     private GRiderCAS oApp;
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
-    int pnDetail = 0, pnAddOns = 0, pnFreebies = 0;
-    private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass(), "PO");
+    int pnDetail = 0, pnAddOns = 0, pnFreebies = 0, pnMain = 0;
+    private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static VehicleQuotation poController;
     public int pnEditMode;
 
@@ -91,12 +93,14 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     private ObservableList<ModelVehicleQuotation_AddOns> addOns_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleQuotation_Freebies> freebies_data = FXCollections.observableArrayList();
+    private ObservableList<ModelVehicleQuotation_Main> main_data = FXCollections.observableArrayList();
+    private FilteredList<ModelVehicleQuotation_Main> filteredData;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
-
+    private boolean tooltipShown = false;
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
 
-    JFXUtil.ReloadableTableTask loadTableAddOns, loadTableFreebies;
+    JFXUtil.ReloadableTableTask loadTableAddOns, loadTableFreebies, loadTableMain;
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
 
@@ -122,7 +126,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     @FXML
     private TableView tblViewAddOns, tblViewFreebies, tblViewMain;
     @FXML
-    private CheckBox cbSelectAll;
+    private CheckBox cbSelectAll, cbActive;
     @FXML
     private TableColumn tblNoAddOns, tblDescriptionAddOns, tblAmountAddOns, tblQtyAddOns, tblTotalAddOns, tblNoFreebies, tblDescriptionFreebies, tblQtyFreebies, tblNoMain, tblDate, tblTransactionNo, tblClient;
     @FXML
@@ -146,6 +150,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             }
             initLoadTable();
             initAddOnsGrid();
+            initMainGrid();
             initFreebiesGrid();
             initComboboxes();
             initCheckboxes();
@@ -153,7 +158,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             initDatepickers();
             initTableOnClick();
             clearTextFields();
-
+            pgPagination.setPageCount(1);
             loadTableAddOns.reload();
             pnEditMode = poController.getEditMode();
             poController.setWithUI(true);
@@ -169,6 +174,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
             });
+
+            lblSource.setText(poController.Master().Company().getCompanyName());
+            loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -361,7 +369,12 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         }
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apAddOns, apAdditionalInfo, apFreebies);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster, apAddOns, apAdditionalInfo, apFreebies);
+                        break;
+                    case "btnRetrieve":
+                        retrieveVehicleSalesQuotation();
+                        break;
+                    case "btnPrint":
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -373,11 +386,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 //                    loadRecordAddOns();
 //                    loadTableAddOns.reload();
 //                }
-                loadTableAddOns.reload();
-                loadTableFreebies.reload();
-                loadRecordMaster();
-                loadRecordAdditionalInfo();
-                loadRecordPricing();
+                reloadRecords();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -410,6 +419,22 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     break;
                 case F3:
                     switch (lsID) {
+                        case "tfSearchClient":
+                            poJSON = poController.SearchClient(lsValue, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                                break;
+                            }
+                            retrieveVehicleSalesQuotation();
+                            loadRecordSearch();
+                            return;
+                        case "tfSearchTransactionNo":
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", tfSearchTransactionNo);
+                                tooltipShown = true;
+                            }
+                            retrieveVehicleSalesQuotation();
+                            return;
                         //apMaster
                         case "tfClient":
                             poJSON = poController.SearchClient(lsValue, false);
@@ -799,40 +824,35 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     ChangeListener<Boolean> txtAdditionalInfo_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                try {
-                    switch (lsID) {
-                        case "tfBank":
-                            if (lsValue.isEmpty()) {
-                                poController.Detail(pnDetail).FinancingRate().setBankId("");
-                            }
-                            break;
-                        case "tfTerms":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setDuration(Integer.parseInt(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                        case "tfPromptPaymentDiscount":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                        case "tfRate":
-                            lsValue = JFXUtil.removeComma(lsValue);
-                            poJSON = poController.Detail(pnDetail).setRateValue(Double.parseDouble(lsValue));
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            }
-                            break;
-                    }
-                    loadRecordAdditionalInfo();
-                } catch (SQLException | GuanzonException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                switch (lsID) {
+                    case "tfBank":
+                        if (lsValue.isEmpty()) {
+                            poController.Detail(pnDetail).setQuotationRate("");
+                        }
+                        break;
+                    case "tfTerms":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setDuration(Integer.parseInt(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfPromptPaymentDiscount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
+                    case "tfRate":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.Detail(pnDetail).setRateValue(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
+                loadRecordAdditionalInfo();
             });
 
     ChangeListener<Boolean> txtFreebies_Focus = JFXUtil.FocusListener(TextField.class,
@@ -910,7 +930,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
             tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
             tfClient.setText(poController.Master().Client().getCompanyName());
-            tfAddress.setText(poController.Master().ClientAddress().getAddress());
+            tfAddress.setText(poController.getFullAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
             tfInquiryNo.setText(poController.Detail(pnDetail).getSourceNo());
@@ -934,9 +954,17 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     private void loadRecordAddOns() {
         try {
+            if (pnEditMode == EditMode.READY) {
+                disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
+                JFXUtil.setDisabled(true, cbSelectAll);
+            } else {
+                disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
+                JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
+            }
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
+            poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
@@ -955,6 +983,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
 
+            JFXUtil.setDisabled(poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE, tfAddOns, tfAccessories);
             //dfine the addonid and stockid if available
             //if none enable the searching for add ons and accessories
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
@@ -1012,8 +1041,10 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
             }
+            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
             tfDescription.setText(poController.FreebiesList(pnFreebies).Inventory().getDescription());
             tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
+            cbActive.setSelected(poController.FreebiesList(pnFreebies).getRecordStatus());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1034,24 +1065,22 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "1");
                         } else {
-                            poController.AddOnList(lnCtr).setAmount(0.00);
                             poController.AddOnList(lnCtr).setQuantity(0);
-                            poController.AddOnList(lnCtr).setTotalAmount(0.00);
                             poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                             checkedItem.set(lnCtr, "0");
                         }
                     }
                     loadTableAddOns.reload();
                     break;
-                case "cbActive": // this is the id
-                    if (isContainsChecked()) {
-                        processAction("cbActive", checkedBox.isSelected() ? "1" : "0");
+                case "cbActive":
+                    if (poController.FreebiesList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
+                        poController.FreebiesList().remove(pnFreebies);
                     } else {
-                        poJSON = poController.Detail(pnAddOns).setRecordStatus(checkedBox.isSelected());
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        loadTableAddOns.reload();
+                        poController.FreebiesList(pnFreebies).setRecordStatus(cbActive.isSelected());
+                    }
+                    loadTableFreebies.reload();
+                    if (!checkedBox.isSelected()) {
+                        moveNextFreebies(false, true);
                     }
                     break;
             }
@@ -1120,9 +1149,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
                             if (!lbisTrue) {
-                                poController.AddOnList(rowIndex).setAmount(0.00);
                                 poController.AddOnList(rowIndex).setQuantity(0);
-                                poController.AddOnList(rowIndex).setTotalAmount(0.00);
                             }
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
@@ -1135,7 +1162,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableAddOns.reload();
-                                JFXUtil.runWithDelay(0.30, () -> {
+                                loadRecordAddOns();
+                                JFXUtil.runWithDelay(0.40, () -> {
                                     if (lbisTrue) {
                                         JFXUtil.selectAndFocusRow(tblViewAddOns, rowIndex);
                                     }
@@ -1301,6 +1329,21 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         loadTableAddOns.reload();
     }
 
+    public void retrieveVehicleSalesQuotation() {
+        try {
+            poJSON = new JSONObject();
+            poJSON = poController.loadTransactionList(tfClient.getText(), tfTransactionNo.getText());
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+            } else {
+                loadTableMain.reload();
+            }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, apMaster);
@@ -1309,7 +1352,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setFocusListener(txtAdditionalInfo_Focus, apAdditionalInfo);
         JFXUtil.setFocusListener(txtFreebies_Focus, apFreebies);
 
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
         JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.setCommaFormatter(tfAmount, tfReservationAmt, tfTotalAmount, tfAmountToFinance, tfPromissoryNoteAmount);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies);
@@ -1324,6 +1367,42 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void initLoadTable() {
+        loadTableMain = new JFXUtil.ReloadableTableTask(
+                tblViewMain,
+                main_data,
+                () -> {
+                    Platform.runLater(() -> {
+                        main_data.clear();
+                        // Simulate loading delay
+//                        Thread.sleep(100);
+                        if (poController.getTransactionListCount() > 0) {
+                            for (int lnCtr = 0; lnCtr <= poController.getTransactionListCount() - 1; lnCtr++) {
+                                try {
+                                    main_data.add(new ModelVehicleQuotation_Main(String.valueOf(lnCtr + 1),
+                                            CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getTransactionDate()),
+                                            String.valueOf(poController.TransactionList(lnCtr).getTransactionNo()),
+                                            String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
+                                    ));
+                                } catch (Exception e) {
+                                }
+                            }
+                            if (pnMain < 0 || pnMain
+                                    >= main_data.size()) {
+                                if (!main_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    tblViewMain.getSelectionModel().select(0);
+                                    tblViewMain.getFocusModel().focus(0);
+                                    pnMain = tblViewMain.getSelectionModel().getSelectedIndex();
+                                }
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                tblViewMain.getSelectionModel().select(pnMain);
+                                tblViewMain.getFocusModel().focus(pnMain);
+                            }
+                        }
+                        JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMain, filteredData);
+                    });
+                });
         loadTableAddOns = new JFXUtil.ReloadableTableTask(
                 tblViewAddOns,
                 addOns_data,
@@ -1337,12 +1416,14 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadAddOnList();
                             }
+                            int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if (pnEditMode == EditMode.READY
                                         && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")
                                         && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).Inventory().getStockId(), null, "")) {
                                     continue;
                                 }
+                                lnCount += 1;
                                 checkedItems(lnCtr);
                                 if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
                                     checkedItem.set(lnCtr, "1");
@@ -1359,7 +1440,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
-                                                String.valueOf(lnCtr + 1),
+                                                String.valueOf(lnCount),
                                                 getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
@@ -1405,13 +1486,18 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadFreebiesList();
                             }
+                            int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
+                                if (!poController.FreebiesList(lnCtr).getRecordStatus()) { // if inactive
+                                    continue;
+                                }
+                                lnCount += 1;
                                 if (pnEditMode == EditMode.READY
                                         && JFXUtil.isObjectEqualTo(poController.FreebiesList(lnCtr).Inventory().getStockId(), null, "")) {
                                     continue;
                                 }
                                 freebies_data.add(
-                                        new ModelVehicleQuotation_Freebies(String.valueOf(lnCtr + 1),
+                                        new ModelVehicleQuotation_Freebies(String.valueOf(lnCount),
                                                 getData(poController.FreebiesList(lnCtr).Inventory().getDescription()),
                                                 String.valueOf(poController.FreebiesList(lnCtr).getQuantity()),
                                                 "",
@@ -1419,20 +1505,20 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-
-                            if (pnFreebies < 0 || pnFreebies
+                            int lnTempRow = JFXUtil.getDetailRow(freebies_data, pnFreebies, 06); //this method is used only when Reverse is applied
+                            if (lnTempRow < 0 || lnTempRow
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    tblViewFreebies.getSelectionModel().select(0);
-                                    tblViewFreebies.getFocusModel().focus(0);
-                                    pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0);
+                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
+                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewFreebies.getSelectionModel().select(pnFreebies);
-                                tblViewFreebies.getFocusModel().focus(pnFreebies);
+                                tblViewFreebies.getSelectionModel().select(lnTempRow);
+                                tblViewFreebies.getFocusModel().focus(lnTempRow);
                                 loadRecordFreebies();
                             }
                         } catch (SQLException | GuanzonException ex) {
@@ -1444,6 +1530,46 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         }
                     });
                 });
+    }
+
+    public void loadTableDetailFromMain() {
+        try {
+            poJSON = new JSONObject();
+
+            ModelVehicleQuotation_Main selected = (ModelVehicleQuotation_Main) tblViewMain.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                String lsTransactionNo = selected.getIndex03();
+                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getTransactionNo(), lsTransactionNo)) {
+                    return;
+                }
+                int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
+                pnMain = pnRowMain;
+                JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
+                JFXUtil.highlightByKey(tblViewMain, String.valueOf(pnRowMain + 1), "#A7C7E7", highlightedRowsMain);
+
+                poJSON = poController.OpenTransaction(poController.TransactionList(pnMain).getTransactionNo());
+                if ("error".equals((String) poJSON.get("result"))) {
+                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                    return;
+                }
+            }
+            reloadRecords();
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (ScriptException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void initMainGrid() {
+        JFXUtil.setColumnCenter(tblNoMain, tblDate, tblTransactionNo);
+        JFXUtil.setColumnLeft(tblClient);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewMain);
+
+        filteredData = new FilteredList<>(main_data, b -> true);
+        tblViewMain.setItems(filteredData);;
     }
 
     private void initAddOnsGrid() {
@@ -1486,15 +1612,20 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void loadRecordSearch() {
-        try {
-            lblSource.setText(poController.Master().Company().getCompanyName());
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
+        tfSearchClient.setText("");
     }
 
     public void initTableOnClick() {
+        tblViewMain.setOnMouseClicked(event -> {
+            pnMain = tblViewMain.getSelectionModel().getSelectedIndex();
+            if (pnMain >= 0) {
+                if (event.getClickCount() == 2) {
+                    loadTableDetailFromMain();
+                    pnEditMode = poController.Master().getEditMode();
+                    initButton(pnEditMode);
+                }
+            }
+        });
         tblViewAddOns.setOnMouseClicked(event -> {
             if (addOns_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
@@ -1532,12 +1663,12 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
+        disableRowCheckbox.set(addOns_data.isEmpty());
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnApprove, btnPrint);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient, tfFinancingRate, tfBrand, tfModel, tfVariant);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate);
@@ -1554,11 +1685,14 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             case VehicleQuotationStatus.OPEN:
                 break;
             case VehicleQuotationStatus.VOID:
-            case VehicleQuotationStatus.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
+                JFXUtil.setButtonsVisibility(true, btnApprove);
+                break;
+            case VehicleQuotationStatus.CANCELLED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove);
                 break;
             case VehicleQuotationStatus.APPROVED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
                 break;
         }
     }
