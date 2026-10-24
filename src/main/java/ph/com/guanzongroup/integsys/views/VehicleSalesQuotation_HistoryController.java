@@ -842,7 +842,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     public void loadRecordSearch() {
         try {
-            lblSource.setText(poController.Master().Company().getCompanyName());
+            lblSource.setText(poController.Company().getCompanyName());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
