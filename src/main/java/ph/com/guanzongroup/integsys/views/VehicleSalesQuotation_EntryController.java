@@ -1169,7 +1169,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
-            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
+            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
+                    && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
+                JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                    {poController.AddOnList(pnAddOns).getAddOnId(), tfAddOns},
+                    {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
+                    {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
+            } else if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
                 JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                     {poController.AddOnList(pnAddOns).Inventory().getDescription(), tfAccessories},
                     {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
