@@ -372,11 +372,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 //                    loadRecordAddOns();
 //                    loadTableAddOns.reload();
 //                }
-                loadTableAddOns.reload();
-                loadTableFreebies.reload();
-                loadRecordMaster();
-                loadRecordAdditionalInfo();
-                loadRecordPricing();
+                reloadRecords();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {

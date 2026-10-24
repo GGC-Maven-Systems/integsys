@@ -1329,12 +1329,26 @@ public class JFXUtil {
             // EXCEPTION → fully enabled, do NOT touch its children
             if (exceptions.contains(node)) {
                 node.setDisable(false);
-                continue; // ← critical
+                continue;
             }
 
             // Do NOT disable GridPane itself
             if (!(node instanceof javafx.scene.layout.GridPane)) {
                 node.setDisable(disable);
+            }
+
+            // Apply CSS style class to TextField
+            if (node instanceof javafx.scene.control.TextField) {
+                javafx.scene.control.TextField textField
+                        = (javafx.scene.control.TextField) node;
+
+                if (disable) {
+                    if (!textField.getStyleClass().contains("DisabledTextField")) {
+                        textField.getStyleClass().add("DisabledTextField");
+                    }
+                } else {
+                    textField.getStyleClass().remove("DisabledTextField");
+                }
             }
 
             // Traverse children

@@ -374,6 +374,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     case "btnRetrieve":
                         retrieveVehicleSalesQuotation();
                         break;
+                    case "btnPrint":
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -384,11 +386,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 //                    loadRecordAddOns();
 //                    loadTableAddOns.reload();
 //                }
-                loadTableAddOns.reload();
-                loadTableFreebies.reload();
-                loadRecordMaster();
-                loadRecordAdditionalInfo();
-                loadRecordPricing();
+                reloadRecords();
                 initButton(pnEditMode);
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
@@ -855,7 +853,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                 }
                 loadRecordAdditionalInfo();
-
             });
 
     ChangeListener<Boolean> txtFreebies_Focus = JFXUtil.FocusListener(TextField.class,
@@ -1341,10 +1338,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             } else {
                 loadTableMain.reload();
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(VehicleSalesQuotation_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GuanzonException ex) {
-            Logger.getLogger(VehicleSalesQuotation_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1542,6 +1538,10 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
             ModelVehicleQuotation_Main selected = (ModelVehicleQuotation_Main) tblViewMain.getSelectionModel().getSelectedItem();
             if (selected != null) {
+                String lsTransactionNo = selected.getIndex03();
+                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getTransactionNo(), lsTransactionNo)) {
+                    return;
+                }
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
@@ -1558,7 +1558,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ScriptException ex) {
-            Logger.getLogger(VehicleSalesQuotation_ApprovalController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1615,7 +1616,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void initTableOnClick() {
-
         tblViewMain.setOnMouseClicked(event -> {
             pnMain = tblViewMain.getSelectionModel().getSelectedIndex();
             if (pnMain >= 0) {
