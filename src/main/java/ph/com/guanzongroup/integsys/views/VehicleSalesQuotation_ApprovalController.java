@@ -175,7 +175,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 }
             });
 
-            lblSource.setText(poController.Master().Company().getCompanyName());
+            lblSource.setText(poController.Company().getCompanyName());
             loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
         } catch (SQLException | GuanzonException ex) {

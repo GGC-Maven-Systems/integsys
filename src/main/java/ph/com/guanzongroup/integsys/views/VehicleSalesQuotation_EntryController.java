@@ -1500,7 +1500,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     public void loadRecordSearch() {
         try {
-            lblSource.setText(poController.Master().Company().getCompanyName());
+            lblSource.setText(poController.Company().getCompanyName());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
