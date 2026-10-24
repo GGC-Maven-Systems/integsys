@@ -262,11 +262,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         //apMaster
                         case "tfSearchClient":
 //                            poJSON = poController.SearchTransaction(lsValue, tfSearchTransactionNo.getText(), false);
-                            
+
                             poJSON = poController.SearchClient(lsValue);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            } 
+                            }
                             tfSearchClient.setText(poController.getClientName());
 //                            pnEditMode = poController.getEditMode();
 //                            loadTableAddOns.reload();
@@ -298,7 +298,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         } catch (ExceptionInInitializerError | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } 
+        }
 //        catch ( CloneNotSupportedException | ScriptException  ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -351,7 +351,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     private void loadRecordMaster() {
         try {
             Platform.runLater(() -> {
-                lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()).toUpperCase());
+                JFXUtil.setStatusValue(lblStatus, VehicleQuotationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
 
                 String lsStat = "Void";
                 if (VehicleQuotationStatus.APPROVED.equals(poController.Master().getTransactionStatus())) {
@@ -360,7 +360,6 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             });
             //if update then disable other nodes
             //if update only enable the expected and valid thru
-
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
@@ -510,7 +509,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         break;
                 }
             });
-    
+
     boolean pbSuccess = true;
     EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
@@ -882,8 +881,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         boolean lbShow2 = fnValue == EditMode.READY;
         JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint);
 
-        JFXUtil.setDisabled(true, apMaster,apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
-        
+        JFXUtil.setDisabled(true, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
+
         if (fnValue != EditMode.READY) {
             return;
         }
