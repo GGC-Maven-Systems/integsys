@@ -320,7 +320,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
 
-                            poJSON = poController.OpenTransaction(poController.Master().getTransactionStatus());
+                            poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 btnCancel.fire();
@@ -876,7 +876,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private void loadRecordMaster() {
         try {
             Platform.runLater(() -> {
-                lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()).toUpperCase());
+                JFXUtil.setStatusValue(lblStatus, VehicleQuotationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
 
                 String lsStat = "Void";
                 if (VehicleQuotationStatus.APPROVED.equals(poController.Master().getTransactionStatus())) {
@@ -1041,6 +1041,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             checkedItem.set(lnCtr, "0");
                         }
                     }
+                    loadRecordAddOns();
                     loadTableAddOns.reload();
                     break;
                 case "cbActive":
@@ -1169,7 +1170,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
             }
-            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
+            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
+                    && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
+                JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                    {poController.AddOnList(pnAddOns).getAddOnId(), tfAddOns},
+                    {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
+                    {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
+            } else if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
                 JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                     {poController.AddOnList(pnAddOns).Inventory().getDescription(), tfAccessories},
                     {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
@@ -1493,7 +1500,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     public void loadRecordSearch() {
         try {
-            lblSource.setText(poController.Master().Company().getCompanyName());
+            lblSource.setText(poController.Company().getCompanyName());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
