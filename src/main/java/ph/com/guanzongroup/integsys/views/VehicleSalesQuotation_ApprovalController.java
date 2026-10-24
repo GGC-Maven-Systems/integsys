@@ -1721,9 +1721,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             case VehicleQuotationStatus.OPEN:
                 break;
             case VehicleQuotationStatus.VOID:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
-                JFXUtil.setButtonsVisibility(true, btnApprove);
-                break;
             case VehicleQuotationStatus.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove);
                 break;
@@ -1732,42 +1729,4 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 break;
         }
     }
-
-//    private void initButton(int fnValue) {
-//        boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
-//        boolean lbShow2 = fnValue == EditMode.READY;
-//        boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-//        disableRowCheckbox.set(addOns_data.isEmpty());
-//        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
-//        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnApprove, btnPrint);
-//        JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-//
-//        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
-//        JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient, tfFinancingRate, tfBrand, tfModel, tfVariant);
-//        if (psValidityId != null && !"".equals(psValidityId)) {
-//            JFXUtil.setButtonsVisibility(false, btnUpdate);
-//        }
-//
-//        boolean lbShow4 = fnValue == EditMode.UPDATE;
-//        if (lbShow4) {
-//            JFXUtil.setDisabledExcept(true, apMaster, dpExpectedDate, dpValidThru);
-//        }
-//        if (fnValue != EditMode.READY) {
-//            return;
-//        }
-//        switch (poController.Master().getTransactionStatus()) {
-//            case VehicleQuotationStatus.OPEN:
-//                break;
-//            case VehicleQuotationStatus.VOID:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
-//                JFXUtil.setButtonsVisibility(true, btnApprove);
-//                break;
-//            case VehicleQuotationStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove);
-//                break;
-//            case VehicleQuotationStatus.APPROVED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
-//                break;
-//        }
-//    }
 }
