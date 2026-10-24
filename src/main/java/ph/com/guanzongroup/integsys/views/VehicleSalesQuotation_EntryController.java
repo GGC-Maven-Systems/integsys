@@ -1041,6 +1041,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             checkedItem.set(lnCtr, "0");
                         }
                     }
+                    loadRecordAddOns();
                     loadTableAddOns.reload();
                     break;
                 case "cbActive":

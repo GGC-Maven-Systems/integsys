@@ -1070,6 +1070,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             checkedItem.set(lnCtr, "0");
                         }
                     }
+                    loadRecordAddOns();
                     loadTableAddOns.reload();
                     break;
                 case "cbActive":
