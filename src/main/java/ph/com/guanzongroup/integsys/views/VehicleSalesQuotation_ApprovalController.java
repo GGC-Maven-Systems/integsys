@@ -1381,7 +1381,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                     main_data.add(new ModelVehicleQuotation_Main(String.valueOf(lnCtr + 1),
                                             CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getTransactionDate()),
                                             String.valueOf(poController.TransactionList(lnCtr).getTransactionNo()),
-                                            String.valueOf(poController.TransactionList(lnCtr).Client())
+                                            String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
                                     ));
                                 } catch (Exception e) {
                                 }
