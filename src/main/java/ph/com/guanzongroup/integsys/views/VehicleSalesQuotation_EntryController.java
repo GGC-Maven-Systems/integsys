@@ -876,7 +876,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private void loadRecordMaster() {
         try {
             Platform.runLater(() -> {
-                lblStatus.setText(poController.getStatus(poController.Master().getTransactionStatus()).toUpperCase());
+                JFXUtil.setStatusValue(lblStatus, VehicleQuotationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
 
                 String lsStat = "Void";
                 if (VehicleQuotationStatus.APPROVED.equals(poController.Master().getTransactionStatus())) {
