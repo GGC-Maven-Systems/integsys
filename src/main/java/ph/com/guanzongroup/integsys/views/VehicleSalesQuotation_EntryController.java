@@ -76,7 +76,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
     int pnDetail = 0, pnAddOns = 0, pnFreebies = 0;
-    private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass(), "PO");
+    private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static VehicleQuotation poController;
     public int pnEditMode;
 
