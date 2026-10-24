@@ -420,7 +420,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 case F3:
                     switch (lsID) {
                         case "tfSearchClient":
-                            poJSON = poController.SearchClient(lsValue, false);
+                            poJSON = poController.SearchClient(lsValue);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 break;
@@ -1352,7 +1352,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     public void retrieveVehicleSalesQuotation() {
         try {
             poJSON = new JSONObject();
-            poJSON = poController.loadTransactionList(tfClient.getText(), tfTransactionNo.getText());
+            poJSON = poController.loadTransactionList(tfSearchClient.getText(), tfSearchTransactionNo.getText());
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             } else {
