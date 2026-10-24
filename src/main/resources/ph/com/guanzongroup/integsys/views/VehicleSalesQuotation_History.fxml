@@ -372,11 +372,7 @@
                                                             </AnchorPane>
                                                                                 <TableView fx:id="tblViewAddOns" prefHeight="700.0" prefWidth="559.0">
                                                               <columns>
-                                                                  <TableColumn prefWidth="26.0">
-                                                                     <graphic>
-                                                                        <CheckBox fx:id="cbSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
-                                                                     </graphic>
-                                                                  </TableColumn>
+                                                                  <TableColumn prefWidth="26.0" />
                                                                 <TableColumn fx:id="tblNoAddOns" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
                                                                   <TableColumn fx:id="tblDescriptionAddOns" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Description" />
                                                                   <TableColumn fx:id="tblAmountAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Amount" />
