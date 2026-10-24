@@ -255,6 +255,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
+                            JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                             //Clear data
                             poController.InitTransaction();
                             retrieveVehicleSalesQuotation();
@@ -303,6 +304,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 btnCancel.fire();
                             }
+                            JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                             pnEditMode = poController.Master().getEditMode();
                         } else {
                             return;
@@ -328,6 +330,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
+                                JFXUtil.highlightByKey(tblViewMain, String.valueOf(pnMain + 1), "#C1E1C1", highlightedRowsMain);;
                             }
 
                             poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
@@ -357,6 +361,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
+                                JFXUtil.highlightByKey(tblViewMain, String.valueOf(pnMain + 1), "#FAA0A0", highlightedRowsMain);
                             }
 
                             poJSON = poController.OpenTransaction(poController.Master().getTransactionNo());
@@ -374,8 +380,10 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                     case "btnRetrieve":
                         retrieveVehicleSalesQuotation();
+                        JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
                         break;
                     case "btnPrint":
+                        JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -1394,6 +1402,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 () -> {
                     Platform.runLater(() -> {
                         main_data.clear();
+                        JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
                         // Simulate loading delay
 //                        Thread.sleep(100);
                         if (poController.getTransactionListCount() > 0) {
@@ -1405,6 +1414,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                             String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
                                     ));
                                 } catch (Exception e) {
+                                }
+                                if (poController.TransactionList(lnCtr).getTransactionStatus().equals(VehicleQuotationStatus.APPROVED)) {
+                                    JFXUtil.highlightByKey(tblViewMain, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
                                 }
                             }
                             if (pnMain < 0 || pnMain
@@ -1674,6 +1686,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 }
             }
         });
+        JFXUtil.applyRowHighlighting(tblViewMain, item -> ((ModelVehicleQuotation_Main) item).getIndex01(), highlightedRowsMain);
 //        JFXUtil.handleDisabledNodeClick(apAddOns, pnEditMode, nodeID -> {
 //            if (JFXUtil.isObjectEqualTo(nodeID, "tfAddOns", "tfAccessories")) {
 //                ShowMessageFX.Information(null, pxeModuleName, "");
