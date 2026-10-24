@@ -383,6 +383,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
                         break;
                     case "btnPrint":
+                        poController.printTransaction();
                         JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                         break;
                     default:
@@ -990,6 +991,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
+
             if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
                     && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
                 JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
@@ -1003,6 +1005,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     JFXUtil.setDisabled(true, tfAccessories);
                 }
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
+            }
+            if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
             }
 
             JFXUtil.setDisabled(poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE, tfAddOns, tfAccessories);

@@ -939,6 +939,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
+
             if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
                     && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
                 JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
@@ -953,8 +954,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
             }
-
-            JFXUtil.setDisabled(poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE, tfAddOns, tfAccessories);
+            if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+            }
             //dfine the addonid and stockid if available
             //if none enable the searching for add ons and accessories
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
