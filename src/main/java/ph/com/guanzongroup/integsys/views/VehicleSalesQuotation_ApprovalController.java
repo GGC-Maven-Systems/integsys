@@ -369,7 +369,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         }
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apAddOns, apAdditionalInfo, apFreebies);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apMaster, apAddOns, apAdditionalInfo, apFreebies);
                         break;
                     case "btnRetrieve":
                         retrieveVehicleSalesQuotation();
@@ -1356,7 +1356,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setFocusListener(txtAdditionalInfo_Focus, apAdditionalInfo);
         JFXUtil.setFocusListener(txtFreebies_Focus, apFreebies);
 
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
         JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.setCommaFormatter(tfAmount, tfReservationAmt, tfTotalAmount, tfAmountToFinance, tfPromissoryNoteAmount);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies);
