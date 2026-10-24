@@ -631,6 +631,19 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         loadRecordPricing();
         loadRecordAdditionalInfo();
     }
+    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
+            (lsID, lsValue) -> {
+                switch (lsID) {
+                    case "tfSearchClient":
+                        if (lsValue.isEmpty()) {
+                            poController.setClientName("");
+                        }
+                        break;
+                }
+                loadRecordSearch();
+                retrieveVehicleSalesQuotation();
+            });
+
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 try {
@@ -1352,6 +1365,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void initTextFields() {
+        JFXUtil.setFocusListener(txtBrowse_Focus, apBrowse);
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, apMaster);
         JFXUtil.setFocusListener(txtAddOns_Focus, apAddOns);
@@ -1619,7 +1633,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void loadRecordSearch() {
-        tfSearchClient.setText("");
+        tfSearchClient.setText(poController.getClientName());
     }
 
     public void initTableOnClick() {
