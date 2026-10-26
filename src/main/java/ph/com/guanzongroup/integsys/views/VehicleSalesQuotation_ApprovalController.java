@@ -964,7 +964,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
-            tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
+            tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission()));
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
             taRemarks.setText(poController.Detail(pnDetail).getRemarks());

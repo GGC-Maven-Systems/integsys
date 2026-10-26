@@ -299,7 +299,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                         break;
                     case "btnBrowse":
-//                        poController.Master().setRecordStatus("01234");
+                        poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
                         poJSON = poController.SearchTransaction(psValidityId, true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -912,7 +912,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
-            tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
+            tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission()));
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
             taRemarks.setText(poController.Detail(pnDetail).getRemarks());
