@@ -35,7 +35,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import org.guanzon.appdriver.agent.ShowMessageFX;
-import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -45,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
@@ -57,8 +55,6 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
-import org.guanzon.appdriver.constant.RecordStatus;
-import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
@@ -221,15 +217,15 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         break;
                     case "btnPrint":
                         try {
-                            poController.printTransaction();
-                        } catch (NullPointerException npe) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
-                            ShowMessageFX.Error(MiscUtil.getException(npe), pxeModuleName, null);
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
-                        }
-                        break;
+                        poController.printTransaction();
+                    } catch (NullPointerException npe) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(npe), npe);
+                        ShowMessageFX.Error(MiscUtil.getException(npe), pxeModuleName, null);
+                    } catch (Exception ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                        ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
+                    }
+                    break;
                     case "btnBrowse":
                         poController.Master().setTransactionStatus("01234");
                         poJSON = poController.SearchTransaction(tfSearchClient.getText(), tfSearchTransactionNo.getText(), true);
@@ -272,20 +268,12 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                     switch (lsID) {
                         //apMaster
                         case "tfSearchClient":
-//                            poJSON = poController.SearchTransaction(lsValue, tfSearchTransactionNo.getText(), false);
-
                             poJSON = poController.SearchClient(lsValue);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             tfSearchClient.setText(poController.getClientName());
-//                            pnEditMode = poController.getEditMode();
-//                            loadTableAddOns.reload();
-//                            loadTableFreebies.reload();
-//                            loadRecordMaster();
-//                            loadRecordAdditionalInfo();
-//                            loadRecordPricing();
-//                            initButton(pnEditMode);
+                            JFXUtil.updateCaretPositions(apBrowse);
                             break;
                         case "tfSearchTransactionNo":
                             btnBrowse.fire();
@@ -310,10 +298,6 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-//        catch ( CloneNotSupportedException | ScriptException  ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } 
     }
 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
