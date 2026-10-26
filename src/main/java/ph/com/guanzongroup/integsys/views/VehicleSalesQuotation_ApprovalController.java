@@ -1064,6 +1064,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     private void loadRecordFreebies() {
+        JFXUtil.clearTextFields(apFreebies);
         try {
             if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                 return;
