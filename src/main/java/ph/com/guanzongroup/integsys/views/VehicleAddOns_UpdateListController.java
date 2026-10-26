@@ -347,6 +347,16 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
                                                 String.valueOf(lnCtr), //fixed column (this is not visible)
                                                 "",
                                                 "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
                                                 ""
                                         ));
                                 JSONArray loJSONArray = poController.loadUniqueAddOnTypeId(dpAsOf.getEditor().getText());
