@@ -21,6 +21,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -36,7 +37,6 @@ import ph.com.guanzongroup.cas.sales.model.Model_Sales_Giveaways;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
-import ph.com.guanzongroup.integsys.model.ModelTableMain;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
@@ -131,8 +131,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     // Table data
     // =========================================================================
-    private final ObservableList<ModelTableMain> unit_data = FXCollections.observableArrayList();
-    private final ObservableList<ModelTableMain> gaway_data = FXCollections.observableArrayList();
+    private final ObservableList<Model_Sales_Detail> unit_data = FXCollections.observableArrayList();
+    private final ObservableList<Model_Sales_Giveaways> gaway_data = FXCollections.observableArrayList();
     private final ObservableList<ModelTableDetail> reginsur_data = FXCollections.observableArrayList();
     private final ObservableList<ModelTableDetail> invoice_data = FXCollections.observableArrayList();
     private final ObservableList<ModelTableDetail> attach_data = FXCollections.observableArrayList();
@@ -264,17 +264,17 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     @FXML private TextField tfGawayGiven;
     @FXML private TextField tfGawayIssued;
     @FXML private TextField tfGawayQty;
-    @FXML private TableView<ModelTableMain> tblGawayItem;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayNo;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayBarrcode;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayDesc;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayRemarks;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayQOH;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayGiven;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayIssued;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayQty;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayStatus;
-    @FXML private TableColumn<ModelTableMain, String> tblRowGawayAction11211;
+    @FXML private TableView<Model_Sales_Giveaways> tblGawayItem;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayNo;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayBarrcode;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayDesc;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayRemarks;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQOH;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayGiven;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayIssued;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQty;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayStatus;
+    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayAction11211;
 
     // =========================================================================
     // Payment Type tab
@@ -304,25 +304,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     // Units grid (bottom of the Sales Information tab)
     // =========================================================================
-    @FXML private TableView<ModelTableMain> tblUnits;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailNo;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailBrand;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailModel;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailEngineNo;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailFramNo;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailVariant;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailWarrantyNo;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailKeySerial;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailRegType;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailNetSRP;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailSRP;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailInsur;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailDiscount;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailAddDisc;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailRemarks;
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailQOH21;   // used as the Remove column
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailQOH22;   // unused in FXML, dropped at runtime
-    @FXML private TableColumn<ModelTableMain, String> tblColDetailQOH23;   // unused in FXML, dropped at runtime
+    @FXML private TableView<Model_Sales_Detail> tblUnits;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailNo;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailBrand;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailModel;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailEngineNo;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailFramNo;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailVariant;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailWarrantyNo;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailKeySerial;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailRegType;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailNetSRP;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailSRP;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailInsur;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailDiscount;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailAddDisc;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailRemarks;
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH21;   // used as the Remove column
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH22;   // unused in FXML, dropped at runtime
+    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH23;   // unused in FXML, dropped at runtime
 
     // =========================================================================
     // Attachment tab
@@ -493,15 +493,20 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfCoClientName":
                             LoadClientInfo();
                             break;
+                        case "tfMCEngineNo":
+                        case "tfMCFrameNo":
                         case "tfMCModel":
                         case "tfMCColor":
-                        case "tfMCEngineNo":
-                            poJSON = oSalesController.MCSales().searchDetailBySerial(pnUnitRow, lsValuse, 2);
+                            // search type: 1 = engine no, 2 = frame no, 3 = model, 4 = color
+                            int lnSearchType = "tfMCEngineNo".equals(lsID) ? 1
+                                    : "tfMCFrameNo".equals(lsID) ? 2
+                                      : "tfMCModel".equals(lsID) ? 3 : 4;
+                            poJSON = oSalesController.MCSales().searchDetailBySerial(pnUnitRow, lsValuse, lnSearchType);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 return;
                             }
-                        case "tfMCFrameNo":
+                            loadTableMCItem();
                             break;
                         case "tfPomoCode":
                             poJSON = oSalesController.MCSales().searchSalesDetailPromotion(pnUnitRow, lsValuse, false);
@@ -514,6 +519,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfGawayBarrcode":
                         case "tfGawayDesc":
                             boolean lbByCode = "tfGawayBarrcode".equals(lsID);   // use your actual id variable
+                            if (pnGawayRow < 1) {
+                                pnGawayRow = Math.max(1, gaway_data.size());   // nothing selected: use the last (blank) row
+                            }
                             poJSON = oSalesController.MCSales().searchSalesGiveAway(pnGawayRow, lsValuse, lbByCode);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
@@ -521,9 +529,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             }
                             tfGawayBarrcode.setText(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).Inventory().getBarCode());
                             tfGawayDesc.setText(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).Inventory().getDescription());
-                            tfGawayGiven.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getGiven()));
-                            tfGawayIssued.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getIssued()));
-                            tfGawayQty.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getQuantity()));
+                            Model_Sales_Giveaways loGaway = oSalesController.MCSales().getSalesGiveaways(pnGawayRow);
+                            tfGawayGiven.setText(numText(() -> loGaway.getGiven()));
+                            tfGawayIssued.setText(numText(() -> loGaway.getIssued()));
+                            tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
+                            loadTableGiveaways();   // store the searched giveaway in the table
                             break;
                         case "tfPaymentTerm":
 //                            ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
@@ -911,9 +921,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     // =========================================================================
     // Tables
-    // NOTE: ModelTableMain / ModelTableDetail were not provided. Columns are bound to the
-    // properties "index01", "index02", ... in the order the columns are declared in the FXML.
-    // If your model classes use other property names, change them in the initTable*() methods.
+    // NOTE: tblUnits and tblGawayItem are bound directly to Model_Sales_Detail / Model_Sales_Giveaways
+    // (lambda cell factories, lookups pre-loaded in the Task). The registration/insurance, invoice and
+    // attachment tables still use ModelTableDetail ("index01"...) until their backend models exist.
     // =========================================================================
     /** Remove column: a trash button per row, enabled only while editing. */
     private <S> void initRemoveColumn(TableColumn<S, String> fcol, final IntConsumer fiAction) {
@@ -960,30 +970,31 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         if (tblColDetailQOH23 != null) {
             tblUnits.getColumns().remove(tblColDetailQOH23);   // unused in FXML
         }
-        tblColDetailNo.setCellValueFactory(new PropertyValueFactory<>("index01"));
-        tblColDetailBrand.setCellValueFactory(new PropertyValueFactory<>("index02"));
-        tblColDetailModel.setCellValueFactory(new PropertyValueFactory<>("index03"));
-        tblColDetailEngineNo.setCellValueFactory(new PropertyValueFactory<>("index04"));
-        tblColDetailFramNo.setCellValueFactory(new PropertyValueFactory<>("index05"));
-        tblColDetailVariant.setCellValueFactory(new PropertyValueFactory<>("index06"));
-        tblColDetailWarrantyNo.setCellValueFactory(new PropertyValueFactory<>("index07"));
-        tblColDetailKeySerial.setCellValueFactory(new PropertyValueFactory<>("index08"));
-        tblColDetailRegType.setCellValueFactory(new PropertyValueFactory<>("index09"));
-        tblColDetailNetSRP.setCellValueFactory(new PropertyValueFactory<>("index10"));
-        tblColDetailSRP.setCellValueFactory(new PropertyValueFactory<>("index11"));
-        tblColDetailInsur.setCellValueFactory(new PropertyValueFactory<>("index12"));
-        tblColDetailDiscount.setCellValueFactory(new PropertyValueFactory<>("index13"));
-        tblColDetailAddDisc.setCellValueFactory(new PropertyValueFactory<>("index14"));
-        tblColDetailRemarks.setCellValueFactory(new PropertyValueFactory<>("index15"));
+        tblColDetailNo.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
+        tblColDetailBrand.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.Inventory().Brand().getDescription()));
+        tblColDetailModel.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.Inventory().Model().getDescription()));
+        tblColDetailEngineNo.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.InventorySerial().getSerial01()));   // check getter
+        tblColDetailFramNo.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.InventorySerial().getSerial02()));     // check getter
+        tblColDetailVariant.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.Inventory().Variant().getDescription()));
+        tblColDetailWarrantyNo.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.getWarrantyNo()));
+        tblColDetailKeySerial.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.getKeyCode()));
+        tblColDetailRegType.setCellValueFactory(cd -> new ReadOnlyStringWrapper(""));   // TODO(model): registration type getter
+        tblColDetailNetSRP.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(unitNet(d))));
+        tblColDetailSRP.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(d.getUnitPrice())));
+        tblColDetailInsur.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(d.getInsuranceAmount())));
+        tblColDetailDiscount.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(d.getDiscount())));
+        tblColDetailAddDisc.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(d.getAddDiscount())));
+        tblColDetailRemarks.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.getNotes()));
         initRemoveColumn(tblColDetailQOH21, this::removeUnit);
         tblUnits.setItems(unit_data);
         tblUnits.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_UNITS));
         tblUnits.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-            pnUnitRow = newIdx.intValue();
-            if (pnUnitRow >= 0) {
+            pnUnitRow = newIdx.intValue() >= 0 ? newIdx.intValue() + 1 : -1;   // model entry no. (1-based)
+            if (pnUnitRow >= 1) {
                 loadUnitRecord(pnUnitRow);
             }
         });
+        tblUnits.setOnMouseClicked(this::setTblUnits_Clicked);
         lockColumnReordering(tblUnits);
     }
 
@@ -1008,24 +1019,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private void initTableGiveaways() {
-        tblRowGawayNo.setCellValueFactory(new PropertyValueFactory<>("index01"));
-        tblRowGawayBarrcode.setCellValueFactory(new PropertyValueFactory<>("index02"));
-        tblRowGawayDesc.setCellValueFactory(new PropertyValueFactory<>("index03"));
-        tblRowGawayRemarks.setCellValueFactory(new PropertyValueFactory<>("index04"));   // new column
-        tblRowGawayQOH.setCellValueFactory(new PropertyValueFactory<>("index05"));
-        tblRowGawayGiven.setCellValueFactory(new PropertyValueFactory<>("index06"));
-        tblRowGawayIssued.setCellValueFactory(new PropertyValueFactory<>("index07"));
-        tblRowGawayQty.setCellValueFactory(new PropertyValueFactory<>("index08"));
-        tblRowGawayStatus.setCellValueFactory(new PropertyValueFactory<>("index09"));
+        tblRowGawayNo.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
+        tblRowGawayBarrcode.setCellValueFactory(cd -> gawayCell(cd.getValue(), g -> g.Inventory().getBarCode()));
+        tblRowGawayDesc.setCellValueFactory(cd -> gawayCell(cd.getValue(), g -> g.Inventory().getDescription()));
+        tblRowGawayRemarks.setCellValueFactory(cd -> new ReadOnlyStringWrapper(""));   // TODO(model): remarks getter
+        tblRowGawayQOH.setCellValueFactory(cd -> new ReadOnlyStringWrapper(""));       // TODO(model): QOH getter
+        tblRowGawayGiven.setCellValueFactory(cd -> gawayCell(cd.getValue(), g -> g.getGiven()));
+        tblRowGawayIssued.setCellValueFactory(cd -> gawayCell(cd.getValue(), g -> g.getIssued()));
+        tblRowGawayQty.setCellValueFactory(cd -> gawayCell(cd.getValue(), g -> g.getQuantity()));
+        tblRowGawayStatus.setCellValueFactory(cd -> new ReadOnlyStringWrapper(""));
         initRemoveColumn(tblRowGawayAction11211, this::removeGiveaway);
         tblGawayItem.setItems(gaway_data);
         tblGawayItem.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_GIVEAWAYS));
         tblGawayItem.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-            pnGawayRow = newIdx.intValue();
-            if (pnGawayRow >= 0) {
+            pnGawayRow = newIdx.intValue() >= 0 ? newIdx.intValue() + 1 : -1;   // model entry no. (1-based)
+            if (pnGawayRow >= 1) {
                 loadGiveawayRecord(pnGawayRow);
             }
         });
+        tblGawayItem.setOnMouseClicked(this::setTblGawayItem_Clicked);
         lockColumnReordering(tblGawayItem);
     }
 
@@ -1074,8 +1086,28 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void loadUnitRecord(int fnRow) {
         pbSyncing = true;
         try {
-            // TODO(model): fill the motorcycle fields (incl. tfMCUnitPrice), combos and check boxes
-            // from the unit at fnRow (e.g. trans().Detail(fnRow)); also set tfRegEngineNo / tfRegFrameNo.
+            clearUnitItemTextFields();
+            Model_Sales_Detail loUnit = oSalesController.MCSales().getDetail(fnRow);   // fnRow = model entry no. (1-based)
+            if (loUnit != null && !isBlankUnit(loUnit)) {
+                tfMCModel.setText(textOf(() -> loUnit.Inventory().Model().getDescription()));
+                tfMCEngineNo.setText(textOf(() -> loUnit.InventorySerial().getSerial01()));   // check getter
+                tfMCFrameNo.setText(textOf(() -> loUnit.InventorySerial().getSerial02()));    // check getter
+                tfMCWarrantyNo.setText(textOf(() -> loUnit.getWarrantyNo()));
+                tfMCKeyCode.setText(textOf(() -> loUnit.getKeyCode()));
+                tfMCRemarks.setText(textOf(() -> loUnit.getNotes()));
+                tfMCUnitPrice.setText(money(loUnit.getUnitPrice()));
+                tfMCInsurAmt.setText(money(loUnit.getInsuranceAmount()));
+                tfPromoDisc.setText(money(loUnit.getDiscount()));
+                tfPromoAddDisc.setText(money(loUnit.getAddDiscount()));
+                tfFreight.setText(money(loUnit.getFreight()));
+                tfPomoCode.setText(textOf(() -> loUnit.PromotionMaster().getPromoDescription()));
+                tfRegEngineNo.setText(tfMCEngineNo.getText());
+                tfRegFrameNo.setText(tfMCFrameNo.getText());
+                // TODO(model): tfMCColor, tfMCRegisAmt, cmbVehicleType and the other combos / check boxes
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         } finally {
             pbSyncing = false;
         }
@@ -1095,9 +1127,84 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void loadGiveawayRecord(int fnRow) {
         pbSyncing = true;
         try {
-            // TODO(model): fill poGiveawayFields (incl. tfGawayRemarks) from the giveaway at fnRow.
+            clearGawayItemTextFields();
+            Model_Sales_Giveaways loGaway = oSalesController.MCSales().getSalesGiveaways(fnRow);   // fnRow = model entry no. (1-based)
+            if (loGaway != null && !isBlankGiveaway(loGaway)) {
+                tfGawayBarrcode.setText(String.valueOf(loGaway.Inventory().getBarCode()));
+                tfGawayDesc.setText(String.valueOf(loGaway.Inventory().getDescription()));
+                tfGawayGiven.setText(numText(() -> loGaway.getGiven()));
+                tfGawayIssued.setText(numText(() -> loGaway.getIssued()));
+                tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
+                // TODO(model): tfGawayRemarks.setText(...) once the remarks getter is known
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         } finally {
             pbSyncing = false;
+        }
+    }
+
+    private static String textOf(Getter fg) {
+        try {
+            Object loVal = fg.get();
+            return loVal == null ? "" : String.valueOf(loVal);
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    private void clearUnitItemTextFields() {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            poMotorcycleFields.forEach(TextInputControl::clear);
+            tfRegEngineNo.clear();
+            tfRegFrameNo.clear();
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /** Click on a unit row: loads it into the motorcycle fields; double-click moves focus to Key Code. */
+    private void setTblUnits_Clicked(MouseEvent event) {
+        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
+            int lnIndex = tblUnits.getSelectionModel().getSelectedIndex();
+            Model_Sales_Detail loSelected = tblUnits.getSelectionModel().getSelectedItem();
+            pnUnitRow = lnIndex >= 0 ? lnIndex + 1 : -1;   // model entry no. (1-based)
+            clearUnitItemTextFields();
+            if (loSelected != null && pnUnitRow >= 1) {
+                loadUnitRecord(pnUnitRow);
+                if (event.getClickCount() == 2) {
+                    tfMCKeyCode.requestFocus();
+                }
+            }
+        }
+    }
+
+    private void clearGawayItemTextFields() {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            poGiveawayFields.forEach(TextInputControl::clear);
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /** Click on a giveaway row: loads it into the giveaway fields; double-click moves focus to Qty. */
+    private void setTblGawayItem_Clicked(MouseEvent event) {
+        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
+            int lnIndex = tblGawayItem.getSelectionModel().getSelectedIndex();
+            Model_Sales_Giveaways loSelected = tblGawayItem.getSelectionModel().getSelectedItem();
+            pnGawayRow = lnIndex >= 0 ? lnIndex + 1 : -1;   // model entry no. (1-based)
+            clearGawayItemTextFields();
+            if (loSelected != null && pnGawayRow >= 1) {
+                loadGiveawayRecord(pnGawayRow);
+                if (event.getClickCount() == 2) {
+                    tfGawayQty.requestFocus();
+                }
+            }
         }
     }
 
@@ -1122,19 +1229,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         final boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
         final int lnSelectRow = pnUnitRow;
 
-        Task<List<ModelTableMain>> task = new Task<List<ModelTableMain>>() {
+        Task<List<Model_Sales_Detail>> task = new Task<List<Model_Sales_Detail>>() {
             private double pdTotal = 0.0;
 
             @Override
-            protected List<ModelTableMain> call() throws Exception {
+            protected List<Model_Sales_Detail> call() throws Exception {
                 MCSales loSales = oSalesController.MCSales();
-                List<ModelTableMain> laRows = new ArrayList<ModelTableMain>();
-                String lsBlank = "";
+                List<Model_Sales_Detail> laRows = new ArrayList<Model_Sales_Detail>();
 
                 int lnCount = loSales.getDetailCount();
-                if (lbEditing && (lnCount == 0 || loSales.getDetail(lnCount).getStockID() != null
-                        && !loSales.getDetail(lnCount).getStockID().isEmpty())) {
-                    loSales.getDetail(++lnCount);   // blank row for the next unit
+                if (lbEditing) {
+                    try {
+                        if (lnCount == 0 || !isBlankUnit(loSales.getDetail(lnCount))) {
+                            loSales.getDetail(lnCount + 1);   // blank row for the next unit
+                            lnCount = loSales.getDetailCount();
+                        }
+                    } catch (IndexOutOfBoundsException ex) {
+                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                        lnCount = loSales.getDetailCount();
+                    }
                 }
 
                 for (int lnCtr = 1; lnCtr <= lnCount; lnCtr++) {
@@ -1142,37 +1255,20 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     if (loRow == null) {
                         break;
                     }
-                    String lsNo = String.valueOf(lnCtr);
-
-                    if (loRow.getStockID() == null || loRow.getStockID().isEmpty()) {
-                        laRows.add(new ModelTableMain(lsNo, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank,
-                                lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank));
-                        continue;
+                    if (!isBlankUnit(loRow)) {
+                        pdTotal += unitNet(loRow);
+                        // warm the lookups on this background thread so the cell factories
+                        // (FX thread) read cached objects instead of hitting the database
+                        try {
+                            loRow.Inventory().Brand().getDescription();
+                            loRow.Inventory().Model().getDescription();
+                            loRow.Inventory().Variant().getDescription();
+                            loRow.InventorySerial().getSerial01();
+                        } catch (Exception ex) {
+                            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                        }
                     }
-
-                    double lnNet = ((loRow.getUnitPrice() - loRow.getDiscount() - loRow.getAddDiscount())
-                            + loRow.getFreight() + loRow.getInsuranceAmount()) * loRow.getQuantity();
-                    pdTotal += lnNet;
-
-                    String lsBrand = "", lsModel = "", lsEngine = "", lsFrame = "", lsVariant = "";
-                    try {
-                        lsBrand = String.valueOf(loRow.Inventory().Brand().getDescription());
-                        lsModel = String.valueOf(loRow.Inventory().Model().getDescription());
-                        lsVariant = String.valueOf(loRow.Inventory().Variant().getDescription());
-                        lsEngine = String.valueOf(loRow.InventorySerial().getSerial01());   // check getter
-                        lsFrame = String.valueOf(loRow.InventorySerial().getSerial02());    // check getter
-                    } catch (Exception ex) {
-                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
-                    }
-
-                    laRows.add(new ModelTableMain(lsNo, lsBrand, lsModel, lsEngine, lsFrame, lsVariant,
-                            String.valueOf(loRow.getWarrantyNo()), String.valueOf(loRow.getKeyCode()), "",
-                            String.format("%,.2f", lnNet),
-                            String.format("%,.2f", loRow.getUnitPrice()),
-                            String.format("%,.2f", loRow.getInsuranceAmount()),
-                            String.format("%,.2f", loRow.getDiscount()),
-                            String.format("%,.2f", loRow.getAddDiscount()),
-                            String.valueOf(loRow.getNotes())));
+                    laRows.add(loRow);
                 }
                 return laRows;
             }
@@ -1180,12 +1276,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             @Override
             protected void succeeded() {
                 unit_data.setAll(getValue());
+                tblUnits.refresh();
                 if (unit_data.isEmpty()) {
                     pnUnitRow = -1;
                     tblUnits.setPlaceholder(loading.placeholderLabel);
                 } else {
-                    JFXUtil.selectAndFocusRow(tblUnits, lnSelectRow >= 0 && lnSelectRow < unit_data.size() ? lnSelectRow : 0);
-                    pnUnitRow = tblUnits.getSelectionModel().getSelectedIndex();
+                    JFXUtil.selectAndFocusRow(tblUnits, lnSelectRow >= 1 && lnSelectRow <= unit_data.size() ? lnSelectRow - 1 : 0);
+                    pnUnitRow = tblUnits.getSelectionModel().getSelectedIndex() + 1;
                     loadUnitRecord(pnUnitRow);
                     tblUnits.toFront();
                 }
@@ -1211,16 +1308,24 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         final boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
         final int lnSelectRow = pnGawayRow;
 
-        Task<List<ModelTableMain>> task = new Task<List<ModelTableMain>>() {
+        Task<List<Model_Sales_Giveaways>> task = new Task<List<Model_Sales_Giveaways>>() {
             @Override
-            protected List<ModelTableMain> call() throws Exception {
+            protected List<Model_Sales_Giveaways> call() throws Exception {
                 MCSales loSales = oSalesController.MCSales();
-                List<ModelTableMain> laRows = new ArrayList<ModelTableMain>();
+                List<Model_Sales_Giveaways> laRows = new ArrayList<Model_Sales_Giveaways>();
 
                 int lnCount = loSales.getCountSalesGiveAway();
-                if (lbEditing && (lnCount == 0 || loSales.getSalesGiveaways(lnCount).getStockID() != null
-                        && !loSales.getSalesGiveaways(lnCount).getStockID().isEmpty())) {
-                    loSales.getSalesGiveaways(++lnCount);   // blank row for the next giveaway
+                if (lbEditing) {
+                    try {
+                        if (lnCount == 0 || !isBlankGiveaway(loSales.getSalesGiveaways(lnCount))) {
+                            loSales.getSalesGiveaways(lnCount + 1);   // blank row for the next giveaway
+                            lnCount = loSales.getCountSalesGiveAway();   // let the model tell us if it really added one
+                        }
+                    } catch (IndexOutOfBoundsException ex) {
+                        // MCSales cannot create the blank row this way; TODO(model): use its add method
+                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                        lnCount = loSales.getCountSalesGiveAway();
+                    }
                 }
 
                 for (int lnCtr = 1; lnCtr <= lnCount; lnCtr++) {   // entry numbers start at 1
@@ -1228,31 +1333,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     if (loRow == null) {
                         break;
                     }
-                    String lsNo = String.valueOf(lnCtr);
-
-                    if (loRow.getStockID() == null || loRow.getStockID().isEmpty()) {
-                        laRows.add(new ModelTableMain(lsNo, "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
-                        continue;
+                    if (!isBlankGiveaway(loRow)) {
+                        try {
+                            loRow.Inventory().getBarCode();   // warm the lookup off the FX thread
+                        } catch (Exception ex) {
+                            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                        }
                     }
-
-                    String lsBarcode = "", lsDesc = "", lsQoh = "";
-                    try {
-                        lsBarcode = String.valueOf(loRow.Inventory().getBarCode());
-                        lsDesc = String.valueOf(loRow.Inventory().getDescription());
-//                        lsQoh = String.valueOf(loRow.Inventory());   // check getter
-                    } catch (Exception ex) {
-                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
-                    }
-
-                    laRows.add(new ModelTableMain(lsNo, lsBarcode, lsDesc,
-//                            String.valueOf(loRow.getRemarks()),        // 04 Remarks (check getter)
-                            "",
-                            lsQoh,                                     // 05 QOH
-                            String.valueOf(loRow.getGiven()),          // 06 Given
-                            String.valueOf(loRow.getIssued()),         // 07 Issued
-                            String.valueOf(loRow.getQuantity()),       // 08 Qty
-                            "",                                        // 09 Status
-                            "", "", "", "", "", ""));
+                    laRows.add(loRow);
                 }
                 return laRows;
             }
@@ -1260,13 +1348,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             @Override
             protected void succeeded() {
                 gaway_data.setAll(getValue());
+                tblGawayItem.refresh();
                 if (gaway_data.isEmpty()) {
                     pnGawayRow = -1;
                     tblGawayItem.setPlaceholder(loading.placeholderLabel);
                 } else {
                     JFXUtil.selectAndFocusRow(tblGawayItem,
-                            lnSelectRow >= 0 && lnSelectRow < gaway_data.size() ? lnSelectRow : 0);
-                    pnGawayRow = tblGawayItem.getSelectionModel().getSelectedIndex();
+                            lnSelectRow >= 1 && lnSelectRow <= gaway_data.size() ? lnSelectRow - 1 : 0);
+                    pnGawayRow = tblGawayItem.getSelectionModel().getSelectedIndex() + 1;
                     loadGiveawayRecord(pnGawayRow);
                     tblGawayItem.toFront();
                 }
@@ -1282,6 +1371,57 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             }
         };
         new Thread(task).start();
+    }
+
+    // =========================================================================
+    // Cell helpers for tables bound directly to the model classes
+    // =========================================================================
+    private interface Getter { Object get() throws Exception; }
+    private interface UnitGetter { Object get(Model_Sales_Detail fo) throws Exception; }
+    private interface GawayGetter { Object get(Model_Sales_Giveaways fo) throws Exception; }
+
+    private static ObservableValue<String> cell(Getter fg) {
+        try {
+            Object loVal = fg.get();
+            return new ReadOnlyStringWrapper(loVal == null ? "" : String.valueOf(loVal));
+        } catch (Exception ex) {
+            return new ReadOnlyStringWrapper("");
+        }
+    }
+
+    private static ObservableValue<String> unitCell(Model_Sales_Detail fo, UnitGetter fg) {
+        return (fo == null || isBlankUnit(fo)) ? new ReadOnlyStringWrapper("") : cell(() -> fg.get(fo));
+    }
+
+    private static ObservableValue<String> gawayCell(Model_Sales_Giveaways fo, GawayGetter fg) {
+        return (fo == null || isBlankGiveaway(fo)) ? new ReadOnlyStringWrapper("") : cell(() -> fg.get(fo));
+    }
+
+    private static boolean isBlankUnit(Model_Sales_Detail fo) {
+        return fo == null || fo.getStockID() == null || fo.getStockID().isEmpty();
+    }
+
+    private static boolean isBlankGiveaway(Model_Sales_Giveaways fo) {
+        return fo == null || fo.getStockID() == null || fo.getStockID().isEmpty();
+    }
+
+    private static double unitNet(Model_Sales_Detail fo) {
+        return ((fo.getUnitPrice() - fo.getDiscount() - fo.getAddDiscount())
+                + fo.getFreight() + fo.getInsuranceAmount()) * fo.getQuantity();
+    }
+
+    /** Number getter that tolerates a model returning a String/blank where a Number is expected. */
+    private static String numText(Getter fg) {
+        try {
+            Object loVal = fg.get();
+            return loVal == null || String.valueOf(loVal).isEmpty() ? "0" : String.valueOf(loVal);
+        } catch (Exception ex) {   // e.g. ClassCastException: String cannot be cast to Number
+            return "0";
+        }
+    }
+
+    private static String money(double fn) {
+        return String.format("%,.2f", fn);
     }
 
     // Helper methods to safely parse String results returned by safe()
