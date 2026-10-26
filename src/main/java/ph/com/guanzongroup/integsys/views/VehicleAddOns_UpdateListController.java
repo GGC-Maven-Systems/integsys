@@ -48,6 +48,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.JSONArray;
@@ -516,21 +517,28 @@ public class VehicleAddOns_UpdateListController implements Initializable, Screen
     }
 
     private void addColumnsAfterSixth(TableView<?> tableView, JSONArray jsonArray) {
+        final double MIN_WIDTH = 100;
+
         for (int lnRow = 0; lnRow < jsonArray.size(); lnRow++) {
             JSONObject loJSONObject = (JSONObject) jsonArray.get(lnRow);
 
-            String lsTypeName = ((String) loJSONObject.get("sAddTypNm"));
-            String lsTypeId = ((String) loJSONObject.get("sAddTypex"));
+            String lsTypeName = String.valueOf(loJSONObject.get("sAddTypNm"));
+            String lsTypeId = (String) loJSONObject.get("sAddTypex");
 
             TableColumn column = new TableColumn();
 
             column.setId(lsTypeId);
-            column.setText(String.valueOf(lsTypeName));
+            column.setText(lsTypeName);
             JFXUtil.setColumnRight(column);
 
-            column.setMinWidth(100);
-            column.setPrefWidth(100);
-            column.setMaxWidth(100);
+            // Measure the header text and add padding for cell margins / sort arrow
+            Text loText = new Text(lsTypeName);
+            double lnTextWidth = loText.getLayoutBounds().getWidth() + 30;
+            double lnWidth = Math.max(MIN_WIDTH, lnTextWidth);
+
+            column.setMinWidth(MIN_WIDTH);
+            column.setPrefWidth(lnWidth);
+            column.setMaxWidth(Double.MAX_VALUE);
 
             int lnIndex = Math.min(6 + lnRow, tableView.getColumns().size());
             tableView.getColumns().add(lnIndex, column);
