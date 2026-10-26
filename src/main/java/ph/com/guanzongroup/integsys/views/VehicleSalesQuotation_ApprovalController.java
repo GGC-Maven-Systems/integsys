@@ -843,6 +843,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                 }
                 loadRecordPricing();
+                loadRecordAdditionalInfo();
             });
 
     ChangeListener<Boolean> txtAdditionalInfo_Focus = JFXUtil.FocusListener(TextField.class,

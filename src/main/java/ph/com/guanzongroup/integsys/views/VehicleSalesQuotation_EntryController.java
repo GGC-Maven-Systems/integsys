@@ -366,7 +366,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-
 //                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
 //                } else {
 //                    loadRecordAddOns();
@@ -790,6 +789,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                 }
                 loadRecordPricing();
+                loadRecordAdditionalInfo();
             });
 
     ChangeListener<Boolean> txtAdditionalInfo_Focus = JFXUtil.FocusListener(TextField.class,
