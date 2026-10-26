@@ -1101,6 +1101,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     }
                     loadRecordAddOns();
                     loadTableAddOns.reload();
+                    loadRecordAddOns();
+                    loadRecordPricing();
+                    loadRecordAdditionalInfo();
                     break;
                 case "cbActive":
                     if (poController.FreebiesList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
@@ -1179,7 +1182,16 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
                             if (!lbisTrue) {
-                                poController.AddOnList(rowIndex).setQuantity(0);
+                                if (!JFXUtil.isObjectEqualTo(poController.AddOnList(rowIndex).getStockId(), null, "")) {
+                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                        int lnRow = rowIndex;
+                                        poController.AddOnList().remove(lnRow);
+                                    } else {
+                                        poController.AddOnList(rowIndex).setQuantity(0);
+                                    }
+                                } else {
+                                    poController.AddOnList(rowIndex).setQuantity(0);
+                                }
                             }
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
@@ -1193,6 +1205,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             Platform.runLater(() -> {
                                 loadTableAddOns.reload();
                                 loadRecordAddOns();
+                                loadRecordPricing();
+                                loadRecordAdditionalInfo();
                                 JFXUtil.runWithDelay(0.40, () -> {
                                     if (lbisTrue) {
                                         JFXUtil.selectAndFocusRow(tblViewAddOns, rowIndex);
