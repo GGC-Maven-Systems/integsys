@@ -174,7 +174,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
             });
-
+            poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
             lblSource.setText(poController.Company().getCompanyName());
             loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
@@ -311,11 +311,11 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         }
                         break;
                     case "btnBrowse":
-//                        poController.Master().setRecordStatus("01234");
+                        poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
                         poJSON = poController.SearchTransaction(psValidityId, true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                            tfValidityID.requestFocus();
+                            tfTransactionNo.requestFocus();
                             return;
                         }
                         pnEditMode = poController.Master().getEditMode();
@@ -1421,9 +1421,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                             String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
                                     ));
                                 } catch (Exception e) {
-                                }
-                                if (poController.TransactionList(lnCtr).getTransactionStatus().equals(VehicleQuotationStatus.APPROVED)) {
-                                    JFXUtil.highlightByKey(tblViewMain, String.valueOf(lnCtr + 1), "#C1E1C1", highlightedRowsMain);
                                 }
                             }
                             if (pnMain < 0 || pnMain
