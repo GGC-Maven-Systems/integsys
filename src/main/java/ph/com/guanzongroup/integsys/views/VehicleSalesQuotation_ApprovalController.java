@@ -1390,7 +1390,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
         JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.setCommaFormatter(tfAmount, tfReservationAmt, tfTotalAmount, tfAmountToFinance, tfPromissoryNoteAmount,
-                tfDownpayment, tfTPL, tfComprehensive, tfCHMODocStmp, tfPromptPaymentDiscount);
+                tfDownpayment, tfTPL, tfComprehensive, tfCHMODocStmp, tfPromptPaymentDiscount, tfLTO);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies, tfTerms);
 
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewAddOns, tblViewFreebies);
