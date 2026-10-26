@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,12 +28,17 @@ import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
+import ph.com.guanzongroup.cas.sales.MCSales;
+import ph.com.guanzongroup.cas.sales.SalesQoutationVersion;
 import ph.com.guanzongroup.cas.sales.constant.SalesTransactionStatic;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Detail;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Giveaways;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.model.ModelTableMain;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.File;
 import java.net.URL;
@@ -469,11 +475,17 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
         String lsID = txtInput.getId();
+        String lsValuse = txtInput.getText();
         try {
             switch (event.getCode()) {
                 case F3:
                     switch (lsID) {
                         case "tfClientName":
+                            poJSON = oSalesController.MCSales().searchClient(txtInput.getText(), true);
+                            if(poJSON.get("result").equals("error")) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                break;
+                            }
                             LoadClientInfo();
                             taCustomerName.setStyle("-fx-font-weight: bold;");
                             taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
@@ -484,12 +496,37 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfMCModel":
                         case "tfMCColor":
                         case "tfMCEngineNo":
+                            poJSON = oSalesController.MCSales().searchDetailBySerial(pnUnitRow, lsValuse, 2);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
                         case "tfMCFrameNo":
+                            break;
                         case "tfPomoCode":
+                            poJSON = oSalesController.MCSales().searchSalesDetailPromotion(pnUnitRow, lsValuse, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            tfPomoCode.setText(oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription());
+                            break;
                         case "tfGawayBarrcode":
                         case "tfGawayDesc":
+                            boolean lbByCode = "tfGawayBarrcode".equals(lsID);   // use your actual id variable
+                            poJSON = oSalesController.MCSales().searchSalesGiveAway(pnGawayRow, lsValuse, lbByCode);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            tfGawayBarrcode.setText(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).Inventory().getBarCode());
+                            tfGawayDesc.setText(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).Inventory().getDescription());
+                            tfGawayGiven.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getGiven()));
+                            tfGawayIssued.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getIssued()));
+                            tfGawayQty.setText(String.valueOf(oSalesController.MCSales().getSalesGiveaways(pnGawayRow).getQuantity()));
+                            break;
                         case "tfPaymentTerm":
-                            ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
+//                            ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
                             break;
                         default:
                             break;
@@ -518,8 +555,24 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 // TODO: write lsValue to the model, e.g.
                 // case "tfMCUnitPrice": trans().getModel().setUnitPrice(lsValue); break;
                 case "tfMCRemarks":
+                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setNotes(lsValue);
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
+                    }
+                    break;
                 case "tfMCWarrantyNo":
+                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setWarrantyNo(lsValue);
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
+                    }
                 case "tfMCKeyCode":
+                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setKeyCode(lsValue);
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
+                    }
                 case "tfGawayRemarks":
                     ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
                     break;
@@ -537,8 +590,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE, System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
             oSalesController = new SalesControllers(oApp, logwrapr);
-            oSalesController.SalesQoutation().initialize();
-            oSalesController.SalesQoutation().setRecordStatus(SalesQoutationStatic.OPEN);
+            oSalesController.MCSales().initTransaction();
+            oSalesController.SalesQoutation().setRecordStatus(SalesTransactionStatic.OPEN);
             oSalesController.SalesQoutation().setWithUI(true);
 
             Platform.runLater(() -> btnNew.fire());
@@ -580,7 +633,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             switch (lsID) {
                 case "btnNew":
                     pnEditMode = EditMode.ADDNEW;
+                    poJSON = oSalesController.MCSales().newTransaction();
+                    if(poJSON.get("result").equals("error")) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
+                    oSalesController.MCSales().getMaster().setIndustryCode(psIndustryId);
+                    oSalesController.MCSales().getMaster().setCompanyID(psCompanyId);
                     LoadMaster();
+                    loadTableMCItem();
+                    loadTableGiveaways();
                     break;
                 case "btnBrowse":
                     pnEditMode = EditMode.READY;
@@ -696,16 +758,34 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private void cmb_Changed(ComboBox fcmb, int fnIndex) {
-        if (!canEdit()) {
+        if (!canEdit() || fnIndex < 0) {
             return;
         }
         try {
             if (fcmb == cmbPaymentTranType && fnIndex != SalesTransactionStatic.PAYMENT_CREDIT) {
-                tfPaymentTerm.clear();          // Cash: term / due date do not apply
+                tfPaymentTerm.clear();
                 setDate(dpPaymentDueDate, null);
             }
-            // TODO(model): write the selected value to the model, e.g.
-            // if (fcmb == cmbClientType) trans().getModel().setClientType(<code for fnIndex>);
+
+            // index -> value stored in the database
+            String lsValue = String.valueOf(fnIndex);
+
+            if (fcmb == cmbClientType) {
+                poJSON = oSalesController.MCSales().getMaster().Client().setClientType(lsValue);          // placeholder
+            } else if (fcmb == cmbPaymentTranType) {
+                poJSON = oSalesController.MCSales().getMaster().setTransactionType(lsValue);     // placeholder
+            } else if (fcmb == cmbPaymentForm) {
+                poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);         // placeholder
+            } else if (fcmb == cmbVehicleType) {
+                poJSON = oSalesController.MCSales().getDetail(pnUnitRow).InventorySerial().setCondition(lsValue); // placeholder
+            } else {
+                poJSON = null;   // combos with no model field yet
+            }
+
+            if (poJSON != null && "error".equals(poJSON.get("result"))) {
+                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                return;
+            }
             loadSummary();
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
@@ -1034,6 +1114,195 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         loadSummary();
     }
 
+    private void loadTableMCItem() {
+        JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
+        tblUnits.setPlaceholder(loading.loadingPane);
+        loading.progressIndicator.setVisible(true);
+
+        final boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
+        final int lnSelectRow = pnUnitRow;
+
+        Task<List<ModelTableMain>> task = new Task<List<ModelTableMain>>() {
+            private double pdTotal = 0.0;
+
+            @Override
+            protected List<ModelTableMain> call() throws Exception {
+                MCSales loSales = oSalesController.MCSales();
+                List<ModelTableMain> laRows = new ArrayList<ModelTableMain>();
+                String lsBlank = "";
+
+                int lnCount = loSales.getDetailCount();
+                if (lbEditing && (lnCount == 0 || loSales.getDetail(lnCount).getStockID() != null
+                        && !loSales.getDetail(lnCount).getStockID().isEmpty())) {
+                    loSales.getDetail(++lnCount);   // blank row for the next unit
+                }
+
+                for (int lnCtr = 1; lnCtr <= lnCount; lnCtr++) {
+                    Model_Sales_Detail loRow = loSales.getDetail(lnCtr);
+                    if (loRow == null) {
+                        break;
+                    }
+                    String lsNo = String.valueOf(lnCtr);
+
+                    if (loRow.getStockID() == null || loRow.getStockID().isEmpty()) {
+                        laRows.add(new ModelTableMain(lsNo, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank,
+                                lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank, lsBlank));
+                        continue;
+                    }
+
+                    double lnNet = ((loRow.getUnitPrice() - loRow.getDiscount() - loRow.getAddDiscount())
+                            + loRow.getFreight() + loRow.getInsuranceAmount()) * loRow.getQuantity();
+                    pdTotal += lnNet;
+
+                    String lsBrand = "", lsModel = "", lsEngine = "", lsFrame = "", lsVariant = "";
+                    try {
+                        lsBrand = String.valueOf(loRow.Inventory().Brand().getDescription());
+                        lsModel = String.valueOf(loRow.Inventory().Model().getDescription());
+                        lsVariant = String.valueOf(loRow.Inventory().Variant().getDescription());
+                        lsEngine = String.valueOf(loRow.InventorySerial().getSerial01());   // check getter
+                        lsFrame = String.valueOf(loRow.InventorySerial().getSerial02());    // check getter
+                    } catch (Exception ex) {
+                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                    }
+
+                    laRows.add(new ModelTableMain(lsNo, lsBrand, lsModel, lsEngine, lsFrame, lsVariant,
+                            String.valueOf(loRow.getWarrantyNo()), String.valueOf(loRow.getKeyCode()), "",
+                            String.format("%,.2f", lnNet),
+                            String.format("%,.2f", loRow.getUnitPrice()),
+                            String.format("%,.2f", loRow.getInsuranceAmount()),
+                            String.format("%,.2f", loRow.getDiscount()),
+                            String.format("%,.2f", loRow.getAddDiscount()),
+                            String.valueOf(loRow.getNotes())));
+                }
+                return laRows;
+            }
+
+            @Override
+            protected void succeeded() {
+                unit_data.setAll(getValue());
+                if (unit_data.isEmpty()) {
+                    pnUnitRow = -1;
+                    tblUnits.setPlaceholder(loading.placeholderLabel);
+                } else {
+                    JFXUtil.selectAndFocusRow(tblUnits, lnSelectRow >= 0 && lnSelectRow < unit_data.size() ? lnSelectRow : 0);
+                    pnUnitRow = tblUnits.getSelectionModel().getSelectedIndex();
+                    loadUnitRecord(pnUnitRow);
+                    tblUnits.toFront();
+                }
+                tfSummaryUnitPrice.setText(String.format("%,.2f", pdTotal));
+                loadSummary();
+                loading.progressIndicator.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, getException());
+                tblUnits.setPlaceholder(loading.placeholderLabel);
+                loading.progressIndicator.setVisible(false);
+            }
+        };
+        new Thread(task).start();
+    }
+    private void loadTableGiveaways() {
+        JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
+        tblGawayItem.setPlaceholder(loading.loadingPane);
+        loading.progressIndicator.setVisible(true);
+
+        final boolean lbEditing = pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
+        final int lnSelectRow = pnGawayRow;
+
+        Task<List<ModelTableMain>> task = new Task<List<ModelTableMain>>() {
+            @Override
+            protected List<ModelTableMain> call() throws Exception {
+                MCSales loSales = oSalesController.MCSales();
+                List<ModelTableMain> laRows = new ArrayList<ModelTableMain>();
+
+                int lnCount = loSales.getCountSalesGiveAway();
+                if (lbEditing && (lnCount == 0 || loSales.getSalesGiveaways(lnCount).getStockID() != null
+                        && !loSales.getSalesGiveaways(lnCount).getStockID().isEmpty())) {
+                    loSales.getSalesGiveaways(++lnCount);   // blank row for the next giveaway
+                }
+
+                for (int lnCtr = 1; lnCtr <= lnCount; lnCtr++) {   // entry numbers start at 1
+                    Model_Sales_Giveaways loRow = loSales.getSalesGiveaways(lnCtr);
+                    if (loRow == null) {
+                        break;
+                    }
+                    String lsNo = String.valueOf(lnCtr);
+
+                    if (loRow.getStockID() == null || loRow.getStockID().isEmpty()) {
+                        laRows.add(new ModelTableMain(lsNo, "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
+                        continue;
+                    }
+
+                    String lsBarcode = "", lsDesc = "", lsQoh = "";
+                    try {
+                        lsBarcode = String.valueOf(loRow.Inventory().getBarCode());
+                        lsDesc = String.valueOf(loRow.Inventory().getDescription());
+//                        lsQoh = String.valueOf(loRow.Inventory());   // check getter
+                    } catch (Exception ex) {
+                        Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                    }
+
+                    laRows.add(new ModelTableMain(lsNo, lsBarcode, lsDesc,
+//                            String.valueOf(loRow.getRemarks()),        // 04 Remarks (check getter)
+                            "",
+                            lsQoh,                                     // 05 QOH
+                            String.valueOf(loRow.getGiven()),          // 06 Given
+                            String.valueOf(loRow.getIssued()),         // 07 Issued
+                            String.valueOf(loRow.getQuantity()),       // 08 Qty
+                            "",                                        // 09 Status
+                            "", "", "", "", "", ""));
+                }
+                return laRows;
+            }
+
+            @Override
+            protected void succeeded() {
+                gaway_data.setAll(getValue());
+                if (gaway_data.isEmpty()) {
+                    pnGawayRow = -1;
+                    tblGawayItem.setPlaceholder(loading.placeholderLabel);
+                } else {
+                    JFXUtil.selectAndFocusRow(tblGawayItem,
+                            lnSelectRow >= 0 && lnSelectRow < gaway_data.size() ? lnSelectRow : 0);
+                    pnGawayRow = tblGawayItem.getSelectionModel().getSelectedIndex();
+                    loadGiveawayRecord(pnGawayRow);
+                    tblGawayItem.toFront();
+                }
+                loadSummary();
+                loading.progressIndicator.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, getException());
+                tblGawayItem.setPlaceholder(loading.placeholderLabel);
+                loading.progressIndicator.setVisible(false);
+            }
+        };
+        new Thread(task).start();
+    }
+
+    // Helper methods to safely parse String results returned by safe()
+    private double parseDouble(String value) {
+        if (value == null || value.trim().isEmpty()) return 0.0;
+        try {
+            return Double.parseDouble(value.replace(",", ""));
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.trim().isEmpty()) return 0;
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     private void removeRegAndInsur(int fnRow) {
         if (!canEdit() || fnRow < 0 || fnRow >= reginsur_data.size()) {
             return;
@@ -1250,10 +1519,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     private void LoadMaster() {
         lblStatus.setText(SalesTransactionStatic.STATUS_NEW);
-        tfTransNo.setText("M00126000001");
-        tfSourceNo.setText("M00126000001");
-        tfSourceDesc.setText("Sales Qoutation");
-        tfReceipt.setText("");
+        tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
+        tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
+        tfSourceDesc.setText(oSalesController.MCSales().getMaster().getSourceCode());
+//        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
         taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
     }
 
