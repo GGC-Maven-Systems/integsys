@@ -1738,10 +1738,11 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         }
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:
+                JFXUtil.setButtonsVisibility(false, btnPrint);
                 break;
             case VehicleQuotationStatus.VOID:
             case VehicleQuotationStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove, btnPrint);
                 break;
             case VehicleQuotationStatus.APPROVED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
