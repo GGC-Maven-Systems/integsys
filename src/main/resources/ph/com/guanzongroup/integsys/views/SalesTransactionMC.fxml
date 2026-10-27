@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -27,8 +28,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
-<?import java.net.URL?>
 
 <AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
    <stylesheets>
@@ -610,7 +609,7 @@
                                                                                                             <Insets right="10.0" />
                                                                                                          </padding>
                                                                                                       </Label>
-                                                                                                      <TextField fx:id="tfPomoCode1" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                                                      <TextField fx:id="tfPomoCode" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                                       <Label text="Discount" GridPane.columnIndex="6" GridPane.rowIndex="2">
                                                                                                          <padding>
                                                                                                             <Insets right="10.0" />
