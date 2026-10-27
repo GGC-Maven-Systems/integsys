@@ -776,6 +776,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
+                    ClearAll();                                       // clears the fields and the observable lists
+                    oSalesController.MCSales().initTransaction();
                     btnNew.fire();
                     break;
                 case "btnApproved":
