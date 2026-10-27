@@ -24,6 +24,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.*;
@@ -49,6 +50,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -104,6 +106,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private String psCategoryId = "";
     private int pnUnitLoadSeq = 0;
     private int pnGawayLoadSeq = 0;
+    /** The rows that were selected when a field got focus: the field's edit belongs to THESE rows even if the user
+     *  clicks another row (which changes the selection before the field's lost-focus handler runs). */
+    private Model_Sales_Detail poEditUnit;
+    private Model_Sales_Giveaways poEditGaway;
 
 
     private int pnUnitRow = -1;
@@ -155,10 +161,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     @FXML private AnchorPane ChildAnchorPane;
     @FXML private AnchorPane apSearchMaster;
     @FXML private AnchorPane AnchorInputs;
-    @FXML private AnchorPane anchorQoutation;
-    @FXML private AnchorPane anchorDetails;
-    @FXML private AnchorPane apAttachments1;
-    @FXML private AnchorPane apAttachmentButtons1;
+    @FXML private AnchorPane AnchorMCSales;
+    @FXML private AnchorPane AnchorClient;
+    @FXML private AnchorPane AnchorAttach;
+    @FXML private AnchorPane AnchorAttach2;
+    @FXML private AnchorPane AnchorMCPrice;
+    @FXML private AnchorPane AnchorRegInsur;
+    @FXML private AnchorPane AnchorGiveaway;
+    @FXML private AnchorPane AnchorPaymType;
     @FXML private HBox hbButtons;
 
     @FXML private Button btnBrowse;
@@ -477,7 +487,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         for (TextInputControl txtInput : poAllFields) {
             txtInput.setOnKeyPressed(this::txtField_KeyPressed);
             txtInput.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (!isFocused) {
+                if (isFocused) {
+                    poEditUnit = (pnUnitRow >= 1 && pnUnitRow <= unit_data.size()) ? unit_data.get(pnUnitRow - 1) : null;
+                    poEditGaway = selectedGiveaway();
+                } else {
                     txtField_LostFocus(txtInput);
                 }
             });
@@ -493,9 +506,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 case F3:
                     switch (lsID) {
                         case "tfClientName":
-                            oSalesController.MCSales().getMaster().Client().setClientType(String.valueOf(cmbClientType.getSelectionModel().getSelectedIndex()));
+                            int lnClientType = cmbClientType.getSelectionModel().getSelectedIndex();
+                            if (lnClientType != 0 && lnClientType != 1) {
+                                ShowMessageFX.Warning("Please select valid client type.", "Warning", null);
+                                cmbClientType.requestFocus();
+                                break;
+                            }
+                            oSalesController.MCSales().setClientType(String.valueOf(lnClientType));
                             poJSON = oSalesController.MCSales().searchClient(txtInput.getText(), true);
-                            if(poJSON.get("result").equals("error")) {
+                            if (poJSON.get("result").equals("error")) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 break;
                             }
@@ -605,34 +624,39 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 // TODO: write lsValue to the model, e.g.
                 // case "tfMCUnitPrice": trans().getModel().setUnitPrice(lsValue); break;
                 case "tfMCRemarks":
-                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setNotes(lsValue);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        return;
-                    }
-                    break;
                 case "tfMCWarrantyNo":
-                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setWarrantyNo(lsValue);
+                case "tfMCKeyCode": {
+                    // write to the unit that was being edited (not the row that is selected now), and only when it
+                    // is a real unit whose value changed: nothing here may create a row or reload for nothing
+                    final Model_Sales_Detail loUnit = poEditUnit;
+                    if (isBlankUnit(loUnit)) {
+                        break;
+                    }
+                    String lsOld = "tfMCRemarks".equals(lsID) ? textOf(() -> loUnit.getNotes())
+                            : "tfMCWarrantyNo".equals(lsID) ? textOf(() -> loUnit.getWarrantyNo())
+                              : textOf(() -> loUnit.getKeyCode());
+                    if (lsValue.equals(lsOld)) {
+                        break;
+                    }
+                    poJSON = "tfMCRemarks".equals(lsID) ? loUnit.setNotes(lsValue)
+                            : "tfMCWarrantyNo".equals(lsID) ? loUnit.setWarrantyNo(lsValue)
+                              : loUnit.setKeyCode(lsValue);
                     if ("error".equals(poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                         return;
                     }
                     loadTableMCItem();
                     break;
-                case "tfMCKeyCode":
-                    poJSON = oSalesController.MCSales().getDetail(pnUnitRow).setKeyCode(lsValue);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        return;
-                    }
-                    loadTableMCItem();
-                    break;
+                }
                 case "tfGawayQty": {
-                    Model_Sales_Giveaways loGaway = selectedGiveaway();   // from the table: never creates a row
+                    final Model_Sales_Giveaways loGaway = poEditGaway;   // the giveaway that was being edited
                     if (isBlankGiveaway(loGaway)) {
                         break;   // no giveaway chosen on this row yet: nothing to write
                     }
                     int lnQty = parseInt(lsValue.replace(",", ""));   // blank / invalid -> 0
+                    if (String.valueOf(lnQty).equals(numText(() -> loGaway.getQuantity()))) {
+                        break;   // unchanged
+                    }
                     poJSON = loGaway.setQuantity(lnQty);
                     if ("error".equals(poJSON.get("result"))) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
@@ -671,8 +695,19 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void initButton(int fnValue) {
         CustomCommonUtil.setVisible(false, btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose);
         CustomCommonUtil.setManaged(false, btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose);
+//        AnchorMCSales.setDisable(true);
+        AnchorClient.setDisable(true);
+        AnchorAttach.setDisable(true);
+        AnchorAttach2.setDisable(true);
+        AnchorMCPrice.setDisable(true);
+        AnchorRegInsur.setDisable(true);
+        AnchorGiveaway.setDisable(true);
+        AnchorPaymType.setDisable(true);
         switch (fnValue) {
             case EditMode.UNKNOWN:
+                CustomCommonUtil.setVisible(true, btnBrowse, btnNew,  btnHistory, btnClose);
+                CustomCommonUtil.setManaged(true, btnBrowse, btnNew,  btnHistory, btnClose);
+                break;
             case EditMode.READY:
                 CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnUpdate, btnHistory, btnClose);
                 CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnUpdate, btnHistory, btnClose);
@@ -681,6 +716,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             case EditMode.UPDATE:
                 CustomCommonUtil.setVisible(true, btnSave, btnCancel);
                 CustomCommonUtil.setManaged(true, btnSave, btnCancel);
+//                AnchorMCSales.setDisable(false);
+                AnchorClient.setDisable(false);
+                AnchorAttach.setDisable(false);
+                AnchorAttach2.setDisable(false);
+                AnchorMCPrice.setDisable(false);
+                AnchorRegInsur.setDisable(false);
+                AnchorGiveaway.setDisable(false);
+                AnchorPaymType.setDisable(false);
                 break;
             default:
                 throw new IllegalStateException(SalesTransactionStatic.MSG_UNEXPECTED_VALUE + fnValue);
@@ -744,9 +787,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CANCEL, pxeModuleName, null)) {
-                        pnEditMode = EditMode.UNKNOWN;
                         ClearAll();                                       // clears the fields and the observable lists
-                        oSalesController.MCSales().initTransaction();     // ASSUMED: resets the model's detail / giveaway lists
+                        oSalesController.MCSales().initTransaction();
+                        pnEditMode = EditMode.UNKNOWN;// ASSUMED: resets the model's detail / giveaway lists
                     }
                     break;
                 case "btnClose":
@@ -755,7 +798,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     break;
             }
-
             initButton(pnEditMode);
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
@@ -997,7 +1039,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // attachment tables still use ModelTableDetail ("index01"...) until their backend models exist.
     // =========================================================================
     /** Remove column: a trash button per row, enabled only while editing. */
-    private <S> void initRemoveColumn(TableColumn<S, String> fcol, final IntConsumer fiAction) {
+    /**
+     * Remove column: a trash button per row. fpBlank tells which rows are still empty; those rows get no
+     * button (null = every row gets one).
+     */
+    private <S> void initRemoveColumn(TableColumn<S, String> fcol, final IntConsumer fiAction, final Predicate<S> fpBlank) {
         if (fcol == null) {
             return;
         }
@@ -1007,7 +1053,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             private final Button btnRow = new Button();
 
             {
-                btnRow.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.TRASH));
+                FontAwesomeIconView loIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+                loIcon.setGlyphSize(14);
+                loIcon.setFill(javafx.scene.paint.Color.WHITE);
+
+                btnRow.setGraphic(loIcon);
+                btnRow.setStyle("-fx-background-color: #d9534f; -fx-cursor: hand; -fx-padding: 4 8 4 8;");
+                btnRow.setTooltip(new Tooltip("Remove"));
                 btnRow.disableProperty().bind(pbEditable.not());
                 btnRow.setOnAction(e -> {
                     if (getIndex() >= 0 && getIndex() < getTableView().getItems().size()) {
@@ -1020,7 +1072,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             protected void updateItem(String fsItem, boolean fbEmpty) {
                 super.updateItem(fsItem, fbEmpty);
                 setText(null);
-                setGraphic(fbEmpty ? null : btnRow);
+                S loRow = null;
+                if (!fbEmpty && getIndex() >= 0 && getIndex() < getTableView().getItems().size()) {
+                    loRow = getTableView().getItems().get(getIndex());
+                }
+                boolean lbBlank = loRow == null || (fpBlank != null && fpBlank.test(loRow));
+                setGraphic(lbBlank ? null : btnRow);   // no remove button on an empty row
                 setAlignment(Pos.CENTER);
             }
         });
@@ -1056,7 +1113,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tblColDetailDiscount.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(dbl(() -> d.getDiscount()))));
         tblColDetailAddDisc.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> money(dbl(() -> d.getAddDiscount()))));
         tblColDetailRemarks.setCellValueFactory(cd -> unitCell(cd.getValue(), d -> d.getNotes()));
-        initRemoveColumn(tblColDetailQOH21, this::removeUnit);
+        initRemoveColumn(tblColDetailQOH21, this::removeUnit, SalesTransactionsMCController::isBlankUnit);
         tblUnits.setItems(unit_data);
         tblUnits.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_UNITS));
         tblUnits.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
@@ -1077,7 +1134,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tblRowRegAndInsurDesc.setCellValueFactory(new PropertyValueFactory<>("index04"));
         tblRowRegAndInsurAmount.setCellValueFactory(new PropertyValueFactory<>("index05"));
         tblRowRegAndInsurStat.setCellValueFactory(new PropertyValueFactory<>("index06"));
-        initRemoveColumn(tblRowRegAndInsurAction, this::removeRegAndInsur);
+        initRemoveColumn(tblRowRegAndInsurAction, this::removeRegAndInsur, null);   // TODO: blank check once the row model exists
         tblRegAndIsur.setItems(reginsur_data);
         tblRegAndIsur.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_REGINSUR));
         tblRegAndIsur.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
@@ -1099,7 +1156,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tblRowGawayIssued.setCellValueFactory(cd -> new ReadOnlyStringWrapper(isBlankGiveaway(cd.getValue()) ? "" : gawayNum(cd.getValue(), () -> cd.getValue().getIssued(), "nIssuedxx")));
         tblRowGawayQty.setCellValueFactory(cd -> new ReadOnlyStringWrapper(isBlankGiveaway(cd.getValue()) ? "" : gawayNum(cd.getValue(), () -> cd.getValue().getQuantity(), "nQuantity")));
         tblRowGawayStatus.setCellValueFactory(cd -> new ReadOnlyStringWrapper(""));
-        initRemoveColumn(tblRowGawayAction11211, this::removeGiveaway);
+        initRemoveColumn(tblRowGawayAction11211, this::removeGiveaway, SalesTransactionsMCController::isBlankGiveaway);
         tblGawayItem.setItems(gaway_data);
         tblGawayItem.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_GIVEAWAYS));
         tblGawayItem.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
@@ -1793,7 +1850,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      * sales, VAT amount) must come from the model once the transaction totals are available.
      */
     private void loadSummary() {
-        tfSummaryCustomer.setText(taCustomerName.getText());
+        tfSummaryCustomer.setText(tfClientName.getText());
         tfSummaryTranType.setText(comboText(cmbPaymentTranType));
         tfSummaryPaymentForm.setText(comboText(cmbPaymentForm));
         tfSummaryTerm.setText(tfPaymentTerm.getText());
@@ -1851,14 +1908,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
     }
 
-    /** TODO(model): replace the sample values with the client / co-client from the model. */
+
+    private String genderText(String fsCode) {
+        if (fsCode == null || fsCode.trim().isEmpty()) {
+            return "";
+        }
+        try {
+            int lnCode = Integer.parseInt(fsCode.trim());
+            return (lnCode >= 0 && lnCode < SalesTransactionStatic.GENDER_TEXT.length) ? SalesTransactionStatic.GENDER_TEXT[lnCode] : fsCode;   // unknown code: show it as-is
+        } catch (NumberFormatException ex) {
+            return fsCode;   // already text, e.g. "Male"
+        }
+    }
     private void LoadClientInfo() {
         pbSyncing = true;
         try {
             cmbClientType.getSelectionModel().select(0);
 
             tfClientName.setText(oSalesController.MCSales().getMaster().Client().getCompanyName());
-            tfClientGender.setText(oSalesController.MCSales().getMaster().Client().getGender());
+            tfClientGender.setText(genderText(oSalesController.MCSales().getMaster().Client().getGender()));
             tfClientCitizenship.setText(oSalesController.MCSales().getMaster().Client().Citizenship().getDescription());
             setDate(dpClientBday, toLocalDate(oSalesController.MCSales().getMaster().Client().getBirthDate()));
 
@@ -1889,7 +1957,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void LoadCoClientInfo(){
         try{
             tfCoClientName.setText(oSalesController.MCSales().getMaster().CoClient().getCompanyName());
-            tfCoClientGender.setText(oSalesController.MCSales().getMaster().CoClient().getGender());
+            tfCoClientGender.setText(genderText(oSalesController.MCSales().getMaster().CoClient().getGender()));
             tfCoClientCitezenship.setText(oSalesController.MCSales().getMaster().CoClient().Citizenship().getDescription());
             setDate(dpCoClientBirthday, toLocalDate(oSalesController.MCSales().getMaster().CoClient().getBirthDate()));
             tfCoClientBirthplace.setText(oSalesController.MCSales().getMaster().CoClient().BirthTown().getDescription() + ", "
