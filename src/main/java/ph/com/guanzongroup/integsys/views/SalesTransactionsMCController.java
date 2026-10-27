@@ -713,15 +713,27 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadTableGiveaways();
                     break;
                 case "btnBrowse":
-                    pnEditMode = EditMode.READY;
+                    poJSON = oSalesController.MCSales().searchTransaction("",true,false);
+                    if(poJSON.get("result").equals("error")) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
                     LoadMaster();
-                    LoadClientInfo();
+                    loadTableGiveaways();
+                    loadTableMCItem();
+                    loadSummary();
                     break;
                 case "btnUpdate":
                     pnEditMode = EditMode.UPDATE;
                     break;
                 case "btnSave":
-                    pnEditMode = EditMode.ADDNEW;
+                    poJSON = oSalesController.MCSales().saveTransaction();
+                    if(poJSON.get("result").equals("error")) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
+                    ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
+                    btnNew.fire();
                     break;
                 case "btnApproved":
                 case "btnVoid":
