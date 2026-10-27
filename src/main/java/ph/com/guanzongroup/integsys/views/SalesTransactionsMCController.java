@@ -729,7 +729,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 throw new IllegalStateException(SalesTransactionStatic.MSG_UNEXPECTED_VALUE + fnValue);
         }
         pbEditable.set(fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
-        loadStatus(fnValue);
+//        loadStatus(fnValue);
     }
 
     private void ClickButton() {
@@ -751,6 +751,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     oSalesController.MCSales().getMaster().setIndustryCode(psIndustryId);
                     oSalesController.MCSales().getMaster().setCompanyID(psCompanyId);
+                    oSalesController.MCSales().getMaster().setCategory(psCategoryId);
+                    oSalesController.MCSales().getMaster().setBranchCode(oApp.getBranchCode());
                     LoadMaster();
                     loadTableMCItem();
                     loadTableGiveaways();
@@ -762,9 +764,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     LoadMaster();
+                    LoadClientInfo();
+                    LoadCoClientInfo();
                     loadTableGiveaways();
                     loadTableMCItem();
                     loadSummary();
+                    pnEditMode = oSalesController.MCSales().getEditMode();
                     break;
                 case "btnUpdate":
                     pnEditMode = EditMode.UPDATE;
@@ -820,24 +825,24 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /** Shows the form state. TODO(model): show the real transaction status (open / confirmed / void) for loaded records. */
-    private void loadStatus(int fnEditMode) {
-        String lsStatus;
-        switch (fnEditMode) {
-            case EditMode.ADDNEW:
-                lsStatus = SalesTransactionStatic.STATUS_NEW;
-                break;
-            case EditMode.UPDATE:
-                lsStatus = SalesTransactionStatic.STATUS_UPDATING;
-                break;
-            case EditMode.READY:
-                lsStatus = SalesTransactionStatic.STATUS_READY;
-                break;
-            default:
-                lsStatus = SalesTransactionStatic.STATUS_UNKNOWN;
-                break;
-        }
-        lblStatus.setText(lsStatus);
-    }
+//    private void loadStatus(int fnEditMode) {
+//        String lsStatus;
+//        switch (fnEditMode) {
+//            case EditMode.ADDNEW:
+//                lsStatus = SalesTransactionStatic.STATUS_NEW;
+//                break;
+//            case EditMode.UPDATE:
+//                lsStatus = SalesTransactionStatic.STATUS_UPDATING;
+//                break;
+//            case EditMode.READY:
+//                lsStatus = SalesTransactionStatic.STATUS_READY;
+//                break;
+//            default:
+//                lsStatus = SalesTransactionStatic.STATUS_UNKNOWN;
+//                break;
+//        }
+//        lblStatus.setText(lsStatus);
+//    }
 
     // =========================================================================
     // Combo boxes
@@ -1902,14 +1907,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private void LoadMaster() {
-        lblStatus.setText(SalesTransactionStatic.STATUS_NEW);
+        lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
         tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
         tfSourceDesc.setText(oSalesController.MCSales().getMaster().getSourceCode());
+        setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
 //        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
         taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
     }
-
+    private String StatusText(String fsCode) {
+        if (fsCode == null || fsCode.trim().isEmpty()) {
+            return "";
+        }
+        try {
+            int lnCode = Integer.parseInt(fsCode.trim());
+            return (lnCode >= 0 && lnCode < SalesTransactionStatic.TRANSACTION_STATUS.length) ? SalesTransactionStatic.TRANSACTION_STATUS[lnCode] : fsCode;   // unknown code: show it as-is
+        } catch (NumberFormatException ex) {
+            return fsCode;   // already text, e.g. "Male"
+        }
+    }
 
     private String genderText(String fsCode) {
         if (fsCode == null || fsCode.trim().isEmpty()) {
