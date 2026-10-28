@@ -888,7 +888,7 @@
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
-                                                                                                                                      <ComboBox fx:id="cmbRegistrationType" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                                                                                      <ComboBox fx:id="cmbRegistrationType" disable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                                                                                                       <!-- nInsAmtxx -->
                                                                                                                                       <Label text="Reg. Amount" GridPane.columnIndex="2" GridPane.rowIndex="0">
                                                                                                                                           <GridPane.margin>
