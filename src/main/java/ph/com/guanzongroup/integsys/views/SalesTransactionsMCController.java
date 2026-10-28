@@ -79,14 +79,18 @@ import java.util.logging.Logger;
  *   5. StatusText(): removed the leftover "Male" comment.
  *   6. Registration & Insurance: tfRegAmount / tfInsurAmt / tfInsurYear are loaded with the selected row, written to
  *      the model on lost focus (tblRegAndIsur is reloaded), and the row added by the F3 search is selected
- *      (poSelRegInsur / poEditRegInsur track rows by object). The table's Amount column also shows registrations.
+ *      (poSelRegInsur tracks the selected row by object). The table's Amount column also shows registrations.
  *      Getter / setter names marked ASSUMED (registration amount, insurance amount / year, type amount) must be checked.
- *   7. cmbRegistrationType: selected from the registration row in loadRegAndInsurRecord() (a blank type leaves
- *      the combo empty), and a pick is written to the selected registration row in cmb_Changed().
+ *   7. cmbRegistrationType is permanently disabled (display only): the registration type is selected from the
+ *      registration row in loadRegAndInsurRecord() (a blank type leaves the combo empty).
  *   8. normalizeRegInsurRows(): new insurance / registration rows hold a blank String in their numeric fields, and
  *      every MCSales getter that returns such a row runs computeTransaction() over all rows (ClassCastException).
  *      The backend's row lists are read by reflection and the blanks are replaced with 0 through Model.getValue() /
  *      setValue() (no compute) before any getter is called (selectNewRegInsur() and the loadTableRegAndInsur() task).
+ *   9. Selecting a row in tblRegAndIsur loads BOTH sections (Registration and Insurance): the row itself plus the
+ *      row of the other type that has the same serial id (findSibling()). The sections are tracked in
+ *      poSectionReg / poSectionIns; lost focus handlers and the Charge check boxes write to those rows
+ *      (poEditReg / poEditIns are the rows that were showing when the field got focus).
  *
  * ASSUMED BACKEND API  (everything marked ASSUMED / trans() / SalesQoutationStatic)
  * The SalesTransaction backend classes were not provided, so every call below is
@@ -118,15 +122,19 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private Model_Sales_Giveaways poEditGaway;
     /** Row selected in tblRegAndIsur (tracked by object: registration and insurance entry nos can be equal). */
     private Model poSelRegInsur;
-    /** The registration / insurance row that was selected when a field got focus. */
-    private Model poEditRegInsur;
+    /** Rows shown in the Registration / Insurance sections (either can be null). */
+    private Model_Sales_Registration poSectionReg;
+    private Model_Sales_Insurance poSectionIns;
+    /** The section rows that were showing when a field got focus. */
+    private Model_Sales_Registration poEditReg;
+    private Model_Sales_Insurance poEditIns;
 
     private int pnUnitRow = -1;
     private int pnGawayRow = -1;
     private int pnRegInsurRow = -1;
     private int pnAttachRow = -1;
     private boolean pbSyncing = false;   // true while combos/checkboxes are set programmatically
-    /** true when the row selected in tblRegAndIsur is a registration; drives cmbRegistrationType. */
+    /** true when the row selected in tblRegAndIsur is a registration. */
     private final BooleanProperty pbRegistrationRow = new SimpleBooleanProperty(false);
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
 
@@ -272,7 +280,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     //    @FXML private ComboBox cmbRegInsuranceOption;
 //    @FXML private TextField tfInsurDesc;
     @FXML private TextField tfInsurYear;
-    //    @FXML private TextField tfInsurPayer;
+        @FXML private TextField tfInsurPayer;
     @FXML private TextField tfInsurAmt;
     @FXML private CheckBox cbInsurIsCharge;
 
@@ -458,7 +466,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfMCRemarks, tfMCUnitPrice, tfPomoCode, tfMCRegisAmt, tfMCInsurAmt, tfPromoDisc, tfPromoAddDisc, tfFreight);
 
         poRegistrationFields = Arrays.asList(tfRegEngineNo, tfRegFrameNo, tfRegAmount,
-                tfInsurYear, tfInsurAmt, tfRegInsurType, tfInsurType);
+                tfInsurYear,tfInsurPayer, tfInsurAmt, tfRegInsurType, tfInsurType);
 
         poGiveawayFields = Arrays.asList(tfGawayBarrcode, tfGawayDesc, tfGawayRemarks, tfGawayGiven, tfGawayIssued, tfGawayQty);
 
@@ -498,7 +506,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 if (isFocused) {
                     poEditUnit = (pnUnitRow >= 1 && pnUnitRow <= unit_data.size()) ? unit_data.get(pnUnitRow - 1) : null;
                     poEditGaway = selectedGiveaway();
-                    poEditRegInsur = poSelRegInsur;
+                    poEditReg = poSectionReg;
+                    poEditIns = poSectionIns;
                 } else {
                     txtField_LostFocus(txtInput);
                 }
@@ -641,6 +650,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             selectNewRegInsur(true);   // the insurance the search just added becomes the selected row
                             loadTableRegAndInsur();   // show the searched insurance in the table
                             break;
+                        case "tfInsurPayer":
+                            poJSON = oSalesController.MCSales().searchInsuranceTypePayee(pnUnitRow, lsValuse, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            ShowMessageFX.Warning((oSalesController.MCSales().getSalesInsurance(pnUnitRow).InusrancePayeeClient().getCompanyName().toString()), "Warning", null);
+                            break;
                         default:
                             break;
                     }
@@ -710,13 +727,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 }
                 case "tfRegAmount": {
-                    // write to the registration that was being edited (not the row that is selected now)
-                    if (!(poEditRegInsur instanceof Model_Sales_Registration)) {
-                        break;   // no registration row selected
-                    }
-                    final Model_Sales_Registration loReg = (Model_Sales_Registration) poEditRegInsur;
+                    // write to the registration that was showing in the section when the field got focus
+                    final Model_Sales_Registration loReg = poEditReg;
                     if (isBlankRegInsur(loReg)) {
-                        break;   // no registration type chosen on this row yet
+                        break;   // no registration in the section yet
                     }
                     double lnRegAmt = parseDouble(lsValue);
                     if (lnRegAmt == dbl(() -> loReg.getInsuranceAmount())) {
@@ -732,12 +746,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 }
                 case "tfInsurAmt":
                 case "tfInsurYear": {
-                    if (!(poEditRegInsur instanceof Model_Sales_Insurance)) {
-                        break;   // registration row or nothing selected
-                    }
-                    final Model_Sales_Insurance loIns = (Model_Sales_Insurance) poEditRegInsur;
+                    // write to the insurance that was showing in the section when the field got focus
+                    final Model_Sales_Insurance loIns = poEditIns;
                     if (isBlankRegInsur(loIns)) {
-                        break;
+                        break;   // no insurance in the section yet
                     }
                     if ("tfInsurAmt".equals(lsID)) {
                         double lnInsAmt = parseDouble(lsValue);
@@ -964,7 +976,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             });
         }
 
-        cmbRegistrationType.setDisable(true);
+        cmbRegistrationType.setDisable(true);   // permanently disabled: display only
         // Term only applies to a credit transaction
         tfPaymentTerm.disableProperty().bind(pbCreditPayment.not());
     }
@@ -991,10 +1003,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             } else if (fcmb == cmbVehicleType) {
                 poJSON = oSalesController.MCSales().getDetail(pnUnitRow).InventorySerial().setCondition(lsValue); // placeholder
             } else if (fcmb == cmbRegistrationType) {
-                if (poSelRegInsur instanceof Model_Sales_Registration && !isBlankRegInsur(poSelRegInsur)) {
-                    poJSON = ((Model_Sales_Registration) poSelRegInsur).setRegistrationType(lsValue);
+                if (poSectionReg != null && !isBlankRegInsur(poSectionReg)) {
+                    poJSON = poSectionReg.setRegistrationType(lsValue);
                 } else {
-                    // no registration row selected: undo the pick without re-triggering this handler
+                    // no registration in the section: undo the pick without re-triggering this handler
                     boolean lbPrev = pbSyncing;
                     pbSyncing = true;
                     try {
@@ -1044,24 +1056,23 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
         try {
             if (fcb == cbRegIsCharge || fcb == cbInsurIsCharge) {
-                // ticked = Charge, unticked = Free; written to the row selected in tblRegAndIsur
+                // ticked = Charge, unticked = Free; written to the row shown in that section
                 boolean lbReg = fcb == cbRegIsCharge;
-                Model loRow = poSelRegInsur;
-                boolean lbMatch = lbReg ? loRow instanceof Model_Sales_Registration
-                        : loRow instanceof Model_Sales_Insurance;
-                if (!lbMatch || isBlankRegInsur(loRow)) {
-                    // no matching row (or no type chosen yet): undo the tick without triggering this handler again
+                Model loRow = lbReg ? poSectionReg : poSectionIns;
+                if (isBlankRegInsur(loRow)) {
+                    // nothing in this section yet: undo the tick without triggering this handler again
+                    boolean lbPrev = pbSyncing;
                     pbSyncing = true;
                     try {
                         fcb.setSelected(!fbSelected);
                     } finally {
-                        pbSyncing = false;
+                        pbSyncing = lbPrev;
                     }
                     return;
                 }
                 poJSON = lbReg
-                        ? ((Model_Sales_Registration) loRow).setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO)
-                        : ((Model_Sales_Insurance) loRow).setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO);
+                        ? poSectionReg.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO)
+                        : poSectionIns.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO);
                 if ("error".equals(poJSON.get("result"))) {
                     ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                     return;
@@ -1399,38 +1410,52 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Called when a registration / insurance row is selected. */
+    /** The row of the other type that belongs to the same unit (same serial id), or null. */
+    private Model findSibling(Model foRow, boolean fbInsurance) {
+        String lsSerial = regInsurSerialId(foRow);
+        if (lsSerial == null || lsSerial.isEmpty()) {
+            return null;
+        }
+        for (Model loRow : reginsur_data) {
+            boolean lbRightType = fbInsurance ? loRow instanceof Model_Sales_Insurance
+                    : loRow instanceof Model_Sales_Registration;
+            if (lbRightType && lsSerial.equals(regInsurSerialId(loRow))) {
+                return loRow;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Called when a registration / insurance row is selected: fills BOTH sections. The selected row fills its own
+     * section; the row of the other type for the same unit (same serial id) fills the other one, when it exists.
+     */
     private void loadRegAndInsurRecord(final Model foRow) throws GuanzonException, SQLException {
         boolean lbPrev = pbSyncing;
         pbSyncing = true;
         pbRegistrationRow.set(foRow instanceof Model_Sales_Registration);
         try {
+            poSectionReg = foRow instanceof Model_Sales_Registration
+                    ? (Model_Sales_Registration) foRow
+                    : (Model_Sales_Registration) findSibling(foRow, false);
+            poSectionIns = foRow instanceof Model_Sales_Insurance
+                    ? (Model_Sales_Insurance) foRow
+                    : (Model_Sales_Insurance) findSibling(foRow, true);
+
             // follows Model_Sales_Insurance.xml: sSerialID, sInsTypID, nInsAmtxx, nInsurYrx, cChargeTo
             tfRegEngineNo.setText(regInsurEngine(foRow));
             tfRegFrameNo.setText(regInsurFrame(foRow));
+
+            // registration section
             tfRegInsurType.clear();
             tfRegAmount.clear();
             cmbRegistrationType.getSelectionModel().clearSelection();
             cbRegIsCharge.setSelected(false);
-            cbInsurIsCharge.setSelected(false);
-            tfInsurType.clear();
-            tfInsurYear.clear();
-            tfInsurAmt.clear();
-            // tfInsurPayer.clear();
-            if (foRow instanceof Model_Sales_Insurance) {
-                final Model_Sales_Insurance loIns = (Model_Sales_Insurance) foRow;
-                tfInsurType.setText(textOf(() -> loIns.InsuranceType().getInsuranceTypeName()));   // assumes getInsuranceTypeName()
-                tfInsurYear.setText(numText(() -> loIns.getInsuranceYear()));
-                tfInsurAmt.setText(money(dbl(() -> loIns.getInsuranceAmount())));
-
-//                tfInsurPayer.setText(isChargeTo(loIns) ? "Charge" : "Free");
-                cbInsurIsCharge.setSelected(isChargeTo(loIns));
-            } else if (foRow instanceof Model_Sales_Registration) {
-                final Model_Sales_Registration loReg = (Model_Sales_Registration) foRow;
-                tfRegInsurType.setText(regInsurTypeId(foRow));
+            if (poSectionReg != null) {
+                final Model_Sales_Registration loReg = poSectionReg;
+                tfRegInsurType.setText(regInsurTypeId(loReg));
                 tfRegAmount.setText(money(dbl(() -> loReg.getInsuranceAmount())));
                 cbRegIsCharge.setSelected(isChargeTo(loReg));
-//                ShowMessageFX.Information("REGISTRATION TYPE: " + textOf(() -> loReg.getRegistrationType()), pxeModuleName, null);
                 // select the registration type on the combo; a blank type leaves the combo empty
                 String lsRegType = textOf(() -> loReg.getRegistrationType()).trim();
                 if (!lsRegType.isEmpty()) {
@@ -1439,6 +1464,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         cmbRegistrationType.getSelectionModel().select(lnRegType);
                     }
                 }
+            }
+
+            // insurance section
+            tfInsurType.clear();
+            tfInsurYear.clear();
+            tfInsurAmt.clear();
+            tfInsurPayer.clear();
+            cbInsurIsCharge.setSelected(false);
+            if (poSectionIns != null) {
+                final Model_Sales_Insurance loIns = poSectionIns;
+                tfInsurType.setText(textOf(() -> loIns.InsuranceType().getInsuranceTypeName()));   // assumes getInsuranceTypeName()
+                tfInsurYear.setText(numText(() -> loIns.getInsuranceYear()));
+                tfInsurAmt.setText(money(dbl(() -> loIns.getInsuranceAmount())));
+                cbInsurIsCharge.setSelected(isChargeTo(loIns));
+                tfInsurPayer.setText(textOf(() -> loIns.InusrancePayeeClient().getCompanyName()));
             }
         } finally {
             pbSyncing = lbPrev;
@@ -1781,6 +1821,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 if (reginsur_data.isEmpty()) {
                     pnRegInsurRow = -1;
                     poSelRegInsur = null;
+                    poSectionReg = null;
+                    poSectionIns = null;
+                    pbSyncing = true;
+                    try {
+                        tfRegInsurType.clear();
+                        tfRegAmount.clear();
+                        tfInsurType.clear();
+                        tfInsurYear.clear();
+                        tfInsurAmt.clear();
+                        cmbRegistrationType.getSelectionModel().clearSelection();
+                        cbRegIsCharge.setSelected(false);
+                        cbInsurIsCharge.setSelected(false);
+                    } finally {
+                        pbSyncing = false;
+                    }
                     tblRegAndIsur.setPlaceholder(loading.placeholderLabel);
                     pbRegistrationRow.set(false);
                 } else {
@@ -2291,7 +2346,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         pnGawayRow = -1;
         pnRegInsurRow = -1;
         poSelRegInsur = null;
-        poEditRegInsur = null;
+        poSectionReg = null;
+        poSectionIns = null;
+        poEditReg = null;
+        poEditIns = null;
         showAttachment(-1);
         pbRegistrationRow.set(false);
     }
@@ -2404,6 +2462,19 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void LoadMotorcyleAndPricing() {
         tfTransNo.setText("M00126000001");
         tfSourceNo.setText("M00126000001");
+        tfSourceDesc.setText("Sales Qoutation");
+        tfReceipt.setText("");
+    }
+
+    private void LoadPaymentMode() {
+        cmbPaymentTranType.getSelectionModel().select(
+                Integer.valueOf(oSalesController.MCSales().getMaster().getTransactionType().toString())
+        );
+        cmbPaymentForm.getSelectionModel().select(
+                Integer.valueOf(oSalesController.MCSales().getMaster().getPaymentForm().toString())
+        );
+//        tfPaymentCreditAdvisor.setText(oSalesController.MCSales().getMaster().));
+        tfPaymentDrNo.setText("M00126000001");
         tfSourceDesc.setText("Sales Qoutation");
         tfReceipt.setText("");
     }
