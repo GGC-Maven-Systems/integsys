@@ -766,18 +766,18 @@
                                                                                                                                         <TextField fx:id="tfFreight" GridPane.columnIndex="10" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                                                                         <TextField fx:id="tfPromoDisc" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                                                                         <TextField fx:id="tfPromoAddDisc" GridPane.columnIndex="7" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                                                                                                                        <Label text="Regis. Amt" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                                                                                        <Label text="Registration" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                                                                                                                             <padding>
                                                                                                                                                 <Insets right="10.0" />
                                                                                                                                             </padding>
                                                                                                                                         </Label>
-                                                                                                                                        <Label text="Insur. Amt" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                                                                                                        <Label text="Insurance" GridPane.columnIndex="3" GridPane.rowIndex="3">
                                                                                                                                             <padding>
                                                                                                                                                 <Insets right="10.0" />
                                                                                                                                             </padding>
                                                                                                                                         </Label>
-                                                                                                                                        <TextField fx:id="tfMCRegisAmt" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-                                                                                                                                        <TextField fx:id="tfMCInsurAmt" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                                                                                                                        <TextField fx:id="tfMCRegisAmt" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                                                                                        <TextField fx:id="tfMCInsurAmt" editable="false" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                                                                                     </children>
                                                                                                                                 </GridPane>
                                                                                                                             </children>
@@ -881,7 +881,7 @@
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
-                                                                                                                                      <ComboBox fx:id="cmbRegistrationType" maxWidth="1.7976931348623157E308" promptText="Select type" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                                                                                                      <ComboBox fx:id="cmbRegistrationType" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                                                                                                                       <!-- nInsAmtxx -->
                                                                                                                                       <Label text="Reg. Amount" GridPane.columnIndex="2" GridPane.rowIndex="0">
                                                                                                                                           <GridPane.margin>
@@ -896,7 +896,6 @@
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
                                                                                                                                       <TextField fx:id="tfRegDesc" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                                                                                                                                      <ComboBox fx:id="cmbRegInsurType" maxWidth="1.7976931348623157E308" promptText="Select type" GridPane.columnIndex="1" GridPane.rowIndex="2" />
       
                                                                                                                                       <!-- cChargeTo -->
                                                                                                                                       <CheckBox fx:id="cbRegIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="2" />
@@ -905,6 +904,7 @@
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
+                                                                                                      <TextField fx:id="tfRegInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                                                                                                   </children>
                                                                                                                               </GridPane>
                                                                                                                           </children>
@@ -945,13 +945,6 @@
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
-                                                                                                                                      <ComboBox fx:id="cmbInsuranceType" maxWidth="1.7976931348623157E308" promptText="Select type" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                                                                                                                      <Label text="Reg. Insur. Opt." GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <ComboBox fx:id="cmbRegInsuranceOption" maxWidth="1.7976931348623157E308" promptText="Select option" GridPane.columnIndex="3" GridPane.rowIndex="0" />
       
                                                                                                                                       <Label text="Insur. Description" GridPane.rowIndex="1">
                                                                                                                                           <GridPane.margin>
@@ -960,12 +953,12 @@
                                                                                                                                       </Label>
                                                                                                                                       <TextField fx:id="tfInsurDesc" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                                                                                                       <!-- nInsurYrx -->
-                                                                                                                                      <Label text="Insur. Year" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                                                                                      <Label text="Insur. Year" GridPane.columnIndex="2">
                                                                                                                                           <GridPane.margin>
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
-                                                                                                                                      <TextField fx:id="tfInsurYear" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                                                                                                      <TextField fx:id="tfInsurYear" alignment="CENTER_RIGHT" GridPane.columnIndex="3" />
       
                                                                                                                                       <!-- cChargeTo -->
                                                                                                                                       <Label text="Payer" GridPane.rowIndex="2">
@@ -975,13 +968,14 @@
                                                                                                                                       </Label>
                                                                                                                                       <TextField fx:id="tfInsurPayer" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                                                                                                       <!-- nInsAmtxx -->
-                                                                                                                                      <Label text="Insur. Amount" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                                                                                                      <Label text="Insur. Amount" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                                                                                                           <GridPane.margin>
                                                                                                                                               <Insets right="10.0" />
                                                                                                                                           </GridPane.margin>
                                                                                                                                       </Label>
-                                                                                                                                      <TextField fx:id="tfInsurAmt" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                                                                                                                      <CheckBox fx:id="cbInsurIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                                                                                                                      <TextField fx:id="tfInsurAmt" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                                                                                                      <CheckBox fx:id="cbInsurIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                                                                                      <TextField fx:id="tfInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" />
                                                                                                                                   </children>
                                                                                                                               </GridPane>
                                                                                                                           </children>
@@ -1399,10 +1393,10 @@
                                                                                 <TableColumn fx:id="tblColDetailVariant" editable="false" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Variant / Color" />
                                                                                 <TableColumn fx:id="tblColDetailWarrantyNo" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Warranty No" />
                                                                                 <TableColumn fx:id="tblColDetailKeySerial" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Key Serial" />
-                                                                                <TableColumn fx:id="tblColDetailRegType" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Reg. Type" />
                                                                                 <TableColumn fx:id="tblColDetailNetSRP" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Net SRP" />
                                                                                 <TableColumn fx:id="tblColDetailSRP" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="SRP" />
-                                                                                <TableColumn fx:id="tblColDetailInsur" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Insurance" />
+                                                                                <TableColumn fx:id="tblColDetailInsReg" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Ins. &amp; Reg." />
+                                                                                <TableColumn fx:id="tblColDetailFreight" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Freight" />
                                                                                 <TableColumn fx:id="tblColDetailDiscount" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Discount" />
                                                                                 <TableColumn fx:id="tblColDetailAddDisc" editable="false" maxWidth="1.7976931348623157E308" minWidth="80.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Add. Disc" />
                                                                                 <TableColumn fx:id="tblColDetailRemarks" editable="false" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="250.0" resizable="false" sortable="false" style="-fx-font-size: 12;" text="Remarks" />
