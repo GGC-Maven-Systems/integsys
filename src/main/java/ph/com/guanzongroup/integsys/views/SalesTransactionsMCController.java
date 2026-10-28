@@ -861,7 +861,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     pnEditMode = oSalesController.MCSales().getEditMode();
                     break;
                 case "btnUpdate":
-                    pnEditMode = EditMode.UPDATE;
+                    poJSON = oSalesController.MCSales().UpdateTransaction();
+                    if (poJSON.get("result").equals("error")) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
                     break;
                 case "btnSave":
                     poJSON = oSalesController.MCSales().saveTransaction();
