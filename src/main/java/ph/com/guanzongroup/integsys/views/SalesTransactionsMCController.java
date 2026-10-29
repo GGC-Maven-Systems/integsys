@@ -28,8 +28,10 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.agent.services.Model;
+import org.guanzon.appdriver.agent.systables.Model_Transaction_Attachment;
 import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.MCSales;
 import ph.com.guanzongroup.cas.sales.SalesQoutationVersion;
@@ -37,6 +39,7 @@ import ph.com.guanzongroup.cas.sales.constant.SalesTransactionStatic;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Detail;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Giveaways;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Insurance;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Master;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Registration;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
@@ -66,35 +69,29 @@ import java.util.logging.Logger;
  * summary rebuilt from the model after every change.
  *
  * ------------------------------------------------------------------------------
- * CHANGES IN THIS VERSION (compile + load fixes)
- *   1. "Unhandled exceptions: GuanzonException, SQLException" fixed:
- *        - isBlankRegInsur() now catches the checked exceptions itself (it is used as a Predicate)
- *          and checks for null BEFORE reading the row.
- *        - the remove column for tblRegAndIsur wraps removeRegAndInsur() in a try/catch lambda
- *          (IntConsumer cannot throw checked exceptions).
- *   2. lnSeq is no longer a class field. It is a local in loadTableMCItem(), incremented on every call,
- *      so the stale-load check works like in loadTableGiveaways() / loadTableRegAndInsur().
- *   3. initialize() reads the edit mode from MCSales() (the screen's own controller).
- *   4. loadUnitRecord(): removed the duplicated nested if.
- *   5. StatusText(): removed the leftover "Male" comment.
- *   6. Registration & Insurance: tfRegAmount / tfInsurAmt / tfInsurYear are loaded with the selected row, written to
- *      the model on lost focus (tblRegAndIsur is reloaded), and the row added by the F3 search is selected
- *      (poSelRegInsur tracks the selected row by object). The table's Amount column also shows registrations.
- *      Getter / setter names marked ASSUMED (registration amount, insurance amount / year, type amount) must be checked.
- *   7. cmbRegistrationType is permanently disabled (display only): the registration type is selected from the
- *      registration row in loadRegAndInsurRecord() (a blank type leaves the combo empty).
- *   8. normalizeRegInsurRows(): new insurance / registration rows hold a blank String in their numeric fields, and
- *      every MCSales getter that returns such a row runs computeTransaction() over all rows (ClassCastException).
- *      The backend's row lists are read by reflection and the blanks are replaced with 0 through Model.getValue() /
- *      setValue() (no compute) before any getter is called (selectNewRegInsur() and the loadTableRegAndInsur() task).
- *   9. Selecting a row in tblRegAndIsur loads BOTH sections (Registration and Insurance): the row itself plus the
- *      row of the other type that has the same serial id (findSibling()). The sections are tracked in
- *      poSectionReg / poSectionIns; lost focus handlers and the Charge check boxes write to those rows
- *      (poEditReg / poEditIns are the rows that were showing when the field got focus).
+ * CHANGES IN THIS VERSION
+ *   1-13. (earlier versions) compile + load fixes, Registration & Insurance, Payment tab, Confirm / Void / History...
+ *  14. ATTACHMENT TAB fixed (see "Attachment tab" section):
+ *        - the tab is wired to MCSales: Add copies the picked file to the temp attachment folder (copyFile) and registers it
+ *          (addAttachment(name)); Remove calls removeAttachment(modelRow). Before, both only touched local lists, so nothing was saved.
+ *        - the attachments are loaded from the model after Browse / Update / Confirm / Void (loadAttachments() runs in a Task,
+ *          it downloads the files). Before, the table was never filled for an existing transaction.
+ *        - the table columns use lambda cell factories (PropertyValueFactory("index01") cannot read Model_Transaction_Attachment).
+ *        - the duplicate check compares FILE NAMES (the old one compared File objects of different folders: never equal).
+ *        - the attachment type combo is stored on the attachment, follows the selected row, and changes the selected row's type.
+ *        - AnchorAttach / AnchorAttach2 are no longer disabled outside edit mode: it also disabled the viewer, the arrows and the
+ *          list, so a saved transaction could not be browsed. Add / Remove / type are still bound to the edit mode.
+ *        - missing import org.guanzon.appdriver.constant.RecordStatus added (reloadAttachmentTable used it).
  *
- * ASSUMED BACKEND API  (everything marked ASSUMED / trans() / SalesQoutationStatic)
- * The SalesTransaction backend classes were not provided, so every call below is
- * modelled on the SalesQoutation API. If a name differs, fix it in one place.
+ * ASSUMED (not visible in the classes provided) - each one is used in ONE place, fix it there:
+ *   Model_Sales_Master getters mirroring the setters MCSales calls: getTransactionTotal, getDiscount, getAddDiscount,
+ *   getFreight, getVATSales, getVATAmount, getNonVATSales, getZeroVATSales, getAmountDue, getTermCode
+ *   (getAdvances and getCWTAmount are used by MCSales itself), setCWTAmount(double), getDueDate()/setDueDate(Date),
+ *   Salesman().getCompanyName() for the credit advisor name. Amount paid is read from the raw column "nAmtPaidx".
+ *   Model_Sales_Insurance / Model_Sales_Registration: getInsuranceAmount(), setInsuranceAmount(), getInsuranceYear(),
+ *   setInsuranceYear(), getChargeTo(), setChargeTo().
+ *   Model_Transaction_Attachment: the attachment type is kept in the raw column ATTACH_TYPE_COLUMN ("sDocTypex") through
+ *   getValue()/setValue(); change the constant if your table names it differently.
  *
  * NEW CONSTANTS NEEDED in SalesTransactionStatic:
  *   TBL_NO_REGINSUR, MSG_CONFIRM_REMOVE_REGINSUR
@@ -116,6 +113,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private int pnUnitLoadSeq = 0;
     private int pnRegInsurLoadSeq = 0;
     private int pnGawayLoadSeq = 0;
+    private int pnAttachLoadSeq = 0;
     /** The rows that were selected when a field got focus: the field's edit belongs to THESE rows even if the user
      *  clicks another row (which changes the selection before the field's lost-focus handler runs). */
     private Model_Sales_Detail poEditUnit;
@@ -132,19 +130,26 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private int pnUnitRow = -1;
     private int pnGawayRow = -1;
     private int pnRegInsurRow = -1;
-    private int pnAttachRow = -1;
+    private int pnAttachRow = -1;        // index in poAttachFiles / attach_data (NOT the model index: see poAttachModelRows)
     private boolean pbSyncing = false;   // true while combos/checkboxes are set programmatically
     /** true when the row selected in tblRegAndIsur is a registration. */
     private final BooleanProperty pbRegistrationRow = new SimpleBooleanProperty(false);
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
-
+    /** true when the payment form is Term; drives the Term field only. */
+    private final BooleanProperty pbTermPayment = new SimpleBooleanProperty(false);
+    /** Index of "Term" in SalesTransactionStatic.PAYMENT_FORMS = {"Cash", "Term", "Cash Balance", "Financing"}. */
+    private static final int PAYMENT_FORM_TERM = 1;
     /** true only in ADDNEW / UPDATE; combos, check boxes, date pickers and action buttons are bound to it. */
     private final BooleanProperty pbEditable = new SimpleBooleanProperty(false);
-    /** true when the payment transaction type is Credit; drives the Term / Due Date fields. */
+    /** true when the payment transaction type is Credit; drives the Due Date field. */
     private final BooleanProperty pbCreditPayment = new SimpleBooleanProperty(false);
 
-    /** Files picked in the Attachment tab (same order as the attachment rows). */
+    /** Raw column of Transaction_Attachment that keeps the attachment type (combo index as text). ASSUMED name. */
+    private static final String ATTACH_TYPE_COLUMN = "sDocTypex";
+
+    /** Files of the active attachments (same order as attach_data / poAttachModelRows). */
     private final ObservableList<File> poAttachFiles = FXCollections.observableArrayList();
+
 
     // =========================================================================
     // TextInputControl groups (filled in initControlGroups(), NOT here:
@@ -170,7 +175,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private final ObservableList<Model_Sales_Giveaways> gaway_data = FXCollections.observableArrayList();
     private final ObservableList<Model> reginsur_data = FXCollections.observableArrayList();   // Model_Sales_Registration / Model_Sales_Insurance rows
     private final ObservableList<ModelTableDetail> invoice_data = FXCollections.observableArrayList();
-    private final ObservableList<ModelTableDetail> attach_data = FXCollections.observableArrayList();
+    private final ObservableList<Model_Transaction_Attachment> attach_data = FXCollections.observableArrayList();
+    private final List<Integer> poAttachModelRows = new ArrayList<>();   // table row -> MCSales attachment index
 
     // =========================================================================
     // Root containers & buttons
@@ -280,7 +286,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     //    @FXML private ComboBox cmbRegInsuranceOption;
 //    @FXML private TextField tfInsurDesc;
     @FXML private TextField tfInsurYear;
-        @FXML private TextField tfInsurPayer;
+    @FXML private TextField tfInsurPayer;
     @FXML private TextField tfInsurAmt;
     @FXML private CheckBox cbInsurIsCharge;
 
@@ -330,6 +336,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     @FXML private TextField tfPaymentCwt;
     @FXML private TextField tfPaymentAmountPaid;
     @FXML private TextField tfPaymentBalance;
+    @FXML private TextField tfSalesman;
 
     @FXML private TableView<ModelTableDetail> tblInvoiceList;   // Invoice list
     @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceNo;
@@ -367,9 +374,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     @FXML private TextField tfAttachmentNo;
     @FXML private ComboBox cmbAttachmentType;
-    @FXML private TableView<ModelTableDetail> tblAttachments;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowNoAttachment;
-    @FXML private TableColumn<ModelTableDetail, String> tblFileNameAttachment;
+    @FXML private TableView<Model_Transaction_Attachment> tblAttachments;
+    @FXML private TableColumn<Model_Transaction_Attachment, String> tblRowNoAttachment;
+    @FXML private TableColumn<Model_Transaction_Attachment, String> tblFileNameAttachment;
     @FXML private Button btnAddAttachment;
     @FXML private Button btnRemoveAttachment;
     @FXML private StackPane stackPane;
@@ -466,7 +473,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfMCRemarks, tfMCUnitPrice, tfPomoCode, tfMCRegisAmt, tfMCInsurAmt, tfPromoDisc, tfPromoAddDisc, tfFreight);
 
         poRegistrationFields = Arrays.asList(tfRegEngineNo, tfRegFrameNo, tfRegAmount,
-                tfInsurYear,tfInsurPayer, tfInsurAmt, tfRegInsurType, tfInsurType);
+                tfInsurYear, tfInsurPayer, tfInsurAmt, tfRegInsurType, tfInsurType);
 
         poGiveawayFields = Arrays.asList(tfGawayBarrcode, tfGawayDesc, tfGawayRemarks, tfGawayGiven, tfGawayIssued, tfGawayQty);
 
@@ -536,9 +543,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 break;
                             }
-                            LoadClientInfo();
-                            taCustomerName.setStyle("-fx-font-weight: bold;");
-                            taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
+                            LoadClientInfo();   // also fills taCustomerName
                             // the search may have loaded a source quotation / reservation into the model:
                             // forget the previous client's selected rows so the table reloads from the first row
                             pnUnitRow = -1;
@@ -546,6 +551,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadTableMCItem();
                             loadTableGiveaways();
                             loadTableRegAndInsur();
+                            loadPaymentRecord();   // a source quotation also sets the payment form, term, advances...
                             break;
                         case "tfCoClientName":
                             oSalesController.MCSales().getMaster().Client().setClientType("0");
@@ -618,7 +624,17 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadTableGiveaways();   // store the searched giveaway in the table
                             break;
                         case "tfPaymentTerm":
-                            ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
+                            // MCSales has no term search: the master keeps a term CODE (setTermCode), typed in this field
+                            ShowMessageFX.Warning("There is no term search yet. Type the term code and leave the field.", "Warning", null);
+                            break;
+                        case "tfPaymentCreditAdvisor":
+                            // the credit advisor is the salesman of the transaction
+                            poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            loadPaymentRecord();
                             break;
                         case "tfRegInsurType":
                             if (pnUnitRow < 1) {
@@ -650,14 +666,23 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             selectNewRegInsur(true);   // the insurance the search just added becomes the selected row
                             loadTableRegAndInsur();   // show the searched insurance in the table
                             break;
-                        case "tfInsurPayer":
-                            poJSON = oSalesController.MCSales().searchInsuranceTypePayee(pnUnitRow, lsValuse, false);
+                        case "tfInsurPayer": {
+                            final Model_Sales_Insurance loInsPayer = poSectionIns;   // the insurance showing in the section
+                            if (isBlankRegInsur(loInsPayer)) {
+                                ShowMessageFX.Warning("Please select or search an insurance first.", "Warning", null);
+                                return;
+                            }
+                            normalizeRegInsurRows();   // before any backend call that computes over the rows
+                            // searchInsuranceTypePayee(n) reads getSalesInsurance(n): n is the insurance ENTRY NO.
+                            poJSON = oSalesController.MCSales().searchInsuranceTypePayee(loInsPayer.getEntryNo(), lsValuse, false);
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 return;
                             }
-                            ShowMessageFX.Warning((oSalesController.MCSales().getSalesInsurance(pnUnitRow).InusrancePayeeClient().getCompanyName().toString()), "Warning", null);
+                            poSelRegInsur = loInsPayer;   // keep the same row selected
+                            loadTableRegAndInsur();       // reloads the row; loadRegAndInsurRecord() fills tfInsurPayer
                             break;
+                        }
                         default:
                             break;
                     }
@@ -771,6 +796,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadTableRegAndInsur();   // refresh the Amount / Year columns
                     break;
                 }
+                case "tfPaymentTerm": {
+                    if (!pbTermPayment.get()) {
+                        break;   // the field is disabled unless the payment form is Term
+                    }
+                    String lsTerm = lsValue.trim();
+                    if (lsTerm.equals(textOf(() -> master().getTermCode()))) {   // ASSUMED getter
+                        break;   // unchanged
+                    }
+                    poJSON = master().setTermCode(lsTerm);
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        return;
+                    }
+                    break;
+                }
                 case "tfGawayRemarks":
                     ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
                     break;
@@ -803,8 +843,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         CustomCommonUtil.setManaged(false, btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose);
 //        AnchorMCSales.setDisable(true);
         AnchorClient.setDisable(true);
-        AnchorAttach.setDisable(true);
-        AnchorAttach2.setDisable(true);
+        // AnchorAttach / AnchorAttach2 are NOT disabled here any more: they hold the viewer, the arrows and the list, which
+        // must work on a saved transaction too. Add / Remove / type are bound to pbEditable in initAttachmentTab().
         AnchorMCPrice.setDisable(true);
         AnchorRegInsur.setDisable(true);
         AnchorGiveaway.setDisable(true);
@@ -815,8 +855,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnHistory, btnClose);
                 break;
             case EditMode.READY:
-                CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnUpdate, btnHistory, btnClose);
-                CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnUpdate, btnHistory, btnClose);
+                CustomCommonUtil.setVisible(true, btnBrowse, btnNew, btnUpdate, btnApproved, btnVoid, btnHistory, btnClose);
+                CustomCommonUtil.setManaged(true, btnBrowse, btnNew, btnUpdate, btnApproved, btnVoid, btnHistory, btnClose);
                 break;
             case EditMode.ADDNEW:
             case EditMode.UPDATE:
@@ -824,8 +864,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 CustomCommonUtil.setManaged(true, btnSave, btnCancel);
 //                AnchorMCSales.setDisable(false);
                 AnchorClient.setDisable(false);
-                AnchorAttach.setDisable(false);
-                AnchorAttach2.setDisable(false);
                 AnchorMCPrice.setDisable(false);
                 AnchorRegInsur.setDisable(false);
                 AnchorGiveaway.setDisable(false);
@@ -842,6 +880,30 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         for (Button btn : new Button[]{btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose}) {
             btn.setOnAction(this::handleButtonAction);
         }
+    }
+
+    /**
+     * Refreshes the whole form from the transaction that is loaded in MCSales (after Browse, Update, Confirm, Void).
+     * The edit mode is read FIRST: the tables add their blank trailing row only while editing.
+     */
+    private void reloadRecord() throws GuanzonException, SQLException {
+        pnEditMode = oSalesController.MCSales().getEditMode();
+        pnUnitRow = -1;
+        pnGawayRow = -1;
+        pnRegInsurRow = -1;
+        poSelRegInsur = null;
+        LoadMaster();
+        LoadClientInfo();
+        try {
+            LoadCoClientInfo();
+        } catch (RuntimeException ex) {   // a transaction without a co-client must still load
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+        loadTableMCItem();
+        loadTableGiveaways();
+        loadTableRegAndInsur();
+        loadPaymentRecord();
+        loadAttachmentRecords();   // downloads the attachments of the loaded transaction (background Task)
     }
 
     private void handleButtonAction(ActionEvent event) {
@@ -863,6 +925,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadTableMCItem();
                     loadTableGiveaways();
                     loadTableRegAndInsur();
+                    loadPaymentRecord();
+                    reloadAttachmentTable();   // newTransaction() emptied the attachment list: nothing to download
+                    showAttachment(-1);
                     break;
                 case "btnBrowse":
                     poJSON = oSalesController.MCSales().searchTransaction("", true, false);
@@ -870,14 +935,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                         break;
                     }
-                    LoadMaster();
-                    LoadClientInfo();
-                    LoadCoClientInfo();
-                    loadTableGiveaways();
-                    loadTableMCItem();
-                    loadTableRegAndInsur();
-                    loadSummary();
-                    pnEditMode = oSalesController.MCSales().getEditMode();
+                    reloadRecord();   // reads the edit mode first, then fills every section and tab
                     break;
                 case "btnUpdate":
                     poJSON = oSalesController.MCSales().UpdateTransaction();
@@ -885,9 +943,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                         break;
                     }
-                    pnEditMode = oSalesController.MCSales().getEditMode();
+                    reloadRecord();   // now UPDATE: the tables get their blank row, the payment fields become editable
                     break;
                 case "btnSave":
+                    String lsPaymentError = validatePayment();
+                    if (lsPaymentError != null) {
+                        ShowMessageFX.Warning(lsPaymentError, "Warning", null);
+                        break;
+                    }
                     poJSON = oSalesController.MCSales().saveTransaction();
                     if (poJSON.get("result").equals("error")) {
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
@@ -898,12 +961,37 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     oSalesController.MCSales().initTransaction();
                     btnNew.fire();
                     break;
-                case "btnApproved":
+                case "btnApproved":   // "Confirm"
+                    if (!ShowMessageFX.YesNo("Do you want to confirm this transaction?", pxeModuleName, null)) {
+                        break;
+                    }
+                    poJSON = oSalesController.MCSales().CloseTransaction();
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
+                    ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
+                    reloadRecord();   // MCSales re-opened the transaction
+                    break;
                 case "btnVoid":
-                    pnEditMode = EditMode.READY;
+                    if (!ShowMessageFX.YesNo("Do you want to void this transaction?", pxeModuleName, null)) {
+                        break;
+                    }
+                    poJSON = oSalesController.MCSales().VoidTransaction();
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        break;
+                    }
+                    ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
+                    reloadRecord();
                     break;
                 case "btnHistory":
-                    ShowMessageFX.Error(SalesTransactionStatic.MSG_UNDER_DEVELOPMENT, pxeModuleName, null);
+                    String lsTransNo = oSalesController.MCSales().getMaster().getTransactionNo();
+                    if (lsTransNo == null || lsTransNo.isEmpty()) {
+                        ShowMessageFX.Warning("No transaction is loaded.", "Warning", null);
+                        break;
+                    }
+                    oSalesController.MCSales().ShowStatusHistory();
                     break;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CANCEL, pxeModuleName, null)) {
@@ -937,6 +1025,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
     }
 
+    /** The master (header) record of the transaction loaded in MCSales. */
+    private Model_Sales_Master master() {
+        return oSalesController.MCSales().getMaster();
+    }
+
     // =========================================================================
     // Combo boxes
     // =========================================================================
@@ -968,6 +1061,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             lcmb.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
                 if (lcmb == cmbPaymentTranType) {
                     pbCreditPayment.set(newIdx.intValue() == SalesTransactionStatic.PAYMENT_CREDIT);   // always keep this in sync
+                } else if (lcmb == cmbPaymentForm) {
+                    pbTermPayment.set(newIdx.intValue() == PAYMENT_FORM_TERM);   // always keep this in sync
                 }
                 if (!pbLoaded || pbSyncing) {
                     return;
@@ -977,8 +1072,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
 
         cmbRegistrationType.setDisable(true);   // permanently disabled: display only
-        // Term only applies to a credit transaction
-        tfPaymentTerm.disableProperty().bind(pbCreditPayment.not());
+        // Term only applies when the payment form is Term (it is the term CODE; the due date follows the Credit type)
+        tfPaymentTerm.disableProperty().bind(pbTermPayment.not());
     }
 
     private void cmb_Changed(ComboBox fcmb, int fnIndex) {
@@ -987,8 +1082,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
         try {
             if (fcmb == cmbPaymentTranType && fnIndex != SalesTransactionStatic.PAYMENT_CREDIT) {
-                tfPaymentTerm.clear();
                 setDate(dpPaymentDueDate, null);
+                writeDueDate(null);   // not a credit transaction: no due date
+            }
+            if (fcmb == cmbPaymentForm && fnIndex != PAYMENT_FORM_TERM) {
+                tfPaymentTerm.clear();
+                master().setTermCode("");   // not a term payment: no term code
             }
 
             // index -> value stored in the database
@@ -997,9 +1096,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             if (fcmb == cmbClientType) {
                 poJSON = oSalesController.MCSales().getMaster().Client().setClientType(lsValue);          // placeholder
             } else if (fcmb == cmbPaymentTranType) {
-                poJSON = oSalesController.MCSales().getMaster().setTransactionType(lsValue);     // placeholder
+                poJSON = oSalesController.MCSales().getMaster().setTransactionType(lsValue);
             } else if (fcmb == cmbPaymentForm) {
-                poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);         // placeholder
+                poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);
+            } else if (fcmb == cmbPaymentCWT) {
+                syncCwt();   // the master keeps the CWT AMOUNT: rate x base, then the totals are recomputed
+                poJSON = null;
+            } else if (fcmb == cmbAttachmentType) {
+                setSelectedAttachmentType(fnIndex);   // only changes the attachment selected in the table (if any)
+                poJSON = null;
             } else if (fcmb == cmbVehicleType) {
                 poJSON = oSalesController.MCSales().getDetail(pnUnitRow).InventorySerial().setCondition(lsValue); // placeholder
             } else if (fcmb == cmbRegistrationType) {
@@ -1040,7 +1145,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     private void initCheckBoxes() {
         for (final CheckBox lcb : poCheckBoxes) {
-            lcb.disableProperty().bind(pbEditable.not());
+            if (lcb != chkPaymentHasPromo) {
+                lcb.disableProperty().bind(pbEditable.not());
+            }
             lcb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
                 if (!pbLoaded || pbSyncing) {
                     return;
@@ -1048,6 +1155,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 cb_Changed(lcb, isSelected);
             });
         }
+        chkPaymentHasPromo.setDisable(true);   // shows whether a unit has a promo: never ticked by hand
     }
 
     private void cb_Changed(CheckBox fcb, boolean fbSelected) {
@@ -1164,8 +1272,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 ShowMessageFX.Error(SalesTransactionStatic.MSG_DUE_DATE_BEFORE_TRANS_DATE, pxeModuleName, null);
                 setDate(dpPaymentDueDate, null);
             }
-            // TODO(model): write the date to the model, e.g.
-            // if (fdp == dpTransDate) trans().getModel().setTransactionDate(<java.util.Date from fdp.getValue()>);
+            if (fdp == dpPaymentDueDate) {
+                writeDueDate(dpPaymentDueDate.getValue());
+            }
+            // TODO(model): the transaction date is set by the model (newTransaction); nothing to write for dpTransDate
             loadSummary();
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
@@ -1175,9 +1285,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     // =========================================================================
     // Tables
-    // NOTE: tblUnits and tblGawayItem are bound directly to Model_Sales_Detail / Model_Sales_Giveaways
-    // (lambda cell factories, lookups pre-loaded in the Task). The registration/insurance, invoice and
-    // attachment tables still use ModelTableDetail ("index01"...) until their backend models exist.
+    // NOTE: tblUnits, tblGawayItem and tblAttachments are bound directly to the model classes
+    // (lambda cell factories, lookups pre-loaded in the Task). The registration/insurance and invoice
+    // tables still use ModelTableDetail ("index01"...) until their backend models exist.
     // =========================================================================
     /**
      * Remove column: a trash button per row, enabled only while editing. fpBlank tells which rows are still
@@ -1349,9 +1459,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         lockColumnReordering(tblInvoiceList);
     }
 
+    /**
+     * Attachment list. The rows are Model_Transaction_Attachment objects, so the columns read them with lambdas
+     * (PropertyValueFactory("index01") only works with ModelTableDetail).
+     */
     private void initTableAttachments() {
-        tblRowNoAttachment.setCellValueFactory(new PropertyValueFactory<>("index01"));
-        tblFileNameAttachment.setCellValueFactory(new PropertyValueFactory<>("index02"));
+        tblRowNoAttachment.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
+        tblFileNameAttachment.setCellValueFactory(cd -> cell(() -> cd.getValue().getFileName()));
         tblAttachments.setItems(attach_data);
         tblAttachments.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_ATTACHMENTS));
         tblAttachments.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
@@ -1592,8 +1706,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         final int lnSeq = ++pnUnitLoadSeq;   // a newer load makes this one stale
 
         Task<List<Model_Sales_Detail>> task = new Task<List<Model_Sales_Detail>>() {
-            private double pdTotal = 0.0;
-
             @Override
             protected List<Model_Sales_Detail> call() throws Exception {
                 MCSales loSales = oSalesController.MCSales();
@@ -1624,7 +1736,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     if (!isBlankUnit(loRow)) {
-                        pdTotal += unitNet(loRow);
                         // warm the lookups on this background thread so the cell factories
                         // (FX thread) read cached objects instead of hitting the database
                         try {
@@ -1659,8 +1770,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadUnitRecord(pnUnitRow);
                     tblUnits.toFront();
                 }
-                tfSummaryUnitPrice.setText(String.format("%,.2f", pdTotal));
-                loadSummary();
+                syncCwt();       // the units changed the base the CWT rate applies to
+                loadSummary();   // totals come from the master (MCSales.computeTransaction())
                 loading.progressIndicator.setVisible(false);
             }
 
@@ -1889,6 +2000,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      * a ClassCastException. So the rows are NOT read through those getters: the backend's own row lists are read by
      * reflection and the blank values are replaced with 0 through the base Model getValue()/setValue(), which do not
      * compute. Must run BEFORE any getSalesInsurance / getSalesRegistration / list getter is called.
+     * (Field names paSalesInsurance / paSalesRegistration are the ones declared in MCSales.)
      */
     private void normalizeRegInsurRows() {
         MCSales loSales = oSalesController.MCSales();
@@ -2034,9 +2146,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return fo == null || fo.getStockID() == null || fo.getStockID().isEmpty();
     }
 
+    /**
+     * Net amount of a unit line, as MCSales.computeTransaction() builds it: nDiscount is a RATE (%) applied to the
+     * line gross, nAddDiscount and nFreight are amounts; the charged registration / insurance is nInsAmtxx.
+     */
     private static double unitNet(Model_Sales_Detail fo) {
-        return ((dbl(() -> fo.getUnitPrice()) - dbl(() -> fo.getDiscount()) - dbl(() -> fo.getAddDiscount()))
-                + dbl(() -> fo.getFreight()) + dbl(() -> fo.getInsuranceAmount())) * dbl(() -> fo.getQuantity());
+        double lnGross = dbl(() -> fo.getUnitPrice()) * dbl(() -> fo.getQuantity());
+        double lnDisc = lnGross * dbl(() -> fo.getDiscount()) / 100.0;
+        return lnGross - lnDisc - dbl(() -> fo.getAddDiscount())
+                + dbl(() -> fo.getFreight()) + dbl(() -> fo.getInsuranceAmount());
     }
 
     /**
@@ -2100,6 +2218,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return String.format("%,.2f", fn);
     }
 
+    private static double round2(double fn) {
+        return Math.round(fn * 100.0) / 100.0;
+    }
+
     // Helper methods to safely parse String results
     private double parseDouble(String value) {
         if (value == null || value.trim().isEmpty()) return 0.0;
@@ -2161,7 +2283,240 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     // =========================================================================
+    // Payment tab
+    // Reads / writes Model_Sales_Master. The totals are computed by MCSales.computeTransaction() (only while editing);
+    // this tab only displays them. CWT is the one value the UI feeds back: the combo holds a RATE, the master an AMOUNT.
+    // =========================================================================
+    /** "" / invalid -> -1 (no selection); the master stores combo indexes as text ("0", "1"...). */
+    private static int indexOf(String fsCode) {
+        if (fsCode == null || fsCode.trim().isEmpty()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(fsCode.trim());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    private void selectIndex(ComboBox fcmb, int fnIndex) {
+        if (fnIndex >= 0 && fnIndex < fcmb.getItems().size()) {
+            fcmb.getSelectionModel().select(fnIndex);
+        } else {
+            fcmb.getSelectionModel().clearSelection();
+        }
+    }
+
+    /** First number in a label such as "1%" / "2 %"; 0 for "None" or blank. */
+    private static double rateOf(String fsLabel) {
+        java.util.regex.Matcher loMatch = java.util.regex.Pattern.compile("\\d+(\\.\\d+)?").matcher(fsLabel == null ? "" : fsLabel);
+        return loMatch.find() ? Double.parseDouble(loMatch.group()) : 0.0;
+    }
+
+    private double cwtRate() {
+        return rateOf(comboText(cmbPaymentCWT));
+    }
+
+    /** Index of the CWT combo item whose rate is closest to fdRate (within 0.5), else -1. */
+    private int cwtIndexFor(double fdRate) {
+        int lnBest = -1;
+        double lnBestDiff = 0.5;
+        for (int lnCtr = 0; lnCtr < cmbPaymentCWT.getItems().size(); lnCtr++) {
+            double lnDiff = Math.abs(rateOf(String.valueOf(cmbPaymentCWT.getItems().get(lnCtr))) - fdRate);
+            if (lnDiff <= lnBestDiff) {
+                lnBestDiff = lnDiff;
+                lnBest = lnCtr;
+            }
+        }
+        return lnBest;
+    }
+
+    /**
+     * The amount the CWT rate applies to: the net selling amount (total - discount - add. discount + freight).
+     * ASSUMED business rule, kept in this one method.
+     */
+    private double cwtBase() {
+        final Model_Sales_Master loMas = master();
+        return dbl(() -> loMas.getTransactionTotal()) - dbl(() -> loMas.getDiscount())
+                - dbl(() -> loMas.getAddDiscount()) + dbl(() -> loMas.getFreight());
+    }
+
+    /** Runs MCSales.computeTransaction() (edit modes only) after the blank numeric fields were fixed. */
+    private void recomputeTransaction() {
+        try {
+            normalizeRegInsurRows();
+            oSalesController.MCSales().computeTransaction();
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+
+    /**
+     * Writes the CWT AMOUNT (rate x base) to the master when a rate is picked in the combo, then recomputes the totals
+     * (a CWT amount above 0 turns the VAT sales into non-VAT sales in computeTransaction()).
+     */
+    private void syncCwt() {
+        if (!canEdit() || cmbPaymentCWT.getSelectionModel().getSelectedIndex() < 0) {
+            return;
+        }
+        try {
+            recomputeTransaction();   // the base must be current
+            double lnAmount = round2(cwtBase() * cwtRate() / 100.0);
+            final Model_Sales_Master loMas = master();
+            if (Math.abs(lnAmount - dbl(() -> loMas.getCWTAmount())) < 0.005) {
+                return;   // unchanged
+            }
+            poJSON = loMas.setCWTAmount(lnAmount);   // ASSUMED setter
+            if ("error".equals(poJSON.get("result"))) {
+                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                return;
+            }
+            recomputeTransaction();
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
+    /** Fills the whole Payment tab from the master. Called after New / Browse / Update / Confirm / Void / advisor search. */
+    private void loadPaymentRecord() {
+        final Model_Sales_Master loMas = master();
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            selectIndex(cmbPaymentTranType, indexOf(textOf(() -> loMas.getTransactionType())));
+            selectIndex(cmbPaymentForm, indexOf(textOf(() -> loMas.getPaymentForm())));
+
+            // the master keeps the CWT amount: show the rate it corresponds to
+            double lnCwtAmt = dbl(() -> loMas.getCWTAmount());
+            double lnBase = cwtBase();
+            selectIndex(cmbPaymentCWT, cwtIndexFor(lnCwtAmt <= 0 || lnBase <= 0 ? 0.0 : lnCwtAmt / lnBase * 100.0));
+
+            tfPaymentTerm.setText(pbTermPayment.get() ? textOf(() -> loMas.getTermCode()) : "");   // ASSUMED getter
+
+            LocalDate ldDue = null;
+            try {
+                ldDue = toLocalDate(loMas.getDueDate());   // ASSUMED getter
+            } catch (Exception ex) {
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+            }
+            setDate(dpPaymentDueDate, pbCreditPayment.get() ? ldDue : null);
+//            tfSalesman.setText(textOf(() -> loMas.Salesman().getSalesmanName()));   // ASSUMED lookup
+            // ASSUMED lookup
+            tfPaymentDrNo.setText(tfReceipt.getText());   // DR No is a read-only mirror of the header
+        } finally {
+            pbSyncing = lbPrev;
+        }
+        loadSummary();   // also refreshes the totals
+    }
+
+    private void writeDueDate(LocalDate fdDue) throws Exception {
+        poJSON = master().setDueDate(fdDue == null ? null : java.sql.Date.valueOf(fdDue));   // ASSUMED setter
+        if ("error".equals(poJSON.get("result"))) {
+            ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+        }
+    }
+
+    /** True when at least one real unit has a promo (the unit's promo id is set). */
+    private boolean hasPromo() {
+        for (final Model_Sales_Detail loUnit : unit_data) {
+            if (!isBlankUnit(loUnit) && !textOf(() -> loUnit.getPromoID()).trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Sum of the CHARGED registration or insurance amounts, read from the backend's own lists (no compute). */
+    private double chargedTotal(boolean fbInsurance) {
+        normalizeRegInsurRows();
+        double lnSum = 0.0;
+        for (Model loRow : rawRows(oSalesController.MCSales(), fbInsurance ? "paSalesInsurance" : "paSalesRegistration")) {
+            if (!isChargeTo(loRow)) {
+                continue;
+            }
+            lnSum += fbInsurance ? dbl(() -> ((Model_Sales_Insurance) loRow).getInsuranceAmount())
+                    : dbl(() -> ((Model_Sales_Registration) loRow).getInsuranceAmount());
+        }
+        return lnSum;
+    }
+
+    /**
+     * Fills the Payment tab totals and the transaction summary figures from the master (computed by MCSales).
+     * Net total = amount due + advances (amount due already subtracts the advances).
+     * Balance = amount due - CWT - amount paid. ASSUMED business rule.
+     */
+    private void loadPaymentTotals() {
+        final Model_Sales_Master loMas = master();
+        double lnTotal = dbl(() -> loMas.getTransactionTotal());
+        double lnDisc = dbl(() -> loMas.getDiscount());
+        double lnAddDisc = dbl(() -> loMas.getAddDiscount());
+        double lnFreight = dbl(() -> loMas.getFreight());
+        double lnDue = dbl(() -> loMas.getAmountDue());
+        double lnAdvances = dbl(() -> loMas.getAdvances());
+        double lnCwt = dbl(() -> loMas.getCWTAmount());
+        double lnPaid = dbl(() -> loMas.getValue("nAmtPaidx"));   // raw column: MCSales never sets it (stays 0)
+        double lnNet = lnDue + lnAdvances;
+        double lnBalance = lnDue - lnCwt - lnPaid;
+
+        tfPaymentTotal.setText(money(lnNet));
+        tfPaymentAdvances.setText(money(lnAdvances));
+        tfPaymentCwt.setText(money(lnCwt));
+        tfPaymentAmountPaid.setText(money(lnPaid));
+        tfPaymentBalance.setText(money(lnBalance));
+
+        tfSummaryUnitPrice.setText(money(lnTotal));
+        tfSummaryDiscount.setText(money(lnDisc));
+        tfSummaryAddDiscount.setText(money(lnAddDisc));
+        tfSummaryFreight.setText(money(lnFreight));
+        tfSummaryRegistration.setText(money(chargedTotal(false)));
+        tfSummaryInsurance.setText(money(chargedTotal(true)));
+        tfSummaryTotal.setText(money(lnNet));
+        tfSummaryGiveaways.setText(String.valueOf(giveawayList(false).size()));
+        tfSummaryVatSales.setText(money(dbl(() -> loMas.getVATSales())));
+        tfSummaryVatAmount.setText(money(dbl(() -> loMas.getVATAmount())));
+        tfSummaryNonVatSales.setText(money(dbl(() -> loMas.getNonVATSales())));
+        tfSummaryZeroVatSales.setText(money(dbl(() -> loMas.getZeroVATSales())));
+        tfSummaryCwt.setText(money(lnCwt));
+        tfSummaryAdvances.setText(money(lnAdvances));
+        tfSummaryAmountPaid.setText(money(lnPaid));
+        tfSummaryBalance.setText(money(lnBalance));
+
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            chkPaymentHasPromo.setSelected(hasPromo());
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /** Returns the first problem on the Payment tab, or null when it is fine to save. */
+    private String validatePayment() {
+        if (cmbPaymentTranType.getSelectionModel().getSelectedIndex() < 0) {
+            cmbPaymentTranType.requestFocus();
+            return "Please select a transaction type.";
+        }
+        if (cmbPaymentForm.getSelectionModel().getSelectedIndex() < 0) {
+            cmbPaymentForm.requestFocus();
+            return "Please select a payment form.";
+        }
+        if (pbTermPayment.get() && tfPaymentTerm.getText().trim().isEmpty()) {
+            tfPaymentTerm.requestFocus();
+            return "Please enter the term code.";
+        }
+        if (pbCreditPayment.get() && dpPaymentDueDate.getValue() == null) {
+            dpPaymentDueDate.requestFocus();
+            return "Please enter the due date.";
+        }
+        return null;
+    }
+
+    // =========================================================================
     // Attachment tab
+    // Three parallel lists describe the active attachments, in the same order:
+    //   attach_data (table rows) = poAttachFiles (files in the temp attachment folder) = poAttachModelRows (index in MCSales).
+    // pnAttachRow is an index in THESE lists; MCSales is always called with poAttachModelRows.get(pnAttachRow).
     // =========================================================================
     private void initAttachmentTab() {
         imageView.setPreserveRatio(true);
@@ -2187,11 +2542,104 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         updateAttachmentArrows();
     }
 
+    /** The attachment type is kept as the combo index in a raw column (see ATTACH_TYPE_COLUMN). */
+    private void setAttachmentType(Model_Transaction_Attachment foModel, int fnType) {
+        if (foModel == null || fnType < 0) {
+            return;
+        }
+        try {
+            foModel.setValue(ATTACH_TYPE_COLUMN, String.valueOf(fnType));   // ASSUMED column
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+
+    private int getAttachmentType(final Model_Transaction_Attachment foModel) {
+        return foModel == null ? -1 : indexOf(textOf(() -> foModel.getValue(ATTACH_TYPE_COLUMN)));
+    }
+
+    /** The type combo was changed: it applies to the attachment selected in the table (nothing selected = just a choice for the next one). */
+    private void setSelectedAttachmentType(int fnType) {
+        if (pnAttachRow >= 0 && pnAttachRow < attach_data.size()) {
+            setAttachmentType(attach_data.get(pnAttachRow), fnType);
+        }
+    }
+
+    /**
+     * Loads the attachments of the transaction that is open in MCSales. MCSales.loadAttachments() reads the attachment
+     * rows AND downloads the files, so it runs in a Task; the table is rebuilt when it is done.
+     * Call it after the edit mode is known (loadAttachments() opens the rows for update when the master is in UPDATE).
+     */
+    private void loadAttachmentRecords() {
+        final int lnSeq = ++pnAttachLoadSeq;   // a newer load makes this one stale
+
+        // empty the tab now: the previous transaction's attachments must not show while the files are downloading
+        attach_data.clear();
+        poAttachFiles.clear();
+        poAttachModelRows.clear();
+        showAttachment(-1);
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                oSalesController.MCSales().loadAttachments();
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                if (lnSeq != pnAttachLoadSeq) {   // stale / cancelled
+                    return;
+                }
+                reloadAttachmentTable();
+                showAttachment(poAttachFiles.isEmpty() ? -1 : 0);
+            }
+
+            @Override
+            protected void failed() {
+                if (lnSeq != pnAttachLoadSeq) {
+                    return;
+                }
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, getException());
+                ShowMessageFX.Error(String.valueOf(getException().getMessage()), pxeModuleName, null);
+            }
+        };
+        Thread loThread = new Thread(task);
+        loThread.setDaemon(true);
+        loThread.start();
+    }
+
+    /**
+     * Rebuilds the three lists from MCSales (only the ACTIVE attachments that have a file name: removed ones are
+     * deactivated in the model and kept there until save). Does not touch the selection: call showAttachment() after.
+     */
+    private void reloadAttachmentTable() {
+        MCSales loSales = oSalesController.MCSales();
+        String lsDir = System.getProperty("sys.default.path.temp.attachments");
+
+        attach_data.clear();
+        poAttachFiles.clear();
+        poAttachModelRows.clear();
+
+        for (int lnCtr = 0; lnCtr < loSales.getTransactionAttachmentCount(); lnCtr++) {
+            // getAttachmentList(int) works; the no-arg list version has a bad cast
+            Model_Transaction_Attachment loModel = loSales.getAttachmentList(lnCtr);
+            String lsFile = loModel.getFileName();
+            if (lsFile == null || lsFile.isEmpty() || RecordStatus.INACTIVE.equals(loModel.getRecordStatus())) {
+                continue;
+            }
+            attach_data.add(loModel);
+            poAttachFiles.add(new File(lsDir, lsFile));
+            poAttachModelRows.add(lnCtr);
+        }
+    }
+
     private void addAttachment() {
         if (!canEdit()) {
             return;
         }
-        if (cmbAttachmentType.getSelectionModel().getSelectedIndex() < 0) {
+        int lnType = cmbAttachmentType.getSelectionModel().getSelectedIndex();
+        if (lnType < 0) {
             ShowMessageFX.Error(SalesTransactionStatic.MSG_SELECT_ATTACHMENT_TYPE, pxeModuleName, null);
             cmbAttachmentType.requestFocus();
             return;
@@ -2205,9 +2653,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         if (loFile == null) {
             return;
         }
-        if (poAttachFiles.contains(loFile)) {
-            ShowMessageFX.Error(SalesTransactionStatic.MSG_ATTACHMENT_DUPLICATE, pxeModuleName, null);
-            return;
+        // the picked file lives in another folder than the attachment files: compare the FILE NAMES
+        for (File loExisting : poAttachFiles) {
+            if (loExisting.getName().equalsIgnoreCase(loFile.getName())) {
+                ShowMessageFX.Error(SalesTransactionStatic.MSG_ATTACHMENT_DUPLICATE, pxeModuleName, null);
+                return;
+            }
         }
         Image loImage = new Image(loFile.toURI().toString());
         if (loImage.isError()) {
@@ -2215,32 +2666,56 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             return;
         }
 
-        // TODO(model): add the attachment (file + type from cmbAttachmentType) to the transaction,
-        // then reload attach_data so the table shows the new row.
-        poAttachFiles.add(loFile);
-        displayAttachment(poAttachFiles.size() - 1, loImage);
+        try {
+            MCSales loSales = oSalesController.MCSales();
+            loSales.copyFile(loFile.getAbsolutePath());                       // into sys.default.path.temp.attachments (saveOthers() reads it from there)
+            int lnModelRow = loSales.addAttachment(loFile.getName());         // new row (or re-activates a removed one with the same name)
+            setAttachmentType(loSales.getAttachmentList(lnModelRow), lnType);
+
+            reloadAttachmentTable();
+            showAttachment(poAttachModelRows.indexOf(lnModelRow));            // select and show the one just added
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
     }
 
     private void removeAttachment() {
-        if (!canEdit() || pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size()) {
+        if (!canEdit() || pnAttachRow < 0 || pnAttachRow >= poAttachModelRows.size()) {
             return;
         }
         if (!ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_REMOVE_ATTACHMENT, pxeModuleName, null)) {
             return;
         }
-        int lnRow = pnAttachRow;
-        // TODO(model): remove the attachment from the transaction first, then reload attach_data.
-        poAttachFiles.remove(lnRow);
-        if (lnRow < attach_data.size()) {
-            attach_data.remove(lnRow);
+        int lnKeep = pnAttachRow;
+        try {
+            // a new attachment is dropped, a saved one is deactivated: both are handled by MCSales
+            poJSON = oSalesController.MCSales().removeAttachment(poAttachModelRows.get(pnAttachRow));
+            if ("error".equals(poJSON.get("result"))) {
+                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                return;
+            }
+            reloadAttachmentTable();
+            showAttachment(Math.min(lnKeep, poAttachFiles.size() - 1));   // -1 clears the preview when none are left
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
-        showAttachment(Math.min(lnRow, poAttachFiles.size() - 1));   // -1 clears the preview when none are left
+    }
+
+    /** The image of an attachment file, or null when the file is missing (download failed) or is not a readable image. */
+    private Image readImage(File ffile) {
+        if (ffile == null || !ffile.isFile()) {
+            return null;
+        }
+        Image loImage = new Image(ffile.toURI().toString());
+        return loImage.isError() ? null : loImage;
     }
 
     private void showAttachment(int fnIndex) {
         Image loImage = null;
         if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
-            loImage = new Image(poAttachFiles.get(fnIndex).toURI().toString());
+            loImage = readImage(poAttachFiles.get(fnIndex));
         }
         displayAttachment(fnIndex, loImage);
     }
@@ -2250,12 +2725,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             pnAttachRow = -1;
             imageView.setImage(null);
             tfAttachmentNo.clear();
+            tblAttachments.getSelectionModel().clearSelection();
         } else {
-            pnAttachRow = fnIndex;
+            pnAttachRow = fnIndex;   // set BEFORE selecting: the selection listener ignores the row that is already shown
             imageView.setImage(foImage);
             tfAttachmentNo.setText(String.format(SalesTransactionStatic.ATTACH_POSITION_FORMAT, fnIndex + 1, poAttachFiles.size()));
             if (fnIndex < attach_data.size()) {
                 tblAttachments.getSelectionModel().select(fnIndex);
+                // the combo shows the type of the attachment on display (without writing it back)
+                boolean lbPrev = pbSyncing;
+                pbSyncing = true;
+                try {
+                    selectIndex(cmbAttachmentType, getAttachmentType(attach_data.get(fnIndex)));
+                } finally {
+                    pbSyncing = lbPrev;
+                }
             }
         }
         updateAttachmentArrows();
@@ -2277,7 +2761,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private void addClient(boolean fbCoClient) {
-        // TODO: open the client search / add dialog and write the chosen client (or co-client) to the model.
+        // TODO: open the client search / add dialog and write the chosen client (or co-client) to the model
+        // (MCSales.addClient() / addCoClient() open the client GUI and set the master).
         ShowMessageFX.Error(fbCoClient
                 ? SalesTransactionStatic.MSG_ADD_COCLIENT_UNDER_DEVELOPMENT
                 : SalesTransactionStatic.MSG_ADD_CLIENT_UNDER_DEVELOPMENT, pxeModuleName, null);
@@ -2291,28 +2776,24 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             ltf.setEditable(false);
             ltf.setFocusTraversable(false);
         }
+        // payment tab figures are computed / mirrored, never typed
+        for (TextField ltf : Arrays.asList(tfPaymentDrNo, tfPaymentTotal, tfPaymentAdvances, tfPaymentCwt,
+                tfPaymentAmountPaid, tfPaymentBalance)) {
+            ltf.setEditable(false);
+        }
     }
 
     /**
-     * Refreshes the summary. Fields that mirror an input on the form are filled from the form;
-     * TODO(model): the computed fields (unit price, total, giveaways, VAT / non-VAT / zero-rated
-     * sales, VAT amount) must come from the model once the transaction totals are available.
+     * Refreshes the summary. The figures come from the master through loadPaymentTotals(); the rest mirrors an input
+     * on the form.
      */
     private void loadSummary() {
+        loadPaymentTotals();   // fills the payment tab and the figures of the summary first
         tfSummaryCustomer.setText(tfClientName.getText());
         tfSummaryTranType.setText(comboText(cmbPaymentTranType));
         tfSummaryPaymentForm.setText(comboText(cmbPaymentForm));
         tfSummaryTerm.setText(tfPaymentTerm.getText());
         tfSummaryDueDate.setText(dateText(dpPaymentDueDate));
-        tfSummaryDiscount.setText(tfPromoDisc.getText());
-        tfSummaryAddDiscount.setText(tfPromoAddDisc.getText());
-        tfSummaryFreight.setText(tfFreight.getText());
-        tfSummaryRegistration.setText(tfMCRegisAmt.getText());
-        tfSummaryInsurance.setText(tfMCInsurAmt.getText());
-        tfSummaryCwt.setText(tfPaymentCwt.getText());
-        tfSummaryAdvances.setText(tfPaymentAdvances.getText());
-        tfSummaryAmountPaid.setText(tfPaymentAmountPaid.getText());
-        tfSummaryBalance.setText(tfPaymentBalance.getText());
     }
 
     // =========================================================================
@@ -2342,6 +2823,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         invoice_data.clear();
         attach_data.clear();
         poAttachFiles.clear();
+        poAttachModelRows.clear();
+        ++pnAttachLoadSeq;   // a download that is still running must not refill the table
         pnUnitRow = -1;
         pnGawayRow = -1;
         pnRegInsurRow = -1;
@@ -2354,13 +2837,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         pbRegistrationRow.set(false);
     }
 
-    private void LoadMaster() {
+    private void LoadMaster() throws GuanzonException, SQLException {
         lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
         tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
         tfSourceDesc.setText(oSalesController.MCSales().getMaster().getSourceCode());
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
+        tfSalesman.setText(oSalesController.MCSales().getMaster().SalesmanClient().getCompanyName());
 //        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
+        // the customer line is built by showCustomerName() at the end of LoadClientInfo(): the client fields are
+        // still empty here, because LoadMaster() runs before LoadClientInfo()
+    }
+
+    /** Header line "name | contact | address". Call it AFTER the client fields are filled. */
+    private void showCustomerName() {
+        if (tfClientName.getText() == null || tfClientName.getText().trim().isEmpty()) {
+            taCustomerName.clear();   // no client yet: do not show " |  | "
+            return;
+        }
+        taCustomerName.setStyle("-fx-font-weight: bold;");
         taCustomerName.setText(tfClientName.getText() + " | " + tfClientContactNo.getText() + " | " + tfClientAddress.getText());
     }
 
@@ -2415,6 +2910,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
             tfClientLTOID.setText(oSalesController.MCSales().getMaster().Client().getLTOClientId());
             tfClientLTOAddress.setText("");
+            showCustomerName();   // the header line needs the name, contact and address set above
 
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
@@ -2457,26 +2953,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             return ((java.sql.Date) fdDate).toLocalDate();
         }
         return fdDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();   // java.util.Date / Timestamp
-    }
-
-    private void LoadMotorcyleAndPricing() {
-        tfTransNo.setText("M00126000001");
-        tfSourceNo.setText("M00126000001");
-        tfSourceDesc.setText("Sales Qoutation");
-        tfReceipt.setText("");
-    }
-
-    private void LoadPaymentMode() {
-        cmbPaymentTranType.getSelectionModel().select(
-                Integer.valueOf(oSalesController.MCSales().getMaster().getTransactionType().toString())
-        );
-        cmbPaymentForm.getSelectionModel().select(
-                Integer.valueOf(oSalesController.MCSales().getMaster().getPaymentForm().toString())
-        );
-//        tfPaymentCreditAdvisor.setText(oSalesController.MCSales().getMaster().));
-        tfPaymentDrNo.setText("M00126000001");
-        tfSourceDesc.setText("Sales Qoutation");
-        tfReceipt.setText("");
     }
 
     /* Clears all text fields in the form.

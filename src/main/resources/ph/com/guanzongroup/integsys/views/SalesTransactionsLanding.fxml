@@ -190,9 +190,9 @@
                <children>
                   <HBox fx:id="hbButtons" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: #E9E9E9;" styleClass="button_process" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                      <children>
-                        <Button fx:id="btnRefresh" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="Refresh">
+                        <Button fx:id="btnRefresh" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="Retrieve">
                            <graphic>
-                              <FontAwesomeIconView glyphName="REFRESH" size="20" styleClass="FontIcon" />
+                              <FontAwesomeIconView glyphName="LIST_ALT" size="20" styleClass="FontIcon" />
                            </graphic>
                            <font>
                               <Font size="11.0" />
@@ -206,41 +206,9 @@
                               <Font size="11.0" />
                            </font>
                         </Button>
-                        <Button fx:id="btnNew" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="New">
-                           <graphic>
-                              <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
-                           </graphic>
-                           <font>
-                              <Font size="11.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btnCreateFrom" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="New From" textAlignment="CENTER">
-                           <graphic>
-                              <FontAwesomeIconView glyphName="PLUS" size="20" styleClass="FontIcon" />
-                           </graphic>
-                           <font>
-                              <Font size="11.0" />
-                           </font>
-                        </Button>
                         <Button fx:id="btnUpdate" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="Update">
                            <graphic>
                               <FontAwesomeIconView glyphName="EDIT" size="20" styleClass="FontIcon" />
-                           </graphic>
-                           <font>
-                              <Font size="11.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btnPrint" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="Print">
-                           <graphic>
-                              <FontAwesomeIconView glyphName="PRINT" size="20" styleClass="FontIcon" />
-                           </graphic>
-                           <font>
-                              <Font size="11.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btnExport" contentDisplay="TOP" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" styleClass="button_process" text="Export">
-                           <graphic>
-                              <FontAwesomeIconView glyphName="FILE_PDF_ALT" size="20" styleClass="FontIcon" />
                            </graphic>
                            <font>
                               <Font size="11.0" />

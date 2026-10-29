@@ -2,176 +2,166 @@ package ph.com.guanzongroup.integsys.views;
 
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
-import org.guanzon.appdriver.base.*;
+import org.guanzon.appdriver.base.GRiderCAS;
+import org.guanzon.appdriver.base.GuanzonException;
+import org.guanzon.appdriver.base.LogWrapper;
+import org.guanzon.appdriver.base.MiscUtil;
 import org.json.simple.JSONObject;
+import ph.com.guanzongroup.cas.sales.MCSales;
 import ph.com.guanzongroup.cas.sales.constant.SalesTransactionStatic;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Master;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
-import ph.com.guanzongroup.integsys.model.ModelTableMain;
-import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
+import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.net.URL;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Controller for SalesTransactionsLanding.fxml (Motorcycle Sales Transactions list).
  *
- * Structure follows SalesTransactionsMCController: ScreenInterface + Initializable,
- * initControlGroups() after FXML injection, grouped handlers, ClickButton() /
- * handleButtonAction() switch on button id, Task-based table loading, lockColumnReordering().
+ * Structure follows SalesTransactionsMCController: ScreenInterface + Initializable, a Task-based table load with a
+ * sequence counter (a newer load makes an older one stale), JFXUtil loading placeholder, lockColumnReordering(),
+ * and the same cell / number helpers.
  *
- * The list is loaded once per search (Refresh / Search / Clear), kept in memory in
- * poAllRows, and paged on the client: only the current page is placed in main_data.
+ * Data comes from MCSales.loadTransactionList() (filtered by industry / category). The filters (search text,
+ * date range, payment form, status) and the paging are applied in memory on that list, because MCSales has no
+ * filter API.
  *
- * ------------------------------------------------------------------------------
- * FXML FIX REQUIRED
- *   The Status ComboBox (row 1, column 1) has no fx:id. This controller expects
- *   fx:id="cmbStatusFilter" with promptText="All status". Add it to the FXML.
+ * ASSUMED (same assumptions as SalesTransactionsMCController, each used in ONE place):
+ *   - Model_Sales_Master getters: getAmountDue, getAdvances, getCWTAmount, getTransactionStatus, getPaymentForm,
+ *     getSourceNo, getTransactionDate, Client().getCompanyName(); amount paid is read from the raw column "nAmtPaidx".
+ *   - Sales_Detail (sTransNox, sSerialID) and the serial table "Inv_Serial" (sSerialID, sSerial01, sSerial02):
+ *     used only for the Units column and for searching by engine / frame no. If that query fails, the units column
+ *     shows 0 and the search covers transaction no. and customer only (see loadUnitInfo()).
+ *   - The entry screen FXML name (ENTRY_FXML).
  *
- * ASSUMED BACKEND / CONSTANTS  (modelled on the SalesQoutation API, fix in one place)
- *   - oSalesController.SalesTransaction().loadTransactionList(search, dateFrom, dateTo, statusCode, paymentForm)
- *   - SalesTransaction().getMasterCount() / Master(i).getXxx()          -> see toRow()
- *   - ModelTableMain.setIndex01() ... setIndex11()                      -> bound to "index01"... below
- *   - SalesTransactionStatic.STATUS_FILTERS            (String[] for cmbStatusFilter)
- *   - SalesTransactionStatic.PAYMENT_FORMS             (String[], already used by the entry screen)
- *   - SalesTransactionStatic.TBL_NO_TRANSACTIONS       (table placeholder text)
- *   - SalesTransactionStatic.MSG_SELECT_TRANSACTION    ("Please select a transaction first.")
- *   - SalesTransactionStatic.MSG_DATE_FROM_AFTER_TO    ("Date From cannot be later than Date To.")
- *   - SalesTransactionStatic.MSG_UNDER_DEVELOPMENT / MSG_CONFIRM_CLOSE / MODULE_NAME / DATE_PATTERN / LOG_*  (existing)
- * ------------------------------------------------------------------------------
+ * NAVIGATION: "New" opens the entry screen, which fires its own New. "Open", "Update" and "New From" need the entry
+ * controller to accept a transaction no.; see openEntryScreen() for the hook to add.
  */
 public class SalesTransactionsLandingController implements Initializable, ScreenInterface {
 
     private final String pxeModuleName = SalesTransactionStatic.MODULE_NAME;
+    private static final String ENTRY_FXML = "SalesTransactionMC.fxml";   // ASSUMED location (same package folder as this one)
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
+    private static final Integer[] PAGE_SIZES = {10, 25, 50, 100};
+    private static final int DEFAULT_DAYS = 7;   // default date filter: today minus 7 days up to today
 
     private GRiderCAS oApp;
     private SalesControllers oSalesController;
-    private JSONObject poJSON;
     private boolean pbLoaded = false;
-    private boolean pbSyncing = false;   // true while filters are set programmatically
 
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
 
-    private int pnRow = -1;              // selected row index within the current page
-
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
-    private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,##0.00");
-    private static final Integer[] PAGE_SIZES = {10, 25, 50, 100};
-    private static final int DEFAULT_PAGE_SIZE = 25;
-
-    /** true while a list load Task is running; disables the filters and buttons that would clash with it. */
-    private final BooleanProperty pbLoading = new SimpleBooleanProperty(false);
-    /** true when a row is selected; Open / Update / New From / Print / Export bind to it. */
-    private final BooleanProperty pbHasSelection = new SimpleBooleanProperty(false);
-
-    private final IntegerProperty pnPage = new SimpleIntegerProperty(1);       // 1-based
-    private final IntegerProperty pnPageSize = new SimpleIntegerProperty(DEFAULT_PAGE_SIZE);
-    private final IntegerProperty pnTotalRows = new SimpleIntegerProperty(0);
-
-    // =========================================================================
-    // Control groups (filled in initControlGroups(), NOT here:
-    // @FXML fields are still null until the FXML loader injects them).
-    // =========================================================================
-    private List<ComboBox> poFilterCombos;
-    private List<DatePicker> poFilterDatePickers;
-    private List<Button> poActionButtons;
-    private List<Button> poPageButtons;
+    private int pnLoadSeq = 0;   // a newer load makes an older one stale
+    private int pnPage = 1;
 
     // =========================================================================
     // Table data
     // =========================================================================
-    /** Every row returned by the last search. */
-    private final List<ModelTableMain> poAllRows = new ArrayList<>();
-    /** Only the rows of the current page. */
-    private final ObservableList<ModelTableMain> main_data = FXCollections.observableArrayList();
+    /** One list row, fully computed off the FX thread so the cell factories only read Strings. */
+    private static class TransRow {
+
+        Model_Sales_Master master;
+        String transNo = "";
+        LocalDate date;
+        String customer = "";
+        int units;
+        String source = "";
+        String payment = "";
+        double total;
+        double paid;
+        double balance;
+        String status = "";
+        String searchText = "";   // lower-cased: trans no, customer, engine nos, frame nos
+    }
+
+    private final ObservableList<TransRow> poAllRows = FXCollections.observableArrayList();   // everything loaded
+    private List<TransRow> poFiltered = new ArrayList<TransRow>();                            // after the filters
+    private final ObservableList<TransRow> page_data = FXCollections.observableArrayList();   // the page shown
 
     // =========================================================================
-    // Root containers
+    // FXML
     // =========================================================================
     @FXML private AnchorPane ChildAnchorPane;
     @FXML private AnchorPane apSearchMaster;
     @FXML private VBox vbMain;
     @FXML private HBox hbButtons;
 
-    // =========================================================================
     // Filters
-    // =========================================================================
     @FXML private TextField tfSearch;
     @FXML private DatePicker dpDateFrom;
     @FXML private DatePicker dpDateTo;
-    @FXML private ComboBox cmbStatusFilter;     // NOTE: add this fx:id to the FXML
-    @FXML private ComboBox cmbPaymentFilter;
+    @FXML private ComboBox<String> cmbPaymentFilter;
+    @FXML private ComboBox<String> cmbStatusFilter;
     @FXML private Button btnSearch;
     @FXML private Button btnClearFilter;
 
-    // =========================================================================
-    // Transaction list
-    // =========================================================================
-    @FXML private TableView<ModelTableMain> tblTransactions;
-    @FXML private TableColumn<ModelTableMain, String> tblRowNo;
-    @FXML private TableColumn<ModelTableMain, String> tblRowTransNo;
-    @FXML private TableColumn<ModelTableMain, String> tblRowDate;
-    @FXML private TableColumn<ModelTableMain, String> tblRowCustomer;
-    @FXML private TableColumn<ModelTableMain, String> tblRowUnits;
-    @FXML private TableColumn<ModelTableMain, String> tblRowSource;
-    @FXML private TableColumn<ModelTableMain, String> tblRowPaymentForm;
-    @FXML private TableColumn<ModelTableMain, String> tblRowTotal;
-    @FXML private TableColumn<ModelTableMain, String> tblRowPaid;
-    @FXML private TableColumn<ModelTableMain, String> tblRowBalance;
-    @FXML private TableColumn<ModelTableMain, String> tblRowStatus;
+    // List
     @FXML private Label lblRecordInfo;
+    @FXML private TableView<TransRow> tblTransactions;
+    @FXML private TableColumn<TransRow, String> tblRowNo;
+    @FXML private TableColumn<TransRow, String> tblRowTransNo;
+    @FXML private TableColumn<TransRow, String> tblRowDate;
+    @FXML private TableColumn<TransRow, String> tblRowCustomer;
+    @FXML private TableColumn<TransRow, String> tblRowUnits;
+    @FXML private TableColumn<TransRow, String> tblRowSource;
+    @FXML private TableColumn<TransRow, String> tblRowPaymentForm;
+    @FXML private TableColumn<TransRow, String> tblRowTotal;
+    @FXML private TableColumn<TransRow, String> tblRowPaid;
+    @FXML private TableColumn<TransRow, String> tblRowBalance;
+    @FXML private TableColumn<TransRow, String> tblRowStatus;
 
-    // =========================================================================
-    // Paging bar
-    // =========================================================================
-    @FXML private ComboBox cmbPageSize;
+    // Paging
+    @FXML private ComboBox<Integer> cmbPageSize;
     @FXML private Button btnPageFirst;
     @FXML private Button btnPagePrev;
+    @FXML private Label lblPage;
     @FXML private Button btnPageNext;
     @FXML private Button btnPageLast;
-    @FXML private Label lblPage;
 
-    // =========================================================================
     // Action buttons
-    // =========================================================================
     @FXML private Button btnRefresh;
     @FXML private Button btnOpen;
-    @FXML private Button btnNew;
-    @FXML private Button btnCreateFrom;
     @FXML private Button btnUpdate;
-    @FXML private Button btnPrint;
-    @FXML private Button btnExport;
     @FXML private Button btnClose;
 
     // =========================================================================
@@ -202,154 +192,48 @@ public class SalesTransactionsLandingController implements Initializable, Screen
     // =========================================================================
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        initControlGroups();      // must run first: FXML injection is done by now
         initializeObject();
-        initFilters();
+        initComboBoxes();
+        initDatePickers();
         initTable();
-        initPaging();
-        initButton();
-        ClickButton();
+        initButtons();
+        initFilterHandlers();
         pbLoaded = true;
-        Platform.runLater(this::loadList);   // first load once the screen is shown
-    }
-
-    /** Groups the controls once, after FXML injection. */
-    private void initControlGroups() {
-        poFilterCombos = Arrays.asList(cmbStatusFilter, cmbPaymentFilter);
-        poFilterDatePickers = Arrays.asList(dpDateFrom, dpDateTo);
-        poActionButtons = Arrays.asList(btnRefresh, btnOpen, btnNew, btnCreateFrom, btnUpdate, btnPrint, btnExport, btnClose);
-        poPageButtons = Arrays.asList(btnPageFirst, btnPagePrev, btnPageNext, btnPageLast);
+        loadTransactions();
     }
 
     private void initializeObject() {
         try {
-            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE, System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
+            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE,
+                    System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
             oSalesController = new SalesControllers(oApp, logwrapr);
-            oSalesController.SalesQoutation().initialize();
-            oSalesController.SalesQoutation().setRecordStatus(SalesQoutationStatic.OPEN);
-            oSalesController.SalesQoutation().setWithUI(true);
-
-            Platform.runLater(() -> btnNew.fire());
+            oSalesController.MCSales().initTransaction();
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
         }
     }
 
     // =========================================================================
-    // Buttons
-    // =========================================================================
-    private void initButton() {
-        CustomCommonUtil.setVisible(true, btnRefresh, btnOpen, btnNew, btnCreateFrom, btnUpdate, btnPrint, btnExport, btnClose);
-        CustomCommonUtil.setManaged(true, btnRefresh, btnOpen, btnNew, btnCreateFrom, btnUpdate, btnPrint, btnExport, btnClose);
-
-        // Row based actions need a selected row and no running load
-        for (Button lbtn : new Button[]{btnOpen, btnCreateFrom, btnUpdate, btnPrint, btnExport}) {
-            lbtn.disableProperty().bind(pbHasSelection.not().or(pbLoading));
-        }
-        btnRefresh.disableProperty().bind(pbLoading);
-        btnSearch.disableProperty().bind(pbLoading);
-        btnClearFilter.disableProperty().bind(pbLoading);
-    }
-
-    private void ClickButton() {
-        for (Button btn : poActionButtons) {
-            btn.setOnAction(this::handleButtonAction);
-        }
-        btnSearch.setOnAction(this::handleButtonAction);
-        btnClearFilter.setOnAction(this::handleButtonAction);
-    }
-
-    private void handleButtonAction(ActionEvent event) {
-        String lsID = ((Button) event.getSource()).getId();
-        try {
-            switch (lsID) {
-                case "btnSearch":
-                case "btnRefresh":
-                    if (!validateFilters()) {
-                        return;
-                    }
-                    loadList();
-                    break;
-                case "btnClearFilter":
-                    ClearFilters();
-                    loadList();
-                    break;
-                case "btnNew":
-                    openEntryScreen(ENTRY_NEW, "");
-                    break;
-                case "btnOpen":
-                    if (hasSelectedTransaction()) {
-                        openEntryScreen(ENTRY_OPEN, selectedTransNo());
-                    }
-                    break;
-                case "btnUpdate":
-                    if (hasSelectedTransaction()) {
-                        openEntryScreen(ENTRY_UPDATE, selectedTransNo());
-                    }
-                    break;
-                case "btnCreateFrom":
-                    if (hasSelectedTransaction()) {
-                        openEntryScreen(ENTRY_NEW_FROM, selectedTransNo());
-                    }
-                    break;
-                case "btnPrint":
-                case "btnExport":
-                    // TODO: print / export the selected transaction (or the filtered list)
-                    ShowMessageFX.Error(SalesTransactionStatic.MSG_UNDER_DEVELOPMENT, pxeModuleName, null);
-                    break;
-                case "btnClose":
-                    if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CLOSE, pxeModuleName, null)) {
-                        new unloadForm().unloadForm(ChildAnchorPane, oApp, pxeModuleName);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
-        }
-    }
-
-    // =========================================================================
-    // Navigation to the entry screen
-    // =========================================================================
-    private static final String ENTRY_NEW = "NEW";
-    private static final String ENTRY_OPEN = "OPEN";
-    private static final String ENTRY_UPDATE = "UPDATE";
-    private static final String ENTRY_NEW_FROM = "NEW_FROM";
-
-    /**
-     * Opens SalesTransactionMC.fxml (SalesTransactionsMCController) for the given mode.
-     * TODO: replace with the project's screen loader. The entry controller currently fires
-     * btnNew on start-up, so it needs a way to receive the mode and the transaction no.
-     * (e.g. setters on the entry controller, called before the form is attached).
-     */
-    private void openEntryScreen(String fsMode, String fsTransNo) {
-        ShowMessageFX.Error(SalesTransactionStatic.MSG_UNDER_DEVELOPMENT, pxeModuleName, null);
-    }
-
-    // =========================================================================
     // Filters
     // =========================================================================
-    @SuppressWarnings("unchecked")
-    private void initFilters() {
-        // Status / Payment: first entry means "all"; the prompt text shows when nothing is selected
-        cmbStatusFilter.getItems().setAll(Arrays.asList(SalesTransactionStatic.TRANSACTION_STATUS));
+    private void initComboBoxes() {
         cmbPaymentFilter.getItems().setAll(Arrays.asList(SalesTransactionStatic.PAYMENT_FORMS));
-        cmbStatusFilter.getSelectionModel().clearSelection();
-        cmbPaymentFilter.getSelectionModel().clearSelection();
+        cmbPaymentFilter.getSelectionModel().clearSelection();   // nothing selected = "All payment forms"
+        cmbStatusFilter.getItems().setAll(Arrays.asList(SalesTransactionStatic.TRANSACTION_STATUS));
+        cmbStatusFilter.getSelectionModel().selectFirst();   // default: Opened  // nothing selected = "All status"
 
-        for (final ComboBox lcmb : poFilterCombos) {
-            lcmb.disableProperty().bind(pbLoading);
-            lcmb.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-                if (!pbLoaded || pbSyncing) {
-                    return;
-                }
-                loadList();
-            });
-        }
+        cmbPageSize.getItems().setAll(PAGE_SIZES);
+        cmbPageSize.getSelectionModel().select(Integer.valueOf(25));
+        cmbPageSize.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (!pbLoaded || newVal == null) {
+                return;
+            }
+            pnPage = 1;
+            showPage();
+        });
+    }
 
+    private void initDatePickers() {
         StringConverter<LocalDate> loConverter = new StringConverter<LocalDate>() {
             @Override
             public String toString(LocalDate fdValue) {
@@ -368,106 +252,142 @@ public class SalesTransactionsLandingController implements Initializable, Screen
                 }
             }
         };
-
-        for (final DatePicker ldp : poFilterDatePickers) {
+        for (DatePicker ldp : Arrays.asList(dpDateFrom, dpDateTo)) {
             ldp.setConverter(loConverter);
             ldp.setPromptText(SalesTransactionStatic.DATE_PATTERN);
-            ldp.disableProperty().bind(pbLoading);
-            ldp.valueProperty().addListener((obs, oldVal, newVal) -> {
-                if (!pbLoaded || pbSyncing) {
-                    return;
-                }
-                if (validateFilters()) {
-                    loadList();
-                }
-            });
         }
-
-        tfSearch.disableProperty().bind(pbLoading);
-        tfSearch.setOnKeyPressed(this::tfSearch_KeyPressed);
+        setDefaultDateRange();   // runs before the first load, so the list starts on the last 7 days
     }
 
-    private void tfSearch_KeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.ENTER) {
-            if (validateFilters()) {
-                loadList();
+    /** Default date filter: the last 7 days, today included. */
+    private void setDefaultDateRange() {
+        dpDateTo.setValue(LocalDate.now());
+        dpDateFrom.setValue(LocalDate.now().minusDays(DEFAULT_DAYS));
+    }
+
+    /** Enter in the search box runs the search. */
+    private void initFilterHandlers() {
+        tfSearch.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                applyFilter();
             }
-        }
+        });
     }
 
-    /** Date From must not be later than Date To. */
-    private boolean validateFilters() {
+    /** Filters poAllRows into poFiltered (in memory), then shows the first page. */
+    private void applyFilter() {
         LocalDate ldFrom = dpDateFrom.getValue();
         LocalDate ldTo = dpDateTo.getValue();
         if (ldFrom != null && ldTo != null && ldFrom.isAfter(ldTo)) {
-            ShowMessageFX.Error(SalesTransactionStatic.MSG_DATE_FROM_AFTER_TO, pxeModuleName, null);
-            return false;
+            ShowMessageFX.Warning("Date From must not be after Date To.", "Warning", null);
+            dpDateFrom.requestFocus();
+            return;
         }
-        return true;
-    }
+        String lsSearch = tfSearch.getText() == null ? "" : tfSearch.getText().trim().toLowerCase(Locale.ROOT);
+        String lsPayment = cmbPaymentFilter.getSelectionModel().getSelectedItem();
+        String lsStatus = cmbStatusFilter.getSelectionModel().getSelectedItem();
 
-    private String dateText(DatePicker fdp) {
-        return fdp.getValue() == null ? "" : DATE_FORMAT.format(fdp.getValue());
-    }
-
-    private String comboText(ComboBox fcmb) {
-        Object loValue = fcmb.getSelectionModel().getSelectedItem();
-        return loValue == null ? "" : loValue.toString();
-    }
-
-    /** Clears every filter without triggering the change handlers. */
-    private void ClearFilters() {
-        pbSyncing = true;
-        try {
-            tfSearch.clear();
-            for (ComboBox lcmb : poFilterCombos) {
-                lcmb.getSelectionModel().clearSelection();
+        List<TransRow> laResult = new ArrayList<TransRow>();
+        for (TransRow loRow : poAllRows) {
+            if (!lsSearch.isEmpty() && !loRow.searchText.contains(lsSearch)) {
+                continue;
             }
-            for (DatePicker ldp : poFilterDatePickers) {
-                ldp.setValue(null);
+            if (ldFrom != null && (loRow.date == null || loRow.date.isBefore(ldFrom))) {
+                continue;
             }
-        } finally {
-            pbSyncing = false;
+            if (ldTo != null && (loRow.date == null || loRow.date.isAfter(ldTo))) {
+                continue;
+            }
+            if (lsPayment != null && !lsPayment.equals(loRow.payment)) {
+                continue;
+            }
+            if (lsStatus != null && !lsStatus.equals(loRow.status)) {
+                continue;
+            }
+            laResult.add(loRow);
         }
+        poFiltered = laResult;
+        pnPage = 1;
+        showPage();
+    }
+
+    private void clearFilter() {
+        tfSearch.clear();
+        setDefaultDateRange();
+        cmbPaymentFilter.getSelectionModel().clearSelection();
+        cmbStatusFilter.getSelectionModel().selectFirst();   // back to Opened
+        applyFilter();
+    }
+
+    // =========================================================================
+    // Paging
+    // =========================================================================
+    private int pageSize() {
+        Integer lnSize = cmbPageSize.getSelectionModel().getSelectedItem();
+        return lnSize == null || lnSize <= 0 ? 25 : lnSize;
+    }
+
+    private int pageCount() {
+        return Math.max(1, (int) Math.ceil(poFiltered.size() / (double) pageSize()));
+    }
+
+    /** Fills the table with the current page and refreshes the paging bar and the "Showing x of y" label. */
+    private void showPage() {
+        int lnSize = pageSize();
+        int lnTotal = poFiltered.size();
+        int lnPages = pageCount();
+        pnPage = Math.max(1, Math.min(pnPage, lnPages));
+
+        int lnFrom = (pnPage - 1) * lnSize;
+        int lnTo = Math.min(lnTotal, lnFrom + lnSize);
+        page_data.setAll(poFiltered.subList(lnFrom, lnTo));
+        tblTransactions.refresh();
+        if (!page_data.isEmpty()) {
+            tblTransactions.getSelectionModel().selectFirst();
+        }
+
+        String lsInfo = "Showing " + page_data.size() + " of " + lnTotal;
+        if (lnTotal != poAllRows.size()) {
+            lsInfo += " (filtered from " + poAllRows.size() + ")";
+        }
+        lblRecordInfo.setText(lsInfo);
+        lblPage.setText("Page " + pnPage + " of " + lnPages);
+
+        btnPageFirst.setDisable(pnPage <= 1);
+        btnPagePrev.setDisable(pnPage <= 1);
+        btnPageNext.setDisable(pnPage >= lnPages);
+        btnPageLast.setDisable(pnPage >= lnPages);
     }
 
     // =========================================================================
     // Table
-    // NOTE: ModelTableMain was not provided. Columns are bound to the properties
-    // "index01", "index02", ... in the order the columns are declared in the FXML.
     // =========================================================================
     private void initTable() {
-        tblRowNo.setCellValueFactory(new PropertyValueFactory<>("index01"));
-        tblRowTransNo.setCellValueFactory(new PropertyValueFactory<>("index02"));
-        tblRowDate.setCellValueFactory(new PropertyValueFactory<>("index03"));
-        tblRowCustomer.setCellValueFactory(new PropertyValueFactory<>("index04"));
-        tblRowUnits.setCellValueFactory(new PropertyValueFactory<>("index05"));
-        tblRowSource.setCellValueFactory(new PropertyValueFactory<>("index06"));
-        tblRowPaymentForm.setCellValueFactory(new PropertyValueFactory<>("index07"));
-        tblRowTotal.setCellValueFactory(new PropertyValueFactory<>("index08"));
-        tblRowPaid.setCellValueFactory(new PropertyValueFactory<>("index09"));
-        tblRowBalance.setCellValueFactory(new PropertyValueFactory<>("index10"));
-        tblRowStatus.setCellValueFactory(new PropertyValueFactory<>("index11"));
+        tblRowNo.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                String.valueOf((pnPage - 1) * pageSize() + cd.getTableView().getItems().indexOf(cd.getValue()) + 1)));
+        tblRowTransNo.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().transNo));
+        tblRowDate.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                cd.getValue().date == null ? "" : DATE_FORMAT.format(cd.getValue().date)));
+        tblRowCustomer.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().customer));
+        tblRowUnits.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().units)));
+        tblRowSource.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().source));
+        tblRowPaymentForm.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().payment));
+        tblRowTotal.setCellValueFactory(cd -> new ReadOnlyStringWrapper(money(cd.getValue().total)));
+        tblRowPaid.setCellValueFactory(cd -> new ReadOnlyStringWrapper(money(cd.getValue().paid)));
+        tblRowBalance.setCellValueFactory(cd -> new ReadOnlyStringWrapper(money(cd.getValue().balance)));
+        tblRowStatus.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().status));
 
-        tblTransactions.setItems(main_data);
-        tblTransactions.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_TRANSACTIONS));
-        tblTransactions.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-            pnRow = newIdx.intValue();
-            pbHasSelection.set(pnRow >= 0);
-        });
-        // Double click opens the selected transaction
-        tblTransactions.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && hasSelectedTransaction()) {
-                btnOpen.fire();
-            }
-        });
-        // Enter opens the selected transaction
-        tblTransactions.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER && hasSelectedTransaction()) {
-                btnOpen.fire();
-            }
-        });
+        tblTransactions.setItems(page_data);
+        tblTransactions.setPlaceholder(new Label("No transactions found."));
+        tblTransactions.setOnMouseClicked(this::tblTransactions_Clicked);
         lockColumnReordering(tblTransactions);
+    }
+
+    /** Double-click on a row opens it. */
+    private void tblTransactions_Clicked(MouseEvent event) {
+        if (event.getClickCount() == 2 && tblTransactions.getSelectionModel().getSelectedItem() != null) {
+            openEntryScreen("OPEN", tblTransactions.getSelectionModel().getSelectedItem());
+        }
     }
 
     /**
@@ -486,128 +406,325 @@ public class SalesTransactionsLandingController implements Initializable, Screen
         });
     }
 
-    private boolean hasSelectedTransaction() {
-        if (tblTransactions.getSelectionModel().getSelectedItem() == null) {
-            ShowMessageFX.Error(SalesTransactionStatic.MSG_SELECT_TRANSACTION, pxeModuleName, null);
-            return false;
-        }
-        return true;
-    }
-
-    /** Transaction no. of the selected row (column index02). */
-    private String selectedTransNo() {
-        ModelTableMain loRow = tblTransactions.getSelectionModel().getSelectedItem();
-        return loRow == null ? "" : loRow.getIndex02();
-    }
-
     // =========================================================================
-    // List loading (Task based, then paged on the client)
+    // Loading
     // =========================================================================
-    /** Reads the filters, loads the list off the FX thread, then shows page 1. */
-    private void loadList() {
-        if (pbLoading.get()) {
-            return;
-        }
-        final String lsSearch = tfSearch.getText() == null ? "" : tfSearch.getText().trim();
-        final String lsFrom = dateText(dpDateFrom);
-        final String lsTo = dateText(dpDateTo);
-        final String lsStatus = cmbStatusFilter.getSelectionModel().getSelectedIndex() <= 0 ? "" : comboText(cmbStatusFilter);
-        final String lsPayment = cmbPaymentFilter.getSelectionModel().getSelectedIndex() <= 0 ? "" : comboText(cmbPaymentFilter);
+    /** Reloads the list from the database (Task-based, like loadTableMCItem() in the entry controller). */
+    private void loadTransactions() {
+        JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
+        tblTransactions.setPlaceholder(loading.loadingPane);
+        loading.progressIndicator.setVisible(true);
 
-        Task<List<ModelTableMain>> loTask = new Task<List<ModelTableMain>>() {
+        final int lnSeq = ++pnLoadSeq;   // a newer load makes this one stale
+
+        Task<List<TransRow>> task = new Task<List<TransRow>>() {
             @Override
-            protected List<ModelTableMain> call() throws Exception {
-                // ASSUMED: runs the search on the backend; the list is then read from the model.
-//                poJSON = oSalesController.SalesTransaction().loadTransactionList(lsSearch, lsFrom, lsTo, lsStatus, lsPayment);
-//                if ("error".equals(String.valueOf(poJSON.get("result")))) {
-//                    throw new Exception(String.valueOf(poJSON.get("message")));
-//                }
-//                List<ModelTableMain> loRows = new ArrayList<>();
-//                int lnCount = oSalesController.SalesTransaction().getMasterCount();   // ASSUMED
-//                for (int lnCtr = 0; lnCtr < lnCount; lnCtr++) {
-//                    loRows.add(toRow(lnCtr));
-//                }
-                List<ModelTableMain> loRows = new ArrayList<>();
-                return loRows;
+            protected List<TransRow> call() throws Exception {
+                MCSales loSales = oSalesController.MCSales();
+                loSales.setIndustryID(psIndustryId);
+                loSales.setCompanyID(psCompanyId);
+                loSales.setCategoryID(psCategoryId);
+
+                List<TransRow> laRows = new ArrayList<TransRow>();
+                // the String overload opens every master with openRecord(), so the amounts are converted to the
+                // types the getters expect; the no-arg overload copies raw JDBC values (BigDecimal), which the
+                // getters cannot cast, and dbl() then showed 0.00. (This overload filters by industry, not category.)
+                JSONObject loJSON = loSales.loadTransactionList("");
+                if (loJSON != null && "error".equals(loJSON.get("result"))) {
+                    String lsMessage = String.valueOf(loJSON.get("message"));
+                    if ("No record found.".equals(lsMessage)) {
+                        return laRows;   // an empty list is not an error
+                    }
+                    throw new Exception(lsMessage);
+                }
+
+                Map<String, Integer> loUnits = new HashMap<String, Integer>();
+                Map<String, StringBuilder> loSerials = new HashMap<String, StringBuilder>();
+                loadUnitInfo(loUnits, loSerials);
+
+                for (Model_Sales_Master loMaster : loSales.getMasterList()) {
+                    if (loMaster == null) {
+                        continue;
+                    }
+                    laRows.add(buildRow(loMaster, loUnits, loSerials));
+                }
+                // newest first
+                laRows.sort((a, b) -> b.transNo.compareTo(a.transNo));
+                return laRows;
+            }
+
+            @Override
+            protected void succeeded() {
+                if (lnSeq != pnLoadSeq) {   // stale / cancelled
+                    loading.progressIndicator.setVisible(false);
+                    return;
+                }
+                poAllRows.setAll(getValue());
+                tblTransactions.setPlaceholder(loading.placeholderLabel);
+                applyFilter();
+                loading.progressIndicator.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                if (lnSeq != pnLoadSeq) {
+                    return;
+                }
+                Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, getException());
+                tblTransactions.setPlaceholder(loading.placeholderLabel);
+                loading.progressIndicator.setVisible(false);
+                final String lsMessage = getException() == null ? "Unable to load transactions." : getException().getMessage();
+                Platform.runLater(() -> ShowMessageFX.Error(lsMessage, pxeModuleName, null));
             }
         };
-        loTask.setOnRunning(e -> pbLoading.set(true));
-        loTask.setOnSucceeded(e -> {
-            poAllRows.clear();
-            poAllRows.addAll(loTask.getValue());
-            pnTotalRows.set(poAllRows.size());
-            pbLoading.set(false);
-            showPage(1);
-        });
-        loTask.setOnFailed(e -> {
-            pbLoading.set(false);
-            Throwable loError = loTask.getException();
-            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, loError);
-            ShowMessageFX.Error(loError == null ? "" : loError.getMessage(), pxeModuleName, null);
-        });
-
-        Thread loThread = new Thread(loTask, "SalesTransactionsLanding-load");
-        loThread.setDaemon(true);
-        loThread.start();
+        new Thread(task).start();
     }
 
-
-
-    // =========================================================================
-    // Paging
-    // =========================================================================
-    @SuppressWarnings("unchecked")
-    private void initPaging() {
-        cmbPageSize.getItems().setAll(Arrays.asList(PAGE_SIZES));
-        cmbPageSize.getSelectionModel().select(Integer.valueOf(DEFAULT_PAGE_SIZE));
-        cmbPageSize.disableProperty().bind(pbLoading);
-        cmbPageSize.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) {
-                return;
+    /**
+     * Units per transaction (number of Sales_Detail rows) and the engine / frame nos of those units, for the search box.
+     * ASSUMED serial table "Inv_Serial". If the joined query fails, falls back to a plain count (no engine / frame search).
+     * Runs on the background thread.
+     */
+    private void loadUnitInfo(Map<String, Integer> foUnits, Map<String, StringBuilder> foSerials) {
+        try {
+            ResultSet loRS = oApp.executeQuery("SELECT a.sTransNox, IFNULL(b.sSerial01, '') sSerial01, IFNULL(b.sSerial02, '') sSerial02"
+                    + " FROM Sales_Detail a LEFT JOIN Inv_Serial b ON b.sSerialID = a.sSerialID");
+            while (loRS != null && loRS.next()) {
+                String lsTrans = loRS.getString("sTransNox");
+                foUnits.merge(lsTrans, 1, Integer::sum);
+                StringBuilder loSb = foSerials.computeIfAbsent(lsTrans, k -> new StringBuilder());
+                loSb.append(' ').append(loRS.getString("sSerial01")).append(' ').append(loRS.getString("sSerial02"));
             }
-            pnPageSize.set((Integer) newVal);
-            if (pbLoaded) {
-                showPage(1);
-            }
-        });
-
-        btnPageFirst.setOnAction(e -> showPage(1));
-        btnPagePrev.setOnAction(e -> showPage(pnPage.get() - 1));
-        btnPageNext.setOnAction(e -> showPage(pnPage.get() + 1));
-        btnPageLast.setOnAction(e -> showPage(totalPages()));
-
-        // Page buttons: disabled while loading or at the matching end of the list
-        btnPageFirst.disableProperty().bind(pbLoading.or(pnPage.lessThanOrEqualTo(1)));
-        btnPagePrev.disableProperty().bind(pbLoading.or(pnPage.lessThanOrEqualTo(1)));
-        btnPageNext.disableProperty().bind(pbLoading.or(Bindings.createBooleanBinding(
-                () -> pnPage.get() >= totalPages(), pnPage, pnPageSize, pnTotalRows)));
-        btnPageLast.disableProperty().bind(pbLoading.or(Bindings.createBooleanBinding(
-                () -> pnPage.get() >= totalPages(), pnPage, pnPageSize, pnTotalRows)));
-    }
-
-    private int totalPages() {
-        int lnSize = Math.max(1, pnPageSize.get());
-        return Math.max(1, (int) Math.ceil(pnTotalRows.get() / (double) lnSize));
-    }
-
-    /** Shows page fnPage (clamped to the valid range) and refreshes the labels. */
-    private void showPage(int fnPage) {
-        int lnPage = Math.max(1, Math.min(fnPage, totalPages()));
-        int lnSize = Math.max(1, pnPageSize.get());
-        int lnFrom = (lnPage - 1) * lnSize;
-        int lnTo = Math.min(lnFrom + lnSize, poAllRows.size());
-
-        List<ModelTableMain> loPage = new ArrayList<>(poAllRows.subList(lnFrom, lnTo));
-        for (int lnCtr = 0; lnCtr < loPage.size(); lnCtr++) {
-            loPage.get(lnCtr).setIndex01(String.valueOf(lnFrom + lnCtr + 1));   // running number across pages
+            MiscUtil.close(loRS);
+            return;
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.WARNING, "Serial query failed, counting units only.", ex);
+            foUnits.clear();
+            foSerials.clear();
         }
-        main_data.setAll(loPage);
-        tblTransactions.getSelectionModel().clearSelection();
-        pnRow = -1;
-        pbHasSelection.set(false);
+        try {
+            ResultSet loRS = oApp.executeQuery("SELECT sTransNox, COUNT(*) xUnits FROM Sales_Detail GROUP BY sTransNox");
+            while (loRS != null && loRS.next()) {
+                foUnits.put(loRS.getString("sTransNox"), loRS.getInt("xUnits"));
+            }
+            MiscUtil.close(loRS);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
 
-        pnPage.set(lnPage);
-        lblPage.setText(String.format("Page %d of %d", lnPage, totalPages()));
-        lblRecordInfo.setText(String.format("Showing %d of %d", loPage.size(), poAllRows.size()));
+    /** Builds one list row from a master (background thread: the lookups hit the database here, not in the cell factories). */
+    private TransRow buildRow(final Model_Sales_Master foMaster, Map<String, Integer> foUnits, Map<String, StringBuilder> foSerials) {
+        TransRow loRow = new TransRow();
+        loRow.master = foMaster;
+        loRow.transNo = textOf(() -> foMaster.getTransactionNo());
+        loRow.date = toLocalDate((java.util.Date) rawOf(() -> foMaster.getTransactionDate()));
+        loRow.customer = textOf(() -> foMaster.Client().getCompanyName());
+        Integer lnUnits = foUnits.get(loRow.transNo);
+        loRow.units = lnUnits == null ? 0 : lnUnits;
+        loRow.source = textOf(() -> foMaster.getSourceNo());
+        loRow.payment = optionText(SalesTransactionStatic.PAYMENT_FORMS, textOf(() -> foMaster.getPaymentForm()));
+        loRow.status = optionText(SalesTransactionStatic.TRANSACTION_STATUS, textOf(() -> foMaster.getTransactionStatus()));
+
+        double lnDue = dbl(() -> foMaster.getAmountDue());
+        double lnAdvances = dbl(() -> foMaster.getAdvances());
+        double lnCwt = dbl(() -> foMaster.getCWTAmount());
+        loRow.paid = dbl(() -> foMaster.getValue("nAmtPaidx"));   // raw column: MCSales never sets it
+        loRow.total = lnDue + lnAdvances;                          // same rule as the entry screen: amount due + advances
+        loRow.balance = lnDue - lnCwt - loRow.paid;                // same rule as the entry screen
+
+        StringBuilder loSerials = foSerials.get(loRow.transNo);
+        loRow.searchText = (loRow.transNo + " " + loRow.customer + (loSerials == null ? "" : loSerials)).toLowerCase(Locale.ROOT);
+        return loRow;
+    }
+
+    // =========================================================================
+    // Buttons
+    // =========================================================================
+    private void initButtons() {
+        // the row actions need a selected row
+        btnOpen.disableProperty().bind(tblTransactions.getSelectionModel().selectedItemProperty().isNull());
+        btnUpdate.disableProperty().bind(tblTransactions.getSelectionModel().selectedItemProperty().isNull());
+
+
+        for (Button btn : new Button[]{btnSearch, btnClearFilter, btnPageFirst, btnPagePrev, btnPageNext, btnPageLast,
+                btnRefresh, btnOpen,  btnUpdate, btnClose}) {
+            btn.setOnAction(this::handleButtonAction);
+        }
+    }
+
+    private void handleButtonAction(ActionEvent event) {
+        String lsID = ((Button) event.getSource()).getId();
+        TransRow loSelected = tblTransactions.getSelectionModel().getSelectedItem();
+        try {
+            switch (lsID) {
+                case "btnSearch":
+                    applyFilter();
+                    break;
+                case "btnClearFilter":
+                    clearFilter();
+                    break;
+                case "btnPageFirst":
+                    pnPage = 1;
+                    showPage();
+                    break;
+                case "btnPagePrev":
+                    pnPage--;
+                    showPage();
+                    break;
+                case "btnPageNext":
+                    pnPage++;
+                    showPage();
+                    break;
+                case "btnPageLast":
+                    pnPage = pageCount();
+                    showPage();
+                    break;
+                case "btnRefresh":
+                    loadTransactions();
+                    break;
+                case "btnNew":
+                    openEntryScreen("NEW", null);
+                    break;
+                case "btnOpen":
+                    openEntryScreen("OPEN", loSelected);
+                    break;
+                case "btnUpdate":
+                    openEntryScreen("UPDATE", loSelected);
+                    break;
+                case "btnCreateFrom":
+                    openEntryScreen("NEWFROM", loSelected);
+                    break;
+                case "btnPrint":
+                    // TODO: MCSales has no print yet (printRecord() is commented out); call it here once it exists.
+                    ShowMessageFX.Information("Printing is under development.", pxeModuleName, null);
+                    break;
+                case "btnExport":
+                    // TODO: export the filtered list (poFiltered) once the report / PDF is defined.
+                    ShowMessageFX.Information("Export is under development.", pxeModuleName, null);
+                    break;
+                case "btnClose":
+                    if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CLOSE, pxeModuleName, null)) {
+                        new unloadForm().unloadForm(ChildAnchorPane, oApp, pxeModuleName);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
+    /**
+     * Opens the entry screen (SalesTransactionMC.fxml / SalesTransactionsMCController) in place of this list.
+     *
+     * "NEW" works as is: the entry controller fires its own New button when it initializes.
+     * "OPEN" / "UPDATE" / "NEWFROM" need the entry controller to take a transaction no. Add this to
+     * SalesTransactionsMCController and call it below (after loader.load()):
+     *
+     *     public void openFromList(String fsTransNo, boolean fbUpdate) { ... searchTransaction / openTransaction,
+     *                                                                        then UpdateTransaction() when fbUpdate,
+     *                                                                        then reloadRecord() and initButton(...) }
+     *
+     * Note initializeObject() always fires btnNew, so it must skip that when the screen is opened from the list.
+     */
+    private void openEntryScreen(String fsMode, TransRow foRow) {
+        if (!"NEW".equals(fsMode) && foRow == null) {
+            ShowMessageFX.Warning("Please select a transaction first.", "Warning", null);
+            return;
+        }
+        if (!"NEW".equals(fsMode)) {
+            ShowMessageFX.Information("Opening " + foRow.transNo + " needs the entry screen to accept a transaction no."
+                    + " (see openEntryScreen() in this controller).", pxeModuleName, null);
+            return;
+        }
+        try {
+            FXMLLoader loLoader = new FXMLLoader(getClass().getResource(ENTRY_FXML));
+            SalesTransactionsMCController loEntry = new SalesTransactionsMCController();
+            loEntry.setGRider(oApp);
+            loEntry.setIndustryID(psIndustryId);
+            loEntry.setCompanyID(psCompanyId);
+            loEntry.setCategoryID(psCategoryId);
+            loLoader.setController(loEntry);
+            AnchorPane loRoot = loLoader.load();
+            AnchorPane.setTopAnchor(loRoot, 0.0);
+            AnchorPane.setBottomAnchor(loRoot, 0.0);
+            AnchorPane.setLeftAnchor(loRoot, 0.0);
+            AnchorPane.setRightAnchor(loRoot, 0.0);
+            ChildAnchorPane.getChildren().setAll(loRoot);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
+    // =========================================================================
+    // Helpers (same behavior as in SalesTransactionsMCController)
+    // =========================================================================
+    private interface Getter {
+
+        Object get() throws Exception;
+    }
+
+    private static Object rawOf(Getter fg) {
+        try {
+            return fg.get();
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private static String textOf(Getter fg) {
+        Object loVal = rawOf(fg);
+        return loVal == null ? "" : String.valueOf(loVal);
+    }
+
+    /** Number as double; 0 when the getter throws or the value is null / blank / not numeric. */
+    private static double dbl(Getter fg) {
+        try {
+            Object loVal = fg.get();
+            if (loVal == null) {
+                return 0.0;
+            }
+            if (loVal instanceof Number) {
+                return ((Number) loVal).doubleValue();
+            }
+            String lsVal = String.valueOf(loVal).replace(",", "").trim();
+            return lsVal.isEmpty() ? 0.0 : Double.parseDouble(lsVal);
+        } catch (Exception ex) {
+            // logged so a failing getter (e.g. ClassCastException) is not silently shown as 0.00
+            Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.WARNING, "Amount getter failed: " + ex, ex);
+            return 0.0;
+        }
+    }
+
+    /** Code ("0", "1"...) to its text in the given option list; an unknown code is shown as is. */
+    private static String optionText(String[] faOptions, String fsCode) {
+        if (fsCode == null || fsCode.trim().isEmpty()) {
+            return "";
+        }
+        try {
+            int lnCode = Integer.parseInt(fsCode.trim());
+            return (lnCode >= 0 && lnCode < faOptions.length) ? faOptions[lnCode] : fsCode;
+        } catch (NumberFormatException ex) {
+            return fsCode;   // already text
+        }
+    }
+
+    private static String money(double fn) {
+        return String.format("%,.2f", fn);
+    }
+
+    /** java.sql.Date has no toInstant(), so convert it with its own toLocalDate(). */
+    private static LocalDate toLocalDate(java.util.Date fdDate) {
+        if (fdDate == null) {
+            return null;
+        }
+        if (fdDate instanceof java.sql.Date) {
+            return ((java.sql.Date) fdDate).toLocalDate();
+        }
+        return fdDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }
