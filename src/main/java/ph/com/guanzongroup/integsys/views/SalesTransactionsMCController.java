@@ -45,6 +45,7 @@ import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
+import ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.File;
@@ -145,12 +146,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private final BooleanProperty pbCreditPayment = new SimpleBooleanProperty(false);
 
     /** Raw column of Transaction_Attachment that keeps the attachment type (combo index as text). ASSUMED name. */
-    private static final String ATTACH_TYPE_COLUMN = "sDocTypex";
+    private static final String ATTACH_TYPE_COLUMN = "sDocuType";
 
     /** Files of the active attachments (same order as attach_data / poAttachModelRows). */
     private final ObservableList<File> poAttachFiles = FXCollections.observableArrayList();
-
-
+    /** Attachment type (combo index) by file name: fallback when the model does not keep the type column. */
+    private final Map<String, Integer> poAttachTypes = new HashMap<>();
+    private boolean pbShowingAttach = false;   // true while displayAttachment() changes the table selection itself
     // =========================================================================
     // TextInputControl groups (filled in initControlGroups(), NOT here:
     // @FXML fields are still null until the FXML loader injects them).
@@ -1468,11 +1470,30 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tblFileNameAttachment.setCellValueFactory(cd -> cell(() -> cd.getValue().getFileName()));
         tblAttachments.setItems(attach_data);
         tblAttachments.setPlaceholder(new Label(SalesTransactionStatic.TBL_NO_ATTACHMENTS));
+
+        // keyboard / programmatic selection (ignored while displayAttachment() is moving the selection itself)
         tblAttachments.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-            if (newIdx.intValue() >= 0 && newIdx.intValue() != pnAttachRow) {
+            if (pbShowingAttach) {
+                return;
+            }
+            if (newIdx.intValue() >= 0 && newIdx.intValue() < poAttachFiles.size()) {
                 showAttachment(newIdx.intValue());
             }
         });
+
+        // a click always refreshes the viewer, even on the row that is already selected
+        tblAttachments.setOnMouseClicked(e -> {
+            int lnIndex = tblAttachments.getSelectionModel().getSelectedIndex();
+            if (lnIndex >= 0 && lnIndex < poAttachFiles.size()) {
+                showAttachment(lnIndex);
+            }
+        });
+
+        // right-click menu
+        MenuItem loOpenLocation = new MenuItem("Open file location");
+        loOpenLocation.setOnAction(e -> openAttachmentLocation());
+        tblAttachments.setContextMenu(new ContextMenu(loOpenLocation));
+
         lockColumnReordering(tblAttachments);
     }
 
@@ -2524,11 +2545,18 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         imageView.fitHeightProperty().bind(stackPane.heightProperty().subtract(4));
         tfAttachmentNo.setEditable(false);
 
+
         btnAddAttachment.disableProperty().bind(pbEditable.not());
         btnRemoveAttachment.disableProperty().bind(pbEditable.not().or(Bindings.isEmpty(poAttachFiles)));
 
         btnAddAttachment.setOnAction(e -> addAttachment());
         btnRemoveAttachment.setOnAction(e -> removeAttachment());
+
+        stackPane.setOnMouseClicked(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY && e.getClickCount() == 2) {
+                openAttachmentLocation();
+            }
+        });
         btnArrowLeft.setOnAction(e -> {
             if (pnAttachRow > 0) {
                 showAttachment(pnAttachRow - 1);
@@ -2543,19 +2571,62 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /** The attachment type is kept as the combo index in a raw column (see ATTACH_TYPE_COLUMN). */
+    /** The attachment type is kept as the combo index in a raw column (see ATTACH_TYPE_COLUMN) AND in poAttachTypes. */
     private void setAttachmentType(Model_Transaction_Attachment foModel, int fnType) {
         if (foModel == null || fnType < 0) {
             return;
         }
+        String lsFile = foModel.getFileName();
+        if (lsFile != null) {
+            poAttachTypes.put(lsFile.toLowerCase(), fnType);
+        }
+
+        // 1) look for a real setter on the model: setDocumentType / setDocType / setFileType ...
+        for (java.lang.reflect.Method loMethod : foModel.getClass().getMethods()) {
+            String lsName = loMethod.getName().toLowerCase();
+            if (lsName.startsWith("set") && (lsName.contains("doc") || lsName.contains("type"))
+                    && loMethod.getParameterCount() == 1
+                    && loMethod.getParameterTypes()[0] == String.class) {
+                try {
+                    Object loResult = loMethod.invoke(foModel, String.valueOf(fnType));
+                    System.out.println("Attachment type written with " + loMethod.getName() + " -> " + loResult);
+                    return;
+                } catch (Exception ex) {
+                    Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, loMethod.getName(), ex);
+                }
+            }
+        }
+
+        // 2) no setter found: raw column, but report the failure instead of hiding it
         try {
-            foModel.setValue(ATTACH_TYPE_COLUMN, String.valueOf(fnType));   // ASSUMED column
+            foModel.setValue(ATTACH_TYPE_COLUMN, String.valueOf(fnType));
         } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE,
+                    "Attachment type NOT written. Setters on the model: " + listSetters(foModel), ex);
         }
     }
 
+    private String listSetters(Object fo) {
+        StringBuilder loSb = new StringBuilder();
+        for (java.lang.reflect.Method m : fo.getClass().getMethods()) {
+            if (m.getName().startsWith("set")) {
+                loSb.append(m.getName()).append(' ');
+            }
+        }
+        return loSb.toString();
+    }
+
     private int getAttachmentType(final Model_Transaction_Attachment foModel) {
-        return foModel == null ? -1 : indexOf(textOf(() -> foModel.getValue(ATTACH_TYPE_COLUMN)));
+        if (foModel == null) {
+            return -1;
+        }
+        int lnType = indexOf(textOf(() -> foModel.getValue(ATTACH_TYPE_COLUMN)));
+        if (lnType >= 0) {
+            return lnType;
+        }
+        String lsFile = foModel.getFileName();
+        Integer loType = lsFile == null ? null : poAttachTypes.get(lsFile.toLowerCase());
+        return loType == null ? -1 : loType;
     }
 
     /** The type combo was changed: it applies to the attachment selected in the table (nothing selected = just a choice for the next one). */
@@ -2577,6 +2648,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         attach_data.clear();
         poAttachFiles.clear();
         poAttachModelRows.clear();
+        poAttachTypes.clear();
         showAttachment(-1);
 
         Task<Void> task = new Task<Void>() {
@@ -2601,7 +2673,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     return;
                 }
                 Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, getException());
-                ShowMessageFX.Error(String.valueOf(getException().getMessage()), pxeModuleName, null);
+                // the rows were already read into MCSales before the download failed: show them anyway
+                reloadAttachmentTable();
+                showAttachment(poAttachFiles.isEmpty() ? -1 : 0);
             }
         };
         Thread loThread = new Thread(task);
@@ -2620,6 +2694,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         attach_data.clear();
         poAttachFiles.clear();
         poAttachModelRows.clear();
+        pnAttachRow = -1;
 
         for (int lnCtr = 0; lnCtr < loSales.getTransactionAttachmentCount(); lnCtr++) {
             // getAttachmentList(int) works; the no-arg list version has a bad cast
@@ -2721,26 +2796,34 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private void displayAttachment(int fnIndex, Image foImage) {
-        if (fnIndex < 0 || fnIndex >= poAttachFiles.size()) {
-            pnAttachRow = -1;
-            imageView.setImage(null);
-            tfAttachmentNo.clear();
-            tblAttachments.getSelectionModel().clearSelection();
-        } else {
-            pnAttachRow = fnIndex;   // set BEFORE selecting: the selection listener ignores the row that is already shown
-            imageView.setImage(foImage);
-            tfAttachmentNo.setText(String.format(SalesTransactionStatic.ATTACH_POSITION_FORMAT, fnIndex + 1, poAttachFiles.size()));
-            if (fnIndex < attach_data.size()) {
-                tblAttachments.getSelectionModel().select(fnIndex);
-                // the combo shows the type of the attachment on display (without writing it back)
-                boolean lbPrev = pbSyncing;
-                pbSyncing = true;
-                try {
-                    selectIndex(cmbAttachmentType, getAttachmentType(attach_data.get(fnIndex)));
-                } finally {
-                    pbSyncing = lbPrev;
+        pbShowingAttach = true;   // the selection changes below must not call showAttachment() again
+        try {
+            if (fnIndex < 0 || fnIndex >= poAttachFiles.size()) {
+                pnAttachRow = -1;
+                imageView.setImage(null);
+                tfAttachmentNo.clear();
+                tblAttachments.getSelectionModel().clearSelection();
+            } else {
+                pnAttachRow = fnIndex;
+                imageView.setImage(foImage);   // null when the file is missing: the viewer is cleared, not left on the old image
+                tfAttachmentNo.setText(String.valueOf(fnIndex + 1));
+                if (fnIndex < attach_data.size()) {
+                    if (tblAttachments.getSelectionModel().getSelectedIndex() != fnIndex) {
+                        tblAttachments.getSelectionModel().select(fnIndex);
+                    }
+                    // the combo follows the clicked attachment; an unknown type clears it instead of keeping the previous one
+                    int lnType = getAttachmentType(attach_data.get(fnIndex));
+                    boolean lbPrev = pbSyncing;
+                    pbSyncing = true;
+                    try {
+                        selectIndex(cmbAttachmentType, lnType);   // -1 clears the combo
+                    } finally {
+                        pbSyncing = lbPrev;
+                    }
                 }
             }
+        } finally {
+            pbShowingAttach = false;
         }
         updateAttachmentArrows();
     }
@@ -2748,6 +2831,35 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void updateAttachmentArrows() {
         btnArrowLeft.setDisable(pnAttachRow <= 0);
         btnArrowRight.setDisable(pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size() - 1);
+    }
+
+    /**
+     * Opens Windows File Explorer at the location of the attachment selected in tblAttachments.
+     * The file name and full path come from poAttachFiles (same order as attach_data), so no
+     * separate path cache is needed. All validation, the confirmation and the Explorer handling are
+     * delegated to ExplorerWindowUtil.confirmAndOpenAttachmentLocation(). Any exception is logged
+     * and not propagated, so a failure here never interrupts the rest of the UI.
+     */
+    private void openAttachmentLocation() {
+        try {
+            int lnSelectedIndex = tblAttachments.getSelectionModel().getSelectedIndex();
+
+            if (lnSelectedIndex < 0 || lnSelectedIndex >= attach_data.size()
+                    || lnSelectedIndex >= poAttachFiles.size()) {
+                return;
+            }
+
+            String lsFileName = attach_data.get(lnSelectedIndex).getFileName();
+
+            // same index as attach_data: this is <temp attachment folder>/<file name>
+            File loFile = poAttachFiles.get(lnSelectedIndex);
+            String lsFilePath = loFile == null ? null : loFile.getAbsolutePath();
+
+            ExplorerWindowUtil.confirmAndOpenAttachmentLocation(lsFileName, lsFilePath);
+
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // =========================================================================
