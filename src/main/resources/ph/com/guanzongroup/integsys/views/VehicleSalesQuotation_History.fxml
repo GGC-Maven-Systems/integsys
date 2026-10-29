@@ -4,10 +4,13 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -35,7 +38,7 @@
                            <children>
                               <GridPane prefHeight="28.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="350.0" AnchorPane.topAnchor="10.0">
                                  <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="230.0" />
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
@@ -91,6 +94,17 @@
                                     <Font size="12.0" />
                                  </font>
                                         </Button>
+                              <Button fx:id="btnDeduct" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Deduct">
+                                 <effect>
+                                    <Blend />
+                                 </effect>
+                                 <graphic>
+                                    <FontAwesomeIconView glyphName="TAG" size="20" />
+                                 </graphic>
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
                               <Button fx:id="btnPrint" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
                                  <effect>
                                     <Blend />
@@ -141,503 +155,583 @@
                         <AnchorPane fx:id="apTransactionInfo" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                             <children>
                                                 <HBox fx:id="hboxid" prefHeight="100.0" prefWidth="200.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
                                              <children>
-                                                      <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-                                    <children>
-                                            <AnchorPane fx:id="apMaster" style="-fx-border-color: FF8201;">
-                                                  <children>
-                                                      <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-                                                          <columnConstraints>
-                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
-                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
+                                                <GridPane layoutX="11.0" layoutY="6.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                   <columnConstraints>
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
                                                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="20.0" minWidth="20.0" prefWidth="20.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="5.0" />
-                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="20.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="65.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="50.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="200.0" prefWidth="250.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="139.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                      <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="50.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                                       <ColumnConstraints />
-                                                          </columnConstraints>
-                                                          <rowConstraints>
-                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
+                                                   </columnConstraints>
+                                                   <rowConstraints>
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                          </rowConstraints>
-                                                          <children>
-                                                          <Label text="Transaction No">
-                                                                  <font>
-                                                                      <Font name="System Bold" size="14.0" />
-                                                                  </font>
-                                                              </Label>
-                                                                        <Label text="Transaction Date" GridPane.rowIndex="2">
-                                                                     <font>
-                                                                        <Font size="12.0" />
-                                                                     </font>
-                                                      </Label>
-                                                                        <Label layoutX="60.0" layoutY="112.0" text="Branch" GridPane.rowIndex="4">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="18.0" layoutY="82.0" text="Client" GridPane.rowIndex="5">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="89.0" layoutY="110.0" text="Address" GridPane.rowIndex="6">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="77.0" layoutY="139.0" text="Contact No" GridPane.rowIndex="7">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="59.0" layoutY="194.0" text="Email" GridPane.rowIndex="8">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="60.0" layoutY="82.0" text="Inquiry No" GridPane.columnIndex="8" GridPane.rowIndex="4">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="656.0" layoutY="54.0" text="Inquiry Date" GridPane.columnIndex="8" GridPane.rowIndex="5">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="752.0" layoutY="54.0" text="Mode of Payment" GridPane.columnIndex="8" GridPane.rowIndex="6">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label layoutX="668.0" layoutY="82.0" text="Sales Person" GridPane.columnIndex="8" GridPane.rowIndex="8">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Vehicle Information" GridPane.columnIndex="13" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="3" GridPane.valignment="TOP">
-                                                         <font>
-                                                            <Font name="System Bold" size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Brand" GridPane.columnIndex="13" GridPane.rowIndex="4">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Model" GridPane.columnIndex="13" GridPane.rowIndex="5">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Variant" GridPane.columnIndex="13" GridPane.rowIndex="6">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Year" GridPane.columnIndex="13" GridPane.rowIndex="7">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <Label text="Color" GridPane.columnIndex="13" GridPane.rowIndex="8">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                                        <TextField fx:id="tfTransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="2" />
-                                                                        <DatePicker fx:id="dpTransactionDate" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                        <TextField fx:id="tfBranch" disable="true" layoutX="125.0" layoutY="165.0" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="364.0" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                                                                        <TextField fx:id="tfClient" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="364.0" promptText="" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-                                                                        <TextField fx:id="tfAddress" disable="true" layoutX="125.0" layoutY="106.0" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="363.0" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6" />
-                                                                        <TextField fx:id="tfContactNo" disable="true" layoutX="125.0" layoutY="135.0" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="159.0" styleClass="" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                                                        <TextField fx:id="tfEmail" disable="true" layoutX="125.0" layoutY="162.0" maxHeight="25.0" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
-                                                                        <Separator prefWidth="200.0" GridPane.columnIndex="8" GridPane.columnSpan="4" GridPane.rowIndex="7" />
-                                                                        <TextField fx:id="tfInquiryNo" disable="true" styleClass="" GridPane.columnIndex="10" GridPane.rowIndex="4" />
-                                                                        <DatePicker fx:id="dpInquiryDate" disable="true" layoutX="125.0" layoutY="50.0" GridPane.columnIndex="10" GridPane.rowIndex="5" />
-                                                                        <ComboBox fx:id="cmbModeOfPayment" disable="true" prefWidth="150.0" styleClass="" GridPane.columnIndex="10" GridPane.halignment="LEFT" GridPane.rowIndex="6" />
-                                                                        <TextField fx:id="tfSalesPerson" disable="true" layoutX="738.0" layoutY="50.0" styleClass="" GridPane.columnIndex="10" GridPane.columnSpan="2" GridPane.rowIndex="8" />
-                                                                        <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="15">
-                                                         <children>
-                                                                              <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
-                                                                          <font>
-                                                                              <Font name="System Bold" size="14.0" />
-                                                                          </font>
-                                                                      </Label>
-                                                         </children></AnchorPane>
-                                                                        <TextField fx:id="tfFinancingRate" layoutX="978.0" layoutY="136.0" maxHeight="25.0" promptText="" visible="false" GridPane.columnIndex="15" GridPane.rowIndex="3" />
-                                                                        <TextField fx:id="tfBrand" maxHeight="25.0" promptText="" GridPane.columnIndex="15" GridPane.rowIndex="4" />
-                                                                        <TextField fx:id="tfModel" promptText="" GridPane.columnIndex="15" GridPane.rowIndex="5" />
-                                                                        <TextField fx:id="tfVariant" promptText="" GridPane.columnIndex="15" GridPane.rowIndex="6" />
-                                                                        <TextField fx:id="tfYear" disable="true" maxHeight="25.0" maxWidth="100.0" styleClass="" GridPane.columnIndex="15" GridPane.halignment="LEFT" GridPane.rowIndex="7" />
-                                                                        <TextField fx:id="tfColor" disable="true" styleClass="" GridPane.columnIndex="15" GridPane.rowIndex="8" />
-                                                      <DatePicker fx:id="dpExpectedDate" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                      <Label text="Expected Date" GridPane.rowIndex="3">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <Label text="Valid Thru" GridPane.columnIndex="4" GridPane.rowIndex="3">
-                                                         <font>
-                                                            <Font size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <DatePicker fx:id="dpValidThru" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                                                                    </children>
-                                                      </GridPane>
-                                                  </children>
-                                              </AnchorPane>
-                                          <HBox spacing="5.0" VBox.vgrow="ALWAYS">
-                                             <children>
-                                                      <AnchorPane layoutX="10.0" layoutY="10.0" style="-fx-border-color: FF8201;" HBox.hgrow="ALWAYS">
+                                                   </rowConstraints>
                                                    <children>
-                                                      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <Label text="Transaction No">
+                                                         <font>
+                                                            <Font name="System Bold" size="14.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label text="Transaction Date" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="60.0" layoutY="112.0" text="Branch" GridPane.columnIndex="9" GridPane.rowIndex="6">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="18.0" layoutY="82.0" text="Client" GridPane.rowIndex="4">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="89.0" layoutY="110.0" text="Address" GridPane.rowIndex="5">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="77.0" layoutY="139.0" text="Contact No" GridPane.rowIndex="6">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="59.0" layoutY="194.0" text="Email" GridPane.rowIndex="7">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="60.0" layoutY="82.0" text="Inquiry No" GridPane.columnIndex="9" GridPane.rowIndex="4">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="656.0" layoutY="54.0" text="Inquiry Date" GridPane.columnIndex="9" GridPane.rowIndex="5">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label layoutX="668.0" layoutY="82.0" text="Sales Person" GridPane.columnIndex="9" GridPane.rowIndex="7">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <TextField fx:id="tfTransactionNo" disable="true" editable="false" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" style="-fx-font-weight: bold;" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" />
+                                                      <DatePicker fx:id="dpTransactionDate" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                      <TextField fx:id="tfBranch" disable="true" layoutX="125.0" layoutY="165.0" styleClass="DisabledTextField" GridPane.columnIndex="11" GridPane.columnSpan="4" GridPane.rowIndex="6" />
+                                                      <TextField fx:id="tfClient" disable="true" maxHeight="25.0" prefHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="4" />
+                                                      <TextField fx:id="tfAddress" disable="true" layoutX="125.0" layoutY="106.0" maxHeight="25.0" prefHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="5" />
+                                                      <TextField fx:id="tfContactNo" disable="true" layoutX="125.0" layoutY="135.0" maxHeight="25.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="159.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                                      <TextField fx:id="tfEmail" disable="true" layoutX="125.0" layoutY="162.0" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="7" />
+                                                      <TextField fx:id="tfInquiryNo" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="11" GridPane.rowIndex="4" />
+                                                      <DatePicker fx:id="dpInquiryDate" disable="true" layoutX="125.0" layoutY="50.0" GridPane.columnIndex="11" GridPane.rowIndex="5" />
+                                                      <TextField fx:id="tfSalesPerson" disable="true" layoutX="738.0" layoutY="50.0" styleClass="DisabledTextField" GridPane.columnIndex="11" GridPane.columnSpan="4" GridPane.rowIndex="7" />
+                                                      <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="15">
                                                          <children>
-                                                            <AnchorPane fx:id="apAddOns">
-                                                               <children>
-                                                                  <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                                     <columnConstraints>
-                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="139.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
-                                                                     </columnConstraints>
-                                                                     <rowConstraints>
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
-                                                                     </rowConstraints>
-                                                                     <children>
-                                                                     <Label text="Add-Ons / Accessories" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                            <Label text="Add-Ons" GridPane.rowIndex="1">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                            <Label layoutX="66.0" layoutY="45.0" text="Accessories" GridPane.rowIndex="2">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                            <Label layoutX="64.0" layoutY="75.0" text="Amount" GridPane.rowIndex="3">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                            <Label layoutX="49.0" layoutY="45.0" text="Quantity" GridPane.columnIndex="4" GridPane.rowIndex="3">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                            <TextField fx:id="tfAddOns" maxHeight="26.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="454.0" promptText="" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                                                            <TextField fx:id="tfAccessories" maxHeight="25.0" promptText="" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="2" />
-                                                                                            <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                                            <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                                                                                        </children>
-                                                                  </GridPane>
-                                                               </children>
-                                                            </AnchorPane>
-                                                                                <TableView fx:id="tblViewAddOns" prefHeight="700.0" prefWidth="559.0">
-                                                              <columns>
-                                                                  <TableColumn prefWidth="26.0" />
-                                                                <TableColumn fx:id="tblNoAddOns" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
-                                                                  <TableColumn fx:id="tblDescriptionAddOns" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Description" />
-                                                                  <TableColumn fx:id="tblAmountAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Amount" />
-                                                                  <TableColumn fx:id="tblQtyAddOns" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Qty" />
-                                                                  <TableColumn fx:id="tblTotalAddOns" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total" />
-                                                              </columns>
-                                                               <VBox.margin>
-                                                                  <Insets bottom="5.0" left="5.0" right="5.0" />
-                                                               </VBox.margin>
-                                                            </TableView>
+                                                            <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
+                                                               <font>
+                                                                  <Font name="System Bold" size="14.0" />
+                                                               </font>
+                                                            </Label>
                                                          </children>
-                                                      </VBox>
+                                                      </AnchorPane>
+                                                      <TextField fx:id="tfFinancingRate" layoutX="978.0" layoutY="136.0" maxHeight="25.0" promptText="Press F3: Search" visible="false" GridPane.columnIndex="15" GridPane.rowIndex="2" />
+                                                      <DatePicker fx:id="dpExpectedDate" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                                      <Label text="Expected Date" GridPane.columnIndex="9" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label text="Valid Thru" GridPane.columnIndex="12" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <DatePicker fx:id="dpValidThru" GridPane.columnIndex="14" GridPane.rowIndex="2" />
+                                                      <Separator prefWidth="200.0" GridPane.columnSpan="16" GridPane.rowIndex="3">
+                                                         <GridPane.margin>
+                                                            <Insets left="5.0" right="5.0" />
+                                                         </GridPane.margin>
+                                                      </Separator>
                                                    </children>
-                                                </AnchorPane>
-                                                <VBox spacing="5.0">
-                                                   <children>
-                                                      <HBox spacing="5.0">
+                                                </GridPane>
+                                             </children>
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </AnchorPane>
+                                          <TabPane VBox.vgrow="ALWAYS">
+                                             <tabs>
+                                                <Tab closable="false" style="-fx-font-weight: bold;" text="Details">
+                                                   <content>
+                                                      <VBox spacing="5.0">
                                                          <children>
-                                                          <AnchorPane fx:id="apPricing" style="-fx-border-color: FF8201;">
+                                                            <HBox spacing="5.0" VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                                    <columnConstraints>
-                                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
-                                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                                    </columnConstraints>
-                                                                    <rowConstraints>
-                                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                    </rowConstraints>
-                                                                     <children>
-                                                                     <Label text="Pricing" GridPane.halignment="LEFT" GridPane.valignment="TOP">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label text="SRP" GridPane.rowIndex="1">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="89.0" layoutY="44.0" text="Downpayment" GridPane.rowIndex="2">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="32.0" layoutY="102.0" text="Reservation Amt" GridPane.rowIndex="3">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="32.0" layoutY="72.0" text="TPL" GridPane.rowIndex="4">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="91.0" layoutY="100.0" text="Comprehensive" GridPane.rowIndex="5">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="27.0" layoutY="130.0" text="LTO" GridPane.rowIndex="6">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="89.0" layoutY="159.0" text="CHMO / Doc Stmp" GridPane.rowIndex="7">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label text="Total Amount" GridPane.rowIndex="8">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                                                                <TextField fx:id="tfDownpayment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                                                <TextField fx:id="tfReservationAmt" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                                                                <TextField fx:id="tfTPL" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="68.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                                                                <TextField fx:id="tfComprehensive" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                                                                                <TextField fx:id="tfLTO" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                                                                                                <TextField fx:id="tfCHMODocStmp" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                                                                                <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.rowIndex="8" />
-                                                                                            </children>
-                                                                  </GridPane>
-                                                               </children>
-                                                          </AnchorPane>
-                                                            <AnchorPane fx:id="apAdditionalInfo" style="-fx-border-color: FF8201;">
-                                                               <children>
-                                                                  <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                                     <columnConstraints>
-                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="50.0" prefWidth="70.0" />
-                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="30.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="70.0" />
-                                                                     </columnConstraints>
-                                                                     <rowConstraints>
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
-                                                                     </rowConstraints>
-                                                                     <children>
-                                                                     <Label text="Additional Info (Financing)" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label text="Bank" GridPane.rowIndex="1">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="89.0" layoutY="44.0" text="Terms" GridPane.rowIndex="2">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="32.0" layoutY="72.0" text="Amount to Finance" GridPane.rowIndex="3">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="91.0" layoutY="100.0" text="Net Monthly Installment" GridPane.rowIndex="4">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="27.0" layoutY="130.0" text="Prompt Payment Discount" GridPane.rowIndex="5">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="89.0" layoutY="159.0" text="Gross Monthly Installment" GridPane.rowIndex="6">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label text="Promissory Note Amount" GridPane.rowIndex="7">
-                                                                           <font>
-                                                                              <Font name="System Bold" size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <Label layoutX="77.0" layoutY="72.0" text="Rate" GridPane.columnIndex="3" GridPane.rowIndex="2">
-                                                                           <font>
-                                                                              <Font size="12.0" />
-                                                                           </font>
-                                                                        </Label>
-                                                                                                <TextField fx:id="tfBank" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="1" />
-                                                                                                <TextField fx:id="tfTerms" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                                                <TextField fx:id="tfAmountToFinance" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="68.0" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="3" />
-                                                                                                <TextField fx:id="tfNetMonthlyInstallment" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="4" />
-                                                                                                <TextField fx:id="tfPromptPaymentDiscount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="5" />
-                                                                                                <TextField fx:id="tfGrossMonthlyInstallment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="6" />
-                                                                                                <TextField fx:id="tfPromissoryNoteAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="243.0" maxHeight="25.0" promptText="0.0000" styleClass="" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="7" />
-                                                                                                <TextField fx:id="tfRate" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                                                            </children>
-                                                                  </GridPane>
-                                                               </children>
-                                                            </AnchorPane>
-                                                         </children>
-                                                      </HBox>
-                                                         <AnchorPane minHeight="210.0" style="-fx-border-color: FF8201;">
-                                                         <children>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                               <children>
-                                                                  <AnchorPane fx:id="apFreebies" prefHeight="200.0" prefWidth="200.0">
+                                                                  <AnchorPane fx:id="apVehicleInfo" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: FF8201;" HBox.hgrow="ALWAYS">
                                                                      <children>
                                                                         <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                            <columnConstraints>
-                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
                                                                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
-                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="130.0" />
-                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                              <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="250.0" />
                                                                            </columnConstraints>
                                                                            <rowConstraints>
-                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="15.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
                                                                               <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                                                               <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                              <RowConstraints maxHeight="3.0" minHeight="3.0" prefHeight="3.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                            </rowConstraints>
                                                                            <children>
-                                                                           <Label text="Freebies" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.valignment="TOP">
+                                                                              <Label text="Vehicle Information" GridPane.columnSpan="3" GridPane.halignment="LEFT">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="15.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <Label text="Brand" GridPane.rowIndex="1">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Model" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Variant" GridPane.rowIndex="3">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Year" GridPane.rowIndex="5">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Color" GridPane.rowIndex="6">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfBrand" disable="true" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                              <TextField fx:id="tfModel" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                              <TextField fx:id="tfVariant" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                              <TextField fx:id="tfYear" disable="true" maxHeight="25.0" maxWidth="100.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="5" />
+                                                                              <TextField fx:id="tfColor" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                                                              <Label layoutX="82.0" layoutY="100.0" text="Transmission" GridPane.rowIndex="4">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfTransmission" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                                              <Label layoutX="19.0" layoutY="16.0" text="Receiving Method" GridPane.rowIndex="7" />
+                                                                              <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                                                           </children>
+                                                                        </GridPane>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                                  <AnchorPane fx:id="apPricing" style="-fx-border-color: FF8201;">
+                                                                     <children>
+                                                                        <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                           <columnConstraints>
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="140.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
+                                                                           </columnConstraints>
+                                                                           <rowConstraints>
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                                                           </rowConstraints>
+                                                                           <children>
+                                                                              <Label text="Pricing" GridPane.halignment="LEFT">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="15.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <Label text="SRP" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Description" GridPane.rowIndex="1">
+                                                                              <Label layoutX="89.0" layoutY="44.0" text="Downpayment" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                                                    <Label text="Quantity" GridPane.rowIndex="2">
+                                                                              <Label layoutX="32.0" layoutY="102.0" text="Reservation Amount" GridPane.rowIndex="4">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                                                    <TextField fx:id="tfDescription" maxHeight="25.0" promptText="" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="1" />
-                                                                                                    <TextField fx:id="tfQuantityFreebies" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                                                </children>
+                                                                              <Label layoutX="32.0" layoutY="72.0" text="TPL Amount" GridPane.rowIndex="5">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="91.0" layoutY="100.0" text="Comprehensive Amount" GridPane.rowIndex="6">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="27.0" layoutY="130.0" text="LTO Amount" GridPane.rowIndex="7">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="89.0" layoutY="159.0" text="CHMO / Doc Stamp" GridPane.rowIndex="8">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Total Amount" GridPane.rowIndex="11">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                              <TextField fx:id="tfDownpayment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                              <TextField fx:id="tfReservationAmt" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                                              <TextField fx:id="tfTPL" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="68.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                                                              <TextField fx:id="tfComprehensive" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                                                              <TextField fx:id="tfLTO" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                                                              <TextField fx:id="tfCHMODocStmp" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                                              <TextField fx:id="tfTotalAmount" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="184.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="11" />
+                                                                              <Label fx:id="lblTotalDiscount" layoutX="44.0" layoutY="224.0" text="Total Discount" GridPane.rowIndex="10">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfTotalDiscount" alignment="CENTER_RIGHT" disable="true" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                                                                              <Label layoutX="73.0" layoutY="282.0" text="Other Add-Ons Total" GridPane.rowIndex="9">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfOtherAddOnsTotal" alignment="CENTER_RIGHT" disable="true" layoutX="155.0" layoutY="278.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                                                                              <Label text="Mode of Payment" GridPane.rowIndex="1" />
+                                                                              <ComboBox fx:id="cmbModeOfPayment" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                                                                           </children>
                                                                         </GridPane>
                                                                      </children>
                                                                   </AnchorPane>
-                                                                                        <TableView fx:id="tblViewFreebies">
-                                                                     <columns>
-                                                                        <TableColumn fx:id="tblNoFreebies" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
-                                                                        <TableColumn fx:id="tblDescriptionFreebies" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
-                                                                        <TableColumn fx:id="tblQtyFreebies" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Qty" />
-                                                                     </columns>
-                                                                     <VBox.margin>
-                                                                        <Insets bottom="5.0" left="5.0" right="5.0" />
-                                                                     </VBox.margin>
-                                                                  </TableView>
+                                                                  <AnchorPane fx:id="apAdditionalInfo" style="-fx-border-color: FF8201;" HBox.hgrow="ALWAYS">
+                                                                     <children>
+                                                                        <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                           <columnConstraints>
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="160.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                                                                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                                                                           </columnConstraints>
+                                                                           <rowConstraints>
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
+                                                                           </rowConstraints>
+                                                                           <children>
+                                                                              <Label text="Additional Info (Financing)" GridPane.columnSpan="3" GridPane.halignment="LEFT">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="15.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <Label text="Bank" GridPane.rowIndex="1">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="89.0" layoutY="44.0" text="Terms" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="32.0" layoutY="72.0" text="Amount to Finance" GridPane.rowIndex="4">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="91.0" layoutY="100.0" text="Net Monthly Installment" GridPane.rowIndex="5">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="27.0" layoutY="130.0" text="Prompt Payment Discount" GridPane.rowIndex="6">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="89.0" layoutY="159.0" text="Gross Monthly Installment" GridPane.rowIndex="7">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label text="Promissory Note Amount" GridPane.rowIndex="8">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="77.0" layoutY="72.0" text="Rate" GridPane.rowIndex="3">
+                                                                                 <font>
+                                                                                    <Font size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <TextField fx:id="tfBank" disable="true" maxHeight="25.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                                                                              <TextField fx:id="tfTerms" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                                              <TextField fx:id="tfRate" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                                              <TextField fx:id="tfAmountToFinance" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="68.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                                                              <TextField fx:id="tfNetMonthlyInstallment" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                                                                              <TextField fx:id="tfPromptPaymentDiscount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="126.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                                                                              <TextField fx:id="tfGrossMonthlyInstallment" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="155.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+                                                                              <TextField fx:id="tfPromissoryNoteAmount" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="243.0" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
+                                                                           </children>
+                                                                        </GridPane>
+                                                                     </children>
+                                                                  </AnchorPane>
                                                                </children>
-                                                            </VBox>
-                                                         </children>
-                                                      </AnchorPane>
-                                                      <AnchorPane fx:id="apRemarks" style="-fx-border-color: FF8201;" VBox.vgrow="ALWAYS">
-                                                         <children>
-                                                            <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-                                                               <columnConstraints>
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
-                                                                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="5.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="5.0" />
-                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="5.0" />
-                                                               </columnConstraints>
-                                                               <rowConstraints>
-                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
-                                                               </rowConstraints>
+                                                               <VBox.margin>
+                                                                  <Insets top="5.0" />
+                                                               </VBox.margin>
+                                                            </HBox>
+                                                            <AnchorPane fx:id="apRemarks" style="-fx-border-color: FF8201;" VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <Label text="Remarks" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                      <TextArea fx:id="taRemarks" minHeight="-Infinity" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowSpan="2">
-                                                         <GridPane.margin>
-                                                            <Insets />
-                                                         </GridPane.margin>
-                                                      </TextArea>
+                                                                  <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="105.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="5.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="5.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="5.0" />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="50.0" vgrow="SOMETIMES" />
+                                                                     </rowConstraints>
+                                                                     <children>
+                                                                        <Label text="Remarks" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
+                                                                           <font>
+                                                                              <Font name="System Bold" size="12.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <TextArea fx:id="taRemarks" minHeight="-Infinity" prefHeight="27.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowSpan="2">
+                                                                           <GridPane.margin>
+                                                                              <Insets />
+                                                                           </GridPane.margin>
+                                                                        </TextArea>
+                                                                     </children>
+                                                                  </GridPane>
                                                                </children>
-                                                            </GridPane>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </VBox>
+                                                   </content>
+                                                </Tab>
+                                                <Tab closable="false" style="-fx-font-weight: bold;" text="Add-Ons / Accessories">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <AnchorPane style="-fx-border-color: FF8201;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                               <children>
+                                                                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane fx:id="apAddOns">
+                                                                           <children>
+                                                                              <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                 <columnConstraints>
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="105.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="500.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                                 </columnConstraints>
+                                                                                 <rowConstraints>
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                 </rowConstraints>
+                                                                                 <children>
+                                                                                    <Label text="Add-Ons">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Accessories" GridPane.rowIndex="1">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="64.0" layoutY="75.0" text="Amount" GridPane.columnIndex="4">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="49.0" layoutY="45.0" text="Quantity" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <TextField fx:id="tfAddOns" maxHeight="26.0" prefHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                                                                    <TextField fx:id="tfAccessories" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                                                    <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="6" />
+                                                                                    <TextField fx:id="tfQuantity" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="70.0" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <TableView fx:id="tblViewAddOns" prefHeight="700.0" prefWidth="559.0">
+                                                                           <columns>
+                                                                              <TableColumn prefWidth="26.0">
+                                                                                 <graphic>
+                                                                                    <CheckBox fx:id="cbSelectAll" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
+                                                                                 </graphic>
+                                                                              </TableColumn>
+                                                                              <TableColumn fx:id="tblNoAddOns" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
+                                                                              <TableColumn fx:id="tblDescriptionAddOns" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
+                                                                              <TableColumn fx:id="tblAmountAddOns" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="Amount" />
+                                                                              <TableColumn fx:id="tblQtyAddOns" maxWidth="80.0" minWidth="80.0" text="Quantity" />
+                                                                              <TableColumn fx:id="tblTotalAddOns" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" text="Total" />
+                                                                           </columns>
+                                                                           <VBox.margin>
+                                                                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                                           </VBox.margin>
+                                                                        </TableView>
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </AnchorPane>
                                                          </children>
                                                       </AnchorPane>
-                                                   </children>
-                                                </VBox>
-                                             </children>
-                                          </HBox>
-                                    </children>
-                                </VBox>
-                                             </children>
+                                                   </content>
+                                                </Tab>
+                                                <Tab closable="false" style="-fx-font-weight: bold;" text="Freebies and Inclusions">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <AnchorPane minHeight="210.0" style="-fx-border-color: FF8201;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                               <children>
+                                                                  <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane fx:id="apFreebies">
+                                                                           <children>
+                                                                              <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                 <columnConstraints>
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="105.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="500.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="18.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                                                                                 </columnConstraints>
+                                                                                 <rowConstraints>
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                 </rowConstraints>
+                                                                                 <children>
+                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Description">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label text="Quantity" GridPane.columnIndex="4">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <TextField fx:id="tfDescription" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                                                                    <TextField fx:id="tfQuantityFreebies" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" />
+                                                                                    <CheckBox fx:id="cbActive" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" GridPane.halignment="LEFT" />
+                                                                                    <Label text="Active" GridPane.columnIndex="7">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <TableView fx:id="tblViewFreebies" VBox.vgrow="ALWAYS">
+                                                                           <columns>
+                                                                              <TableColumn fx:id="tblNoFreebies" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
+                                                                              <TableColumn fx:id="tblDescriptionFreebies" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
+                                                                              <TableColumn fx:id="tblQtyFreebies" maxWidth="80.0" minWidth="80.0" text="Quantity" />
+                                                                           </columns>
+                                                                           <VBox.margin>
+                                                                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                                           </VBox.margin>
+                                                                        </TableView>
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
+                                             </tabs>
+                                          </TabPane>
+                                       </children>
+                                    </VBox>
+                                 </children>
                                           </HBox>
                             </children>
                                 </AnchorPane>
