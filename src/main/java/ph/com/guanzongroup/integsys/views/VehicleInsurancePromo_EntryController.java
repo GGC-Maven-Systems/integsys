@@ -674,41 +674,32 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             }
                             JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
                             details_data.clear();
-                            String lsCurrentVariantId = null;
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
                                     continue;
                                 }
-                                String lsVariantId = String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription());
-
-                                // Only parents get a row number; children are left blank
-                                for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
-                                    if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
-                                        continue;
+                                String lsVariantId = String.valueOf(poController.Detail(lnCtr).getVariantId());
+                                details_data.add(
+                                        new ModelVehicleInsurance_Detail(String.valueOf(lnCtr + 1),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
+                                                String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).ModelVariant().getSellingPrice(), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 1), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 2), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false)),
+                                                String.valueOf(lnCtr), //fixed column (this is not visible)
+                                                "",//starts ammortization column dynamic
+                                                "",
+                                                ""
+                                        ));
+                                    //store agein as a prepared and then will dynamically added in details_data
+                                    if (!poController.Detail(lnCtr).getRecordStatus()) {
+                                        JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
                                     }
-                                    details_data.add(
-                                            new ModelVehicleInsurance_Detail(String.valueOf(lnCtr + 1),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
-                                                    String.valueOf(poController.Detail(lnCtr).ModelVariant().Color().getDescription()),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).ModelVariant().getSellingPrice(), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 1), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 2), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false)),
-                                                    String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false)),
-                                                    String.valueOf(lnCtr), //fixed column (this is not visible)
-                                                    "",//starts ammortization column dynamic
-                                                    "",
-                                                    ""
-                                            ));
-                                        //store agein as a prepared and then will dynamically added in details_data
-                                        if (!poController.Detail(lnCtr).getRecordStatus()) {
-                                            JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
-                                        }
-                                }
-
                             }
                             
                             if (pnDetail < 0 || pnDetail
