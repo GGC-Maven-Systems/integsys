@@ -65,14 +65,14 @@ import ph.com.guanzongroup.integsys.model.ModelVehicleInsurance_Detail;
  * @author Team 1
  */
 public class VehicleInsurancePromo_EntryController implements Initializable, ScreenInterface {
-
+    
     private GRiderCAS oApp;
     private JSONObject poJSON;
     int pnDetail = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static VehicleInsurance poController;
     public int pnEditMode;
-
+    
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
@@ -82,7 +82,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
     private FilteredList<ModelVehicleInsurance_Detail> filteredDataDetail;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     JFXUtil.ReloadableTableTask loadTableDetail;
-
+    
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
     @FXML
@@ -139,31 +139,31 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-
+    
     @Override
     public void setIndustryID(String fsValue) {
         psIndustryId = fsValue;
     }
-
+    
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-
+    
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
     }
-
+    
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
-
+        
         try {
             Object source = event.getSource();
             if (source instanceof Button) {
@@ -182,13 +182,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         //Clear data
                         poController.Detail().clear();
                         clearTextFields();
-
+                        
                         poJSON = poController.NewTransaction();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-
+                        
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnUpdate":
@@ -198,7 +198,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-
+                        
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnCancel":
@@ -217,7 +217,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning("No transaction status history to load!", pxeModuleName, null);
                             return;
                         }
-
+                        
                         try {
                             poController.ShowStatusHistory();
                         } catch (NullPointerException npe) {
@@ -241,7 +241,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-
+                            
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -272,7 +272,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-
+                            
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -301,7 +301,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
-
+                            
                             poJSON = poController.OpenTransaction(poController.Master().getValidityId());
                             if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -325,7 +325,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         ) == false) {
                             return;
                         }
-
+                        
                         if (ValidityPeriodStatus.OPEN.equals(poController.Master().getRecordStatus())
                                 || ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
                             if (ShowMessageFX.YesNo(null, pxeModuleName,
@@ -343,7 +343,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                 }
                             }
                         }
-
+                        
                         poJSON = poController.remake(poController.Master().getValidityId());
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -358,7 +358,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-
+                
                 loadRecordDetail();
                 loadTableDetail.reload();
                 initButton(pnEditMode);
@@ -371,7 +371,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -382,7 +382,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                 case TAB:
                 case ENTER:
                     pbEntered = true;
-
+                    
                     CommonUtils.SetNextFocus(txtField);
                     event.consume();
                     break;
@@ -406,7 +406,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 int lnYear = 1;
@@ -453,7 +453,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                     loadTableDetail.reload();
                 });
             });
-
+    
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -466,7 +466,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         break;
                 }
             });
-
+    
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -488,7 +488,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             }
         }
     }
-
+    
     private void loadRecordMaster() {
         String lsStat = "Void";
         if (ValidityPeriodStatus.APPROVED.equals(poController.Master().getRecordStatus())) {
@@ -497,12 +497,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         btnVoid.setText(lsStat);
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, !JFXUtil.isObjectEqualTo(poController.Master().getRecordStatus(), null, "") ? poController.Master().getRecordStatus().toString() : "-1");
         tfValidityID.setText(poController.Master().getValidityId());
+        tfValidityPeriod.setText(poController.Master().getValidityDescription());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsValidTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpValidTo, JFXUtil.isObjectEqualTo(lsValidTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidTo, "yyyy-MM-dd"));
     }
-
+    
     private void loadRecordDetail() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -521,7 +522,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             tf3rdYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false));
             tf4thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false));
             tf5thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false));
-
+            
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
@@ -529,7 +530,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     boolean pbSuccess = true;
     EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
@@ -564,7 +565,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
-
+                            
                             pbSuccess = false;
                             loadTableDetail.reload();
                             pbSuccess = true;
@@ -584,7 +585,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
-
+                            
                             pbSuccess = false;
                             loadTableDetail.reload();
                             pbSuccess = true;
@@ -597,12 +598,12 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
-
+    
     private void initDatepickers() {
         // DatePicker setup
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpValidFrom, dpValidTo);
         JFXUtil.setActionListener(datepicker_Action, dpValidFrom, dpValidTo);
-
+        
         dpValidTo.getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 // Lost focus
@@ -637,7 +638,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             }
         }
     };
-
+    
     public void moveNext(boolean isUp, boolean continueNext) {
         if (continueNext) {
             apDetail.requestFocus();
@@ -652,7 +653,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
             {poController.getAmount(lsVariantId, 1), tf1stYear},}, tf1stYear); // default
     }
-
+    
     public void initTextFields() {
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
         JFXUtil.setFocusListener(txtMaster_Focus, tfValidityPeriod);
@@ -660,11 +661,11 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         JFXUtil.setCommaFormatter(tfSRP, tf1stYear, tf2ndYear, tf3rdYear, tf4thYear, tf5thYear);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
     }
-
+    
     private String getData(Object value) {
         return value == null ? "" : value.toString().trim();
     }
-
+    
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -707,9 +708,9 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                                 "",
                                                 ""
                                         ));
-
+                                
                                 if (!poController.Detail(lnCtr).getRecordStatus()) {
-                                    JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+                                    JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCount), "#FAA0A0", highlightedRowsMain);
                                 }
                             }
                             int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 12);
@@ -741,18 +742,18 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                 }
         );
     }
-
+    
     public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
         try {
             String getterName = String.format("getIndex%02d", columnIndex);
-
+            
             for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
                 Object item = dataList.get(lnCtr);
-
+                
                 String value = (String) item.getClass()
                         .getMethod(getterName)
                         .invoke(item);
-
+                
                 if (String.valueOf(lnpn).equals(value)) {
                     return lnCtr;
                 }
@@ -760,26 +761,26 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
         return -1; // not found
     }
-
+    
     private void initDetailsGrid() {
         JFXUtil.setColumnCenter(tblNo);
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnRight(tblSRP, tbl1stYear, tbl2ndYear, tbl3rdYear, tbl4thYear, tbl5thYear);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         filteredDataDetail = new FilteredList<>(details_data, b -> true);
-
+        
         SortedList<ModelVehicleInsurance_Detail> sortedData = new SortedList<>(filteredDataDetail);
         sortedData.comparatorProperty().bind(tblViewDetail.comparatorProperty());
         tblViewDetail.setItems(sortedData);
     }
-
+    
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster, apDetail);
     }
-
+    
     public void loadRecordSearch() {
         try {
             lblSource.setText(poController.Master().Company().getCompanyName());
@@ -788,7 +789,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     public void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
@@ -805,18 +806,18 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         });
         JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleInsurance_Detail) item).getIndex01(), highlightedRowsMain);
     }
-
+    
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
+        
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnApprove, btnPrint);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-
+        
         if (fnValue != EditMode.READY) {
             return;
         }
