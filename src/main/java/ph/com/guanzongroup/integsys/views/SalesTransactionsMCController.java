@@ -199,6 +199,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     @FXML private AnchorPane AnchorRegInsur;
     @FXML private AnchorPane AnchorGiveaway;
     @FXML private AnchorPane AnchorPaymType;
+    @FXML private AnchorPane anchorReg;
+    @FXML private AnchorPane anchorInsur;
+    @FXML private AnchorPane anchorGaways;
     @FXML private HBox hbButtons;
 
     @FXML private Button btnBrowse;
@@ -551,6 +554,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 break;
                             }
+                            LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
                             LoadClientInfo();   // also fills taCustomerName
                             // the search may have loaded a source quotation / reservation into the model:
                             // forget the previous client's selected rows so the table reloads from the first row
@@ -902,8 +906,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         // AnchorAttach / AnchorAttach2 are NOT disabled here any more: they hold the viewer, the arrows and the list, which
         // must work on a saved transaction too. Add / Remove / type are bound to pbEditable in initAttachmentTab().
         AnchorMCPrice.setDisable(true);
-        AnchorRegInsur.setDisable(true);
-        AnchorGiveaway.setDisable(true);
+        anchorReg.setDisable(true);
+        anchorInsur.setDisable(true);
+        anchorGaways.setDisable(true);
         AnchorPaymType.setDisable(true);
         switch (fnValue) {
             case EditMode.UNKNOWN:
@@ -921,8 +926,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 //                AnchorMCSales.setDisable(false);
                 AnchorClient.setDisable(false);
                 AnchorMCPrice.setDisable(false);
-                AnchorRegInsur.setDisable(false);
-                AnchorGiveaway.setDisable(false);
+                anchorReg.setDisable(false);
+                anchorInsur.setDisable(false);
+                anchorGaways.setDisable(false);
                 AnchorPaymType.setDisable(false);
                 break;
             default:

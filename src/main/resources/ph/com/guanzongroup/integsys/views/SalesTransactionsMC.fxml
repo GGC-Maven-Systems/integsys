@@ -874,46 +874,50 @@
                                                                                                                                       </Label>
                                                                                                                                   </children>
                                                                                                                               </AnchorPane>
-                                                                                                                              <GridPane>
-                                                                                                                                  <padding>
-                                                                                                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                                                                                                                  </padding>
-                                                                                                                                  <columnConstraints>
-                                                                                                                                      <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="110.0" prefWidth="120.0" />
-                                                                                                                                      <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
-                                                                                                                                      <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="80.0" prefWidth="100.0" />
-                                                                                                                                      <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
-                                                                                                                                  </columnConstraints>
-                                                                                                                                  <rowConstraints>
-                                                                                                                                      <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                                                                                      <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                                                                                  </rowConstraints>
-                                                                                                                                  <children>
-                                                                                                                                      <!-- cRegisTyp -->
-                                                                                                                                      <Label text="Registration Type" GridPane.rowIndex="1">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <ComboBox fx:id="cmbRegistrationType" disable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                                                                                                      <!-- nInsAmtxx -->
-                                                                                                                                      <Label text="Reg. Amount" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <TextField fx:id="tfRegAmount" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-      
-                                                                                                                                      <!-- cChargeTo -->
-                                                                                                                                      <CheckBox fx:id="cbRegIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                                                                                                                      <Label text="Insurance Type">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                      <TextField fx:id="tfRegInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" />
-                                                                                                                                  </children>
-                                                                                                                              </GridPane>
+                                                                                                <AnchorPane fx:id="anchorReg">
+                                                                                                   <children>
+                                                                                                                                    <GridPane>
+                                                                                                                                        <padding>
+                                                                                                                                            <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                                                                                                        </padding>
+                                                                                                                                        <columnConstraints>
+                                                                                                                                            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="110.0" prefWidth="120.0" />
+                                                                                                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
+                                                                                                                                            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="80.0" prefWidth="100.0" />
+                                                                                                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
+                                                                                                                                        </columnConstraints>
+                                                                                                                                        <rowConstraints>
+                                                                                                                                            <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                                                                                            <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                                                                                        </rowConstraints>
+                                                                                                                                        <children>
+                                                                                                                                            <!-- cRegisTyp -->
+                                                                                                                                            <Label text="Registration Type" GridPane.rowIndex="1">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                                                            <ComboBox fx:id="cmbRegistrationType" disable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                                                                                            <!-- nInsAmtxx -->
+                                                                                                                                            <Label text="Reg. Amount" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                                                            <TextField fx:id="tfRegAmount" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+            
+                                                                                                                                            <!-- cChargeTo -->
+                                                                                                                                            <CheckBox fx:id="cbRegIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                                                                                                            <Label text="Insurance Type">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                            <TextField fx:id="tfRegInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" />
+                                                                                                                                        </children>
+                                                                                                                                    </GridPane>
+                                                                                                   </children>
+                                                                                                </AnchorPane>
                                                                                                                           </children>
                                                                                                                       </VBox>
       
@@ -929,52 +933,56 @@
                                                                                                                                       </Label>
                                                                                                                                   </children>
                                                                                                                               </AnchorPane>
-                                                                                                                              <GridPane>
-                                                                                                                                  <padding>
-                                                                                                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                                                                                                                  </padding>
-                                                                                                                                  <columnConstraints>
-                                                                                                                                      <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="110.0" prefWidth="120.0" />
-                                                                                                                                      <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
-                                                                                                                                      <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="80.0" prefWidth="100.0" />
-                                                                                                                                      <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
-                                                                                                                                  </columnConstraints>
-                                                                                                                                  <rowConstraints>
-                                                                                                                                      <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                                                                                      <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                                                      <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                                                                                  </rowConstraints>
-                                                                                                                                  <children>
-                                                                                                                                      <!-- sInsTypID -->
-                                                                                                                                      <Label text="Insurance Type" GridPane.rowIndex="0">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <!-- nInsurYrx -->
-                                                                                                                                      <Label text="Insur. Year" GridPane.columnIndex="2">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <TextField fx:id="tfInsurYear" alignment="CENTER_RIGHT" GridPane.columnIndex="3" />
-                                                                                                                                      <!-- nInsAmtxx -->
-                                                                                                                                      <Label text="Insur. Amount" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                                                                                                                                          <GridPane.margin>
-                                                                                                                                              <Insets right="10.0" />
-                                                                                                                                          </GridPane.margin>
-                                                                                                                                      </Label>
-                                                                                                                                      <TextField fx:id="tfInsurAmt" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                                                                                                                      <CheckBox fx:id="cbInsurIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                                                                                      <TextField fx:id="tfInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" />
-                                                                                                      <Label text="Payeer" GridPane.rowIndex="1">
-                                                                                                         <GridPane.margin>
-                                                                                                            <Insets right="10.0" />
-                                                                                                         </GridPane.margin>
-                                                                                                      </Label>
-                                                                                                      <TextField fx:id="tfInsurPayer" editable="false" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                                                                                                  </children>
-                                                                                                                              </GridPane>
+                                                                                                <AnchorPane fx:id="anchorInsur">
+                                                                                                   <children>
+                                                                                                                                    <GridPane>
+                                                                                                                                        <padding>
+                                                                                                                                            <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                                                                                                        </padding>
+                                                                                                                                        <columnConstraints>
+                                                                                                                                            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="110.0" prefWidth="120.0" />
+                                                                                                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
+                                                                                                                                            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="80.0" prefWidth="100.0" />
+                                                                                                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="130.0" prefWidth="170.0" />
+                                                                                                                                        </columnConstraints>
+                                                                                                                                        <rowConstraints>
+                                                                                                                                            <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                                                                                            <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                                                            <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                                                                                        </rowConstraints>
+                                                                                                                                        <children>
+                                                                                                                                            <!-- sInsTypID -->
+                                                                                                                                            <Label text="Insurance Type" GridPane.rowIndex="0">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                                                            <!-- nInsurYrx -->
+                                                                                                                                            <Label text="Insur. Year" GridPane.columnIndex="2">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                                                            <TextField fx:id="tfInsurYear" alignment="CENTER_RIGHT" GridPane.columnIndex="3" />
+                                                                                                                                            <!-- nInsAmtxx -->
+                                                                                                                                            <Label text="Insur. Amount" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                                                                                                <GridPane.margin>
+                                                                                                                                                    <Insets right="10.0" />
+                                                                                                                                                </GridPane.margin>
+                                                                                                                                            </Label>
+                                                                                                                                            <TextField fx:id="tfInsurAmt" alignment="CENTER_RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                                                                                                            <CheckBox fx:id="cbInsurIsCharge" mnemonicParsing="false" text="is Charge" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                                                                                            <TextField fx:id="tfInsurType" promptText="PRESS F3 : Search" GridPane.columnIndex="1" />
+                                                                                                            <Label text="Payeer" GridPane.rowIndex="1">
+                                                                                                               <GridPane.margin>
+                                                                                                                  <Insets right="10.0" />
+                                                                                                               </GridPane.margin>
+                                                                                                            </Label>
+                                                                                                            <TextField fx:id="tfInsurPayer" editable="false" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                                                                                        </children>
+                                                                                                                                    </GridPane>
+                                                                                                   </children>
+                                                                                                </AnchorPane>
                                                                                                                           </children>
                                                                                                                       </VBox>
                                                                                        </children>
@@ -1050,7 +1058,7 @@
                                                                                                                                         </Label>
                                                                                                                                     </children>
                                                                                                                                 </AnchorPane>
-                                                                                                <AnchorPane layoutX="5.0" layoutY="30.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0">
+                                                                                                <AnchorPane fx:id="anchorGaways" layoutX="5.0" layoutY="30.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0">
                                                                                                    <children>
                                                                                                                                       <GridPane alignment="CENTER">
                                                                                                                                           <columnConstraints>
