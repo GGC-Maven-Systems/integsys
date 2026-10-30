@@ -14,8 +14,13 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -206,7 +211,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     @FXML private Button btnHistory;
     @FXML private Button btnClose;
     @FXML private Button btnAddClient;
-    @FXML private Button btnAddClient1;      // co-client add button (fx:id as in the FXML)
+    @FXML private Button btnAddClient1;
+    @FXML private Button btnNonItemize;// co-client add button (fx:id as in the FXML)
     @FXML private FontAwesomeIconView faAdd12;
     @FXML private FontAwesomeIconView faAdd121;
 
@@ -627,7 +633,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             break;
                         case "tfPaymentTerm":
                             // MCSales has no term search: the master keeps a term CODE (setTermCode), typed in this field
-                            ShowMessageFX.Warning("There is no term search yet. Type the term code and leave the field.", "Warning", null);
+//                            poJSON = oSalesController.MCSales().search(lsValuse, false);
+//                            if ("error".equals(poJSON.get("result"))) {
+//                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+//                                return;
+//                            }
                             break;
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
@@ -813,6 +823,50 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     break;
                 }
+                case "tfPromoDisc":
+                case "tfPromoAddDisc":
+                case "tfFreight": {
+                    // write to the unit that was being edited (not the row selected now), only when it is a real unit and the value changed
+                    final Model_Sales_Detail loUnit = poEditUnit;
+                    if (isBlankUnit(loUnit)) {
+                        break;
+                    }
+                    double lnNew = parseDouble(lsValue);   // blank / invalid -> 0, commas removed
+
+                    if ("tfPromoDisc".equals(lsID)) {
+                        if (lnNew < 0 || lnNew > 100) {
+                            ShowMessageFX.Warning("Discount rate must be between 0 and 100.", "Warning", null);
+                            loadUnitRecord(pnUnitRow);   // put the old value back
+                            return;
+                        }
+                        if (lnNew == dbl(() -> loUnit.getDiscount())) break;
+                        poJSON = loUnit.setDiscount(lnNew);          // ASSUMED setter
+                    } else if ("tfPromoAddDisc".equals(lsID)) {
+                        if (lnNew < 0) {
+                            ShowMessageFX.Warning("Additional discount cannot be negative.", "Warning", null);
+                            loadUnitRecord(pnUnitRow);
+                            return;
+                        }
+                        if (lnNew == dbl(() -> loUnit.getAddDiscount())) break;
+                        poJSON = loUnit.setAddDiscount(lnNew);       // ASSUMED setter
+                    } else {
+                        if (lnNew < 0) {
+                            ShowMessageFX.Warning("Freight cannot be negative.", "Warning", null);
+                            loadUnitRecord(pnUnitRow);
+                            return;
+                        }
+                        if (lnNew == dbl(() -> loUnit.getFreight())) break;
+                        poJSON = loUnit.setFreight(lnNew);           // ASSUMED setter
+                    }
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        loadUnitRecord(pnUnitRow);
+                        return;
+                    }
+                    loadTableMCItem();   // refreshes tblUnits (Net SRP, Discount, Add. Disc, Freight), re-formats the fields,
+                    // then syncCwt()/recomputeTransaction() and loadSummary() run in its succeeded()
+                    break;
+                }
                 case "tfGawayRemarks":
                     ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
                     break;
@@ -913,6 +967,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             switch (lsID) {
                 case "btnNew":
+                    ClearAll();                                   // clear the form and the table lists
+                    oSalesController.MCSales().initTransaction(); // reset the model's detail / giveaway / reg-insur / attachment lists
                     pnEditMode = EditMode.ADDNEW;
                     poJSON = oSalesController.MCSales().newTransaction();
                     if (poJSON.get("result").equals("error")) {
@@ -937,6 +993,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                         break;
                     }
+
+                    ClearAll();
                     reloadRecord();   // reads the edit mode first, then fills every section and tab
                     break;
                 case "btnUpdate":
@@ -1083,9 +1141,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             return;
         }
         try {
-            if (fcmb == cmbPaymentTranType && fnIndex != SalesTransactionStatic.PAYMENT_CREDIT) {
-                setDate(dpPaymentDueDate, null);
-                writeDueDate(null);   // not a credit transaction: no due date
+            if (fcmb == cmbPaymentTranType) {
+                // not credit: due date = transaction date. Credit: keep a valid due date, otherwise start at the transaction date
+                LocalDate ldTrans = toLocalDate(master().getTransactionDate());
+                LocalDate ldDue = toLocalDate(master().getDueDate());   // ASSUMED getter
+                if (fnIndex != SalesTransactionStatic.PAYMENT_CREDIT || ldDue == null
+                        || (ldTrans != null && ldDue.isBefore(ldTrans))) {
+                    ldDue = ldTrans;
+                }
+                writeDueDate(ldDue);
+                setDate(dpPaymentDueDate, ldDue);
             }
             if (fcmb == cmbPaymentForm && fnIndex != PAYMENT_FORM_TERM) {
                 tfPaymentTerm.clear();
@@ -1535,6 +1600,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfPomoCode.setText(textOf(() -> loUnit.PromotionMaster().getPromoDescription()));
                 tfRegEngineNo.setText(tfMCEngineNo.getText());
                 tfRegFrameNo.setText(tfMCFrameNo.getText());
+
+
+                tfMCInsurAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isInsuranceFree()))
+                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isInsuranceFree())) ? "Yes" : "No");
+                tfMCRegisAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isRegistrationFree()))
+                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isRegistrationFree())) ? "Yes" : "No");
                 // TODO(model): tfMCRegisAmt, cmbVehicleType and the other combos / check boxes
             }
         } catch (Exception ex) {
@@ -1791,7 +1862,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadUnitRecord(pnUnitRow);
                     tblUnits.toFront();
                 }
-                syncCwt();       // the units changed the base the CWT rate applies to
+                refreshRegInsurEngine();
+                if (lbEditing) {
+                    syncCwt();               // ADDNEW / UPDATE: writes the CWT amount, then recomputes
+                } else {
+                    recomputeTransaction();  // READY (browse): recompute so the totals exist for display
+                }       // the units changed the base the CWT rate applies to
                 loadSummary();   // totals come from the master (MCSales.computeTransaction())
                 loading.progressIndicator.setVisible(false);
             }
@@ -2303,6 +2379,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         loadTableGiveaways();
     }
 
+    /** The engine / frame come from unit_data, which loads in its own Task: re-read them once the units are there. */
+    private void refreshRegInsurEngine() {
+        tblRegAndIsur.refresh();   // rebuilds the cells, so the Engine column re-reads unit_data
+        if (poSelRegInsur != null) {
+            boolean lbPrev = pbSyncing;
+            pbSyncing = true;
+            try {
+                tfRegEngineNo.setText(regInsurEngine(poSelRegInsur));
+                tfRegFrameNo.setText(regInsurFrame(poSelRegInsur));
+            } finally {
+                pbSyncing = lbPrev;
+            }
+        }
+    }
+
     // =========================================================================
     // Payment tab
     // Reads / writes Model_Sales_Master. The totals are computed by MCSales.computeTransaction() (only while editing);
@@ -2367,8 +2458,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             normalizeRegInsurRows();
             oSalesController.MCSales().computeTransaction();
-        } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+            System.out.println("[PAY] computeTransaction OK, mode=" + pnEditMode);
+        } catch (Throwable ex) {
+            System.out.println("[PAY] computeTransaction FAILED, mode=" + pnEditMode);
+            ex.printStackTrace();
         }
     }
 
@@ -2415,13 +2508,19 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
             tfPaymentTerm.setText(pbTermPayment.get() ? textOf(() -> loMas.getTermCode()) : "");   // ASSUMED getter
 
-            LocalDate ldDue = null;
             try {
-                ldDue = toLocalDate(loMas.getDueDate());   // ASSUMED getter
+                LocalDate ldTrans = toLocalDate(loMas.getTransactionDate());
+                LocalDate ldDue = toLocalDate(loMas.getDueDate());   // ASSUMED getter
+                // New / Update: initialize it. Browse: show what is saved, write nothing
+                if (canEdit() && (!pbCreditPayment.get() || ldDue == null
+                        || (ldTrans != null && ldDue.isBefore(ldTrans)))) {
+                    ldDue = ldTrans;
+                    writeDueDate(ldDue);
+                }
+                setDate(dpPaymentDueDate, ldDue);
             } catch (Exception ex) {
                 Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
             }
-            setDate(dpPaymentDueDate, pbCreditPayment.get() ? ldDue : null);
 //            tfSalesman.setText(textOf(() -> loMas.Salesman().getSalesmanName()));   // ASSUMED lookup
             // ASSUMED lookup
             tfPaymentDrNo.setText(tfReceipt.getText());   // DR No is a read-only mirror of the header
@@ -2477,6 +2576,35 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         double lnAdvances = dbl(() -> loMas.getAdvances());
         double lnCwt = dbl(() -> loMas.getCWTAmount());
         double lnPaid = dbl(() -> loMas.getValue("nAmtPaidx"));   // raw column: MCSales never sets it (stays 0)
+
+        // Browse (READY) fallback: the master's amount due is 0 (computeTransaction does not fill it outside edit mode),
+        // so build every figure from the loaded units
+        boolean lbHasUnits = false;
+        for (Model_Sales_Detail d : unit_data) {
+            if (!isBlankUnit(d)) {
+                lbHasUnits = true;
+                break;
+            }
+        }
+        if (!canEdit() && lnDue == 0 && lbHasUnits) {
+            lnTotal = 0;
+            lnDisc = 0;
+            lnAddDisc = 0;
+            lnFreight = 0;
+            for (final Model_Sales_Detail d : unit_data) {
+                if (isBlankUnit(d)) {
+                    continue;
+                }
+                double lnGross = dbl(() -> d.getUnitPrice()) * dbl(() -> d.getQuantity());
+                lnTotal += lnGross;
+                lnDisc += lnGross * dbl(() -> d.getDiscount()) / 100.0;
+                lnAddDisc += dbl(() -> d.getAddDiscount());
+                lnFreight += dbl(() -> d.getFreight());
+            }
+            lnDue = lnTotal - lnDisc - lnAddDisc + lnFreight
+                    + chargedTotal(false) + chargedTotal(true) - lnAdvances;
+        }
+
         double lnNet = lnDue + lnAdvances;
         double lnBalance = lnDue - lnCwt - lnPaid;
 
@@ -2870,6 +2998,42 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         btnAddClient1.disableProperty().bind(pbEditable.not());
         btnAddClient.setOnAction(e -> addClient(false));
         btnAddClient1.setOnAction(e -> addClient(true));
+        btnNonItemize.setOnAction(e -> showNonItemizeGiveaways());   // read-only list: works in every edit mode
+    }
+
+    /**
+     * Opens SalesTransactionNonItemize.fxml as a modal listing the non-itemized giveaways of the source quotation of
+     * this transaction. The list is loaded by MCSales.loadSalesQuotationNonItemizedList(); the modal only displays it.
+     */
+    private void showNonItemizeGiveaways() {
+        try {
+            String lsSourceNo = master().getSourceNo();
+            if (lsSourceNo == null || lsSourceNo.trim().isEmpty()) {
+                ShowMessageFX.Warning("This transaction has no source quotation.", "Warning", null);
+                return;
+            }
+            poJSON = oSalesController.MCSales().loadSalesQuotationNonItemizedList();
+            if ("error".equals(poJSON.get("result"))) {
+                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                return;
+            }
+
+            FXMLLoader loLoader = new FXMLLoader(getClass().getResource("/ph/com/guanzongroup/integsys/views/SalesTransactionNonItemize.fxml"));
+            Parent loRoot = loLoader.load();
+            SalesTransactionNonItemizeController loController = loLoader.getController();
+            loController.setCustomerName(tfClientName.getText());
+            loController.setMCSales(oSalesController.MCSales());
+
+            Stage loStage = new Stage();
+            loStage.initModality(Modality.APPLICATION_MODAL);
+            loStage.initOwner(btnNonItemize.getScene().getWindow());
+            loStage.setTitle("Non-Itemize Giveaways");
+            loStage.setScene(new Scene(loRoot));
+            loStage.showAndWait();
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
     }
 
     private void addClient(boolean fbCoClient) {
@@ -2953,7 +3117,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
         tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
-        tfSourceDesc.setText(oSalesController.MCSales().getMaster().getSourceCode());
+        tfSourceDesc.setText(oSalesController.MCSales().getMaster().TransactionSource().getSourceName());
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
         tfSalesman.setText(oSalesController.MCSales().getMaster().SalesmanClient().getCompanyName());
 //        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());

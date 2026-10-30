@@ -987,7 +987,7 @@
                                                                                                    <children>
                                                                                                       <AnchorPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                                                                          <children>
-                                                                                                            <TableView fx:id="tblRegAndIsur" maxHeight="1.7976931348623157E308" prefHeight="280.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
+                                                                                                            <TableView fx:id="tblRegAndIsur" maxHeight="1.7976931348623157E308" prefHeight="280.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                                                                <columns>
                                                                                                                   <TableColumn fx:id="tblRowRegAndInsurNo" editable="false" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" sortable="false" text="No." />
                                                                                                                   <TableColumn fx:id="tblRowRegAndInsurEngine" editable="false" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" style="-fx-alignment: CENTER-RIGHT;" text="Enigne No" />
@@ -1142,6 +1142,18 @@
                                                                                                                         </AnchorPane>
                                                                                                                     </children>
                                                                                                                 </AnchorPane>
+                                                                                    <AnchorPane>
+                                                                                       <children>
+                                                                                          <Button fx:id="btnNonItemize" graphicTextGap="3.0" maxHeight="70.0" mnemonicParsing="false" prefHeight="50.0" text="Other Giveaways" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                                                             <graphic>
+                                                                                                <FontAwesomeIconView glyphName="GIFT" size="20" styleClass="FontIcon" />
+                                                                                             </graphic>
+                                                                                             <font>
+                                                                                                <Font size="11.0" />
+                                                                                             </font>
+                                                                                          </Button>
+                                                                                       </children>
+                                                                                    </AnchorPane>
                                                                                                             </children>
                                                                                                         </VBox>
                                                                                                     </children>
@@ -1498,11 +1510,11 @@
                                                                                         </GridPane>
                                                                                     </children>
                                                                                 </AnchorPane>
-                                                                                <AnchorPane prefWidth="945.0" style="-fx-border-color: FF8201;">
+                                                                                <AnchorPane prefWidth="910.0" style="-fx-border-color: FF8201;">
                                                                                     <children>
                                                                                         <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                             <children>
-                                                                                                <AnchorPane prefWidth="890.0">
+                                                                                                <AnchorPane prefWidth="920.0">
                                                                                                     <children>
                                                                                                         <StackPane fx:id="stackPane" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                                                             <children>
