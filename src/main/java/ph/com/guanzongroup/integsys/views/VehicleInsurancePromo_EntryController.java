@@ -778,6 +778,8 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         JFXUtil.setColumnCenter(tblNo);
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnRight(tblSRP, tbl1stYear, tbl2ndYear, tbl3rdYear, tbl4thYear, tbl5thYear);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
+        tblViewDetail.setItems(details_data);
     }
     
     public void clearTextFields() {
