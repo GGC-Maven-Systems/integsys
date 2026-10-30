@@ -42,8 +42,11 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
@@ -79,7 +82,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
     private FilteredList<ModelVehicleInsurance_Detail> filteredDataDetail;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     JFXUtil.ReloadableTableTask loadTableDetail;
-    
+
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
     @FXML
@@ -195,7 +198,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        
+
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnCancel":
@@ -251,7 +254,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         break;
                     case "btnBrowse":
                         poController.Master().setRecordStatus("01234");
-                        poJSON = poController.SearchTransaction("",false);
+                        poJSON = poController.SearchTransaction("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             tfValidityID.requestFocus();
@@ -432,7 +435,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                     case "tf5thYear":
                         String lsVariantId = poController.Detail(pnDetail).getVariantId();
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.setAmount(lsVariantId,lnYear,Double.parseDouble(lsValue)); //Need to identify kung anong row siya mag sset
+                        poJSON = poController.setAmount(lsVariantId, lnYear, Double.parseDouble(lsValue)); //Need to identify kung anong row siya mag sset
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -448,7 +451,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                     loadTableDetail.reload();
                 });
             });
-    
+
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -507,16 +510,16 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             tfDescription.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().Model().Brand().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().Model().getDescription(),
                     poController.Detail(pnDetail).ModelVariant().getDescription(),
-//                    poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
+                    //                    poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
                     poController.Detail(pnDetail).ModelVariant().Color().getDescription()));
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).ModelVariant().getSellingPrice(), false));
             String lsVariantId = poController.Detail(pnDetail).getVariantId();
-            tf1stYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId , 1), false));
-            tf2ndYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId , 2), false));
-            tf3rdYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId , 3), false));
-            tf4thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId , 4), false));
-            tf5thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId , 5), false));
-            
+            tf1stYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 1), false));
+            tf2ndYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 2), false));
+            tf3rdYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false));
+            tf4thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false));
+            tf5thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false));
+
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
@@ -617,42 +620,42 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         });
     }
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
-            @Override
-            protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
-                int newIndex = 0;
-                switch (currentTableID) {
-                    case "tblViewDetail":
-                        newIndex = !isMovedDown ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09())
-                                : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(currentTable)).getIndex09());
-                        if (!details_data.isEmpty()) {
-                            pnDetail = newIndex;
-                            loadRecordDetail();
-                        }
-                        break;
-                }
+        @Override
+        protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
+            int newIndex = 0;
+            switch (currentTableID) {
+                case "tblViewDetail":
+                    newIndex = !isMovedDown ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex12())
+                            : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(currentTable)).getIndex12());
+                    if (!details_data.isEmpty()) {
+                        pnDetail = newIndex;
+                        loadRecordDetail();
+                    }
+                    break;
             }
-        };
-    
+        }
+    };
+
     public void moveNext(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apDetail.requestFocus();
-            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
-                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
-        }
-        loadRecordDetail();
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
-        }
-        String lsVariantId = poController.Detail(pnDetail).getVariantId();
-        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.getAmount(lsVariantId, 1), tf1stYear},}, tf1stYear); // default
+//        if (continueNext) {
+//            apDetail.requestFocus();
+//            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex12())
+//                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex12());
+//        }
+//        loadRecordDetail();
+//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+//            return;
+//        }
+//        String lsVariantId = poController.Detail(pnDetail).getVariantId();
+//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+//            {poController.getAmount(lsVariantId, 1), tf1stYear},}, tf1stYear); // default
     }
 
     public void initTextFields() {
         JFXUtil.setFocusListener(txtDetail_Focus, apDetail);
         JFXUtil.setFocusListener(txtMaster_Focus, tfValidityPeriod);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail);
-        JFXUtil.setCommaFormatter(tfSRP, tf1stYear, tf2ndYear, tf3rdYear,tf4thYear,tf5thYear);
+        JFXUtil.setCommaFormatter(tfSRP, tf1stYear, tf2ndYear, tf3rdYear, tf4thYear, tf5thYear);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
     }
 
@@ -669,18 +672,25 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                     Platform.runLater(() -> {
                         int lnCtr;
                         try {
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                poController.populateVehicleList();
-                            }
+//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+//                                poController.populateVehicleList();
+//                            }
                             JFXUtil.disableAllHighlightByColor(tblViewDetail, "#FAA0A0", highlightedRowsMain);
                             details_data.clear();
+                            Set<String> loSeenVariantIds = new HashSet<>();
+                            int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
                                     continue;
                                 }
                                 String lsVariantId = String.valueOf(poController.Detail(lnCtr).getVariantId());
+                                if (!loSeenVariantIds.add(lsVariantId)) {
+                                    continue;
+                                }
+                                lnCount += 1;
+                                System.out.println(String.valueOf(lnCtr));
                                 details_data.add(
-                                        new ModelVehicleInsurance_Detail(String.valueOf(lnCtr + 1),
+                                        new ModelVehicleInsurance_Detail(String.valueOf(lnCount),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().getDescription()),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().getDescription()),
@@ -691,17 +701,17 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false)),
-                                                String.valueOf(lnCtr), //fixed column (this is not visible)
-                                                "",//starts ammortization column dynamic
+                                                String.valueOf(lnCtr), 
+                                                poController.Detail(lnCtr).getVariantId(),
                                                 "",
                                                 ""
                                         ));
-                                    //store agein as a prepared and then will dynamically added in details_data
-                                    if (!poController.Detail(lnCtr).getRecordStatus()) {
-                                        JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
-                                    }
+
+                                if (!poController.Detail(lnCtr).getRecordStatus()) {
+                                    JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+                                }
                             }
-                            
+                            int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 12);
                             if (pnDetail < 0 || pnDetail
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -713,56 +723,44 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewDetail.getSelectionModel().select(pnDetail);
-                                tblViewDetail.getFocusModel().focus(pnDetail);
+                                tblViewDetail.getSelectionModel().select(lnTempRow);
+                                tblViewDetail.getFocusModel().focus(lnTempRow);
                                 loadRecordDetail();
                             }
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
+//                        catch (CloneNotSupportedException ex) {
+//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+//                        }
                     });
                 }
         );
-
     }
 
-    public static <T> TreeItem<T> getDetailRowFilter(TreeItem<T> root, int lnpn, int columnIndex) {
-        if (root == null) {
-            return null;
-        }
-
-        String getterName = String.format("getIndex%02d", columnIndex);
-
+    public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
         try {
-            for (TreeItem<T> child : root.getChildren()) {
-                T model = child.getValue();
+            String getterName = String.format("getIndex%02d", columnIndex);
 
-                if (model != null) {
-                    String value = (String) model.getClass()
-                            .getMethod(getterName)
-                            .invoke(model);
+            for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
+                Object item = dataList.get(lnCtr);
 
-                    if (String.valueOf(lnpn).equals(value)) {
-                        return child;
-                    }
-                }
+                String value = (String) item.getClass()
+                        .getMethod(getterName)
+                        .invoke(item);
 
-                // search the children of this node too
-                TreeItem<T> found = getDetailRowFilter(child, lnpn, columnIndex);
-                if (found != null) {
-                    return found;
+                if (String.valueOf(lnpn).equals(value)) {
+                    return lnCtr;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null; // not found
+        return -1; // not found
     }
 
     private void initDetailsGrid() {
@@ -770,9 +768,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblColor);
         JFXUtil.setColumnRight(tblSRP, tbl1stYear, tbl2ndYear, tbl3rdYear, tbl4thYear, tbl5thYear);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
-        tblViewDetail.setItems(details_data);
+        filteredDataDetail = new FilteredList<>(details_data, b -> true);
+
+        SortedList<ModelVehicleInsurance_Detail> sortedData = new SortedList<>(filteredDataDetail);
+        sortedData.comparatorProperty().bind(tblViewDetail.comparatorProperty());
+        tblViewDetail.setItems(sortedData);
     }
-    
+
     public void clearTextFields() {
         JFXUtil.clearTextFields(apMaster, apDetail);
     }
@@ -795,7 +797,8 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex12());
                         pnDetail = lnRow;
                         loadRecordDetail();
-                        moveNext(false, false);
+                        tf1stYear.requestFocus();
+//                        moveNext(false, false);
                     }
                 }
             }
@@ -813,7 +816,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid, btnApprove, btnPrint);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-        
+
         if (fnValue != EditMode.READY) {
             return;
         }
