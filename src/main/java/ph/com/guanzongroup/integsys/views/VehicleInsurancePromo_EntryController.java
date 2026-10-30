@@ -439,11 +439,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        if (pbEntered) {
-                            JFXUtil.runWithDelay(.6, () -> {
-                                moveNext(false, true);
-                                pbEntered = false;
-                            });
+                        if (lsID.equals("tf5thYear")) {
+                            if (pbEntered) {
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    moveNext(false, true);
+                                    pbEntered = false;
+                                });
+                            }
                         }
                         break;
                 }
@@ -688,7 +690,6 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                     continue;
                                 }
                                 lnCount += 1;
-                                System.out.println(String.valueOf(lnCtr));
                                 details_data.add(
                                         new ModelVehicleInsurance_Detail(String.valueOf(lnCount),
                                                 String.valueOf(poController.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
