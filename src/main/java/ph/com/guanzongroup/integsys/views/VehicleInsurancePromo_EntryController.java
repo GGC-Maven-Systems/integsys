@@ -637,18 +637,18 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
     };
 
     public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex12())
-//                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex12());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        String lsVariantId = poController.Detail(pnDetail).getVariantId();
-//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.getAmount(lsVariantId, 1), tf1stYear},}, tf1stYear); // default
+        if (continueNext) {
+            apDetail.requestFocus();
+            pnDetail = isUp ? Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex12())
+                    : Integer.parseInt(filteredDataDetail.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex12());
+        }
+        loadRecordDetail();
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
+        String lsVariantId = poController.Detail(pnDetail).getVariantId();
+        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+            {poController.getAmount(lsVariantId, 1), tf1stYear},}, tf1stYear); // default
     }
 
     public void initTextFields() {
@@ -701,7 +701,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 3), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 4), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getAmount(lsVariantId, 5), false)),
-                                                String.valueOf(lnCtr), 
+                                                String.valueOf(lnCtr),
                                                 poController.Detail(lnCtr).getVariantId(),
                                                 "",
                                                 ""
@@ -713,7 +713,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                             }
                             int lnTempRow = getDetailRowFilter(filteredDataDetail, pnDetail, 12);
                             if (pnDetail < 0 || pnDetail
-                                    >= details_data.size()) {
+                                    >= poController.getDetailCount()) {
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     tblViewDetail.getSelectionModel().select(0);
@@ -797,8 +797,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(filteredDataDetail.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex12());
                         pnDetail = lnRow;
                         loadRecordDetail();
-                        tf1stYear.requestFocus();
-//                        moveNext(false, false);
+                        moveNext(false, false);
                     }
                 }
             }
