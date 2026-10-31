@@ -356,8 +356,12 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "btnAddAttachment":
                         if (poController.getTransactionAttachmentCount() > 0) {
-                            ShowMessageFX.Warning(null, pxeModuleName, "Unable to upload more than one image!\nRemove existing image to replace.");
-                            return;
+                            for (int lnCtr = 0; lnCtr < poController.getTransactionAttachmentCount(); lnCtr++) {
+                                if (RecordStatus.ACTIVE.equals(poController.TransactionAttachmentList(lnCtr).getModel().getRecordStatus())) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, "Unable to upload more than one image!\nRemove existing image to replace.");
+                                    return;
+                                }
+                            }
                         }
                         fileChooser = new FileChooser();
                         fileChooser.setTitle("Choose Image");
