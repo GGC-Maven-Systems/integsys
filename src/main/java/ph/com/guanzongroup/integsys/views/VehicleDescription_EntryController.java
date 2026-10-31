@@ -201,6 +201,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 }
             });
             poController.setRecordStatus("01234");
+            initAttachmentPreviewPane();
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -433,6 +434,17 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 Logger.getLogger(VehicleDescription_EntryController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private void initAttachmentPreviewPane() {
+        imageviewerutil.initAttachmentPreviewPane(stackPane1, imageView);
+        stackPane1.heightProperty().addListener((observable, oldValue, newHeight) -> {
+            double computedHeight = newHeight.doubleValue();
+            imageviewerutil.ldstackPaneHeight = computedHeight;
+            loadTableAttachment.reload();
+            loadRecordAttachment(true);
+        });
+
     }
 
     public void initTabPane() {
