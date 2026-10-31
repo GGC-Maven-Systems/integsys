@@ -355,6 +355,10 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         openParameter(false, lsButton);
                         break;
                     case "btnAddAttachment":
+                        if (poController.getTransactionAttachmentCount() > 0) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Unable to upload more than one image!\nRemove existing image to replace.");
+                            return;
+                        }
                         fileChooser = new FileChooser();
                         fileChooser.setTitle("Choose Image");
                         fileChooser.getExtensionFilters().addAll(
@@ -781,6 +785,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             initButton(pnEditMode);
                             tfSearchVariant.setText(poController.getModel().getDescription());
                             loadRecordMaster();
+                            JFXUtil.clickTabByTitleText(tabPaneMain, "Description");
                             break;
                         //apMaster
                         case "tfBrand":
@@ -909,6 +914,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
         JFXUtil.setButtonsVisibility(false, btnActivate, btnDeactivate);
         JFXUtil.setDisabledExcept(!lbShow, apMaster, btnBrand, btnModel, btnColor);
         JFXUtil.setDisabled(!lbShow, tfBrand, tfModel, tfColor);
+        JFXUtil.setDisabled(!lbShow, btnAddAttachment, btnRemoveAttachment, apAttachments);
         if (fnValue != EditMode.READY) {
             return;
         }
