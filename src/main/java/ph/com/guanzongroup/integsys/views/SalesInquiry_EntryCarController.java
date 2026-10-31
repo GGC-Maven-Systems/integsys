@@ -138,7 +138,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
     @FXML
     private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
-    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
+    private ComboBox cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -556,7 +556,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
+//                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
                 } else {
@@ -567,7 +567,7 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                     cmbCategoryType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getCategoryType()));
                 }
             } else {
-                cmbPurchaseType.getSelectionModel().select(0);
+//                cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
                 cmbCategoryType.getSelectionModel().select(0);
             }
@@ -1524,31 +1524,31 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
                             }
                         }
                         break;
-                    case "cmbPurchaseType":
-                        if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 || poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0) {
-                            if (!poSalesInquiryController.SalesInquiry().Master().getPurchaseType().equals(String.valueOf(cmbPurchaseType.getSelectionModel().getSelectedIndex()))) {
-                                poJSON = poSalesInquiryController.SalesInquiry().checkPendingBankApplication();
-                                if ("error".equals((String) poJSON.get("result"))) {
-                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                    break;
-                                }
-
-                                if (ShowMessageFX.YesNo(null, pxeModuleName,
-                                        "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
-                                    poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
-                                    poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
-                                    poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
-                                    if ("error".equals((String) poJSON.get("result"))) {
-                                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                        break;
-                                    }
-                                    pbPurchaseTypeChanged = true;
-                                }
-                            }
-                        } else {
-                            poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
-                        }
-                        break;
+//                    case "cmbPurchaseType":
+//                        if (poSalesInquiryController.SalesInquiry().getSalesInquiryRequirementsCount() > 0 || poSalesInquiryController.SalesInquiry().getBankApplicationsCount() > 0) {
+//                            if (!poSalesInquiryController.SalesInquiry().Master().getPurchaseType().equals(String.valueOf(cmbPurchaseType.getSelectionModel().getSelectedIndex()))) {
+//                                poJSON = poSalesInquiryController.SalesInquiry().checkPendingBankApplication();
+//                                if ("error".equals((String) poJSON.get("result"))) {
+//                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                                    break;
+//                                }
+//
+//                                if (ShowMessageFX.YesNo(null, pxeModuleName,
+//                                        "Are you sure you want to change the Purchase Type?\nPlease note that this action will reset the Requirements & Bank Applications list.\n\nDo you wish to proceed?") == true) {
+//                                    poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
+//                                    poJSON = poSalesInquiryController.SalesInquiry().removeRequirements();
+//                                    poJSON = poSalesInquiryController.SalesInquiry().removeBankApplications();
+//                                    if ("error".equals((String) poJSON.get("result"))) {
+//                                        ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                                        break;
+//                                    }
+//                                    pbPurchaseTypeChanged = true;
+//                                }
+//                            }
+//                        } else {
+//                            poSalesInquiryController.SalesInquiry().Master().setPurchaseType(String.valueOf(selectedIndex));
+//                        }
+//                        break;
                     case "cmbCategoryType":
                         poSalesInquiryController.SalesInquiry().Master().setCategoryType(String.valueOf(selectedIndex));
                         break;
@@ -1591,10 +1591,12 @@ public class SalesInquiry_EntryCarController implements Initializable, ScreenInt
     };
 
     private void initComboBoxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), //new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
                 new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup), new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbClientType, //cmbPurchaseType, 
+                            cmbCategoryType, cmbCustomerGroup);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, //cmbPurchaseType, 
+                            cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
 
         cmbAttachmentType.setOnAction(event -> {
             if (attachment_data.size() > 0) {

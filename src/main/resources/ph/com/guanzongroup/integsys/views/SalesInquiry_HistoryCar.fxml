@@ -183,10 +183,6 @@
                                                                                   <Font name="System Bold" size="14.0" />
                                                                               </font>
                                                                           </Label>
-                                                                          <Label text="Purchase Type" GridPane.columnIndex="5" GridPane.rowIndex="4">
-                                                                                 <font>
-                                                                                    <Font size="12.0" />
-                                                                                 </font></Label>
                                                                           <Label text="Branch" GridPane.rowIndex="3">
                                                                                  <font>
                                                                                     <Font size="12.0" />
@@ -195,7 +191,7 @@
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font></Label>
-                                                      <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="7">
+                                                      <Label text="Target Date" GridPane.columnIndex="5" GridPane.rowIndex="5">
                                                                                  <font>
                                                                                     <Font size="12.0" />
                                                                                  </font></Label>
@@ -233,7 +229,7 @@
                                                                         <Font size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <Label layoutX="493.0" layoutY="110.0" text="Unit Type" GridPane.columnIndex="5" GridPane.rowIndex="5">
+                                                                  <Label layoutX="493.0" layoutY="110.0" text="Unit Type" GridPane.columnIndex="5" GridPane.rowIndex="4">
                                                                      <font>
                                                                         <Font size="12.0" />
                                                                      </font>
@@ -249,9 +245,8 @@
                                                                   <TextField fx:id="tfSalesPerson" layoutX="100.0" layoutY="135.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                                                   <TextField fx:id="tfReferralAgent" layoutX="100.0" layoutY="105.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
                                                                   <TextField fx:id="tfInquiryType" GridPane.columnIndex="7" GridPane.rowIndex="3" />
-                                                                  <ComboBox fx:id="cmbPurchaseType" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
-                                                                  <ComboBox fx:id="cmbCategoryType" layoutX="580.0" layoutY="105.0" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="5" />
-                                                                        <DatePicker fx:id="dpTargetDate" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
+                                                                  <ComboBox fx:id="cmbCategoryType" layoutX="580.0" layoutY="105.0" prefWidth="150.0" GridPane.columnIndex="7" GridPane.rowIndex="4" />
+                                                                        <DatePicker fx:id="dpTargetDate" maxWidth="139.0" GridPane.columnIndex="7" GridPane.rowIndex="5" />
                                                                   <ComboBox fx:id="cmbClientType" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                                                                   <TextField fx:id="tfClient" layoutX="85.0" layoutY="78.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="8" />
                                                                   <TextField fx:id="tfAddress" disable="true" editable="false" layoutX="85.0" layoutY="203.0" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="9" />

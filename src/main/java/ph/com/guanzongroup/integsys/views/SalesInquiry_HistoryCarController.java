@@ -125,7 +125,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
     @FXML
     private DatePicker dpTransactionDate, dpTargetDate, dpReceivedDate;
     @FXML
-    private ComboBox cmbPurchaseType, cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
+    private ComboBox cmbCategoryType, cmbClientType, cmbCustomerGroup, cmbAttachmentType;
     @FXML
     private TextArea taRemarks;
     @FXML
@@ -355,7 +355,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
             taRemarks.setText(poSalesInquiryController.SalesInquiry().Master().getRemarks());
 
             if (pnEditMode != EditMode.UNKNOWN) {
-                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
+//                cmbPurchaseType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getPurchaseType()));
                 if (poSalesInquiryController.SalesInquiry().Master().getClientId() != null && !"".equals(poSalesInquiryController.SalesInquiry().Master().getClientId())) {
                     cmbClientType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().Client().getClientType()));
                 } else {
@@ -365,7 +365,7 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
                     cmbCategoryType.getSelectionModel().select(Integer.parseInt(poSalesInquiryController.SalesInquiry().Master().getCategoryType()));
                 }
             } else {
-                cmbPurchaseType.getSelectionModel().select(0);
+//                cmbPurchaseType.getSelectionModel().select(0);
                 cmbClientType.getSelectionModel().select(0);
                 cmbCategoryType.getSelectionModel().select(0);
             }
@@ -862,9 +862,10 @@ public class SalesInquiry_HistoryCarController implements Initializable, ScreenI
     }
 
     private void initComboBoxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(ClientType, cmbClientType), //new JFXUtil.Pairs<>(PurchaseType, cmbPurchaseType),
                 new JFXUtil.Pairs<>(CategoryType, cmbCategoryType), new JFXUtil.Pairs<>(CustomerGroup, cmbCustomerGroup), new JFXUtil.Pairs<>(documentType, cmbAttachmentType));
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, cmbPurchaseType, cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbClientType, //cmbPurchaseType, 
+                cmbCategoryType, cmbCustomerGroup, cmbAttachmentType);
     }
 
     public void initDatePickers() {
