@@ -11,6 +11,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -23,6 +25,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.GRiderCAS;
@@ -79,6 +84,7 @@ public class SalesTransactionsLandingController implements Initializable, Screen
 
     private final String pxeModuleName = SalesTransactionStatic.MODULE_NAME;
     private static final String ENTRY_FXML = "SalesTransactionMC.fxml";   // ASSUMED location (same package folder as this one)
+    private static final String PREVIEW_FXML = "SalesTransactionsMCPreview.fxml";   // ASSUMED: set to your preview FXML name
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
     private static final Integer[] PAGE_SIZES = {10, 25, 50, 100};
     private static final int DEFAULT_DAYS = 7;   // default date filter: today minus 7 days up to today
@@ -618,46 +624,111 @@ public class SalesTransactionsLandingController implements Initializable, Screen
     }
 
     /**
-     * Opens the entry screen (SalesTransactionMC.fxml / SalesTransactionsMCController) in place of this list.
+     * Opens another screen in place of this list.
      *
-     * "NEW" works as is: the entry controller fires its own New button when it initializes.
-     * "OPEN" / "UPDATE" / "NEWFROM" need the entry controller to take a transaction no. Add this to
-     * SalesTransactionsMCController and call it below (after loader.load()):
-     *
-     *     public void openFromList(String fsTransNo, boolean fbUpdate) { ... searchTransaction / openTransaction,
-     *                                                                        then UpdateTransaction() when fbUpdate,
-     *                                                                        then reloadRecord() and initButton(...) }
-     *
-     * Note initializeObject() always fires btnNew, so it must skip that when the screen is opened from the list.
+     * "NEW" opens the entry screen (SalesTransactionMC.fxml / SalesTransactionsMCController), which fires its own New.
+     * "OPEN" / "UPDATE" open the selected record in SalesTransactionsMCPreviewController as a modal (showPreview());
+     * UPDATE also puts it in edit mode. The preview's Close button closes the modal and the list reloads.
+     * "NEWFROM" is not implemented yet.
      */
     private void openEntryScreen(String fsMode, TransRow foRow) {
         if (!"NEW".equals(fsMode) && foRow == null) {
             ShowMessageFX.Warning("Please select a transaction first.", "Warning", null);
             return;
         }
-        if (!"NEW".equals(fsMode)) {
-            ShowMessageFX.Information("Opening " + foRow.transNo + " needs the entry screen to accept a transaction no."
-                    + " (see openEntryScreen() in this controller).", pxeModuleName, null);
+        if ("NEWFROM".equals(fsMode)) {
+            ShowMessageFX.Information("Create From is under development.", pxeModuleName, null);
             return;
         }
         try {
-            FXMLLoader loLoader = new FXMLLoader(getClass().getResource(ENTRY_FXML));
-            SalesTransactionsMCController loEntry = new SalesTransactionsMCController();
-            loEntry.setGRider(oApp);
-            loEntry.setIndustryID(psIndustryId);
-            loEntry.setCompanyID(psCompanyId);
-            loEntry.setCategoryID(psCategoryId);
-            loLoader.setController(loEntry);
-            AnchorPane loRoot = loLoader.load();
-            AnchorPane.setTopAnchor(loRoot, 0.0);
-            AnchorPane.setBottomAnchor(loRoot, 0.0);
-            AnchorPane.setLeftAnchor(loRoot, 0.0);
-            AnchorPane.setRightAnchor(loRoot, 0.0);
-            ChildAnchorPane.getChildren().setAll(loRoot);
+            if ("NEW".equals(fsMode)) {
+                FXMLLoader loLoader = new FXMLLoader(getClass().getResource(ENTRY_FXML));
+                SalesTransactionsMCController loEntry = new SalesTransactionsMCController();
+                loEntry.setGRider(oApp);
+                loEntry.setIndustryID(psIndustryId);
+                loEntry.setCompanyID(psCompanyId);
+                loEntry.setCategoryID(psCategoryId);
+                loLoader.setController(loEntry);
+                showInPlace((AnchorPane) loLoader.load());
+                return;
+            }
+
+            showPreview(foRow.transNo, "UPDATE".equals(fsMode));
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsLandingController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
+    }
+
+    /**
+     * Opens SalesTransactionsMCPreviewController as a modal over this list and loads the selected transaction into it.
+     * The preview's Close button closes the modal; the list is reloaded afterwards, so a Confirm / Void / Update done in
+     * the preview shows up here.
+     */
+    private void showPreview(String fsTransNo, boolean fbUpdate) throws Exception {
+        FXMLLoader loLoader = new FXMLLoader(getClass().getResource(PREVIEW_FXML));
+        SalesTransactionsMCPreviewController loPreview = new SalesTransactionsMCPreviewController();
+        loPreview.setGRider(oApp);
+        loPreview.setIndustryID(psIndustryId);
+        loPreview.setCompanyID(psCompanyId);
+        loPreview.setCategoryID(psCategoryId);
+        loLoader.setController(loPreview);
+        Parent loRoot = loLoader.load();
+
+        Stage loStage = new Stage();
+        loStage.setTitle("Motorcycle Sales");
+        loStage.initStyle(StageStyle.UNDECORATED);
+        loStage.initModality(Modality.APPLICATION_MODAL);
+        loStage.initOwner(btnOpen.getScene().getWindow());
+        loPreview.setOnClose(loStage::close);   // the preview's Close button closes this modal
+
+        // load the record BEFORE showing: nothing is shown when it cannot be opened
+        if (!loPreview.openFromList(fsTransNo, fbUpdate)) {
+            return;
+        }
+
+        // 1. MAKE THE MAIN ANCHOR MOVABLE
+        final double[] xOffset = new double[1];
+        final double[] yOffset = new double[1];
+
+        loRoot.setOnMousePressed(event -> {
+            xOffset[0] = event.getSceneX();
+            yOffset[0] = event.getSceneY();
+        });
+
+        loRoot.setOnMouseDragged(event -> {
+            loStage.setX(event.getScreenX() - xOffset[0]);
+            loStage.setY(event.getScreenY() - yOffset[0]);
+        });
+
+        // 2. APPLY SHADOW TO THE MAIN ANCHOR
+        javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
+        shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0)); // 40% Opacity black shadow
+        shadow.setRadius(15.0);
+        shadow.setOffsetX(0.0);
+        shadow.setOffsetY(5.0);
+        loRoot.setEffect(shadow);
+
+        // 3. BOUNDARY FIX FOR UNDECORATED SHADOWS
+        // To prevent the shadow from being clipped by the window edges,
+        // the scene is made transparent.
+        Scene scene = new Scene(loRoot);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+
+        loStage.setScene(scene);
+        loStage.setResizable(false);
+        loStage.showAndWait();
+
+        loadTransactions();   // the preview may have changed the record
+    }
+
+    /** Puts a loaded root in place of whatever is in ChildAnchorPane, stretched to the edges. */
+    private void showInPlace(AnchorPane foRoot) {
+        AnchorPane.setTopAnchor(foRoot, 0.0);
+        AnchorPane.setBottomAnchor(foRoot, 0.0);
+        AnchorPane.setLeftAnchor(foRoot, 0.0);
+        AnchorPane.setRightAnchor(foRoot, 0.0);
+        ChildAnchorPane.getChildren().setAll(foRoot);
     }
 
     // =========================================================================

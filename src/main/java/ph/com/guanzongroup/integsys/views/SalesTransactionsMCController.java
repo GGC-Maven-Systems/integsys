@@ -29,6 +29,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
@@ -470,7 +471,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      * tfSummary* fields are display-only and intentionally NOT included.
      */
     private void initControlGroups() {
-        poMasterFields = Arrays.asList(tfTransNo, tfSourceDesc, tfSourceNo, tfReceipt, taCustomerName);
+        // tfSalesman is in this group so it gets the F3 handler and is cleared with the rest of the header
+        poMasterFields = Arrays.asList(tfTransNo, tfSourceDesc, tfSourceNo, tfReceipt, taCustomerName, tfSalesman);
 
         poClientFields = Arrays.asList(
                 tfClientName, tfClientGender, tfClientCitizenship, tfClientBirthplace, tfClientOccupation,
@@ -637,11 +639,32 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             break;
                         case "tfPaymentTerm":
                             // MCSales has no term search: the master keeps a term CODE (setTermCode), typed in this field
-//                            poJSON = oSalesController.MCSales().search(lsValuse, false);
-//                            if ("error".equals(poJSON.get("result"))) {
-//                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-//                                return;
-//                            }
+                            poJSON = oSalesController.MCSales().SearchTerm(lsValuse, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            restoreTermText();    // shows the searched term's description
+                            applyTermDueDate();   // due date = transaction date + the term's days
+                            loadSummary();        // the summary shows the due date too
+                            break;
+                        case "tfSalesman":
+                            // with a source (quotation / reservation) the salesman comes from the source and is only displayed;
+                            // without a source the salesman is chosen here with F3
+                            if (!canEdit()) {
+                                break;
+                            }
+                            if (hasSource()) {
+                                ShowMessageFX.Warning("The salesman comes from the source transaction and cannot be changed.", "Warning", null);
+                                break;
+                            }
+                            poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                return;
+                            }
+                            LoadMaster();          // shows the searched salesman in tfSalesman
+                            loadPaymentRecord();   // the credit advisor follows the salesman
                             break;
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
@@ -710,6 +733,93 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
+    }
+
+    /**
+     * Re-reads the due date from the master into dpPaymentDueDate (without firing its change handler). Call it after
+     * anything that can change the due date on the master, such as the term search. Same rule as loadPaymentRecord():
+     * outside Credit the due date is the transaction date, and a due date before the transaction date is not kept.
+     */
+    private void refreshDueDate() {
+        try {
+            LocalDate ldTrans = toLocalDate(master().getTransactionDate());
+            LocalDate ldDue = toLocalDate(master().getDueDate());
+            if (canEdit() && (!pbCreditPayment.get() || ldDue == null
+                    || (ldTrans != null && ldDue.isBefore(ldTrans)))) {
+                ldDue = ldTrans;
+                writeDueDate(ldDue);
+            }
+            setDate(dpPaymentDueDate, ldDue);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+    /**
+     * Number of days of the term saved on the master, 0 when it cannot be read. The getter name on the term model was not
+     * provided, so the usual names are tried by reflection; when none gives a number, every getter of the term is
+     * printed as "[TERM] ..." lines so the real name can be put in TERM_DAYS_GETTERS.
+     */
+    private static final String[] TERM_DAYS_GETTERS = {"getTermValue", "getTermDays", "getDays", "getNoOfDays", "getNumberOfDays", "getDueDays", "getTerm"};
+
+    private int termDays() {
+        Object loTerm;
+        try {
+            loTerm = master().Term();
+        } catch (Exception ex) {
+            System.out.println("[TERM] master().Term() threw " + ex);
+            return 0;
+        }
+        if (loTerm == null) {
+            System.out.println("[TERM] master().Term() is null (term code = '" + textOf(() -> master().getTermCode()) + "')");
+            return 0;
+        }
+        for (String lsGetter : TERM_DAYS_GETTERS) {
+            try {
+                Object loVal = loTerm.getClass().getMethod(lsGetter).invoke(loTerm);
+                if (loVal instanceof Number) {
+                    return ((Number) loVal).intValue();
+                }
+                java.util.regex.Matcher loMatch = java.util.regex.Pattern.compile("\\d+").matcher(loVal == null ? "" : String.valueOf(loVal));
+                if (loMatch.find()) {
+                    return Integer.parseInt(loMatch.group());
+                }
+            } catch (Exception ex) {
+                // no such getter: try the next one
+            }
+        }
+        System.out.println("[TERM] no days getter found on " + loTerm.getClass().getName());
+        for (java.lang.reflect.Method loMethod : loTerm.getClass().getMethods()) {
+            if (loMethod.getName().startsWith("get") && loMethod.getParameterCount() == 0
+                    && loMethod.getDeclaringClass() != Object.class) {
+                try {
+                    System.out.println("[TERM]   " + loMethod.getName() + "() = " + loMethod.invoke(loTerm));
+                } catch (Exception ex) {
+                    System.out.println("[TERM]   " + loMethod.getName() + "() threw " + ex.getCause());
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * After a term search: due date = transaction date + the term's days, written to the master and shown in the picker.
+     * This ignores the Credit rule on purpose (the picker itself stays disabled outside Credit, but it must show the term's
+     * date). When the days cannot be read, falls back to refreshDueDate().
+     */
+    private void applyTermDueDate() {
+        try {
+            int lnDays = termDays();
+            LocalDate ldTrans = toLocalDate(master().getTransactionDate());
+            if (lnDays > 0 && ldTrans != null) {
+                LocalDate ldDue = ldTrans.plusDays(lnDays);
+                writeDueDate(ldDue);
+                setDate(dpPaymentDueDate, ldDue);
+                return;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+        refreshDueDate();
     }
 
     private void txtField_LostFocus(TextInputControl txtInput) {
@@ -812,21 +922,29 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     loadTableRegAndInsur();   // refresh the Amount / Year columns
                     break;
                 }
-                case "tfPaymentTerm": {
+                case "tfPaymentTerm":
+                    // The term is chosen ONLY with F3 (SearchTerm sets the term code on the master and the field shows its
+                    // DESCRIPTION), so typed text is never a code.
+                    //  - field emptied (blank / null): the term is cleared on the master, the previous value is NOT brought back
+                    //  - field has text: it was not searched, so the saved term's description is put back
                     if (!pbTermPayment.get()) {
                         break;   // the field is disabled unless the payment form is Term
                     }
-                    String lsTerm = lsValue.trim();
-                    if (lsTerm.equals(textOf(() -> master().getTermCode()))) {   // ASSUMED getter
-                        break;   // unchanged
-                    }
-                    poJSON = master().setTermCode(lsTerm);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        return;
+                    if (lsValue == null || lsValue.trim().isEmpty()) {
+                        if (!textOf(() -> master().getTermCode()).trim().isEmpty()) {
+                            poJSON = master().setTermCode("");   // same "no term" value cmb_Changed() uses
+                            if ("error".equals(poJSON.get("result"))) {
+                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                                restoreTermText();   // the clear was refused: show what the master still holds
+                                return;
+                            }
+                        }
+                        tfPaymentTerm.clear();
+                        refreshDueDate();
+                    } else {
+                        restoreTermText();
                     }
                     break;
-                }
                 case "tfPromoDisc":
                 case "tfPromoAddDisc":
                 case "tfFreight": {
@@ -1063,7 +1181,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CANCEL, pxeModuleName, null)) {
                         ClearAll();                                       // clears the fields and the observable lists
                         oSalesController.MCSales().initTransaction();
-                        pnEditMode = EditMode.UNKNOWN;   // ASSUMED: resets the model's detail / giveaway lists
+                        pnEditMode = EditMode.UNKNOWN;
+                        lblStatus.setText("UNKNOWN");// ASSUMED: resets the model's detail / giveaway lists
                     }
                     break;
                 case "btnClose":
@@ -2512,7 +2631,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             double lnBase = cwtBase();
             selectIndex(cmbPaymentCWT, cwtIndexFor(lnCwtAmt <= 0 || lnBase <= 0 ? 0.0 : lnCwtAmt / lnBase * 100.0));
 
-            tfPaymentTerm.setText(pbTermPayment.get() ? textOf(() -> loMas.getTermCode()) : "");   // ASSUMED getter
+            tfPaymentTerm.setText(pbTermPayment.get() ? termText() : "");   // the field shows the term DESCRIPTION, like after F3
 
             try {
                 LocalDate ldTrans = toLocalDate(loMas.getTransactionDate());
@@ -2656,9 +2775,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             cmbPaymentForm.requestFocus();
             return "Please select a payment form.";
         }
-        if (pbTermPayment.get() && tfPaymentTerm.getText().trim().isEmpty()) {
+        // the term is valid only when it was searched (F3): the master must hold a term code, not just typed text
+        if (pbTermPayment.get() && textOf(() -> master().getTermCode()).trim().isEmpty()) {
             tfPaymentTerm.requestFocus();
-            return "Please enter the term code.";
+            return "Please search and select a term (press F3 on the Term field).";
         }
         if (pbCreditPayment.get() && dpPaymentDueDate.getValue() == null) {
             dpPaymentDueDate.requestFocus();
@@ -3031,10 +3151,40 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             loController.setMCSales(oSalesController.MCSales());
 
             Stage loStage = new Stage();
+            loStage.setTitle("Non-Itemize Giveaways");
+            loStage.initStyle(StageStyle.UNDECORATED);
             loStage.initModality(Modality.APPLICATION_MODAL);
             loStage.initOwner(btnNonItemize.getScene().getWindow());
-            loStage.setTitle("Non-Itemize Giveaways");
-            loStage.setScene(new Scene(loRoot));
+            // 1. MAKE THE MAIN ANCHOR MOVABLE
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+
+            loRoot.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+
+            loRoot.setOnMouseDragged(event -> {
+                loStage.setX(event.getScreenX() - xOffset[0]);
+                loStage.setY(event.getScreenY() - yOffset[0]);
+            });
+
+            // 2. APPLY SHADOW TO THE MAIN ANCHOR
+            javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
+            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0)); // 40% Opacity black shadow
+            shadow.setRadius(15.0);
+            shadow.setOffsetX(0.0);
+            shadow.setOffsetY(5.0);
+            loRoot.setEffect(shadow);
+
+            // 3. BOUNDARY FIX FOR UNDECORATED SHADOWS
+            // To prevent the shadow from being clipped by the window edges,
+            // the scene is made transparent.
+            Scene scene = new Scene(loRoot);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+
+            loStage.setScene(scene);
+            loStage.setResizable(false);
             loStage.showAndWait();
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
@@ -3125,10 +3275,70 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
         tfSourceDesc.setText(oSalesController.MCSales().getMaster().TransactionSource().getSourceName());
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
-        tfSalesman.setText(oSalesController.MCSales().getMaster().SalesmanClient().getCompanyName());
+        // Salesman: filled from the master (the source's salesman when there is a source). Only searchable (F3) while editing
+        // AND when there is no source; otherwise the field is display-only.
+        tfSalesman.setText(salesmanName());
+        tfSalesman.setEditable(canEdit() && !hasSource());
+        // hint only while the salesman can actually be searched: editing AND the source is empty / null
+        tfSalesman.setPromptText(canEdit() && !hasSource() ? "PRESS F3: Search" : "");
 //        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
         // the customer line is built by showCustomerName() at the end of LoadClientInfo(): the client fields are
         // still empty here, because LoadMaster() runs before LoadClientInfo()
+    }
+
+    /**
+     * Salesman name from the master. Unlike textOf(), a failure is LOGGED (not hidden), and when the name comes back
+     * blank the master's salesman-related getters are printed as "[SALESMAN] ..." lines so the real getter / column can be found.
+     */
+    private String salesmanName() {
+        String lsName = "";
+        try {
+            Object loName = master().SalesmanClient().getCompanyName();
+            lsName = loName == null ? "" : String.valueOf(loName).trim();
+        } catch (Exception ex) {
+            System.out.println("[SALESMAN] SalesmanClient().getCompanyName() threw " + ex);
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+        }
+        if (lsName.isEmpty()) {
+            System.out.println("[SALESMAN] name is blank, source = '" + textOf(() -> master().getSourceNo()) + "'");
+            for (java.lang.reflect.Method loMethod : master().getClass().getMethods()) {
+                String lsMethod = loMethod.getName().toLowerCase();
+                if (loMethod.getParameterCount() == 0 && loMethod.getDeclaringClass() != Object.class
+                        && (lsMethod.contains("sales") || lsMethod.contains("agent") || lsMethod.contains("advis"))) {
+                    try {
+                        System.out.println("[SALESMAN]   " + loMethod.getName() + "() = " + loMethod.invoke(master()));
+                    } catch (Exception ex) {
+                        System.out.println("[SALESMAN]   " + loMethod.getName() + "() threw " + ex.getCause());
+                    }
+                }
+            }
+        }
+        return lsName;
+    }
+
+    /** Description of the term saved on the master ("" when none / not readable). */
+    private String termText() {
+        return textOf(() -> master().Term().getDescription()).trim();
+    }
+
+    /** Puts the saved term back into tfPaymentTerm (only when it differs, and without firing change handlers). */
+    private void restoreTermText() {
+        String lsText = pbTermPayment.get() ? termText() : "";
+        if (lsText.equals(tfPaymentTerm.getText() == null ? "" : tfPaymentTerm.getText())) {
+            return;
+        }
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            tfPaymentTerm.setText(lsText);
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /** true when the transaction has a source (quotation / reservation); null or blank source = no source. */
+    private boolean hasSource() {
+        return !textOf(() -> master().getSourceNo()).trim().isEmpty();
     }
 
     /** Header line "name | contact | address". Call it AFTER the client fields are filled. */

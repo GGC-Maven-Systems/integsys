@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
@@ -19,9 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import java.net.URL?>
-
-<AnchorPane style="-fx-border-color: black;" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ph.com.guanzongroup.integsys.views.SalesQoutationFollowUpController">
+<AnchorPane style="-fx-border-color: black;" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ph.com.guanzongroup.integsys.views.SalesTransactionNonItemizeController">
    <children>
       <StackPane layoutX="109.0" layoutY="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -99,11 +98,11 @@
                                           <GridPane layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="5.0">
                                             <columnConstraints>
                                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="80.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="80.0" />
                                                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="80.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="80.0" />
                                             </columnConstraints>
                                             <rowConstraints>
                                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -141,9 +140,8 @@
                                           <TableView fx:id="tblFollowUp" prefHeight="300.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="30.0">
                                             <columns>
                                               <TableColumn fx:id="tblRowFUNo" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="35.0" text="No" />
-                                              <TableColumn fx:id="tblRowFUDate" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="380.0" text="Description" />
-                                                <TableColumn fx:id="tblRowFUNextDate" maxWidth="1.7976931348623157E308" minWidth="-1.0" text="Qty" />
-                                                <TableColumn fx:id="tblRowFUType" maxWidth="1.7976931348623157E308" minWidth="-1.0" text="Status" />
+                                              <TableColumn fx:id="tblRowDesc" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="480.0" text="Description" />
+                                                <TableColumn fx:id="tblRowQty" maxWidth="1.7976931348623157E308" minWidth="-1.0" text="Qty" />
                                             </columns>
                                           </TableView>
                                           <AnchorPane prefHeight="25.0" style="-fx-background-color: A0A0A0;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

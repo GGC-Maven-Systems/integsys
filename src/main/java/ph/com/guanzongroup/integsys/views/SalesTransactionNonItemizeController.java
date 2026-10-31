@@ -34,23 +34,33 @@ import java.util.logging.Logger;
  * Controller for SalesTransactionNonItemize.fxml: a read-only modal that lists the NON-ITEMIZED giveaways of the source
  * quotation of the Motorcycle Sales transaction that is open in SalesTransactionsMCController.
  *
+ * The @FXML fields below match the fx:ids of the FXML exactly:
+ *   header : tfTransactionNo, dpInquiryDate, tfCustomerName
+ *   table  : tblFollowUp with the columns tblRowFUNo (No), tblRowDesc (Description), tblRowQty (Qty)
+ *   buttons: hbButtons, btnClose, btnCLoseModal
+ *
  * Usage (see SalesTransactionsMCController.showNonItemizeGiveaways()):
- *   controller.setMCSales(oSalesController.MCSales());   // BEFORE the stage is shown
- *   controller.setCustomerName(...);                      // optional header values
+ *   controller.setCustomerName(...);
+ *   controller.setMCSales(oSalesController.MCSales());   // fills the form, BEFORE the stage is shown
  *   stage.showAndWait();
  *
- * ASSUMED (the Model_Sales_Quotation_Version_Giveaways class was not provided): the three columns below are read through
- * the raw getValue() of the model. If your table names them differently, change the three COL_* constants (one place).
+ * ASSUMED (the Model_Sales_Quotation_Version_Giveaways class was not provided): the two columns below are read through
+ * the raw getValue() of the model. If your table names them differently, change the two COL_* constants (one place).
  */
 public class SalesTransactionNonItemizeController implements Initializable {
 
     private static final String MODULE_NAME = SalesTransactionStatic.MODULE_NAME;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
 
-    /** ASSUMED raw column names of Sales_Quotation_Version_Giveaways. */
-    private static final String COL_DESCRIPTION = "sDescript";
-    private static final String COL_QUANTITY = "nQuantity";
-    private static final String COL_STATUS = "cRecdStat";
+    /**
+     * The real getter / column names of Model_Sales_Quotation_Version_Giveaways were not provided, so each cell tries
+     * the typed getters first, then the raw columns, in this order. The first non-blank value wins.
+     * When the console prints "[NONITEMIZE] ..." lines, use them to keep only the real name in each array.
+     */
+    private static final String[] DESC_GETTERS = {"getDescription", "getGiveawayDescription", "getRemarks", "getNotes", "getName"};
+    private static final String[] DESC_COLUMNS = {"sDescript", "sGiveAway", "sGiveaway", "sRemarksx", "sNotesxxx", "sDescrip"};
+    private static final String[] QTY_GETTERS = {"getQuantity", "getQty", "getGiveawayQuantity"};
+    private static final String[] QTY_COLUMNS = {"nQuantity", "nQtyxxxxx", "nQty"};
 
     private MCSales poSales;
     private final ObservableList<Model_Sales_Quotation_Version_Giveaways> giveaway_data = FXCollections.observableArrayList();
@@ -62,10 +72,9 @@ public class SalesTransactionNonItemizeController implements Initializable {
 
     // ---- table ----
     @FXML private TableView<Model_Sales_Quotation_Version_Giveaways> tblFollowUp;
-    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowFUNo;
-    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowFUDate;       // Description
-    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowFUNextDate;   // Qty
-    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowFUType;       // Status
+    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowFUNo;   // No
+    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowDesc;   // Description
+    @FXML private TableColumn<Model_Sales_Quotation_Version_Giveaways, String> tblRowQty;    // Qty
 
     // ---- buttons ----
     @FXML private HBox hbButtons;
@@ -108,9 +117,19 @@ public class SalesTransactionNonItemizeController implements Initializable {
     private void initTable() {
         tblRowFUNo.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
                 String.valueOf(cd.getTableView().getItems().indexOf(cd.getValue()) + 1)));
-        tblRowFUDate.setCellValueFactory(cd -> raw(cd.getValue(), COL_DESCRIPTION, ""));
-        tblRowFUNextDate.setCellValueFactory(cd -> raw(cd.getValue(), COL_QUANTITY, "0"));
-        tblRowFUType.setCellValueFactory(cd -> raw(cd.getValue(), COL_STATUS, ""));
+        tblRowDesc.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                pick(cd.getValue(), DESC_GETTERS, DESC_COLUMNS, "")));
+        tblRowQty.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                pick(cd.getValue(), QTY_GETTERS, QTY_COLUMNS, "0")));
+        // The FXML gives every column maxWidth = Double.MAX_VALUE, and with the constrained policy that lets the first
+        // column take the whole table. Fix the No and Qty widths: Description gets all the remaining space.
+        tblRowFUNo.setMinWidth(45);
+        tblRowFUNo.setMaxWidth(45);
+        tblRowQty.setMinWidth(90);
+        tblRowQty.setMaxWidth(90);
+        tblRowFUNo.setResizable(false);
+        tblRowQty.setResizable(false);
+        tblRowDesc.setMaxWidth(Double.MAX_VALUE);
         tblFollowUp.setItems(giveaway_data);
         tblFollowUp.setPlaceholder(new Label("No non-itemized giveaways."));
         tblFollowUp.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -155,6 +174,8 @@ public class SalesTransactionNonItemizeController implements Initializable {
             if (laList != null) {
                 giveaway_data.setAll(laList);
             }
+            System.out.println("[NONITEMIZE] rows = " + giveaway_data.size());
+            dumpRow(giveaway_data.isEmpty() ? null : giveaway_data.get(0));
             tblFollowUp.refresh();
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionNonItemizeController.class.getName()).log(Level.SEVERE, null, ex);
@@ -165,14 +186,55 @@ public class SalesTransactionNonItemizeController implements Initializable {
     // =========================================================================
     // Helpers
     // =========================================================================
-    /** Raw model column as text; fsDefault when the column is missing / null / blank. */
-    private static ObservableValue<String> raw(Model_Sales_Quotation_Version_Giveaways fo, String fsColumn, String fsDefault) {
-        try {
-            Object loVal = fo == null ? null : fo.getValue(fsColumn);
-            String lsVal = loVal == null ? "" : String.valueOf(loVal).trim();
-            return new ReadOnlyStringWrapper(lsVal.isEmpty() ? fsDefault : lsVal);
-        } catch (Exception ex) {
-            return new ReadOnlyStringWrapper(fsDefault);
+    /**
+     * First non-blank value for a cell: the typed getters (by reflection, so a name that does not exist is simply
+     * skipped instead of breaking the build), then the raw columns. fsDefault when nothing has a value.
+     */
+    private static String pick(Model_Sales_Quotation_Version_Giveaways fo, String[] fasGetters, String[] fasColumns, String fsDefault) {
+        if (fo == null) {
+            return fsDefault;
+        }
+        for (String lsGetter : fasGetters) {
+            try {
+                Object loVal = fo.getClass().getMethod(lsGetter).invoke(fo);
+                String lsVal = loVal == null ? "" : String.valueOf(loVal).trim();
+                if (!lsVal.isEmpty()) {
+                    return lsVal;
+                }
+            } catch (Exception ex) {
+                // no such getter (or it threw): try the next one
+            }
+        }
+        for (String lsColumn : fasColumns) {
+            try {
+                Object loVal = fo.getValue(lsColumn);
+                String lsVal = loVal == null ? "" : String.valueOf(loVal).trim();
+                if (!lsVal.isEmpty()) {
+                    return lsVal;
+                }
+            } catch (Exception ex) {
+                // no such column: try the next one
+            }
+        }
+        return fsDefault;
+    }
+
+    /** Prints every public no-arg getter of the first row, so the real names show up in the console. */
+    private static void dumpRow(Model_Sales_Quotation_Version_Giveaways fo) {
+        if (fo == null) {
+            System.out.println("[NONITEMIZE] list is empty: nothing to dump");
+            return;
+        }
+        System.out.println("[NONITEMIZE] row class = " + fo.getClass().getName());
+        for (java.lang.reflect.Method loMethod : fo.getClass().getMethods()) {
+            if (loMethod.getName().startsWith("get") && loMethod.getParameterCount() == 0
+                    && loMethod.getDeclaringClass() != Object.class) {
+                try {
+                    System.out.println("[NONITEMIZE]   " + loMethod.getName() + "() = " + loMethod.invoke(fo));
+                } catch (Exception ex) {
+                    System.out.println("[NONITEMIZE]   " + loMethod.getName() + "() threw " + ex.getClass().getSimpleName());
+                }
+            }
         }
     }
 
