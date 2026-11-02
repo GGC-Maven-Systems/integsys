@@ -455,8 +455,9 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 if (!loSeenVariantIds.add(lsVariantId)) {
                                     continue;
                                 }
+                                lnCount += 1;
                                 details_datalockIn.add(
-                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
+                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCount),
                                                 String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
                                                 String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().Model().getDescription()),
                                                 String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().getDescription()),
