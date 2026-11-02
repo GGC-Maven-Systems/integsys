@@ -67,6 +67,8 @@ import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.input.KeyCode;
+import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
 
 /**
  * Controller for SalesTransactionMC.fxml (Motorcycle Sales form).
@@ -460,6 +462,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         initAttachmentTab();
         initOtherButtons();
         initSummary();
+        initHotKeys();
         pnEditMode = oSalesController.MCSales().getEditMode();
         initButton(pnEditMode);
         ClickButton();
@@ -3564,5 +3567,40 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     private void ClearPayment() {
         poPaymentFields.forEach(TextInputControl::clear);
+    }
+    
+    /**
+     * Form-wide hot keys. F5 = approval status (matrix recipients), view only.
+     */
+    private void initHotKeys() {
+        ChildAnchorPane.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F5) {
+                event.consume();
+                showMatrixRecipients();
+            }
+        });
+    }
+
+    /**
+     * Shows who the approval request of the loaded transaction was sent to and
+     * their status. Works in every edit mode.
+     */
+    private void showMatrixRecipients() {
+        try {
+            String lsTransNo = master().getTransactionNo();
+            if (lsTransNo == null || lsTransNo.isEmpty()) {
+                ShowMessageFX.Warning("No transaction is loaded.", "Approval Status", null);
+                return;
+            }
+            JSONObject loJSON = oSalesController.MCSales().getMatrixRecipients();
+            if ("error".equals((String) loJSON.get("result"))) {
+                ShowMessageFX.Warning((String) loJSON.get("message"), "Approval Status", null);
+                return;
+            }
+            MatrixRecipientDialog.show(ChildAnchorPane.getScene().getWindow(), "Approval Status", loJSON);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
     }
 }
