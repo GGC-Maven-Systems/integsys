@@ -78,7 +78,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
     private ObservableList<ModelVehicleAddOns_Detail> details_dataAddOns = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleFinancingPromo_Detail> details_datalockIn = FXCollections.observableArrayList();
     private FilteredList<ModelVehicleFinancingPromo_Detail> filteredDataDetail;
-    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     JFXUtil.ReloadableTableTask loadTableFinancing, loadTableAddOns, loadTableLockIn;
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
@@ -442,7 +441,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                         int lnCtr;
                         details_datalockIn.clear();
                         try {
-                            JFXUtil.disableAllHighlightByColor(tblViewLockIn, "#FAA0A0", highlightedRowsMain);
                             details_datalockIn.clear();
                             Set<String> loSeenVariantIds = new HashSet<>();
                             int lnCount = 0;
@@ -453,6 +451,9 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 }
                                 String lsVariantId = String.valueOf(poInsurance.Detail(lnCtr).getVariantId());
                                 if (!loSeenVariantIds.add(lsVariantId)) {
+                                    continue;
+                                }
+                                if (!poInsurance.Detail(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -473,9 +474,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                                 "",
                                                 ""
                                         ));
-                                if (!poInsurance.Detail(lnCtr).getRecordStatus()) {
-                                    JFXUtil.highlightByKey(tblViewLockIn, String.valueOf(lnCount), "#FAA0A0", highlightedRowsMain);
-                                }
+
                             }
                         } catch (SQLException | GuanzonException | CloneNotSupportedException | ScriptException | ExceptionInInitializerError ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
@@ -693,8 +692,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         JFXUtil.setColumnLeft(tblBrandLockIn, tblModelLockIn, tblVariantLockIn, tblColorLockIn, tblSRPLockIn);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewLockIn);
         tblViewLockIn.setItems(details_datalockIn);
-
-        JFXUtil.applyRowHighlighting(tblViewLockIn, item -> ((ModelVehicleFinancingPromo_Detail) item).getIndex01(), highlightedRowsMain);
     }
 
     public void initAddOnGrid() {
