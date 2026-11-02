@@ -35,6 +35,11 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
@@ -45,6 +50,7 @@ import javax.script.ScriptException;
 import org.json.simple.JSONArray;
 import ph.com.guanzongroup.cas.sales.VehicleAddOns;
 import ph.com.guanzongroup.cas.sales.VehicleFinancingPrice;
+import ph.com.guanzongroup.cas.sales.VehicleInsurance;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelVehicleAddOns_Detail;
 
@@ -59,6 +65,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
     private JSONObject poJSON;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     static VehicleFinancingPrice poFinancing;
+    static VehicleInsurance poInsurance;
     static VehicleAddOns poAddOns;
     public int pnEditMode;
 
@@ -69,32 +76,33 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
 
     private ObservableList<ModelVehicleFinancingPromo_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleAddOns_Detail> details_dataAddOns = FXCollections.observableArrayList();
+    private ObservableList<ModelVehicleFinancingPromo_Detail> details_datalockIn = FXCollections.observableArrayList();
     private FilteredList<ModelVehicleFinancingPromo_Detail> filteredDataDetail;
-
-    JFXUtil.ReloadableTableTask loadTableFinancing, loadTableAddOns;
+    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
+    JFXUtil.ReloadableTableTask loadTableFinancing, loadTableAddOns, loadTableLockIn;
     ObservableList<String> comboboxlist = FXCollections.observableArrayList();
     ArrayList<ArrayList<ArrayList<String>>> array = new ArrayList<ArrayList<ArrayList<String>>>();
     ArrayList<ArrayList<ArrayList<String>>> arrayAddOns = new ArrayList<ArrayList<ArrayList<String>>>();
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail, apDetail11;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apDetail11, apDetail112, apDetail1121;
     @FXML
-    private Label lblSource, lblStatus;
+    private Label lblSource;
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
     private Button btnPrint, btnClose;
     @FXML
-    private Tab tabFinancing;
+    private TabPane tabPaneMain;
+    @FXML
+    private Tab tabFinancing, tabLockIn, tabAddOns;
     @FXML
     private ComboBox cmbDPRate;
     @FXML
-    private TabPane tabPaneMain;
+    private TableView tblViewFinancing, tblViewLockIn, tblViewAddOns;
     @FXML
-    private TableView tblViewFinancing, tblViewAddOns;
-    @FXML
-    private TableColumn tblFinancingNo, tblFinancingBrand, tblFinancingModel, tblFinancingVariant, tblFinancingColor, tblFinancingSRP, tblFinancingDPRate, tblFinancingReservationAmount, tblMonthlyAmortization, tblsamp,
-                        tblAddOnsNo, tblAddOnsBrand, tblAddOnsModel, tblAddOnsVariant, tblAddOnsColor, tblAddOnsSRP;
+    private TableColumn tblFinancingNo, tblFinancingBrand, tblFinancingModel, tblFinancingVariant, tblFinancingColor, tblFinancingSRP, tblFinancingDPRate, tblFinancingReservationAmount, tblMonthlyAmortization, tblsamp, tblNoLockIn, tblBrandLockIn, tblModelLockIn, tblVariantLockIn, tblColorLockIn, tblSRPLockIn, tbl1stYear, tbl2ndYear, tbl3rdYear, tbl4thYear, tbl5thYear, tblAddOnsNo, tblAddOnsBrand, tblAddOnsModel, tblAddOnsVariant, tblAddOnsColor, tblAddOnsSRP;
+
     LocalDate ValidFrom;
 
     /**
@@ -104,22 +112,30 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
     public void initialize(URL url, ResourceBundle rb) {
         try {
             poJSON = new JSONObject();
-            
+
             poFinancing = new SalesControllers(oApp, null).VehicleFinancingPrice();
             poJSON = poFinancing.InitTransaction(); // Initialize transaction
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             }
-            
+
+            poInsurance = new SalesControllers(oApp, null).VehicleInsurance();
+            poJSON = poInsurance.InitTransaction(); // Initialize transaction
+            if (!"success".equals((String) poJSON.get("result"))) {
+                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+            }
+
             poAddOns = new SalesControllers(oApp, null).VehicleAddOns();
             poJSON = poAddOns.InitTransaction(); // Initialize transaction
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             }
-            
+
             initLoadTable();
             initTextFields();
             initDetailsGrid();
+            initLockInGrid();
+            initAddOnGrid();
             clearTextFields();
             initComboboxes();
             initTabPane();
@@ -134,7 +150,17 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                     } else {
                         loadTableFinancing.reload();
                     }
-                    
+
+                    poInsurance.setWithUI(true);
+                    poInsurance.Master().setCompanyId(psCompanyId);
+                    poInsurance.setCompanyId(psCompanyId);
+                    poJSON = poInsurance.LoadVehicleInsurance();
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    } else {
+                        loadTableLockIn.reload();
+                    }
+
                     poAddOns.setWithUI(true);
                     poAddOns.Master().setCompanyId(psCompanyId);
                     poAddOns.setCompanyId(psCompanyId);
@@ -145,13 +171,12 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                     } else {
                         loadTableAddOns.reload();
                     }
-                    
+
                     loadRecordSearch();
                 } catch (ExceptionInInitializerError | SQLException | GuanzonException | CloneNotSupportedException | ScriptException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
-                
             });
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -198,16 +223,16 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                         }
                         break;
                     case "btnPrint":
-                        switch(lnTab){
+                        switch (tabPaneMain.getSelectionModel().getSelectedIndex()) {
                             case 1: //Insurance
-                                ShowMessageFX.Warning(null, pxeModuleName, "No Lock-In insurance to be print.");
-                            break;
+                                poInsurance.printTransaction();
+                                break;
                             case 2: //AddOns
                                 poAddOns.printTransaction(getCurrentDate());
-                            break;
+                                break;
                             default:
                                 poFinancing.printTransaction(cmbDPRate.getSelectionModel().getSelectedItem().toString());
-                            break;
+                                break;
                         }
                         return;
                     default:
@@ -216,10 +241,11 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                 }
 
                 loadTableFinancing.reload();
+                loadTableLockIn.reload();
                 loadTableAddOns.reload();
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException  ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -276,21 +302,17 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
     public void initTextFields() {
         JFXUtil.adjustColumnForScrollbar(tblViewFinancing, tblViewAddOns);
     }
-    
-    private int lnTab = 0;
+
     public void initTabPane() {
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Lock-In Insurance":
-                    lnTab = 1;
                     JFXUtil.setButtonsVisibility(false, btnPrint);
                     break;
                 case "Add-Ons":
-                    lnTab = 2;
                     JFXUtil.setButtonsVisibility(poAddOns.getVehicleListCount() > 0, btnPrint);
                     break;
                 default:
-                    lnTab = 0;
                     JFXUtil.setButtonsVisibility(poFinancing.getDetailCount() > 0, btnPrint);
                     break;
             }
@@ -316,8 +338,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         }
         return String.join(", ", array.get(row).get(column));
     }
-    
-    
+
     private String getData(String lsValue) {
         return JFXUtil.isObjectEqualTo(lsValue, null, "") ? "" : lsValue;
     }
@@ -361,7 +382,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                             double lnTotal = 0.0;
                             for (lnCtr = 0; lnCtr < poFinancing.getDetailCount(); lnCtr++) {
                                 if (JFXUtil.isObjectEqualTo(poFinancing.Detail(lnCtr).ModelVariant().getDescription(), null, "")
-                                    || !poFinancing.Detail(lnCtr).getRecordStatus()) {
+                                        || !poFinancing.Detail(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 details_data.add(
@@ -390,7 +411,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                     getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poFinancing.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
                                 }
                                 //store agein as a prepared and then will dynamically added in details_data
-                                
                             }
                             //then re-add in here
                             int lnCount = 9;
@@ -405,7 +425,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                     details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
                                 }
                             }
-                        } catch (SQLException | GuanzonException  ex) {
+                        } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
@@ -413,7 +433,57 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                     );
                 }
         );
-        
+        loadTableLockIn = new JFXUtil.ReloadableTableTask(
+                tblViewLockIn,
+                details_datalockIn,
+                () -> {
+                    pbEntered = false;
+                    Platform.runLater(() -> {
+                        int lnCtr;
+                        details_datalockIn.clear();
+                        try {
+                            JFXUtil.disableAllHighlightByColor(tblViewLockIn, "#FAA0A0", highlightedRowsMain);
+                            details_datalockIn.clear();
+                            Set<String> loSeenVariantIds = new HashSet<>();
+                            int lnCount = 0;
+                            JSONObject loJSONArray = poInsurance.LoadVehicleInsurance();
+                            for (lnCtr = 0; lnCtr < poInsurance.getDetailCount(); lnCtr++) {
+                                if (JFXUtil.isObjectEqualTo(poInsurance.Detail(lnCtr).ModelVariant().getDescription(), null, "")) {
+                                    continue;
+                                }
+                                String lsVariantId = String.valueOf(poInsurance.Detail(lnCtr).getVariantId());
+                                if (!loSeenVariantIds.add(lsVariantId)) {
+                                    continue;
+                                }
+                                details_datalockIn.add(
+                                        new ModelVehicleFinancingPromo_Detail(String.valueOf(lnCtr + 1),
+                                                String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().Model().Brand().getDescription()),
+                                                String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().Model().getDescription()),
+                                                String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().getDescription()),
+                                                String.valueOf(poInsurance.Detail(lnCtr).ModelVariant().Color().getDescription()),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.Detail(lnCtr).ModelVariant().getSellingPrice(), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.getAmount(lsVariantId, 1), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.getAmount(lsVariantId, 2), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.getAmount(lsVariantId, 3), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.getAmount(lsVariantId, 4), false)),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poInsurance.getAmount(lsVariantId, 5), false)),
+                                                String.valueOf(lnCtr),
+                                                poInsurance.Detail(lnCtr).getVariantId(),
+                                                "",
+                                                ""
+                                        ));
+                                if (!poInsurance.Detail(lnCtr).getRecordStatus()) {
+                                    JFXUtil.highlightByKey(tblViewLockIn, String.valueOf(lnCount), "#FAA0A0", highlightedRowsMain);
+                                }
+                            }
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException | ScriptException | ExceptionInInitializerError ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        }
+                    }
+                    );
+                }
+        );
         loadTableAddOns = new JFXUtil.ReloadableTableTask(
                 tblViewAddOns,
                 details_dataAddOns,
@@ -474,7 +544,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                     details_dataAddOns.get(lnCtr).setIndexDynamic(lnCount, getCellDataAddOns(lnCtr, lnMAcount)); //11
                                 }
                             }
-
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -620,18 +689,30 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         JFXUtil.setColumnCenter(tblFinancingNo);
         JFXUtil.setColumnLeft(tblFinancingBrand, tblFinancingModel, tblFinancingVariant, tblFinancingColor);
         JFXUtil.setColumnRight(tblFinancingDPRate, tblFinancingReservationAmount, tblFinancingSRP);
-        
-        //Add Ons
+        tblViewFinancing.setItems(details_data);
+    }
+
+    public void initLockInGrid() {
+        JFXUtil.setColumnCenter(tblNoLockIn);
+        JFXUtil.setColumnRight(tbl1stYear, tbl2ndYear, tbl3rdYear, tbl4thYear, tbl5thYear);
+        JFXUtil.setColumnLeft(tblBrandLockIn, tblModelLockIn, tblVariantLockIn, tblColorLockIn, tblSRPLockIn);
+        JFXUtil.setColumnsIndexAndDisableReordering(tblViewLockIn);
+        tblViewLockIn.setItems(details_datalockIn);
+
+        JFXUtil.applyRowHighlighting(tblViewLockIn, item -> ((ModelVehicleFinancingPromo_Detail) item).getIndex01(), highlightedRowsMain);
+    }
+
+    public void initAddOnGrid() {
         JFXUtil.setColumnCenter(tblAddOnsNo);
         JFXUtil.setColumnRight(tblAddOnsSRP);
         JFXUtil.setColumnLeft(tblAddOnsBrand, tblAddOnsModel, tblAddOnsVariant, tblAddOnsColor);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewAddOns);
         tblViewAddOns.setItems(details_dataAddOns);
-        
     }
 
     public void clearTextFields() {
         loadTableFinancing.reload();
+        loadTableLockIn.reload();
         loadTableAddOns.reload();
     }
 
@@ -644,7 +725,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         }
     }
 
-    
     private void removeColumnsAfterSixth(TableView<?> tableView) {
         if (tableView.getColumns().size() > 6) {
             tableView.getColumns().remove(6, tableView.getColumns().size());
@@ -694,39 +774,11 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-    
-    private String getCurrentDate() throws SQLException{
+
+    private String getCurrentDate() throws SQLException {
         return new SimpleDateFormat("MM/dd/yyyy").format(oApp.getServerDate());
     }
 
-    
     private void initButton(int fnValue) {
-//        boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
-//        boolean lbShow2 = fnValue == EditMode.READY;
-//        boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-//
-//        JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
-//        JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel);
-//        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
-//        JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
-//
-//        JFXUtil.setDisabled(!lbShow1, apMaster);
-//        JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint);
-//
-//        if (fnValue != EditMode.READY) {
-//            return;
-//        }
-//        switch (poController.Master().getRecordStatus()) {
-//            case ValidityPeriodStatus.OPEN:
-//                JFXUtil.setButtonsVisibility(false, btnPrint);
-//                break;
-//            case ValidityPeriodStatus.VOID:
-//            case ValidityPeriodStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove, btnVoid, btnPrint);
-//                break;
-//            case ValidityPeriodStatus.APPROVED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
-//                break;
-//        }
     }
 }
