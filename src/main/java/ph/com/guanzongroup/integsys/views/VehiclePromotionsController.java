@@ -35,10 +35,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
@@ -132,7 +129,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
 
             initLoadTable();
             initTextFields();
-            initDetailsGrid();
+            initFinancingGrid();
             initLockInGrid();
             initAddOnGrid();
             clearTextFields();
@@ -230,6 +227,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 poAddOns.printTransaction(getCurrentDate());
                                 break;
                             default:
+                                //Financing
                                 poFinancing.printTransaction(cmbDPRate.getSelectionModel().getSelectedItem().toString());
                                 break;
                         }
@@ -318,7 +316,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         });
     }
 
-    private ArrayList<String> getCell(int row, int column) {
+    private ArrayList<String> getCell(ArrayList<ArrayList<ArrayList<String>>> array, int row, int column) {
         while (array.size() <= row) {
             array.add(new ArrayList<ArrayList<String>>());
         }
@@ -328,7 +326,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         return array.get(row).get(column);
     }
 
-    private String getCellData(int row, int column) {
+    private String getCellData(ArrayList<ArrayList<ArrayList<String>>> array, int row, int column) {
         if (row >= array.size()) {
             return "";
         }
@@ -340,26 +338,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
 
     private String getData(String lsValue) {
         return JFXUtil.isObjectEqualTo(lsValue, null, "") ? "" : lsValue;
-    }
-
-    private ArrayList<String> getCellAddOns(int row, int column) {
-        while (arrayAddOns.size() <= row) {
-            arrayAddOns.add(new ArrayList<ArrayList<String>>());
-        }
-        while (arrayAddOns.get(row).size() <= column) {
-            arrayAddOns.get(row).add(new ArrayList<String>());
-        }
-        return arrayAddOns.get(row).get(column);
-    }
-
-    private String getCellDataAddOns(int row, int column) {
-        if (row >= arrayAddOns.size()) {
-            return "";
-        }
-        if (column >= arrayAddOns.get(row).size()) {
-            return "";
-        }
-        return String.join(", ", arrayAddOns.get(row).get(column));
     }
 
     public void initLoadTable() {
@@ -407,7 +385,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                     JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
                                     int lnDuration = (int) loJSONObject.get("nDuration"); // this is the column title per array
                                     Double ldblRate = (Double) loJSONObject.get("nRateValx");
-                                    getCell(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poFinancing.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
+                                    getCell(array, lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poFinancing.getMontlyAmortizationAmount(lnCtr, lnDuration, ldblRate), false)));
                                 }
                                 //store agein as a prepared and then will dynamically added in details_data
                             }
@@ -421,7 +399,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 //well need to define the number of loJSONArray
                                 for (int lnMAcount = 0; lnMAcount < lnAmmortizationColumnCount; lnMAcount++) {
                                     lnCount += 1;
-                                    details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(lnCtr, lnMAcount)); //11
+                                    details_data.get(lnCtr).setIndexDynamic(lnCount, getCellData(array, lnCtr, lnMAcount)); //11
                                 }
                             }
                         } catch (SQLException | GuanzonException ex) {
@@ -526,7 +504,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 for (int lnRow = 0; lnRow < loJSONArray.size(); lnRow++) { //sample is it have size of 3
                                     JSONObject loJSONObject = (JSONObject) loJSONArray.get(lnRow);
                                     String lsAddTypeId = (String) loJSONObject.get("sAddTypex");
-                                    getCellAddOns(lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poAddOns.getAmount(poAddOns.VehicleList(lnCtr).getVariantId(),
+                                    getCell(arrayAddOns, lnCtr, lnRow).add(String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poAddOns.getAmount(poAddOns.VehicleList(lnCtr).getVariantId(),
                                             lsAddTypeId, getCurrentDate()), false)));
                                 }
                             }
@@ -541,7 +519,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
                                 //well need to define the number of loJSONArray
                                 for (int lnMAcount = 0; lnMAcount < lnDynamicColumnCount; lnMAcount++) {
                                     lnCount += 1;
-                                    details_dataAddOns.get(lnCtr).setIndexDynamic(lnCount, getCellDataAddOns(lnCtr, lnMAcount)); //11
+                                    details_dataAddOns.get(lnCtr).setIndexDynamic(lnCount, getCellData(arrayAddOns, lnCtr, lnMAcount)); //11
                                 }
                             }
                         } catch (SQLException | GuanzonException ex) {
@@ -572,7 +550,6 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         if (parentColumn == null) {
             return;
         }
-
         if (parentColumn.getColumns().size() > 1) {
             parentColumn.getColumns().remove(1, parentColumn.getColumns().size());
         }
@@ -678,7 +655,7 @@ public class VehiclePromotionsController implements Initializable, ScreenInterfa
         }
     }
 
-    public void initDetailsGrid() {
+    public void initFinancingGrid() {
         //Financing
         JFXUtil.setColumnCenter(tblFinancingNo);
         JFXUtil.setColumnLeft(tblFinancingBrand, tblFinancingModel, tblFinancingVariant, tblFinancingColor);
