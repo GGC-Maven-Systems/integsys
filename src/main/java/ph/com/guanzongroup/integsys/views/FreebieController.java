@@ -75,7 +75,7 @@ public class FreebieController implements Initializable, ScreenInterface {
             Platform.runLater(() -> {
                 btnNew.fire();
             });
-            poController.setRecordStatus("01234");
+            poController.setRecordStatus("012");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -113,7 +113,7 @@ public class FreebieController implements Initializable, ScreenInterface {
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnBrowse":
-                        poController.setRecordStatus("01234");
+                        poController.setRecordStatus("012");
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
