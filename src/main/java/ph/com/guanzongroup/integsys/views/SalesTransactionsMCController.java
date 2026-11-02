@@ -1010,7 +1010,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             oSalesController.MCSales().initTransaction();
             oSalesController.SalesQoutation().setRecordStatus(SalesTransactionStatic.OPEN);
             oSalesController.SalesQoutation().setWithUI(true);
-
+            oSalesController.MCSales().setIndustryID(psIndustryId);
+            oSalesController.MCSales().setCompanyID(psCompanyId);
+            oSalesController.MCSales().setCategoryID(psCategoryId);
+            oSalesController.MCSales().setBranchCode(oApp.getBranchCode());
             Platform.runLater(() -> btnNew.fire());
         } catch (SQLException | GuanzonException e) {
             throw new RuntimeException(e);
@@ -1100,10 +1103,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                         break;
                     }
-                    oSalesController.MCSales().getMaster().setIndustryCode(psIndustryId);
-                    oSalesController.MCSales().getMaster().setCompanyID(psCompanyId);
-                    oSalesController.MCSales().getMaster().setCategory(psCategoryId);
-                    oSalesController.MCSales().getMaster().setBranchCode(oApp.getBranchCode());
+                    oSalesController.MCSales().setIndustryID(psIndustryId);
+                    oSalesController.MCSales().setCompanyID(psCompanyId);
+                    oSalesController.MCSales().setCategoryID(psCategoryId);
+                    oSalesController.MCSales().setBranchCode(oApp.getBranchCode());
                     LoadMaster();
                     loadTableMCItem();
                     loadTableGiveaways();
@@ -1294,6 +1297,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);
             } else if (fcmb == cmbPaymentCWT) {
                 syncCwt();   // the master keeps the CWT AMOUNT: rate x base, then the totals are recomputed
+                loadTableMCItem();   // re-reads the unit cells (Net SRP, Discount, etc.) after the recompute
+                loadSummary();        // payment tab totals + transaction summary
                 poJSON = null;
             } else if (fcmb == cmbAttachmentType) {
                 setSelectedAttachmentType(fnIndex);   // only changes the attachment selected in the table (if any)
@@ -3411,6 +3416,21 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             tfClientBirthplace.setText(
                     loClient.BirthTown().getDescription() + ", "
                             + loClient.BirthTown().Province().getDescription());
+            String lsCitezenship = loClient.getCitizenshipId();
+            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
+                tfClientCitizenship.setText("");
+                return;
+            }
+
+            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfClientCitizenship.setText("");
+                return;
+            }
+
+            tfClientCitizenship.setText(
+                    loClient.Citizenship().getNationality() );
 
             tfClientOccupation.setText(oSalesController.MCSales().getMaster().ClientEmployment().getPosition());
             tfClientTinNo.setText(oSalesController.MCSales().getMaster().Client().getTaxIdNumber());
@@ -3459,6 +3479,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             tfCoClientBirthplace.setText(
                     loClient.BirthTown().getDescription() + ", "
                             + loClient.BirthTown().Province().getDescription());
+
+            String lsCitezenship = loClient.getCitizenshipId();
+            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
+                tfCoClientCitezenship.setText("");
+                return;
+            }
+
+            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfCoClientCitezenship.setText("");
+                return;
+            }
+
+            tfCoClientCitezenship.setText(
+                    loClient.Citizenship().getNationality() );
+
+
+
             tfCoClientOccupation.setText(oSalesController.MCSales().getMaster().CoClientEmployment().getPosition());
             tfCoClientTinNo.setText(oSalesController.MCSales().getMaster().CoClient().getTaxIdNumber());
             tfCoClientFathersName.setText(oSalesController.MCSales().getMaster().CoClient().getFatherName());

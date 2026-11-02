@@ -1180,10 +1180,29 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     break;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CANCEL, pxeModuleName, null)) {
-                        ClearAll();                                       // clears the fields and the observable lists
-                        oSalesController.MCSales().initTransaction();
-                        pnEditMode = EditMode.UNKNOWN;
-                        lblStatus.setText("UNKNOWN");// ASSUMED: resets the model's detail / giveaway lists
+                        // read the trans no BEFORE anything is reloaded
+                        String lsCancelTransNo = oSalesController.MCSales().getMaster().getTransactionNo();
+
+                        if (lsCancelTransNo == null || lsCancelTransNo.trim().isEmpty()) {
+                            // nothing saved yet (should not happen in the popup): there is nothing to reload, so close it
+                            if (poOnClose != null) {
+                                poOnClose.run();
+                                return;
+                            }
+                            ClearAll();
+                            oSalesController.MCSales().initTransaction();
+                            pnEditMode = EditMode.UNKNOWN;
+                            lblStatus.setText("UNKNOWN");
+                            break;
+                        }
+
+                        // re-open the saved record: this throws away every unsaved edit and returns the model to READY
+                        poJSON = oSalesController.MCSales().OpenTransaction(lsCancelTransNo);   // same call openFromList() uses
+                        if ("error".equals(poJSON.get("result"))) {
+                            ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            break;
+                        }
+                        reloadRecord();   // reads the edit mode first, then refills every tab, table and the attachments
                     }
                     break;
                 case "btnClose":
@@ -1298,6 +1317,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);
             } else if (fcmb == cmbPaymentCWT) {
                 syncCwt();   // the master keeps the CWT AMOUNT: rate x base, then the totals are recomputed
+                loadTableMCItem();   // re-reads the unit cells (Net SRP, Discount, etc.) after the recompute
+                loadSummary();        // payment tab totals + transaction summary
                 poJSON = null;
             } else if (fcmb == cmbAttachmentType) {
                 setSelectedAttachmentType(fnIndex);   // only changes the attachment selected in the table (if any)
@@ -3415,6 +3436,21 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             tfClientBirthplace.setText(
                     loClient.BirthTown().getDescription() + ", "
                             + loClient.BirthTown().Province().getDescription());
+            String lsCitezenship = loClient.getCitizenshipId();
+            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
+                tfClientCitizenship.setText("");
+                return;
+            }
+
+            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfClientCitizenship.setText("");
+                return;
+            }
+
+            tfClientCitizenship.setText(
+                    loClient.Citizenship().getNationality() );
 
             tfClientOccupation.setText(oSalesController.MCSales().getMaster().ClientEmployment().getPosition());
             tfClientTinNo.setText(oSalesController.MCSales().getMaster().Client().getTaxIdNumber());
@@ -3463,6 +3499,25 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             tfCoClientBirthplace.setText(
                     loClient.BirthTown().getDescription() + ", "
                             + loClient.BirthTown().Province().getDescription());
+
+            String lsCitezenship = loClient.getCitizenshipId();
+            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
+                tfCoClientCitezenship.setText("");
+                return;
+            }
+
+            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfCoClientCitezenship.setText("");
+                return;
+            }
+
+            tfCoClientCitezenship.setText(
+                    loClient.Citizenship().getNationality() );
+
+
+
             tfCoClientOccupation.setText(oSalesController.MCSales().getMaster().CoClientEmployment().getPosition());
             tfCoClientTinNo.setText(oSalesController.MCSales().getMaster().CoClient().getTaxIdNumber());
             tfCoClientFathersName.setText(oSalesController.MCSales().getMaster().CoClient().getFatherName());
