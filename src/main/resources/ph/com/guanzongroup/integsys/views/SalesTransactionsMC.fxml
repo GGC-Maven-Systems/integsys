@@ -762,7 +762,7 @@
                                                                                                                                                 <Insets right="10.0" />
                                                                                                                                             </padding>
                                                                                                                                         </Label>
-                                                                                                                                        <TextField fx:id="tfPomoCode" editable="false" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                                                                                                                        <TextField fx:id="tfPomoCode" prefWidth="170.0" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                                                                                                                         <Label text="Discount" GridPane.columnIndex="6" GridPane.rowIndex="2">
                                                                                                                                             <padding>
                                                                                                                                                 <Insets right="10.0" />

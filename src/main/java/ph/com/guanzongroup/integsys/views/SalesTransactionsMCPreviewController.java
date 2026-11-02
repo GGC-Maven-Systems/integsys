@@ -145,11 +145,15 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private final BooleanProperty pbTermPayment = new SimpleBooleanProperty(false);
     /** Index of "Term" in SalesTransactionStatic.PAYMENT_FORMS = {"Cash", "Term", "Cash Balance", "Financing"}. */
     private static final int PAYMENT_FORM_TERM = 1;
+
+    private static final int CWT_YES = 0;
+    private static final int CWT_NO = 1;
     /** true only in ADDNEW / UPDATE; combos, check boxes, date pickers and action buttons are bound to it. */
     private final BooleanProperty pbEditable = new SimpleBooleanProperty(false);
     /** true when the payment transaction type is Credit; drives the Due Date field. */
     private final BooleanProperty pbCreditPayment = new SimpleBooleanProperty(false);
-
+    /** true when the CWT combo is "Yes"; drives the CWT amount field. */
+    private final BooleanProperty pbCwtYes = new SimpleBooleanProperty(false);
     /** Raw column of Transaction_Attachment that keeps the attachment type (combo index as text). ASSUMED name. */
     private static final String ATTACH_TYPE_COLUMN = "sDocuType";
 
@@ -986,6 +990,30 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     // then syncCwt()/recomputeTransaction() and loadSummary() run in its succeeded()
                     break;
                 }
+                case "tfPaymentCwt": {
+                    if (!pbCwtYes.get()) {
+                        break;   // field is disabled unless CWT = Yes
+                    }
+                    double lnCwt = parseDouble(lsValue);
+                    final Model_Sales_Master loMas = master();
+                    if (lnCwt < 0) {
+                        ShowMessageFX.Warning("CWT amount cannot be negative.", "Warning", null);
+                        loadSummary();   // put the saved value back
+                        return;
+                    }
+                    if (lnCwt == dbl(() -> loMas.getCWTAmount())) {
+                        break;   // unchanged
+                    }
+                    poJSON = loMas.setCWTAmount(lnCwt);
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        loadSummary();
+                        return;
+                    }
+                    recomputeTransaction();
+                    loadTableMCItem();   // refreshes tblUnits; its succeeded() reloads the summary too
+                    break;
+                }
                 case "tfGawayRemarks":
                     ShowMessageFX.Error(SalesTransactionStatic.MSG_TEXTFIELD_UNDER_DEVELOPMENT, pxeModuleName, null);
                     break;
@@ -1272,6 +1300,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     pbCreditPayment.set(newIdx.intValue() == SalesTransactionStatic.PAYMENT_CREDIT);   // always keep this in sync
                 } else if (lcmb == cmbPaymentForm) {
                     pbTermPayment.set(newIdx.intValue() == PAYMENT_FORM_TERM);   // always keep this in sync
+                }else if (lcmb == cmbPaymentCWT) {
+                    pbCwtYes.set(newIdx.intValue() == CWT_YES);   // always keep this in sync
                 }
                 if (!pbLoaded || pbSyncing) {
                     return;
@@ -1283,6 +1313,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         cmbRegistrationType.setDisable(true);   // permanently disabled: display only
         // Term only applies when the payment form is Term (it is the term CODE; the due date follows the Credit type)
         tfPaymentTerm.disableProperty().bind(pbTermPayment.not());
+        // CWT amount can only be typed when CWT = Yes (and while editing)
+        tfPaymentCwt.disableProperty().bind(pbEditable.not().or(pbCwtYes.not()));
+        tfPaymentCwt.editableProperty().bind(pbCwtYes);
     }
 
     private void cmb_Changed(ComboBox fcmb, int fnIndex) {
@@ -2625,20 +2658,17 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             return;
         }
         try {
-            recomputeTransaction();   // the base must be current
-            double lnAmount = round2(cwtBase() * cwtRate() / 100.0);
             final Model_Sales_Master loMas = master();
-            if (Math.abs(lnAmount - dbl(() -> loMas.getCWTAmount())) < 0.005) {
-                return;   // unchanged
-            }
-            poJSON = loMas.setCWTAmount(lnAmount);   // ASSUMED setter
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                return;
+            if (!pbCwtYes.get() && dbl(() -> loMas.getCWTAmount()) != 0) {
+                poJSON = loMas.setCWTAmount(0.0);   // No: no CWT
+                if ("error".equals(poJSON.get("result"))) {
+                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    return;
+                }
             }
             recomputeTransaction();
         } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
     }
@@ -2652,10 +2682,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             selectIndex(cmbPaymentTranType, indexOf(textOf(() -> loMas.getTransactionType())));
             selectIndex(cmbPaymentForm, indexOf(textOf(() -> loMas.getPaymentForm())));
 
-            // the master keeps the CWT amount: show the rate it corresponds to
+            // the master keeps the CWT amount: any amount above 0 means CWT = Yes
             double lnCwtAmt = dbl(() -> loMas.getCWTAmount());
-            double lnBase = cwtBase();
-            selectIndex(cmbPaymentCWT, cwtIndexFor(lnCwtAmt <= 0 || lnBase <= 0 ? 0.0 : lnCwtAmt / lnBase * 100.0));
+            selectIndex(cmbPaymentCWT, lnCwtAmt > 0 ? CWT_YES : CWT_NO);
 
             tfPaymentTerm.setText(pbTermPayment.get() ? termText() : "");   // the field shows the term DESCRIPTION, like after F3
 
@@ -2670,10 +2699,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 }
                 setDate(dpPaymentDueDate, ldDue);
             } catch (Exception ex) {
-                Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
             }
-//            tfSalesman.setText(textOf(() -> loMas.Salesman().getSalesmanName()));   // ASSUMED lookup
-            // ASSUMED lookup
             tfPaymentDrNo.setText(tfReceipt.getText());   // DR No is a read-only mirror of the header
         } finally {
             pbSyncing = lbPrev;
@@ -3234,8 +3261,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             ltf.setEditable(false);
             ltf.setFocusTraversable(false);
         }
-        // payment tab figures are computed / mirrored, never typed
-        for (TextField ltf : Arrays.asList(tfPaymentDrNo, tfPaymentTotal, tfPaymentAdvances, tfPaymentCwt,
+        // payment tab figures are computed / mirrored, never typed.
+        // tfPaymentCwt is NOT here: its editable / disable state is bound to the CWT combo in initComboBoxes().
+        for (TextField ltf : Arrays.asList(tfPaymentDrNo, tfPaymentTotal, tfPaymentAdvances,
                 tfPaymentAmountPaid, tfPaymentBalance)) {
             ltf.setEditable(false);
         }
@@ -3408,63 +3436,57 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         }
     }
 
+    /**
+     * Birthplace text "town, province" of a client; "" when the id is blank or the town cannot be opened.
+     * No early returns in the callers: a blank birthplace must not stop the rest of the client info from loading.
+     */
+    private String birthplaceText(Model_Client_Master foClient) throws GuanzonException, SQLException {
+        String lsId = foClient.getBirthPlaceId();
+        if (lsId == null || lsId.isEmpty()) {
+            return "";
+        }
+        if (!"success".equals(foClient.BirthTown().openRecord(lsId).get("result"))) {
+            return "";
+        }
+        return foClient.BirthTown().getDescription() + ", " + foClient.BirthTown().Province().getDescription();
+    }
+
+    /** Nationality text of a client; "" when the id is blank or the country cannot be opened. */
+    private String citizenshipText(Model_Client_Master foClient) throws GuanzonException, SQLException {
+        String lsId = foClient.getCitizenshipId();
+        if (lsId == null || lsId.isEmpty()) {
+            return "";
+        }
+        if (!"success".equals(foClient.Citizenship().openRecord(lsId).get("result"))) {
+            return "";
+        }
+        return foClient.Citizenship().getNationality();
+    }
+
     private void LoadClientInfo() {
         pbSyncing = true;
         try {
-            cmbClientType.getSelectionModel().select(0);
-
-            tfClientName.setText(oSalesController.MCSales().getMaster().Client().getCompanyName());
-            tfClientGender.setText(genderText(oSalesController.MCSales().getMaster().Client().getGender()));
-            tfClientCitizenship.setText(oSalesController.MCSales().getMaster().Client().Citizenship().getDescription());
-            setDate(dpClientBday, toLocalDate(oSalesController.MCSales().getMaster().Client().getBirthDate()));
-
+            // the client type combo is filled by LoadMaster() from the model: nothing to select here
             Model_Client_Master loClient = oSalesController.MCSales().getMaster().Client();
-            String lsBirthPlaceId = loClient.getBirthPlaceId();
 
-            if (lsBirthPlaceId == null || lsBirthPlaceId.isEmpty()) {
-                tfClientBirthplace.setText("");
-                return;
-            }
-
-            JSONObject loResult = loClient.BirthTown().openRecord(lsBirthPlaceId);
-
-            if (!"success".equals(loResult.get("result"))) {
-                tfClientBirthplace.setText("");
-                return;
-            }
-
-            tfClientBirthplace.setText(
-                    loClient.BirthTown().getDescription() + ", "
-                            + loClient.BirthTown().Province().getDescription());
-            String lsCitezenship = loClient.getCitizenshipId();
-            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
-                tfClientCitizenship.setText("");
-                return;
-            }
-
-            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
-
-            if (!"success".equals(loResult.get("result"))) {
-                tfClientCitizenship.setText("");
-                return;
-            }
-
-            tfClientCitizenship.setText(
-                    loClient.Citizenship().getNationality() );
+            tfClientName.setText(loClient.getCompanyName());
+            tfClientGender.setText(genderText(loClient.getGender()));
+            setDate(dpClientBday, toLocalDate(loClient.getBirthDate()));
+            tfClientBirthplace.setText(birthplaceText(loClient));
+            tfClientCitizenship.setText(citizenshipText(loClient));
 
             tfClientOccupation.setText(oSalesController.MCSales().getMaster().ClientEmployment().getPosition());
-            tfClientTinNo.setText(oSalesController.MCSales().getMaster().Client().getTaxIdNumber());
-            tfClientFathersName.setText(oSalesController.MCSales().getMaster().Client().getFatherName());
-            tfClientMothersName.setText(oSalesController.MCSales().getMaster().Client().getMotherName());
+            tfClientTinNo.setText(loClient.getTaxIdNumber());
+            tfClientFathersName.setText(loClient.getFatherName());
+            tfClientMothersName.setText(loClient.getMotherName());
             tfClientContactNo.setText(oSalesController.MCSales().getMaster().ClientMobile().getMobileNo());
-//            tfClientEmail.setText(oSalesController.MCSales().getMaster().M);
             tfClientAddress.setText(oSalesController.MCSales().getMaster().ClientAddress().getAddress() + ","
                     + oSalesController.MCSales().getMaster().ClientAddress().Barangay().getBarangayName() + ","
                     + oSalesController.MCSales().getMaster().ClientAddress().Town().getDescription() + ","
                     + oSalesController.MCSales().getMaster().ClientAddress().Town().Province().getDescription() + ","
                     + oSalesController.MCSales().getMaster().ClientAddress().Town().getZipCode());
 
-            tfClientLTOID.setText(oSalesController.MCSales().getMaster().Client().getLTOClientId());
+            tfClientLTOID.setText(loClient.getLTOClientId());
             tfClientLTOAddress.setText("");
             showCustomerName();   // the header line needs the name, contact and address set above
 
@@ -3477,51 +3499,18 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     private void LoadCoClientInfo() {
         try {
-            tfCoClientName.setText(oSalesController.MCSales().getMaster().CoClient().getCompanyName());
-            tfCoClientGender.setText(genderText(oSalesController.MCSales().getMaster().CoClient().getGender()));
-            tfCoClientCitezenship.setText(oSalesController.MCSales().getMaster().CoClient().Citizenship().getDescription());
-            setDate(dpCoClientBirthday, toLocalDate(oSalesController.MCSales().getMaster().CoClient().getBirthDate()));
             Model_Client_Master loClient = oSalesController.MCSales().getMaster().CoClient();
-            String lsBirthPlaceId = loClient.getBirthPlaceId();
 
-            if (lsBirthPlaceId == null || lsBirthPlaceId.isEmpty()) {
-                tfCoClientBirthplace.setText("");
-                return;
-            }
-
-            JSONObject loResult = loClient.BirthTown().openRecord(lsBirthPlaceId);
-
-            if (!"success".equals(loResult.get("result"))) {
-                tfCoClientBirthplace.setText("");
-                return;
-            }
-
-            tfCoClientBirthplace.setText(
-                    loClient.BirthTown().getDescription() + ", "
-                            + loClient.BirthTown().Province().getDescription());
-
-            String lsCitezenship = loClient.getCitizenshipId();
-            if (lsCitezenship == null || lsCitezenship.isEmpty()) {
-                tfCoClientCitezenship.setText("");
-                return;
-            }
-
-            JSONObject loCitizen = loClient.Citizenship().openRecord(lsCitezenship);
-
-            if (!"success".equals(loResult.get("result"))) {
-                tfCoClientCitezenship.setText("");
-                return;
-            }
-
-            tfCoClientCitezenship.setText(
-                    loClient.Citizenship().getNationality() );
-
-
+            tfCoClientName.setText(loClient.getCompanyName());
+            tfCoClientGender.setText(genderText(loClient.getGender()));
+            setDate(dpCoClientBirthday, toLocalDate(loClient.getBirthDate()));
+            tfCoClientBirthplace.setText(birthplaceText(loClient));
+            tfCoClientCitezenship.setText(citizenshipText(loClient));
 
             tfCoClientOccupation.setText(oSalesController.MCSales().getMaster().CoClientEmployment().getPosition());
-            tfCoClientTinNo.setText(oSalesController.MCSales().getMaster().CoClient().getTaxIdNumber());
-            tfCoClientFathersName.setText(oSalesController.MCSales().getMaster().CoClient().getFatherName());
-            tfCoClientMothersName.setText(oSalesController.MCSales().getMaster().CoClient().getMotherName());
+            tfCoClientTinNo.setText(loClient.getTaxIdNumber());
+            tfCoClientFathersName.setText(loClient.getFatherName());
+            tfCoClientMothersName.setText(loClient.getMotherName());
 //            tfCoClientContactNo.setText(oSalesController.MCSales().getMaster().CoClient().getContactNumber());
 //            tfCoClientEmail.setText(oSalesController.MCSales().getMaster().CoClient().getEmailAddress());
             tfCoClientAddress.setText(oSalesController.MCSales().getMaster().CoClientAddress().getAddress() + ","
