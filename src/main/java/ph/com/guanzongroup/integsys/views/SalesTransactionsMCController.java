@@ -38,6 +38,7 @@ import org.guanzon.appdriver.agent.systables.Model_Transaction_Attachment;
 import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.cas.client.model.Model_Client_Master;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.MCSales;
 import ph.com.guanzongroup.cas.sales.SalesQoutationVersion;
@@ -3380,18 +3381,34 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             cmbClientType.getSelectionModel().select(0);
 
-            tfClientName.setText(oSalesController.MCSales().getMaster().Client().getCompanyName());
+            tfClientName.setText(oSalesController.MCSales().getMaster().Client .getCompanyName());
             tfClientGender.setText(genderText(oSalesController.MCSales().getMaster().Client().getGender()));
             tfClientCitizenship.setText(oSalesController.MCSales().getMaster().Client().Citizenship().getDescription());
             setDate(dpClientBday, toLocalDate(oSalesController.MCSales().getMaster().Client().getBirthDate()));
 
-            tfClientBirthplace.setText(oSalesController.MCSales().getMaster().Client().BirthTown().getDescription() + ", "
-                    + oSalesController.MCSales().getMaster().Client().BirthTown().Province().getDescription());
+            Model_Client_Master loClient = oSalesController.MCSales().getMaster().Client();
+            String lsBirthPlaceId = loClient.getBirthPlaceId();
 
-//            tfClientOccupation.setText(oSalesController.MCSales().getMaster().Client().getO);
+            if (lsBirthPlaceId == null || lsBirthPlaceId.isEmpty()) {
+                tfClientBirthplace.setText("");
+                return;
+            }
+
+            JSONObject loResult = loClient.BirthTown().openRecord(lsBirthPlaceId);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfClientBirthplace.setText("");
+                return;
+            }
+
+            tfClientBirthplace.setText(
+                    loClient.BirthTown().getDescription() + ", "
+                            + loClient.BirthTown().Province().getDescription());
+
+            tfClientOccupation.setText(oSalesController.MCSales().getMaster().ClientEmployment().getPosition());
             tfClientTinNo.setText(oSalesController.MCSales().getMaster().Client().getTaxIdNumber());
-//            tfClientFathersName.setText(oSalesController.MCSales().getMaster().Client().getFathersName());
-//            tfClientMothersName.setText("");
+            tfClientFathersName.setText(oSalesController.MCSales().getMaster().Client().getFatherName());
+            tfClientMothersName.setText(oSalesController.MCSales().getMaster().Client().getMotherName());
             tfClientContactNo.setText(oSalesController.MCSales().getMaster().ClientMobile().getMobileNo());
 //            tfClientEmail.setText(oSalesController.MCSales().getMaster().M);
             tfClientAddress.setText(oSalesController.MCSales().getMaster().ClientAddress().getAddress() + ","
@@ -3417,12 +3434,28 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             tfCoClientGender.setText(genderText(oSalesController.MCSales().getMaster().CoClient().getGender()));
             tfCoClientCitezenship.setText(oSalesController.MCSales().getMaster().CoClient().Citizenship().getDescription());
             setDate(dpCoClientBirthday, toLocalDate(oSalesController.MCSales().getMaster().CoClient().getBirthDate()));
-            tfCoClientBirthplace.setText(oSalesController.MCSales().getMaster().CoClient().BirthTown().getDescription() + ", "
-                    + oSalesController.MCSales().getMaster().CoClient().BirthTown().Province().getDescription());
-//            tfCoClientOccupation.setText(oSalesController.MCSales().getMaster().CoClient().getOccupation());
+            Model_Client_Master loClient = oSalesController.MCSales().getMaster().CoClient();
+            String lsBirthPlaceId = loClient.getBirthPlaceId();
+
+            if (lsBirthPlaceId == null || lsBirthPlaceId.isEmpty()) {
+                tfCoClientBirthplace.setText("");
+                return;
+            }
+
+            JSONObject loResult = loClient.BirthTown().openRecord(lsBirthPlaceId);
+
+            if (!"success".equals(loResult.get("result"))) {
+                tfCoClientBirthplace.setText("");
+                return;
+            }
+
+            tfCoClientBirthplace.setText(
+                    loClient.BirthTown().getDescription() + ", "
+                            + loClient.BirthTown().Province().getDescription());
+            tfCoClientOccupation.setText(oSalesController.MCSales().getMaster().CoClientEmployment().getPosition());
             tfCoClientTinNo.setText(oSalesController.MCSales().getMaster().CoClient().getTaxIdNumber());
-            tfCoClientFathersName.setText("");
-            tfCoClientMothersName.setText("");
+            tfCoClientFathersName.setText(oSalesController.MCSales().getMaster().CoClient().getFatherName());
+            tfCoClientMothersName.setText(oSalesController.MCSales().getMaster().CoClient().getMotherName());
 //            tfCoClientContactNo.setText(oSalesController.MCSales().getMaster().CoClient().getContactNumber());
 //            tfCoClientEmail.setText(oSalesController.MCSales().getMaster().CoClient().getEmailAddress());
             tfCoClientAddress.setText(oSalesController.MCSales().getMaster().CoClientAddress().getAddress() + ","
