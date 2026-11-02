@@ -28,7 +28,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import java.net.URL?>
+<!--<?import java.net.URL?>-->
 
 <AnchorPane fx:id="ChildAnchorPane" style="-fx-border-color: black;" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>

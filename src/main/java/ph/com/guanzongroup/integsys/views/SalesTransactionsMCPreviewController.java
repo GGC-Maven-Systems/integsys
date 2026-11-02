@@ -138,6 +138,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private int pnRegInsurRow = -1;
     private int pnAttachRow = -1;        // index in poAttachFiles / attach_data (NOT the model index: see poAttachModelRows)
     private boolean pbSyncing = false;   // true while combos/checkboxes are set programmatically
+    private boolean pbSearching = false;   // true while the F3 promo search runs
+    private String psPromoAtFocus = "";    // tfPomoCode text when it got focus
     /** true when the row selected in tblRegAndIsur is a registration. */
     private final BooleanProperty pbRegistrationRow = new SimpleBooleanProperty(false);
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
@@ -529,6 +531,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     poEditGaway = selectedGiveaway();
                     poEditReg = poSectionReg;
                     poEditIns = poSectionIns;
+                    if (txtInput == tfPomoCode) {
+                        psPromoAtFocus = tfPomoCode.getText() == null ? "" : tfPomoCode.getText();
+                    }
                 } else {
                     txtField_LostFocus(txtInput);
                 }
@@ -611,16 +616,27 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             break;
 
                         case "tfPomoCode":
-                            poJSON = oSalesController.MCSales().searchSalesDetailPromotion(pnUnitRow, lsValuse, false);
+                            if (pnUnitRow < 1) {
+                                ShowMessageFX.Warning("Please select a unit first.", "Warning", null);
+                                return;
+                            }
+                            pbSearching = true;
+                            try {
+                                poJSON = oSalesController.MCSales().searchSalesDetailPromotion(pnUnitRow, lsValuse, false);
+                            } finally {
+                                pbSearching = false;
+                            }
                             if ("error".equals(poJSON.get("result"))) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 return;
                             }
-                            tfPomoCode.setText(oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription());
+                            psPromoAtFocus = oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription();
+                            tfPomoCode.setText(psPromoAtFocus);
                             loadTableMCItem();          // the promo can change discount / freight
                             loadTableGiveaways();       // ...add giveaways
                             loadTableRegAndInsur();     // ...and registration / insurance rows
                             break;
+
                         case "tfGawayBarrcode":
                         case "tfGawayDesc":
                             boolean lbByCode = "tfGawayBarrcode".equals(lsID);
@@ -946,6 +962,30 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         restoreTermText();
                     }
                     break;
+                case "tfPomoCode": {
+                    if (pbSearching) break;                          // focus left only because the F3 search ran
+                    final Model_Sales_Detail loUnit = poEditUnit;
+                    if (isBlankUnit(loUnit)) break;
+                    String lsText = lsValue == null ? "" : lsValue.trim();
+                    if (!lsText.isEmpty()) {
+                        if (!lsText.equals(psPromoAtFocus.trim())) {
+                            loadUnitRecord(pnUnitRow);               // typed text isn't a promo: put the saved one back
+                        }
+                        break;
+                    }
+                    if (psPromoAtFocus.trim().isEmpty()) break;      // it was already empty: nothing to remove
+                    poJSON = loUnit.setPromoID("");                  // ASSUMED setter
+                    if ("error".equals(poJSON.get("result"))) {
+                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        loadUnitRecord(pnUnitRow);
+                        return;
+                    }
+                    psPromoAtFocus = "";
+                    loadTableMCItem();
+                    loadTableGiveaways();
+                    loadTableRegAndInsur();
+                    break;
+                }
                 case "tfPromoDisc":
                 case "tfPromoAddDisc":
                 case "tfFreight": {
