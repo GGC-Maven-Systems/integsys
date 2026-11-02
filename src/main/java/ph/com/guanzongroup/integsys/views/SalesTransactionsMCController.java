@@ -569,8 +569,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadPaymentRecord();   // a source quotation also sets the payment form, term, advances...
                             break;
                         case "tfCoClientName":
-                            oSalesController.MCSales().getMaster().Client().setClientType("0");
-                            poJSON = oSalesController.MCSales().searchCoClient(txtInput.getText(), true);
+                            oSalesController.MCSales().getMaster().CoClient().setClientType("0");
+                            poJSON = oSalesController.MCSales().searchCoClient(txtInput.getText(), false);
                             if (poJSON.get("result").equals("error")) {
                                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
                                 break;
@@ -3282,6 +3282,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tfSalesman.setEditable(canEdit() && !hasSource());
         // hint only while the salesman can actually be searched: editing AND the source is empty / null
         tfSalesman.setPromptText(canEdit() && !hasSource() ? "PRESS F3: Search" : "");
+        boolean lbPrevType = pbSyncing;
+        pbSyncing = true;   // show the model's value without firing cmb_Changed
+        try {
+            selectIndex(cmbClientType, indexOf(textOf(() -> master().Client().getClientType())));
+        } finally {
+            pbSyncing = lbPrevType;
+        }
 //        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
         // the customer line is built by showCustomerName() at the end of LoadClientInfo(): the client fields are
         // still empty here, because LoadMaster() runs before LoadClientInfo()
@@ -3381,7 +3388,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             cmbClientType.getSelectionModel().select(0);
 
-            tfClientName.setText(oSalesController.MCSales().getMaster().Client .getCompanyName());
+            tfClientName.setText(oSalesController.MCSales().getMaster().Client().getCompanyName());
             tfClientGender.setText(genderText(oSalesController.MCSales().getMaster().Client().getGender()));
             tfClientCitizenship.setText(oSalesController.MCSales().getMaster().Client().Citizenship().getDescription());
             setDate(dpClientBday, toLocalDate(oSalesController.MCSales().getMaster().Client().getBirthDate()));
