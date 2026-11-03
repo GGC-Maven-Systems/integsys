@@ -30,7 +30,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.agent.services.Model;
@@ -41,7 +40,6 @@ import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.cas.client.model.Model_Client_Master;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.MCSales;
-import ph.com.guanzongroup.cas.sales.SalesQoutationVersion;
 import ph.com.guanzongroup.cas.sales.constant.SalesTransactionStatic;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Detail;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Giveaways;
@@ -49,7 +47,6 @@ import ph.com.guanzongroup.cas.sales.model.Model_Sales_Insurance;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Master;
 import ph.com.guanzongroup.cas.sales.model.Model_Sales_Registration;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.SalesQoutationStatic;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil;
@@ -74,33 +71,39 @@ import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
  * Controller for SalesTransactionMC.fxml (Motorcycle Sales form).
  *
  * Structure follows SalesQoutationController: ScreenInterface + Initializable,
- * initButton(editMode), JFXUtil focus listeners that write straight to the model,
- * F3 search in txtField_KeyPressed, Task-based table loading, and a transaction
- * summary rebuilt from the model after every change.
+ * initButton(editMode), JFXUtil focus listeners that write straight to the
+ * model, F3 search in txtField_KeyPressed, Task-based table loading, and a
+ * transaction summary rebuilt from the model after every change.
  *
  * ------------------------------------------------------------------------------
- * CHANGES IN THIS VERSION
- *   1-14. (earlier versions) compile + load fixes, Registration & Insurance, Payment tab, Confirm / Void / History,
- *         Attachment tab wired to MCSales.
- *  15. CWT is now a Yes / No combo (SalesTransactionStatic.CWT_RATES = {"Yes", "No"}):
- *        - Yes: tfPaymentCwt is editable; the typed amount is written to the master, then the units table and summary reload.
- *        - No : tfPaymentCwt is disabled and not editable; the CWT amount is forced to 0.
- *        - syncCwt() no longer computes rate x base (it would overwrite the typed amount); the rate helpers were removed.
- *  16. Client type combo shows the master's client type (LoadMaster), New defaults to the model's default (Individual).
- *  17. LoadClientInfo() / LoadCoClientInfo(): blank birthplace / citizenship no longer stop the rest of the load.
+ * CHANGES IN THIS VERSION 1-14. (earlier versions) compile + load fixes,
+ * Registration & Insurance, Payment tab, Confirm / Void / History, Attachment
+ * tab wired to MCSales. 15. CWT is now a Yes / No combo
+ * (SalesTransactionStatic.CWT_RATES = {"Yes", "No"}): - Yes: tfPaymentCwt is
+ * editable; the typed amount is written to the master, then the units table and
+ * summary reload. - No : tfPaymentCwt is disabled and not editable; the CWT
+ * amount is forced to 0. - syncCwt() no longer computes rate x base (it would
+ * overwrite the typed amount); the rate helpers were removed. 16. Client type
+ * combo shows the master's client type (LoadMaster), New defaults to the
+ * model's default (Individual). 17. LoadClientInfo() / LoadCoClientInfo():
+ * blank birthplace / citizenship no longer stop the rest of the load.
  *
- * ASSUMED (not visible in the classes provided) - each one is used in ONE place, fix it there:
- *   Model_Sales_Master getters mirroring the setters MCSales calls: getTransactionTotal, getDiscount, getAddDiscount,
- *   getFreight, getVATSales, getVATAmount, getNonVATSales, getZeroVATSales, getAmountDue, getTermCode
- *   (getAdvances and getCWTAmount are used by MCSales itself), setCWTAmount(double), getDueDate()/setDueDate(Date),
- *   Salesman().getCompanyName() for the credit advisor name. Amount paid is read from the raw column "nAmtPaidx".
- *   Model_Sales_Insurance / Model_Sales_Registration: getInsuranceAmount(), setInsuranceAmount(), getInsuranceYear(),
- *   setInsuranceYear(), getChargeTo(), setChargeTo().
- *   Model_Transaction_Attachment: the attachment type is kept in the raw column ATTACH_TYPE_COLUMN through
- *   getValue()/setValue(); change the constant if your table names it differently.
+ * ASSUMED (not visible in the classes provided) - each one is used in ONE
+ * place, fix it there: Model_Sales_Master getters mirroring the setters MCSales
+ * calls: getTransactionTotal, getDiscount, getAddDiscount, getFreight,
+ * getVATSales, getVATAmount, getNonVATSales, getZeroVATSales, getAmountDue,
+ * getTermCode (getAdvances and getCWTAmount are used by MCSales itself),
+ * setCWTAmount(double), getDueDate()/setDueDate(Date),
+ * Salesman().getCompanyName() for the credit advisor name. Amount paid is read
+ * from the raw column "nAmtPaidx". Model_Sales_Insurance /
+ * Model_Sales_Registration: getInsuranceAmount(), setInsuranceAmount(),
+ * getInsuranceYear(), setInsuranceYear(), getChargeTo(), setChargeTo().
+ * Model_Transaction_Attachment: the attachment type is kept in the raw column
+ * ATTACH_TYPE_COLUMN through getValue()/setValue(); change the constant if your
+ * table names it differently.
  *
- * NEW CONSTANTS NEEDED in SalesTransactionStatic:
- *   TBL_NO_REGINSUR, MSG_CONFIRM_REMOVE_REGINSUR
+ * NEW CONSTANTS NEEDED in SalesTransactionStatic: TBL_NO_REGINSUR,
+ * MSG_CONFIRM_REMOVE_REGINSUR
  * ------------------------------------------------------------------------------
  */
 public class SalesTransactionsMCController implements Initializable, ScreenInterface {
@@ -120,16 +123,26 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private int pnRegInsurLoadSeq = 0;
     private int pnGawayLoadSeq = 0;
     private int pnAttachLoadSeq = 0;
-    /** The rows that were selected when a field got focus: the field's edit belongs to THESE rows even if the user
-     *  clicks another row (which changes the selection before the field's lost-focus handler runs). */
+    /**
+     * The rows that were selected when a field got focus: the field's edit
+     * belongs to THESE rows even if the user clicks another row (which changes
+     * the selection before the field's lost-focus handler runs).
+     */
     private Model_Sales_Detail poEditUnit;
     private Model_Sales_Giveaways poEditGaway;
-    /** Row selected in tblRegAndIsur (tracked by object: registration and insurance entry nos can be equal). */
+    /**
+     * Row selected in tblRegAndIsur (tracked by object: registration and
+     * insurance entry nos can be equal).
+     */
     private Model poSelRegInsur;
-    /** Rows shown in the Registration / Insurance sections (either can be null). */
+    /**
+     * Rows shown in the Registration / Insurance sections (either can be null).
+     */
     private Model_Sales_Registration poSectionReg;
     private Model_Sales_Insurance poSectionIns;
-    /** The section rows that were showing when a field got focus. */
+    /**
+     * The section rows that were showing when a field got focus.
+     */
     private Model_Sales_Registration poEditReg;
     private Model_Sales_Insurance poEditIns;
 
@@ -140,29 +153,55 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private boolean pbSyncing = false;   // true while combos/checkboxes are set programmatically
     private boolean pbSearching = false;   // true while the F3 promo search runs
     private String psPromoAtFocus = "";    // tfPomoCode text when it got focus
-    /** true when the row selected in tblRegAndIsur is a registration. */
+    /**
+     * true when the row selected in tblRegAndIsur is a registration.
+     */
     private final BooleanProperty pbRegistrationRow = new SimpleBooleanProperty(false);
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
-    /** true when the payment form is Term; drives the Term field only. */
+    /**
+     * true when the payment form is Term; drives the Term field only.
+     */
     private final BooleanProperty pbTermPayment = new SimpleBooleanProperty(false);
-    /** true when the CWT combo is "Yes"; drives the CWT amount field. */
+    /**
+     * true when the CWT combo is "Yes"; drives the CWT amount field.
+     */
     private final BooleanProperty pbCwtYes = new SimpleBooleanProperty(false);
-    /** Index of "Term" in SalesTransactionStatic.PAYMENT_FORMS = {"Cash", "Term", "Cash Balance", "Financing"}. */
+    /**
+     * Index of "Term" in SalesTransactionStatic.PAYMENT_FORMS = {"Cash",
+     * "Term", "Cash Balance", "Financing"}.
+     */
     private static final int PAYMENT_FORM_TERM = 1;
-    /** Index of "Yes" in SalesTransactionStatic.CWT_RATES = {"Yes", "No"}. */
+    /**
+     * Index of "Yes" in SalesTransactionStatic.CWT_RATES = {"Yes", "No"}.
+     */
     private static final int CWT_YES = 0;
     private static final int CWT_NO = 1;
-    /** true only in ADDNEW / UPDATE; combos, check boxes, date pickers and action buttons are bound to it. */
+    /**
+     * true only in ADDNEW / UPDATE; combos, check boxes, date pickers and
+     * action buttons are bound to it.
+     */
     private final BooleanProperty pbEditable = new SimpleBooleanProperty(false);
-    /** true when the payment transaction type is Credit; drives the Due Date field. */
+    /**
+     * true when the payment transaction type is Credit; drives the Due Date
+     * field.
+     */
     private final BooleanProperty pbCreditPayment = new SimpleBooleanProperty(false);
 
-    /** Raw column of Transaction_Attachment that keeps the attachment type (combo index as text). ASSUMED name. */
+    /**
+     * Raw column of Transaction_Attachment that keeps the attachment type
+     * (combo index as text). ASSUMED name.
+     */
     private static final String ATTACH_TYPE_COLUMN = "sDocuType";
 
-    /** Files of the active attachments (same order as attach_data / poAttachModelRows). */
+    /**
+     * Files of the active attachments (same order as attach_data /
+     * poAttachModelRows).
+     */
     private final ObservableList<File> poAttachFiles = FXCollections.observableArrayList();
-    /** Attachment type (combo index) by file name: fallback when the model does not keep the type column. */
+    /**
+     * Attachment type (combo index) by file name: fallback when the model does
+     * not keep the type column.
+     */
     private final Map<String, Integer> poAttachTypes = new HashMap<>();
     private boolean pbShowingAttach = false;   // true while displayAttachment() changes the table selection itself
     // =========================================================================
@@ -195,235 +234,423 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     // Root containers & buttons
     // =========================================================================
-    @FXML private AnchorPane ChildAnchorPane;
-    @FXML private AnchorPane apSearchMaster;
-    @FXML private AnchorPane AnchorInputs;
-    @FXML private AnchorPane AnchorMCSales;
-    @FXML private AnchorPane AnchorClient;
-    @FXML private AnchorPane AnchorAttach;
-    @FXML private AnchorPane AnchorAttach2;
-    @FXML private AnchorPane AnchorMCPrice;
-    @FXML private AnchorPane AnchorRegInsur;
-    @FXML private AnchorPane AnchorGiveaway;
-    @FXML private AnchorPane AnchorPaymType;
-    @FXML private AnchorPane anchorReg;
-    @FXML private AnchorPane anchorInsur;
-    @FXML private AnchorPane anchorGaways;
-    @FXML private HBox hbButtons;
+    @FXML
+    private AnchorPane ChildAnchorPane;
+    @FXML
+    private AnchorPane apSearchMaster;
+    @FXML
+    private AnchorPane AnchorInputs;
+    @FXML
+    private AnchorPane AnchorMCSales;
+    @FXML
+    private AnchorPane AnchorClient;
+    @FXML
+    private AnchorPane AnchorAttach;
+    @FXML
+    private AnchorPane AnchorAttach2;
+    @FXML
+    private AnchorPane AnchorMCPrice;
+    @FXML
+    private AnchorPane AnchorRegInsur;
+    @FXML
+    private AnchorPane AnchorGiveaway;
+    @FXML
+    private AnchorPane AnchorPaymType;
+    @FXML
+    private AnchorPane anchorReg;
+    @FXML
+    private AnchorPane anchorInsur;
+    @FXML
+    private AnchorPane anchorGaways;
+    @FXML
+    private HBox hbButtons;
 
-    @FXML private Button btnBrowse;
-    @FXML private Button btnNew;
-    @FXML private Button btnUpdate;
-    @FXML private Button btnSave;
-    @FXML private Button btnCancel;
-    @FXML private Button btnApproved;   // "Confirm"
-    @FXML private Button btnVoid;
-    @FXML private Button btnHistory;
-    @FXML private Button btnClose;
-    @FXML private Button btnAddClient;
-    @FXML private Button btnAddClient1;
-    @FXML private Button btnNonItemize;// co-client add button (fx:id as in the FXML)
-    @FXML private FontAwesomeIconView faAdd12;
-    @FXML private FontAwesomeIconView faAdd121;
+    @FXML
+    private Button btnBrowse;
+    @FXML
+    private Button btnNew;
+    @FXML
+    private Button btnUpdate;
+    @FXML
+    private Button btnSave;
+    @FXML
+    private Button btnCancel;
+    @FXML
+    private Button btnApproved;   // "Confirm"
+    @FXML
+    private Button btnVoid;
+    @FXML
+    private Button btnHistory;
+    @FXML
+    private Button btnClose;
+    @FXML
+    private Button btnAddClient;
+    @FXML
+    private Button btnAddClient1;
+    @FXML
+    private Button btnNonItemize;// co-client add button (fx:id as in the FXML)
+    @FXML
+    private FontAwesomeIconView faAdd12;
+    @FXML
+    private FontAwesomeIconView faAdd121;
 
     // =========================================================================
     // Header
     // =========================================================================
-    @FXML private TextField tfTransNo;
-    @FXML private DatePicker dpTransDate;
-    @FXML private TextField tfSourceDesc;
-    @FXML private TextField tfSourceNo;
-    @FXML private TextField tfReceipt;          // DR No (header, read-only mirror)
-    @FXML private TextArea taCustomerName;
-    @FXML private Label lblStatus;
+    @FXML
+    private TextField tfTransNo;
+    @FXML
+    private DatePicker dpTransDate;
+    @FXML
+    private TextField tfSourceDesc;
+    @FXML
+    private TextField tfSourceNo;
+    @FXML
+    private TextField tfReceipt;          // DR No (header, read-only mirror)
+    @FXML
+    private TextArea taCustomerName;
+    @FXML
+    private Label lblStatus;
 
     // =========================================================================
     // Client Information tab
     // =========================================================================
-    @FXML private ComboBox cmbClientType;
-    @FXML private TextField tfClientName;
-    @FXML private TextField tfClientGender;
-    @FXML private TextField tfClientCitizenship;
-    @FXML private DatePicker dpClientBday;
-    @FXML private TextField tfClientBirthplace;
-    @FXML private TextField tfClientOccupation;
-    @FXML private TextField tfClientTinNo;
-    @FXML private TextField tfClientFathersName;
-    @FXML private TextField tfClientMothersName;
-    @FXML private TextField tfClientContactNo;
-    @FXML private TextField tfClientEmail;
-    @FXML private TextField tfClientAddress;
-    @FXML private TextField tfClientLTOID;
-    @FXML private TextField tfClientLTOAddress;
+    @FXML
+    private ComboBox cmbClientType;
+    @FXML
+    private TextField tfClientName;
+    @FXML
+    private TextField tfClientGender;
+    @FXML
+    private TextField tfClientCitizenship;
+    @FXML
+    private DatePicker dpClientBday;
+    @FXML
+    private TextField tfClientBirthplace;
+    @FXML
+    private TextField tfClientOccupation;
+    @FXML
+    private TextField tfClientTinNo;
+    @FXML
+    private TextField tfClientFathersName;
+    @FXML
+    private TextField tfClientMothersName;
+    @FXML
+    private TextField tfClientContactNo;
+    @FXML
+    private TextField tfClientEmail;
+    @FXML
+    private TextField tfClientAddress;
+    @FXML
+    private TextField tfClientLTOID;
+    @FXML
+    private TextField tfClientLTOAddress;
 
     // Co-Client (fx:id "tfCoClientCitezenship" is spelled that way in the FXML)
-    @FXML private TextField tfCoClientName;
-    @FXML private TextField tfCoClientGender;
-    @FXML private TextField tfCoClientCitezenship;
-    @FXML private DatePicker dpCoClientBirthday;
-    @FXML private TextField tfCoClientBirthplace;
-    @FXML private TextField tfCoClientOccupation;
-    @FXML private TextField tfCoClientTinNo;
-    @FXML private TextField tfCoClientFathersName;
-    @FXML private TextField tfCoClientMothersName;
-    @FXML private TextField tfCoClientContactNo;
-    @FXML private TextField tfCoClientEmail;
-    @FXML private TextField tfCoClientAddress;
-    @FXML private TextField tfCoClientLTOID;
-    @FXML private TextField tfCoClientLTOAddress;
+    @FXML
+    private TextField tfCoClientName;
+    @FXML
+    private TextField tfCoClientGender;
+    @FXML
+    private TextField tfCoClientCitezenship;
+    @FXML
+    private DatePicker dpCoClientBirthday;
+    @FXML
+    private TextField tfCoClientBirthplace;
+    @FXML
+    private TextField tfCoClientOccupation;
+    @FXML
+    private TextField tfCoClientTinNo;
+    @FXML
+    private TextField tfCoClientFathersName;
+    @FXML
+    private TextField tfCoClientMothersName;
+    @FXML
+    private TextField tfCoClientContactNo;
+    @FXML
+    private TextField tfCoClientEmail;
+    @FXML
+    private TextField tfCoClientAddress;
+    @FXML
+    private TextField tfCoClientLTOID;
+    @FXML
+    private TextField tfCoClientLTOAddress;
 
     // =========================================================================
     // Motorcycle & Pricing tab
     // =========================================================================
-    @FXML private TextField tfMCModel;
-    @FXML private TextField tfMCColor;
-    @FXML private TextField tfMCEngineNo;
-    @FXML private TextField tfMCFrameNo;
-    @FXML private TextField tfMCWarrantyNo;
-    @FXML private TextField tfMCKeyCode;
-    @FXML private TextField tfMCRemarks;
-    @FXML private ComboBox cmbVehicleType;
-    @FXML private TextField tfMCUnitPrice;     // Unit Price
-    @FXML private TextField tfPomoCode;        // Promo
-    @FXML private TextField tfMCRegisAmt;      // Regis. Amt
-    @FXML private TextField tfMCInsurAmt;      // Insur. Amt
-    @FXML private TextField tfPromoDisc;       // Discount (%)
-    @FXML private TextField tfPromoAddDisc;    // Add. Discount
-    @FXML private TextField tfFreight;         // Freight
+    @FXML
+    private TextField tfMCModel;
+    @FXML
+    private TextField tfMCColor;
+    @FXML
+    private TextField tfMCEngineNo;
+    @FXML
+    private TextField tfMCFrameNo;
+    @FXML
+    private TextField tfMCWarrantyNo;
+    @FXML
+    private TextField tfMCKeyCode;
+    @FXML
+    private TextField tfMCRemarks;
+    @FXML
+    private ComboBox cmbVehicleType;
+    @FXML
+    private TextField tfMCUnitPrice;     // Unit Price
+    @FXML
+    private TextField tfPomoCode;        // Promo
+    @FXML
+    private TextField tfMCRegisAmt;      // Regis. Amt
+    @FXML
+    private TextField tfMCInsurAmt;      // Insur. Amt
+    @FXML
+    private TextField tfPromoDisc;       // Discount (%)
+    @FXML
+    private TextField tfPromoAddDisc;    // Add. Discount
+    @FXML
+    private TextField tfFreight;         // Freight
 
     // =========================================================================
     // Registration & Insurance tab
     // =========================================================================
-    @FXML private TextField tfRegEngineNo;
-    @FXML private TextField tfRegFrameNo;
-    @FXML private ComboBox cmbRegistrationType;
-    @FXML private TextField tfRegAmount;
-    @FXML private TextField tfRegInsurType;
-    @FXML private CheckBox cbRegIsCharge;
-    @FXML private TextField tfInsurType;
-    @FXML private TextField tfInsurYear;
-    @FXML private TextField tfInsurPayer;
-    @FXML private TextField tfInsurAmt;
-    @FXML private CheckBox cbInsurIsCharge;
+    @FXML
+    private TextField tfRegEngineNo;
+    @FXML
+    private TextField tfRegFrameNo;
+    @FXML
+    private ComboBox cmbRegistrationType;
+    @FXML
+    private TextField tfRegAmount;
+    @FXML
+    private TextField tfRegInsurType;
+    @FXML
+    private CheckBox cbRegIsCharge;
+    @FXML
+    private TextField tfInsurType;
+    @FXML
+    private TextField tfInsurYear;
+    @FXML
+    private TextField tfInsurPayer;
+    @FXML
+    private TextField tfInsurAmt;
+    @FXML
+    private CheckBox cbInsurIsCharge;
 
-    @FXML private TableView<Model> tblRegAndIsur;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurNo;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurEngine;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurSource;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurDesc;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurAmount;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurStat;
-    @FXML private TableColumn<Model, String> tblRowRegAndInsurAction;   // Remove column
+    @FXML
+    private TableView<Model> tblRegAndIsur;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurNo;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurEngine;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurSource;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurDesc;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurAmount;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurStat;
+    @FXML
+    private TableColumn<Model, String> tblRowRegAndInsurAction;   // Remove column
 
     // =========================================================================
     // Giveaways tab
     // =========================================================================
-    @FXML private TextField tfGawayBarrcode;
-    @FXML private TextField tfGawayDesc;
-    @FXML private TextField tfGawayRemarks;
-    @FXML private TextField tfGawayGiven;
-    @FXML private TextField tfGawayIssued;
-    @FXML private TextField tfGawayQty;
-    @FXML private TableView<Model_Sales_Giveaways> tblGawayItem;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayNo;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayBarrcode;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayDesc;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayRemarks;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQOH;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayGiven;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayIssued;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQty;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayStatus;
-    @FXML private TableColumn<Model_Sales_Giveaways, String> tblRowGawayAction11211;
+    @FXML
+    private TextField tfGawayBarrcode;
+    @FXML
+    private TextField tfGawayDesc;
+    @FXML
+    private TextField tfGawayRemarks;
+    @FXML
+    private TextField tfGawayGiven;
+    @FXML
+    private TextField tfGawayIssued;
+    @FXML
+    private TextField tfGawayQty;
+    @FXML
+    private TableView<Model_Sales_Giveaways> tblGawayItem;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayNo;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayBarrcode;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayDesc;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayRemarks;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQOH;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayGiven;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayIssued;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayQty;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayStatus;
+    @FXML
+    private TableColumn<Model_Sales_Giveaways, String> tblRowGawayAction11211;
 
     // =========================================================================
     // Payment Type tab
     // =========================================================================
-    @FXML private ComboBox cmbPaymentTranType;
-    @FXML private ComboBox cmbPaymentForm;
-    @FXML private TextField tfPaymentCreditAdvisor;
-    @FXML private ComboBox cmbPaymentCWT;
-    @FXML private CheckBox chkPaymentHasPromo;
-    @FXML private TextField tfPaymentDrNo;         // DR No (payment tab, read-only)
-    @FXML private TextField tfPaymentTerm;
-    @FXML private DatePicker dpPaymentDueDate;
-    @FXML private TextField tfPaymentTotal;
-    @FXML private TextField tfPaymentAdvances;
-    @FXML private TextField tfPaymentCwt;
-    @FXML private TextField tfPaymentAmountPaid;
-    @FXML private TextField tfPaymentBalance;
-    @FXML private TextField tfSalesman;
+    @FXML
+    private ComboBox cmbPaymentTranType;
+    @FXML
+    private ComboBox cmbPaymentForm;
+    @FXML
+    private TextField tfPaymentCreditAdvisor;
+    @FXML
+    private ComboBox cmbPaymentCWT;
+    @FXML
+    private CheckBox chkPaymentHasPromo;
+    @FXML
+    private TextField tfPaymentDrNo;         // DR No (payment tab, read-only)
+    @FXML
+    private TextField tfPaymentTerm;
+    @FXML
+    private DatePicker dpPaymentDueDate;
+    @FXML
+    private TextField tfPaymentTotal;
+    @FXML
+    private TextField tfPaymentAdvances;
+    @FXML
+    private TextField tfPaymentCwt;
+    @FXML
+    private TextField tfPaymentAmountPaid;
+    @FXML
+    private TextField tfPaymentBalance;
+    @FXML
+    private TextField tfSalesman;
 
-    @FXML private TableView<ModelTableDetail> tblInvoiceList;   // Invoice list
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceNo;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceDate;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceSource;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceReceiptNo;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceAmount;
-    @FXML private TableColumn<ModelTableDetail, String> tblRowInvoiceStatus;
+    @FXML
+    private TableView<ModelTableDetail> tblInvoiceList;   // Invoice list
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceNo;
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceDate;
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceSource;
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceReceiptNo;
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceAmount;
+    @FXML
+    private TableColumn<ModelTableDetail, String> tblRowInvoiceStatus;
 
     // =========================================================================
     // Units grid (bottom of the Sales Information tab)
     // =========================================================================
-    @FXML private TableView<Model_Sales_Detail> tblUnits;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailNo;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailBrand;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailModel;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailEngineNo;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailFramNo;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailVariant;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailWarrantyNo;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailKeySerial;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailFreight;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailNetSRP;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailSRP;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailInsReg;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailDiscount;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailAddDisc;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailRemarks;
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH21;   // used as the Remove column
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH22;   // unused in FXML, dropped at runtime
-    @FXML private TableColumn<Model_Sales_Detail, String> tblColDetailQOH23;   // unused in FXML, dropped at runtime
+    @FXML
+    private TableView<Model_Sales_Detail> tblUnits;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailNo;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailBrand;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailModel;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailEngineNo;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailFramNo;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailVariant;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailWarrantyNo;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailKeySerial;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailFreight;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailNetSRP;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailSRP;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailInsReg;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailDiscount;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailAddDisc;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailRemarks;
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailQOH21;   // used as the Remove column
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailQOH22;   // unused in FXML, dropped at runtime
+    @FXML
+    private TableColumn<Model_Sales_Detail, String> tblColDetailQOH23;   // unused in FXML, dropped at runtime
 
     // =========================================================================
     // Attachment tab
     // =========================================================================
-    @FXML private TextField tfAttachmentNo;
-    @FXML private ComboBox cmbAttachmentType;
-    @FXML private TableView<Model_Transaction_Attachment> tblAttachments;
-    @FXML private TableColumn<Model_Transaction_Attachment, String> tblRowNoAttachment;
-    @FXML private TableColumn<Model_Transaction_Attachment, String> tblFileNameAttachment;
-    @FXML private Button btnAddAttachment;
-    @FXML private Button btnRemoveAttachment;
-    @FXML private StackPane stackPane;
-    @FXML private ImageView imageView;
-    @FXML private Button btnArrowLeft;
-    @FXML private Button btnArrowRight;
+    @FXML
+    private TextField tfAttachmentNo;
+    @FXML
+    private ComboBox cmbAttachmentType;
+    @FXML
+    private TableView<Model_Transaction_Attachment> tblAttachments;
+    @FXML
+    private TableColumn<Model_Transaction_Attachment, String> tblRowNoAttachment;
+    @FXML
+    private TableColumn<Model_Transaction_Attachment, String> tblFileNameAttachment;
+    @FXML
+    private Button btnAddAttachment;
+    @FXML
+    private Button btnRemoveAttachment;
+    @FXML
+    private StackPane stackPane;
+    @FXML
+    private ImageView imageView;
+    @FXML
+    private Button btnArrowLeft;
+    @FXML
+    private Button btnArrowRight;
 
     // =========================================================================
     // Transaction summary
     // =========================================================================
-    @FXML private TextField tfSummaryCustomer;
-    @FXML private TextField tfSummaryTranType;
-    @FXML private TextField tfSummaryPaymentForm;
-    @FXML private TextField tfSummaryTerm;
-    @FXML private TextField tfSummaryDueDate;
-    @FXML private TextField tfSummaryUnitPrice;
-    @FXML private TextField tfSummaryDiscount;
-    @FXML private TextField tfSummaryAddDiscount;
-    @FXML private TextField tfSummaryFreight;
-    @FXML private TextField tfSummaryRegistration;
-    @FXML private TextField tfSummaryInsurance;
-    @FXML private TextField tfSummaryTotal;
-    @FXML private TextField tfSummaryGiveaways;
-    @FXML private TextField tfSummaryVatSales;
-    @FXML private TextField tfSummaryVatAmount;
-    @FXML private TextField tfSummaryNonVatSales;
-    @FXML private TextField tfSummaryZeroVatSales;
-    @FXML private TextField tfSummaryCwt;
-    @FXML private TextField tfSummaryAdvances;
-    @FXML private TextField tfSummaryAmountPaid;
-    @FXML private TextField tfSummaryBalance;
+    @FXML
+    private TextField tfSummaryCustomer;
+    @FXML
+    private TextField tfSummaryTranType;
+    @FXML
+    private TextField tfSummaryPaymentForm;
+    @FXML
+    private TextField tfSummaryTerm;
+    @FXML
+    private TextField tfSummaryDueDate;
+    @FXML
+    private TextField tfSummaryUnitPrice;
+    @FXML
+    private TextField tfSummaryDiscount;
+    @FXML
+    private TextField tfSummaryAddDiscount;
+    @FXML
+    private TextField tfSummaryFreight;
+    @FXML
+    private TextField tfSummaryRegistration;
+    @FXML
+    private TextField tfSummaryInsurance;
+    @FXML
+    private TextField tfSummaryTotal;
+    @FXML
+    private TextField tfSummaryGiveaways;
+    @FXML
+    private TextField tfSummaryVatSales;
+    @FXML
+    private TextField tfSummaryVatAmount;
+    @FXML
+    private TextField tfSummaryNonVatSales;
+    @FXML
+    private TextField tfSummaryZeroVatSales;
+    @FXML
+    private TextField tfSummaryCwt;
+    @FXML
+    private TextField tfSummaryAdvances;
+    @FXML
+    private TextField tfSummaryAmountPaid;
+    @FXML
+    private TextField tfSummaryBalance;
 
     // =========================================================================
     // ScreenInterface
@@ -471,9 +698,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Groups the text fields once, after FXML injection.
-     * Each group is used by its Clear*() method; poAllFields is used to attach handlers.
-     * tfSummary* fields are display-only and intentionally NOT included.
+     * Groups the text fields once, after FXML injection. Each group is used by
+     * its Clear*() method; poAllFields is used to attach handlers. tfSummary*
+     * fields are display-only and intentionally NOT included.
      */
     private void initControlGroups() {
         // tfSalesman is in this group so it gets the F3 handler and is cleared with the rest of the header
@@ -523,7 +750,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfSummaryAmountPaid, tfSummaryBalance);
     }
 
-    /** Attaches the key press and lost focus handlers to every grouped field in one pass. */
+    /**
+     * Attaches the key press and lost focus handlers to every grouped field in
+     * one pass.
+     */
     private void initFieldHandlers() {
         for (TextInputControl txtInput : poAllFields) {
             txtInput.setOnKeyPressed(this::txtField_KeyPressed);
@@ -560,8 +790,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             }
                             oSalesController.MCSales().setClientType(String.valueOf(lnClientType));
                             poJSON = oSalesController.MCSales().searchClient(txtInput.getText(), true);
-                            if (poJSON.get("result").equals("error")) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
                                 break;
                             }
                             LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
@@ -578,8 +807,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfCoClientName":
                             oSalesController.MCSales().getMaster().CoClient().setClientType("0");
                             poJSON = oSalesController.MCSales().searchCoClient(txtInput.getText(), false);
-                            if (poJSON.get("result").equals("error")) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
                                 break;
                             }
                             LoadCoClientInfo();
@@ -591,16 +819,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             // search type: 0 = engine no, 1 = frame no, 2 = model, 3 = color
                             int lnSearchType = "tfMCEngineNo".equals(lsID) ? 0
                                     : "tfMCFrameNo".equals(lsID) ? 1
-                                      : "tfMCModel".equals(lsID) ? 2
-                                        : "tfMCColor".equals(lsID) ? 3 : 0;
+                                    : "tfMCModel".equals(lsID) ? 2
+                                    : "tfMCColor".equals(lsID) ? 3 : 0;
 
                             if (pnUnitRow < 1) {   // nothing selected yet: use the last (blank) row
                                 pnUnitRow = Math.max(1, oSalesController.MCSales().getDetailCount());
                             }
 
                             poJSON = oSalesController.MCSales().searchDetailBySerial(pnUnitRow, lsValuse, lnSearchType);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
                                 return;
                             }
 
@@ -628,10 +855,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             } finally {
                                 pbSearching = false;
                             }
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadUnitRecord(pnUnitRow);
                                 return;
                             }
+
                             psPromoAtFocus = oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription();
                             tfPomoCode.setText(psPromoAtFocus);
                             loadTableMCItem();          // the promo can change discount / freight
@@ -650,8 +878,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 break;
                             }
                             poJSON = oSalesController.MCSales().searchSalesGiveAway(loGawayRow.getEntryNo(), lsValuse, lbByCode);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadUnitRecord(pnUnitRow);
                                 return;
                             }
                             loadTableGiveaways();   // store the searched giveaway in the table
@@ -659,8 +887,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfPaymentTerm":
                             // MCSales has no term search: the master keeps a term CODE (setTermCode), typed in this field
                             poJSON = oSalesController.MCSales().SearchTerm(lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                restoreTermText();
                                 return;
                             }
                             restoreTermText();    // shows the searched term's description
@@ -673,9 +901,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 break;
                             }
                             poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                                return;
+                            if (hasError(poJSON)) {
+                                break;
                             }
                             LoadMaster();          // shows the searched salesman in tfSalesman
                             loadPaymentRecord();   // the credit advisor follows the salesman
@@ -683,9 +910,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
                             poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                                return;
+                            if (hasError(poJSON)) {
+                                break;
                             }
                             loadPaymentRecord();
                             break;
@@ -696,8 +922,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             }
                             // MCSales reads the serial from the selected UNIT and adds a registration/insurance row for it
                             poJSON = oSalesController.MCSales().searchInsuranceTypeRegistration(pnUnitRow, lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             selectNewRegInsur(false);   // the registration the search just added becomes the selected row
@@ -712,8 +938,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             }
                             // MCSales reads the serial from the selected UNIT and adds a registration/insurance row for it
                             poJSON = oSalesController.MCSales().searchInsuranceTypeInsurance(pnUnitRow, lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             selectNewRegInsur(true);   // the insurance the search just added becomes the selected row
@@ -728,8 +954,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             normalizeRegInsurRows();   // before any backend call that computes over the rows
                             // searchInsuranceTypePayee(n) reads getSalesInsurance(n): n is the insurance ENTRY NO.
                             poJSON = oSalesController.MCSales().searchInsuranceTypePayee(loInsPayer.getEntryNo(), lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             poSelRegInsur = loInsPayer;   // keep the same row selected
@@ -750,9 +976,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Re-reads the due date from the master into dpPaymentDueDate (without firing its change handler). Call it after
-     * anything that can change the due date on the master, such as the term search. Same rule as loadPaymentRecord():
-     * outside Credit the due date is the transaction date, and a due date before the transaction date is not kept.
+     * Re-reads the due date from the master into dpPaymentDueDate (without
+     * firing its change handler). Call it after anything that can change the
+     * due date on the master, such as the term search. Same rule as
+     * loadPaymentRecord(): outside Credit the due date is the transaction date,
+     * and a due date before the transaction date is not kept.
      */
     private void refreshDueDate() {
         try {
@@ -770,9 +998,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Number of days of the term saved on the master, 0 when it cannot be read. The getter name on the term model was not
-     * provided, so the usual names are tried by reflection; when none gives a number, every getter of the term is
-     * printed as "[TERM] ..." lines so the real name can be put in TERM_DAYS_GETTERS.
+     * Number of days of the term saved on the master, 0 when it cannot be read.
+     * The getter name on the term model was not provided, so the usual names
+     * are tried by reflection; when none gives a number, every getter of the
+     * term is printed as "[TERM] ..." lines so the real name can be put in
+     * TERM_DAYS_GETTERS.
      */
     private static final String[] TERM_DAYS_GETTERS = {"getTermValue", "getTermDays", "getDays", "getNoOfDays", "getNumberOfDays", "getDueDays", "getTerm"};
 
@@ -817,9 +1047,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * After a term search: due date = transaction date + the term's days, written to the master and shown in the picker.
-     * This ignores the Credit rule on purpose (the picker itself stays disabled outside Credit, but it must show the term's
-     * date). When the days cannot be read, falls back to refreshDueDate().
+     * After a term search: due date = transaction date + the term's days,
+     * written to the master and shown in the picker. This ignores the Credit
+     * rule on purpose (the picker itself stays disabled outside Credit, but it
+     * must show the term's date). When the days cannot be read, falls back to
+     * refreshDueDate().
      */
     private void applyTermDueDate() {
         try {
@@ -859,15 +1091,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     String lsOld = "tfMCRemarks".equals(lsID) ? textOf(() -> loUnit.getNotes())
                             : "tfMCWarrantyNo".equals(lsID) ? textOf(() -> loUnit.getWarrantyNo())
-                              : textOf(() -> loUnit.getKeyCode());
+                            : textOf(() -> loUnit.getKeyCode());
                     if (lsValue.equals(lsOld)) {
                         break;
                     }
                     poJSON = "tfMCRemarks".equals(lsID) ? loUnit.setNotes(lsValue)
                             : "tfMCWarrantyNo".equals(lsID) ? loUnit.setWarrantyNo(lsValue)
-                              : loUnit.setKeyCode(lsValue);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            : loUnit.setKeyCode(lsValue);
+                    if (hasError(poJSON)) {
+                        loadUnitRecord(pnUnitRow);
                         return;
                     }
                     loadTableMCItem();
@@ -883,9 +1115,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;   // unchanged
                     }
                     poJSON = loGaway.setQuantity(lnQty);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        return;
+                    if (hasError(poJSON)) {
+                        loadSummary();
+                        break;
                     }
                     loadTableGiveaways();
                     break;
@@ -901,8 +1133,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;   // unchanged
                     }
                     poJSON = loReg.setInsuranceAmount(lnRegAmt);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+                        loadSummary();
                         return;
                     }
                     loadTableRegAndInsur();   // refreshes the Amount column and re-formats the field
@@ -928,8 +1160,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         }
                         poJSON = loIns.setInsuranceYear(lnInsYear);    // ASSUMED setter
                     }
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+                        loadSummary();
                         return;
                     }
                     loadTableRegAndInsur();   // refresh the Amount / Year columns
@@ -946,9 +1178,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     if (lsValue == null || lsValue.trim().isEmpty()) {
                         if (!textOf(() -> master().getTermCode()).trim().isEmpty()) {
                             poJSON = master().setTermCode("");   // same "no term" value cmb_Changed() uses
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                                restoreTermText();   // the clear was refused: show what the master still holds
+                            if (hasError(poJSON)) {
+                                restoreTermText();
                                 return;
                             }
                         }
@@ -959,9 +1190,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     break;
                 case "tfPomoCode": {
-                    if (pbSearching) break;                          // focus left only because the F3 search ran
+                    if (pbSearching) {
+                        break;                          // focus left only because the F3 search ran
+                    }
                     final Model_Sales_Detail loUnit = poEditUnit;
-                    if (isBlankUnit(loUnit)) break;
+                    if (isBlankUnit(loUnit)) {
+                        break;
+                    }
                     String lsText = lsValue == null ? "" : lsValue.trim();
                     if (!lsText.isEmpty()) {
                         if (!lsText.equals(psPromoAtFocus.trim())) {
@@ -969,10 +1204,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         }
                         break;
                     }
-                    if (psPromoAtFocus.trim().isEmpty()) break;      // it was already empty: nothing to remove
+                    if (psPromoAtFocus.trim().isEmpty()) {
+                        break;      // it was already empty: nothing to remove
+                    }
                     poJSON = loUnit.setPromoID("");                  // ASSUMED setter
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
@@ -998,7 +1234,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadUnitRecord(pnUnitRow);   // put the old value back
                             return;
                         }
-                        if (lnNew == dbl(() -> loUnit.getDiscount())) break;
+                        if (lnNew == dbl(() -> loUnit.getDiscount())) {
+                            break;
+                        }
                         poJSON = loUnit.setDiscount(lnNew);          // ASSUMED setter
                     } else if ("tfPromoAddDisc".equals(lsID)) {
                         if (lnNew < 0) {
@@ -1006,7 +1244,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadUnitRecord(pnUnitRow);
                             return;
                         }
-                        if (lnNew == dbl(() -> loUnit.getAddDiscount())) break;
+                        if (lnNew == dbl(() -> loUnit.getAddDiscount())) {
+                            break;
+                        }
                         poJSON = loUnit.setAddDiscount(lnNew);       // ASSUMED setter
                     } else {
                         if (lnNew < 0) {
@@ -1014,11 +1254,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             loadUnitRecord(pnUnitRow);
                             return;
                         }
-                        if (lnNew == dbl(() -> loUnit.getFreight())) break;
+                        if (lnNew == dbl(() -> loUnit.getFreight())) {
+                            break;
+                        }
                         poJSON = loUnit.setFreight(lnNew);           // ASSUMED setter
                     }
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
@@ -1041,8 +1282,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;   // unchanged
                     }
                     poJSON = loMas.setCWTAmount(lnCwt);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         loadSummary();
                         return;
                     }
@@ -1124,8 +1364,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Refreshes the whole form from the transaction that is loaded in MCSales (after Browse, Update, Confirm, Void).
-     * The edit mode is read FIRST: the tables add their blank trailing row only while editing.
+     * Refreshes the whole form from the transaction that is loaded in MCSales
+     * (after Browse, Update, Confirm, Void). The edit mode is read FIRST: the
+     * tables add their blank trailing row only while editing.
      */
     private void reloadRecord() throws GuanzonException, SQLException {
         pnEditMode = oSalesController.MCSales().getEditMode();
@@ -1156,8 +1397,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     oSalesController.MCSales().initTransaction(); // reset the model's detail / giveaway / reg-insur / attachment lists
                     pnEditMode = EditMode.ADDNEW;
                     poJSON = oSalesController.MCSales().newTransaction();
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     oSalesController.MCSales().setIndustryID(psIndustryId);
@@ -1174,18 +1414,15 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 case "btnBrowse":
                     poJSON = oSalesController.MCSales().searchTransaction("", true, false);
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
-
                     ClearAll();
                     reloadRecord();   // reads the edit mode first, then fills every section and tab
                     break;
                 case "btnUpdate":
                     poJSON = oSalesController.MCSales().UpdateTransaction();
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     reloadRecord();   // now UPDATE: the tables get their blank row, the payment fields become editable
@@ -1197,8 +1434,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     poJSON = oSalesController.MCSales().saveTransaction();
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1211,8 +1447,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     poJSON = oSalesController.MCSales().CloseTransaction();
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1223,8 +1458,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         break;
                     }
                     poJSON = oSalesController.MCSales().VoidTransaction();
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1257,7 +1491,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
             try {
-                if (oApp != null) oApp.rollbackTrans();
+                if (oApp != null) {
+                    oApp.rollbackTrans();
+                }
             } catch (SQLException ex1) {
                 Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex1);
             }
@@ -1271,7 +1507,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE;
     }
 
-    /** The master (header) record of the transaction loaded in MCSales. */
+    /**
+     * The master (header) record of the transaction loaded in MCSales.
+     */
     private Model_Sales_Master master() {
         return oSalesController.MCSales().getMaster();
     }
@@ -1386,8 +1624,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 poJSON = null;   // combos with no model field yet
             }
 
-            if (poJSON != null && "error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
             if (fcmb == cmbRegistrationType) {
@@ -1441,8 +1678,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 poJSON = lbReg
                         ? poSectionReg.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO)
                         : poSectionIns.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO);
-                if ("error".equals(poJSON.get("result"))) {
-                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                if (hasError(poJSON)) {
                     return;
                 }
                 loadTableRegAndInsur();   // the Status column shows Charge / Free, and the payer field follows
@@ -1461,7 +1697,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return fdp.getValue() == null ? "" : DATE_FORMAT.format(fdp.getValue());
     }
 
-    /** Sets a date programmatically without triggering the change handler. */
+    /**
+     * Sets a date programmatically without triggering the change handler.
+     */
     private void setDate(DatePicker fdp, LocalDate fdValue) {
         boolean lbPrev = pbSyncing;
         pbSyncing = true;
@@ -1550,9 +1788,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // ModelTableDetail ("index01"...) until its backend model exists.
     // =========================================================================
     /**
-     * Remove column: a trash button per row, enabled only while editing. fpBlank tells which rows are still
-     * empty; those rows get no button (null = every row gets one).
-     * Neither the IntConsumer nor the Predicate may throw checked exceptions: callers must handle them.
+     * Remove column: a trash button per row, enabled only while editing.
+     * fpBlank tells which rows are still empty; those rows get no button (null
+     * = every row gets one). Neither the IntConsumer nor the Predicate may
+     * throw checked exceptions: callers must handle them.
      */
     private <S> void initRemoveColumn(TableColumn<S, String> fcol, final IntConsumer fiAction, final Predicate<S> fpBlank) {
         if (fcol == null) {
@@ -1637,7 +1876,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         lockColumnReordering(tblUnits);
     }
 
-    /** Registration and insurance list (Registration & Insurance tab). */
+    /**
+     * Registration and insurance list (Registration & Insurance tab).
+     */
     private void initTableRegAndInsur() {
         tblRowRegAndInsurNo.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
         tblRowRegAndInsurEngine.setCellValueFactory(cd -> cell(() -> regInsurEngine(cd.getValue())));
@@ -1645,14 +1886,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         tblRowRegAndInsurDesc.setCellValueFactory(cd -> cell(() -> cd.getValue() instanceof Model_Sales_Insurance
                 ? ((Model_Sales_Insurance) cd.getValue()).InsuranceType().getInsuranceTypeName()
                 : regInsurTypeId(cd.getValue())));
-        tblRowRegAndInsurAmount.setCellValueFactory(cd -> cell(() ->
-                cd.getValue() instanceof Model_Sales_Insurance
-                        ? money(dbl(() -> ((Model_Sales_Insurance) cd.getValue()).getInsuranceAmount()))
-                        : cd.getValue() instanceof Model_Sales_Registration
-                          ? money(dbl(() -> ((Model_Sales_Registration) cd.getValue()).getInsuranceAmount()))
-                          : ""));
-        tblRowRegAndInsurStat.setCellValueFactory(cd -> cell(() ->
-                isBlankRegInsur(cd.getValue()) ? "" : (isChargeTo(cd.getValue()) ? "Charge" : "Free")));
+        tblRowRegAndInsurAmount.setCellValueFactory(cd -> cell(()
+                -> cd.getValue() instanceof Model_Sales_Insurance
+                ? money(dbl(() -> ((Model_Sales_Insurance) cd.getValue()).getInsuranceAmount()))
+                : cd.getValue() instanceof Model_Sales_Registration
+                ? money(dbl(() -> ((Model_Sales_Registration) cd.getValue()).getInsuranceAmount()))
+                : ""));
+        tblRowRegAndInsurStat.setCellValueFactory(cd -> cell(()
+                -> isBlankRegInsur(cd.getValue()) ? "" : (isChargeTo(cd.getValue()) ? "Charge" : "Free")));
 
         // IntConsumer cannot throw checked exceptions: removeRegAndInsur() declares them, so they are handled here
         initRemoveColumn(tblRowRegAndInsurAction,
@@ -1719,8 +1960,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Attachment list. The rows are Model_Transaction_Attachment objects, so the columns read them with lambdas
-     * (PropertyValueFactory("index01") only works with ModelTableDetail).
+     * Attachment list. The rows are Model_Transaction_Attachment objects, so
+     * the columns read them with lambdas (PropertyValueFactory("index01") only
+     * works with ModelTableDetail).
      */
     private void initTableAttachments() {
         tblRowNoAttachment.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
@@ -1755,8 +1997,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * JavaFX 8 has no per-column "reorderable" flag, so the header row is told to cancel
-     * any column drag. The listener is attached to each header row only once.
+     * JavaFX 8 has no per-column "reorderable" flag, so the header row is told
+     * to cancel any column drag. The listener is attached to each header row
+     * only once.
      */
     private void lockColumnReordering(final TableView<?> ftbl) {
         ftbl.widthProperty().addListener((ObservableValue<? extends Number> source, Number oldWidth, Number newWidth) -> {
@@ -1807,7 +2050,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** The row of the other type that belongs to the same unit (same serial id), or null. */
+    /**
+     * The row of the other type that belongs to the same unit (same serial id),
+     * or null.
+     */
     private Model findSibling(Model foRow, boolean fbInsurance) {
         String lsSerial = regInsurSerialId(foRow);
         if (lsSerial == null || lsSerial.isEmpty()) {
@@ -1824,8 +2070,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Called when a registration / insurance row is selected: fills BOTH sections. The selected row fills its own
-     * section; the row of the other type for the same unit (same serial id) fills the other one, when it exists.
+     * Called when a registration / insurance row is selected: fills BOTH
+     * sections. The selected row fills its own section; the row of the other
+     * type for the same unit (same serial id) fills the other one, when it
+     * exists.
      */
     private void loadRegAndInsurRecord(final Model foRow) throws GuanzonException, SQLException {
         boolean lbPrev = pbSyncing;
@@ -1882,7 +2130,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Called when a giveaway row is selected. */
+    /**
+     * Called when a giveaway row is selected.
+     */
     private void loadGiveawayRecord(int fnRow) {
         boolean lbPrev = pbSyncing;
         pbSyncing = true;
@@ -1925,7 +2175,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Click on a unit row: loads it into the motorcycle fields; double-click moves focus to Key Code. */
+    /**
+     * Click on a unit row: loads it into the motorcycle fields; double-click
+     * moves focus to Key Code.
+     */
     private void setTblUnits_Clicked(MouseEvent event) {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
             int lnIndex = tblUnits.getSelectionModel().getSelectedIndex() + 1;   // model entry no. (1-based)
@@ -1950,7 +2203,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Click on a giveaway row: loads it into the giveaway fields; double-click moves focus to Qty. */
+    /**
+     * Click on a giveaway row: loads it into the giveaway fields; double-click
+     * moves focus to Qty.
+     */
     private void setTblGawayItem_Clicked(MouseEvent event) {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.READY) {
             int lnIndex = tblGawayItem.getSelectionModel().getSelectedIndex();
@@ -2077,10 +2333,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * A COPY of the model's giveaway entries for the table. Reads the model's list directly
-     * (getSalesGiveawaysList()) so nothing is created: getSalesGiveaways(n) adds a new, empty entry whenever
-     * entry n does not exist, which is what used to pile up blank rows on every load.
-     * Rows with a barcode are listed in order; blank rows are skipped except one trailing blank row (when asked).
+     * A COPY of the model's giveaway entries for the table. Reads the model's
+     * list directly (getSalesGiveawaysList()) so nothing is created:
+     * getSalesGiveaways(n) adds a new, empty entry whenever entry n does not
+     * exist, which is what used to pile up blank rows on every load. Rows with
+     * a barcode are listed in order; blank rows are skipped except one trailing
+     * blank row (when asked).
      */
     private List<Model_Sales_Giveaways> giveawayList(boolean fbWithBlankRow) {
         List<Model_Sales_Giveaways> laList = new ArrayList<Model_Sales_Giveaways>();
@@ -2101,7 +2359,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return laList;
     }
 
-    /** The giveaway row currently selected in the table (null when none / out of range). */
+    /**
+     * The giveaway row currently selected in the table (null when none / out of
+     * range).
+     */
     private Model_Sales_Giveaways selectedGiveaway() {
         return (pnGawayRow >= 1 && pnGawayRow <= gaway_data.size()) ? gaway_data.get(pnGawayRow - 1) : null;
     }
@@ -2187,8 +2448,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Loads tblRegAndIsur from the model: every registration followed by every insurance entry that has a serial or an
-     * insurance type. Reads the model's lists directly (nothing is created, so no blank rows pile up).
+     * Loads tblRegAndIsur from the model: every registration followed by every
+     * insurance entry that has a serial or an insurance type. Reads the model's
+     * lists directly (nothing is created, so no blank rows pile up).
      */
     private void loadTableRegAndInsur() {
         JFXUtil.LoadScreenComponents loading = JFXUtil.createLoadingComponents();
@@ -2271,11 +2533,17 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         new Thread(task).start();
     }
 
-    /** cChargeTo values: "1" = charged to the client, anything else = free. ASSUMED: confirm the codes. */
+    /**
+     * cChargeTo values: "1" = charged to the client, anything else = free.
+     * ASSUMED: confirm the codes.
+     */
     private static final String CHARGE_YES = "1";
     private static final String CHARGE_NO = "0";
 
-    /** true when the registration / insurance row is charged (getChargeTo() is a String, cChargeTo). */
+    /**
+     * true when the registration / insurance row is charged (getChargeTo() is a
+     * String, cChargeTo).
+     */
     private static boolean isChargeTo(Model fo) {
         String lsCharge = fo instanceof Model_Sales_Registration ? ((Model_Sales_Registration) fo).getChargeTo()
                 : fo instanceof Model_Sales_Insurance ? ((Model_Sales_Insurance) fo).getChargeTo() : null;
@@ -2283,12 +2551,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * New insurance / registration rows hold a blank String in their numeric fields, and every MCSales getter that
-     * returns such a row (getSalesInsurance(n), getSales...List()) runs computeTransaction() over all rows, which throws
-     * a ClassCastException. So the rows are NOT read through those getters: the backend's own row lists are read by
-     * reflection and the blank values are replaced with 0 through the base Model getValue()/setValue(), which do not
-     * compute. Must run BEFORE any getSalesInsurance / getSalesRegistration / list getter is called.
-     * (Field names paSalesInsurance / paSalesRegistration are the ones declared in MCSales.)
+     * New insurance / registration rows hold a blank String in their numeric
+     * fields, and every MCSales getter that returns such a row
+     * (getSalesInsurance(n), getSales...List()) runs computeTransaction() over
+     * all rows, which throws a ClassCastException. So the rows are NOT read
+     * through those getters: the backend's own row lists are read by reflection
+     * and the blank values are replaced with 0 through the base Model
+     * getValue()/setValue(), which do not compute. Must run BEFORE any
+     * getSalesInsurance / getSalesRegistration / list getter is called. (Field
+     * names paSalesInsurance / paSalesRegistration are the ones declared in
+     * MCSales.)
      */
     private void normalizeRegInsurRows() {
         MCSales loSales = oSalesController.MCSales();
@@ -2297,7 +2569,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         zeroBlankNumbers(rawRows(loSales, "paSalesRegistration"), "nInsAmtxx", 0.0);   // ASSUMED: same column name as the insurance amount
     }
 
-    /** The backend's own row list (private field of MCSales), without going through a computing getter. */
+    /**
+     * The backend's own row list (private field of MCSales), without going
+     * through a computing getter.
+     */
     @SuppressWarnings("unchecked")
     private List<Model> rawRows(MCSales foSales, String fsField) {
         try {
@@ -2311,7 +2586,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Replaces a blank / non-numeric value in the given column with fdDefault (a Number), row by row. */
+    /**
+     * Replaces a blank / non-numeric value in the given column with fdDefault
+     * (a Number), row by row.
+     */
     private void zeroBlankNumbers(List<Model> faRows, String fsColumn, Number fnDefault) {
         for (Model loRow : faRows) {
             if (loRow == null) {
@@ -2327,7 +2605,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** After a search added a row: the new row is the last entry of its list, so select that one. */
+    /**
+     * After a search added a row: the new row is the last entry of its list, so
+     * select that one.
+     */
     private void selectNewRegInsur(boolean fbInsurance) {
         normalizeRegInsurRows();   // must run before getSales...List(), which computes over every row
         MCSales loSales = oSalesController.MCSales();
@@ -2356,8 +2637,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * A row with neither a serial nor an insurance type is still empty.
-     * Used as a Predicate, so it must not throw checked exceptions: a row that cannot be read counts as empty.
+     * A row with neither a serial nor an insurance type is still empty. Used as
+     * a Predicate, so it must not throw checked exceptions: a row that cannot
+     * be read counts as empty.
      */
     private static boolean isBlankRegInsur(Model fo) {
         if (fo == null) {
@@ -2373,7 +2655,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Engine no. of the unit this row belongs to: found through the serial id in the units table. */
+    /**
+     * Engine no. of the unit this row belongs to: found through the serial id
+     * in the units table.
+     */
     private String regInsurEngine(Model fo) {
         return regInsurSerialValue(fo, true);
     }
@@ -2399,9 +2684,20 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // =========================================================================
     // Cell helpers for tables bound directly to the model classes
     // =========================================================================
-    private interface Getter { Object get() throws Exception; }
-    private interface UnitGetter { Object get(Model_Sales_Detail fo) throws Exception; }
-    private interface GawayGetter { Object get(Model_Sales_Giveaways fo) throws Exception; }
+    private interface Getter {
+
+        Object get() throws Exception;
+    }
+
+    private interface UnitGetter {
+
+        Object get(Model_Sales_Detail fo) throws Exception;
+    }
+
+    private interface GawayGetter {
+
+        Object get(Model_Sales_Giveaways fo) throws Exception;
+    }
 
     private static ObservableValue<String> cell(Getter fg) {
         try {
@@ -2421,8 +2717,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * A unit row counts as filled when it has a stock id OR a serial id, because the serial search
-     * may set only the serial. TODO(model): check the getSerialID() getter name.
+     * A unit row counts as filled when it has a stock id OR a serial id,
+     * because the serial search may set only the serial. TODO(model): check the
+     * getSerialID() getter name.
      */
     private static boolean isBlankUnit(Model_Sales_Detail fo) {
         return fo == null
@@ -2435,8 +2732,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Net amount of a unit line, as MCSales.computeTransaction() builds it: nDiscount is a RATE (%) applied to the
-     * line gross, nAddDiscount and nFreight are amounts; the charged registration / insurance is nInsAmtxx.
+     * Net amount of a unit line, as MCSales.computeTransaction() builds it:
+     * nDiscount is a RATE (%) applied to the line gross, nAddDiscount and
+     * nFreight are amounts; the charged registration / insurance is nInsAmtxx.
      */
     private static double unitNet(Model_Sales_Detail fo) {
         double lnGross = dbl(() -> fo.getUnitPrice()) * dbl(() -> fo.getQuantity());
@@ -2446,8 +2744,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Number as double. Returns 0 when the getter throws (e.g. ClassCastException: the model holds a blank
-     * String where a Number is expected), or when the value is null / blank / not numeric.
+     * Number as double. Returns 0 when the getter throws (e.g.
+     * ClassCastException: the model holds a blank String where a Number is
+     * expected), or when the value is null / blank / not numeric.
      */
     private static double dbl(Getter fg) {
         try {
@@ -2465,7 +2764,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Number getter that tolerates a model returning a String/blank where a Number is expected. */
+    /**
+     * Number getter that tolerates a model returning a String/blank where a
+     * Number is expected.
+     */
     private static String numText(Getter fg) {
         try {
             Object loVal = fg.get();
@@ -2475,13 +2777,19 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Raw model field as text ("" when missing); used where a typed getter is not available. */
+    /**
+     * Raw model field as text ("" when missing); used where a typed getter is
+     * not available.
+     */
     private static String gawayRaw(Model_Sales_Giveaways fo, String fsField) throws Exception {
         Object loVal = fo.getValue(fsField);
         return loVal == null ? "" : String.valueOf(loVal).trim();
     }
 
-    /** Typed getter first; if it fails (e.g. String stored where a Number is expected) read the raw field; else "0". */
+    /**
+     * Typed getter first; if it fails (e.g. String stored where a Number is
+     * expected) read the raw field; else "0".
+     */
     private static String gawayNum(Model_Sales_Giveaways fo, Getter fg, String fsField) {
         try {
             Object loVal = fg.get();
@@ -2508,7 +2816,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     // Helper methods to safely parse String results
     private double parseDouble(String value) {
-        if (value == null || value.trim().isEmpty()) return 0.0;
+        if (value == null || value.trim().isEmpty()) {
+            return 0.0;
+        }
         try {
             return Double.parseDouble(value.replace(",", ""));
         } catch (NumberFormatException e) {
@@ -2517,7 +2827,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     private int parseInt(String value) {
-        if (value == null || value.trim().isEmpty()) return 0;
+        if (value == null || value.trim().isEmpty()) {
+            return 0;
+        }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
@@ -2535,7 +2847,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         Model loRow = reginsur_data.get(fnRow);
         if (!isBlankRegInsur(loRow)) {
             poJSON = loRow instanceof Model_Sales_Registration
-                    ? oSalesController.MCSales().removeSalesRegistration(regInsurEntryNo(loRow))   // removes it and realigns the entry nos
+                    ? oSalesController.MCSales().removeSalesRegistration(regInsurEntryNo(loRow)) // removes it and realigns the entry nos
                     : oSalesController.MCSales().removeSalesInsurance(regInsurEntryNo(loRow));
             if ("error".equals(poJSON.get("result"))) {
                 ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
@@ -2566,7 +2878,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         loadTableGiveaways();
     }
 
-    /** The engine / frame come from unit_data, which loads in its own Task: re-read them once the units are there. */
+    /**
+     * The engine / frame come from unit_data, which loads in its own Task:
+     * re-read them once the units are there.
+     */
     private void refreshRegInsurEngine() {
         tblRegAndIsur.refresh();   // rebuilds the cells, so the Engine column re-reads unit_data
         if (poSelRegInsur != null) {
@@ -2586,7 +2901,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // Reads / writes Model_Sales_Master. The totals are computed by MCSales.computeTransaction() (only while editing);
     // this tab only displays them. CWT: the combo is Yes / No, the master keeps the typed CWT AMOUNT.
     // =========================================================================
-    /** "" / invalid -> -1 (no selection); the master stores combo indexes as text ("0", "1"...). */
+    /**
+     * "" / invalid -> -1 (no selection); the master stores combo indexes as
+     * text ("0", "1"...).
+     */
     private static int indexOf(String fsCode) {
         if (fsCode == null || fsCode.trim().isEmpty()) {
             return -1;
@@ -2606,7 +2924,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Runs MCSales.computeTransaction() (edit modes only) after the blank numeric fields were fixed. */
+    /**
+     * Runs MCSales.computeTransaction() (edit modes only) after the blank
+     * numeric fields were fixed.
+     */
     private void recomputeTransaction() {
         try {
             normalizeRegInsurRows();
@@ -2619,9 +2940,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * CWT = No: the CWT amount on the master is forced to 0. CWT = Yes: the amount the user typed is kept (it is written
-     * by txtField_LostFocus "tfPaymentCwt"). Then the totals are recomputed (a CWT amount above 0 turns the VAT sales
-     * into non-VAT sales in computeTransaction()).
+     * CWT = No: the CWT amount on the master is forced to 0. CWT = Yes: the
+     * amount the user typed is kept (it is written by txtField_LostFocus
+     * "tfPaymentCwt"). Then the totals are recomputed (a CWT amount above 0
+     * turns the VAT sales into non-VAT sales in computeTransaction()).
      */
     private void syncCwt() {
         if (!canEdit() || cmbPaymentCWT.getSelectionModel().getSelectedIndex() < 0) {
@@ -2643,7 +2965,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Fills the whole Payment tab from the master. Called after New / Browse / Update / Confirm / Void / advisor search. */
+    /**
+     * Fills the whole Payment tab from the master. Called after New / Browse /
+     * Update / Confirm / Void / advisor search.
+     */
     private void loadPaymentRecord() {
         final Model_Sales_Master loMas = master();
         boolean lbPrev = pbSyncing;
@@ -2685,7 +3010,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** True when at least one real unit has a promo (the unit's promo id is set). */
+    /**
+     * True when at least one real unit has a promo (the unit's promo id is
+     * set).
+     */
     private boolean hasPromo() {
         for (final Model_Sales_Detail loUnit : unit_data) {
             if (!isBlankUnit(loUnit) && !textOf(() -> loUnit.getPromoID()).trim().isEmpty()) {
@@ -2695,7 +3023,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return false;
     }
 
-    /** Sum of the CHARGED registration or insurance amounts, read from the backend's own lists (no compute). */
+    /**
+     * Sum of the CHARGED registration or insurance amounts, read from the
+     * backend's own lists (no compute).
+     */
     private double chargedTotal(boolean fbInsurance) {
         normalizeRegInsurRows();
         double lnSum = 0.0;
@@ -2710,9 +3041,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Fills the Payment tab totals and the transaction summary figures from the master (computed by MCSales).
-     * Net total = amount due + advances (amount due already subtracts the advances).
-     * Balance = amount due - CWT - amount paid. ASSUMED business rule.
+     * Fills the Payment tab totals and the transaction summary figures from the
+     * master (computed by MCSales). Net total = amount due + advances (amount
+     * due already subtracts the advances). Balance = amount due - CWT - amount
+     * paid. ASSUMED business rule.
      */
     private void loadPaymentTotals() {
         final Model_Sales_Master loMas = master();
@@ -2788,7 +3120,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** Returns the first problem on the Payment tab, or null when it is fine to save. */
+    /**
+     * Returns the first problem on the Payment tab, or null when it is fine to
+     * save.
+     */
     private String validatePayment() {
         if (cmbPaymentTranType.getSelectionModel().getSelectedIndex() < 0) {
             cmbPaymentTranType.requestFocus();
@@ -2846,7 +3181,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         updateAttachmentArrows();
     }
 
-    /** The attachment type is kept as the combo index in a raw column (see ATTACH_TYPE_COLUMN) AND in poAttachTypes. */
+    /**
+     * The attachment type is kept as the combo index in a raw column (see
+     * ATTACH_TYPE_COLUMN) AND in poAttachTypes.
+     */
     private void setAttachmentType(Model_Transaction_Attachment foModel, int fnType) {
         if (foModel == null || fnType < 0) {
             return;
@@ -2904,7 +3242,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return loType == null ? -1 : loType;
     }
 
-    /** The type combo was changed: it applies to the attachment selected in the table (nothing selected = just a choice for the next one). */
+    /**
+     * The type combo was changed: it applies to the attachment selected in the
+     * table (nothing selected = just a choice for the next one).
+     */
     private void setSelectedAttachmentType(int fnType) {
         if (pnAttachRow >= 0 && pnAttachRow < attach_data.size()) {
             setAttachmentType(attach_data.get(pnAttachRow), fnType);
@@ -2912,9 +3253,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Loads the attachments of the transaction that is open in MCSales. MCSales.loadAttachments() reads the attachment
-     * rows AND downloads the files, so it runs in a Task; the table is rebuilt when it is done.
-     * Call it after the edit mode is known (loadAttachments() opens the rows for update when the master is in UPDATE).
+     * Loads the attachments of the transaction that is open in MCSales.
+     * MCSales.loadAttachments() reads the attachment rows AND downloads the
+     * files, so it runs in a Task; the table is rebuilt when it is done. Call
+     * it after the edit mode is known (loadAttachments() opens the rows for
+     * update when the master is in UPDATE).
      */
     private void loadAttachmentRecords() {
         final int lnSeq = ++pnAttachLoadSeq;   // a newer load makes this one stale
@@ -2959,8 +3302,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Rebuilds the three lists from MCSales (only the ACTIVE attachments that have a file name: removed ones are
-     * deactivated in the model and kept there until save). Does not touch the selection: call showAttachment() after.
+     * Rebuilds the three lists from MCSales (only the ACTIVE attachments that
+     * have a file name: removed ones are deactivated in the model and kept
+     * there until save). Does not touch the selection: call showAttachment()
+     * after.
      */
     private void reloadAttachmentTable() {
         MCSales loSales = oSalesController.MCSales();
@@ -3053,7 +3398,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** The image of an attachment file, or null when the file is missing (download failed) or is not a readable image. */
+    /**
+     * The image of an attachment file, or null when the file is missing
+     * (download failed) or is not a readable image.
+     */
     private Image readImage(File ffile) {
         if (ffile == null || !ffile.isFile()) {
             return null;
@@ -3109,11 +3457,13 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Opens Windows File Explorer at the location of the attachment selected in tblAttachments.
-     * The file name and full path come from poAttachFiles (same order as attach_data), so no
-     * separate path cache is needed. All validation, the confirmation and the Explorer handling are
-     * delegated to ExplorerWindowUtil.confirmAndOpenAttachmentLocation(). Any exception is logged
-     * and not propagated, so a failure here never interrupts the rest of the UI.
+     * Opens Windows File Explorer at the location of the attachment selected in
+     * tblAttachments. The file name and full path come from poAttachFiles (same
+     * order as attach_data), so no separate path cache is needed. All
+     * validation, the confirmation and the Explorer handling are delegated to
+     * ExplorerWindowUtil.confirmAndOpenAttachmentLocation(). Any exception is
+     * logged and not propagated, so a failure here never interrupts the rest of
+     * the UI.
      */
     private void openAttachmentLocation() {
         try {
@@ -3149,8 +3499,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Opens SalesTransactionNonItemize.fxml as a modal listing the non-itemized giveaways of the source quotation of
-     * this transaction. The list is loaded by MCSales.loadSalesQuotationNonItemizedList(); the modal only displays it.
+     * Opens SalesTransactionNonItemize.fxml as a modal listing the non-itemized
+     * giveaways of the source quotation of this transaction. The list is loaded
+     * by MCSales.loadSalesQuotationNonItemizedList(); the modal only displays
+     * it.
      */
     private void showNonItemizeGiveaways() {
         try {
@@ -3238,8 +3590,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Refreshes the summary. The figures come from the master through loadPaymentTotals(); the rest mirrors an input
-     * on the form.
+     * Refreshes the summary. The figures come from the master through
+     * loadPaymentTotals(); the rest mirrors an input on the form.
      */
     private void loadSummary() {
         loadPaymentTotals();   // fills the payment tab and the figures of the summary first
@@ -3316,8 +3668,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Salesman name from the master. Unlike textOf(), a failure is LOGGED (not hidden), and when the name comes back
-     * blank the master's salesman-related getters are printed as "[SALESMAN] ..." lines so the real getter / column can be found.
+     * Salesman name from the master. Unlike textOf(), a failure is LOGGED (not
+     * hidden), and when the name comes back blank the master's salesman-related
+     * getters are printed as "[SALESMAN] ..." lines so the real getter / column
+     * can be found.
      */
     private String salesmanName() {
         String lsName = "";
@@ -3345,12 +3699,18 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return lsName;
     }
 
-    /** Description of the term saved on the master ("" when none / not readable). */
+    /**
+     * Description of the term saved on the master ("" when none / not
+     * readable).
+     */
     private String termText() {
         return textOf(() -> master().Term().getDescription()).trim();
     }
 
-    /** Puts the saved term back into tfPaymentTerm (only when it differs, and without firing change handlers). */
+    /**
+     * Puts the saved term back into tfPaymentTerm (only when it differs, and
+     * without firing change handlers).
+     */
     private void restoreTermText() {
         String lsText = pbTermPayment.get() ? termText() : "";
         if (lsText.equals(tfPaymentTerm.getText() == null ? "" : tfPaymentTerm.getText())) {
@@ -3365,12 +3725,18 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** true when the transaction has a source (quotation / reservation); null or blank source = no source. */
+    /**
+     * true when the transaction has a source (quotation / reservation); null or
+     * blank source = no source.
+     */
     private boolean hasSource() {
         return !textOf(() -> master().getSourceNo()).trim().isEmpty();
     }
 
-    /** Header line "name | contact | address". Call it AFTER the client fields are filled. */
+    /**
+     * Header line "name | contact | address". Call it AFTER the client fields
+     * are filled.
+     */
     private void showCustomerName() {
         if (tfClientName.getText() == null || tfClientName.getText().trim().isEmpty()) {
             taCustomerName.clear();   // no client yet: do not show " |  | "
@@ -3405,8 +3771,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * Birthplace text "town, province" of a client; "" when the id is blank or the town cannot be opened.
-     * No early returns in the callers: a blank birthplace must not stop the rest of the client info from loading.
+     * Birthplace text "town, province" of a client; "" when the id is blank or
+     * the town cannot be opened. No early returns in the callers: a blank
+     * birthplace must not stop the rest of the client info from loading.
      */
     private String birthplaceText(Model_Client_Master foClient) throws GuanzonException, SQLException {
         String lsId = foClient.getBirthPlaceId();
@@ -3419,7 +3786,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return foClient.BirthTown().getDescription() + ", " + foClient.BirthTown().Province().getDescription();
     }
 
-    /** Nationality text of a client; "" when the id is blank or the country cannot be opened. */
+    /**
+     * Nationality text of a client; "" when the id is blank or the country
+     * cannot be opened.
+     */
     private String citizenshipText(Model_Client_Master foClient) throws GuanzonException, SQLException {
         String lsId = foClient.getCitizenshipId();
         if (lsId == null || lsId.isEmpty()) {
@@ -3492,7 +3862,10 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
     }
 
-    /** java.sql.Date has no toInstant(), so convert it with its own toLocalDate(). */
+    /**
+     * java.sql.Date has no toInstant(), so convert it with its own
+     * toLocalDate().
+     */
     private static LocalDate toLocalDate(java.util.Date fdDate) {
         if (fdDate == null) {
             return null;
@@ -3561,14 +3934,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      */
     private void showMatrixRecipients() {
         try {
+            if (oSalesController.MCSales().getEditMode() == EditMode.ADDNEW) {
+                return;
+            }
             String lsTransNo = master().getTransactionNo();
             if (lsTransNo == null || lsTransNo.isEmpty()) {
                 ShowMessageFX.Warning("No transaction is loaded.", "Approval Status", null);
                 return;
             }
             JSONObject loJSON = oSalesController.MCSales().getMatrixRecipients();
-            if ("error".equals((String) loJSON.get("result"))) {
-                ShowMessageFX.Warning((String) loJSON.get("message"), "Approval Status", null);
+            if (hasError(loJSON)) {
                 return;
             }
             MatrixRecipientDialog.show(ChildAnchorPane.getScene().getWindow(), "Approval Status", loJSON);
@@ -3576,5 +3951,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
+    }
+
+    private boolean hasError(JSONObject foJSON) {
+        if (foJSON == null || !"error".equals(foJSON.get("result"))) {
+            return false;
+        }
+        String lsMessage = (String) foJSON.get("message");
+        if (lsMessage != null && !lsMessage.trim().isEmpty()) {
+            ShowMessageFX.Warning(lsMessage, "Warning", null);
+        }
+        return true;
     }
 }

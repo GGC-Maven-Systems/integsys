@@ -887,7 +887,7 @@ public class InventoryCount_PostingController implements Initializable, ScreenIn
         String lsTransNo = tfTransNo.getText();
         boolean lbHasTransaction = lsTransNo != null && !lsTransNo.isEmpty();
         boolean lbIsApproved = lbHasTransaction
-                && "1".equals(poAppController.getMaster().getTransactionStatus())
+                && "2".equals(poAppController.getMaster().getTransactionStatus())
                 && poAppController.getMaster().getCounterNo() >= 1;
         boolean lbIsCountable = lbHasTransaction
                 && "1".equals(poAppController.getMaster().getTransactionStatus())
