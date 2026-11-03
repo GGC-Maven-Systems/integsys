@@ -133,28 +133,6 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnApprove" contentDisplay="TOP" ellipsisString="" layoutX="465.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Approve">
-                                 <effect>
-                                    <Blend />
-                                 </effect>
-                                 <graphic>
-                                    <FontAwesomeIconView glyphName="CHECK" size="20" />
-                                 </graphic>
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="btnVoid" contentDisplay="TOP" ellipsisString="" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Void">
-                                 <effect>
-                                    <Blend />
-                                 </effect>
-                                 <graphic>
-                                    <FontAwesomeIconView glyphName="TIMES" size="20" />
-                                 </graphic>
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Button>
                               <Button fx:id="btnHistory" contentDisplay="TOP" ellipsisString="" layoutX="695.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
                                  <graphic>
                                     <FontAwesomeIconView glyphName="BOOK" size="20" />
@@ -211,16 +189,19 @@
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="30.0" />
                                           <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                           <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="90.0" />
                                           <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="415.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                           <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="180.0" minWidth="150.0" prefWidth="150.0" />
+                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="10.0" />
                                        </columnConstraints>
                                        <rowConstraints>
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
@@ -252,7 +233,7 @@
                                                             <DatePicker fx:id="dpValidFrom" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                             <TextField fx:id="tfValidityPeriod" GridPane.columnIndex="8" GridPane.rowIndex="2" />
                                                             <DatePicker fx:id="dpTo" layoutX="154.0" layoutY="42.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                            <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="12">
+                                                            <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="140.0" style="-fx-background-color: FF8201;" GridPane.columnIndex="14" GridPane.columnSpan="2">
                                              <children>
                                                                   <Label fx:id="lblStatus" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="142.0" text="STATUS" textAlignment="CENTER">
                                                    <font>
@@ -263,6 +244,8 @@
                                           </AnchorPane>
                                           <Label text="Mode of Payment" GridPane.columnIndex="9" GridPane.rowIndex="2" />
                                           <ComboBox prefWidth="150.0" GridPane.columnIndex="11" GridPane.rowIndex="2" />
+                                          <Label text="Discount Amount" GridPane.columnIndex="12" GridPane.rowIndex="2" />
+                                          <TextField alignment="CENTER_RIGHT" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="2" />
                                                         </children>
                                     </GridPane>
                                  </children>
@@ -278,7 +261,9 @@
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                                       <ColumnConstraints hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="139.0" />
-                                                      <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="200.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="110.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="120.0" />
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="20.0" />
                                                    </columnConstraints>
@@ -293,13 +278,13 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                        <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="3">
+                                                                        <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="5">
                                                          <font>
                                                             <Font name="System Bold" size="14.0" />
                                                          </font>
                                                       </Label>
-                                                                        <CheckBox mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="5" GridPane.halignment="LEFT" />
-                                                      <TextField promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="1" />
+                                                                        <CheckBox mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="7" GridPane.halignment="LEFT" />
+                                                      <TextField promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="1" />
                                                       <Label text="Promo Type" GridPane.rowIndex="2" />
                                                       <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                       <Label text="Add Ons" GridPane.columnSpan="3" GridPane.halignment="LEFT">
@@ -311,6 +296,8 @@
                                                          </GridPane.margin>
                                                       </Label>
                                                       <FontAwesomeIconView fill="#ff8201" glyphName="GIFT" size="20" GridPane.halignment="LEFT" />
+                                                      <Label layoutX="45.0" layoutY="72.0" text="Discount Amount" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                                      <TextField alignment="CENTER_RIGHT" layoutX="115.0" layoutY="39.0" promptText="0.00" GridPane.columnIndex="5" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                                                                     </children>
                                                 </GridPane>
                                              </children>
@@ -328,7 +315,9 @@
                                                       <TableView fx:id="tblViewDetail" GridPane.vgrow="ALWAYS">
                                                          <columns>
                                                             <TableColumn maxWidth="205.0" minWidth="30.0" prefWidth="33.000030517578125" text="No" />
-                                                            <TableColumn maxWidth="380.0" minWidth="45.0" prefWidth="350.0" text="Add On" />
+                                                            <TableColumn maxWidth="380.0" minWidth="45.0" prefWidth="221.0" text="Add On" />
+                                                            <TableColumn maxWidth="511.0" minWidth="45.0" prefWidth="101.0" text="Amount" />
+                                                            <TableColumn maxWidth="511.0" minWidth="45.0" prefWidth="102.0" text="Discount Amt" />
                                                          </columns>
                                                       </TableView>
                                                    </children>
