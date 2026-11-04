@@ -26,8 +26,7 @@ public class ModelSalesInquiry_Detail {
             "PO",
             "Financing",
             "Insurance",
-            "Term",
-            "Applicable to All"
+            "Term"
     );
     public static ObservableList<String> CategoryType = FXCollections.observableArrayList(
             "New",
