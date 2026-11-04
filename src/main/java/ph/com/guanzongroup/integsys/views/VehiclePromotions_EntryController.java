@@ -626,6 +626,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void loadRecordAddOns() {
+        if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
+            return;
+        }
         tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).getPromoType());
         JFXUtil.setCmbValue(cmbPromoType, !poController.PromotionAddOnList(pnAddOns).getPromoType().equals("") ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
         tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), true));
@@ -633,18 +636,27 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void loadRecordFreebies() {
+        if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
+            return;
+        }
         tfFreebie.setText(poController.PromotionFreebieList(pnFreebies).getFreebieId());
         tfQuantity.setText(String.valueOf(poController.PromotionFreebieList(pnFreebies).getQuantity()));
         cbActive.setSelected(poController.PromotionFreebieList(pnFreebies).getRecordStatus());
     }
 
     private void loadRecordInclusion() {
+        if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
+            return;
+        }
         tfInclusion.setText(poController.PromotionInclusionList(pnInclusion).getPromoInclusionId());
         tfQuantityInclusion.setText(String.valueOf(poController.PromotionInclusionList(pnInclusion).getQuantity()));
         cbActiveInclusion.setSelected(poController.PromotionInclusionList(pnInclusion).getRecordStatus());
     }
 
     private void loadRecordPromoAvailability() {
+        if (pnDetail < 0 || pnDetail > poController.getPromotionApplicabilityCount() - 1) {
+            return;
+        }
         try {
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
