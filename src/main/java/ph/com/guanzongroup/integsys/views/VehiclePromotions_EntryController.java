@@ -426,11 +426,17 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     break;
                 case UP:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNext(true, true)},});
+                        {new String[]{"tfAddOns", "tfDiscountAmountAddOns"}, (Runnable) () -> moveNextAddOns(true, true)},
+                        {new String[]{"tfFreebie", "tfQuantity"}, (Runnable) () -> moveNextFreebies(true, true)},
+                        {new String[]{"tfInclusion", "tfQuantityInclusion"}, (Runnable) () -> moveNextInclusion(true, true)},
+                        {new String[]{"tfBrand", "tfModel", "tfVariant"}, (Runnable) () -> moveNext(true, true)},});
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfAmount"}, (Runnable) () -> moveNext(false, true)},});
+                        {new String[]{"tfAddOns", "tfDiscountAmountAddOns"}, (Runnable) () -> moveNextAddOns(false, true)},
+                        {new String[]{"tfFreebie", "tfQuantity"}, (Runnable) () -> moveNextFreebies(false, true)},
+                        {new String[]{"tfInclusion", "tfQuantityInclusion"}, (Runnable) () -> moveNextInclusion(false, true)},
+                        {new String[]{"tfBrand", "tfModel", "tfVariant"}, (Runnable) () -> moveNext(false, true)},});
                     break;
                 default:
                     break;
@@ -509,6 +515,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (pbEntered) {
+                            moveNextAddOns(false, true);
+                            pbEntered = false;
+                        }
                         break;
                 }
                 loadTableAddOns.reload();
@@ -526,6 +536,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         poJSON = poController.PromotionFreebieList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (pbEntered) {
+                            moveNextFreebies(false, true);
+                            pbEntered = false;
                         }
                         break;
                 }
@@ -545,6 +559,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         poJSON = poController.PromotionFreebieList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (pbEntered) {
+                            moveNextInclusion(false, true);
+                            pbEntered = false;
                         }
                         break;
                 }
@@ -869,8 +887,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 tblViewMain,
                 main_data,
                 () -> {
-                    pbEntered = false;
-                    // Setting data to table detail
                     Platform.runLater(() -> {
                         int lnCtr;
                         main_data.clear();
@@ -892,23 +908,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                             "", "", "", "", "", ""
                                     ));
                         }
-
-//                        if (pnDetail < 0 || pnDetail
-//                                >= details_data.size()) {
-//                            if (!details_data.isEmpty()) {
-//                                /* FOCUS ON FIRST ROW */
-//                                tblViewDetail.getSelectionModel().select(0);
-//                                tblViewDetail.getFocusModel().focus(0);
-//                                pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
-////                                    loadRecordDetail();
-//                            }
-//                        } else {
-//                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-//                            tblViewDetail.getSelectionModel().select(pnDetail);
-//                            tblViewDetail.getFocusModel().focus(pnDetail);
-////                                loadRecordDetail();
-//                        }
-//                            loadRecordMaster();
 //                        } catch (SQLException | GuanzonException ex) {
 //                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
 //                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
