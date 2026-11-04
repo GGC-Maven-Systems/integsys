@@ -91,7 +91,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     private ObservableList<ModelInclusion_Detail> inclusion_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleAddOn_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleAddOn_List> main_data = FXCollections.observableArrayList();
-    ObservableList<String> promotype = FXCollections.observableArrayList("data", "data2");
+    ObservableList<String> promotype = FXCollections.observableArrayList("Included", "Free", "Discounted");
 
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
@@ -107,7 +107,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnHistory, btnPrint, btnRetrieve, btnClose;
+    private Button btnNew, btnUpdate, btnSearch, btnSave, btnVoid, btnCancel, btnHistory, btnPrint, btnRetrieve, btnClose;
     @FXML
     private TextField tfPromoCode, tfDescription, tfDiscountAmount, tfAddOn, tfDiscountAmountAddOns, tfFreebie, tfQuantity, tfInclusion, tfQuantityInclusion, tfBrand, tfModel, tfVariant;
     @FXML
@@ -119,7 +119,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     @FXML
     private TableView tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail, tblViewMain;
     @FXML
-    private TableColumn tblNoAddOns, tblAddOn, tblAmount, tblDiscountAmt, tblNoFreebies, tblFreebie, tblQuantityFreebies, tblNoInclusion, tblInclusion, tblQuantityInclusion, tblNoDetail, tblBrand, tblModel, tblVariant, tblExclude, tblNoMain, tblDescription, tblFrom, tblTo;
+    private TableColumn tblNoAddOns, tblAddOn, tblAmount, tblDiscountAmt, tblNoFreebies, tblFreebie, tblQuantityFreebies, tblNoInclusion, tblInclusion, tblQuantityInclusion, tblNoDetail, tblBrand, tblModel, tblVariant, tblExclude, tblStatus, tblNoMain, tblFrom, tblTo, tblDescription;
 
     LocalDate ValidFrom;
 
@@ -495,14 +495,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfDescription":
-                        poJSON = poController.Detail(0).setDescription(lsValue);
+                        poJSON = poController.PromotionMaster().setDescription(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfDiscountAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.Detail(0).setDiscountAmount(Double.parseDouble(lsValue));
+                        poJSON = poController.PromotionMaster().setDiscountAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -616,7 +616,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             return;
         }
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
-        tfPromoCode.setText(poController.Detail(0).getPromotionCode());
+        tfPromoCode.setText(poController.PromotionMaster().getPromotionCode());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
@@ -627,31 +627,43 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void loadRecordAddOns() {
-        if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
-            return;
+        try {
+            if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
+                return;
+            }
+            tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).AddOnType().getAddTypeName());
+            JFXUtil.setCmbValue(cmbPromoType, !poController.PromotionAddOnList(pnAddOns).getPromoType().equals("") ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
+            tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), true));
+            cbAddOns.setSelected(poController.PromotionAddOnList(pnAddOns).getRecordStatus());
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).getPromoType());
-        JFXUtil.setCmbValue(cmbPromoType, !poController.PromotionAddOnList(pnAddOns).getPromoType().equals("") ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
-        tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), true));
-        cbAddOns.setSelected(poController.PromotionAddOnList(pnAddOns).getRecordStatus());
     }
 
     private void loadRecordFreebies() {
-        if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
-            return;
+        try {
+            if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
+                return;
+            }
+            tfFreebie.setText(poController.PromotionFreebieList(pnFreebies).Freebie().getDescription());
+            tfQuantity.setText(String.valueOf(poController.PromotionFreebieList(pnFreebies).getQuantity()));
+            cbActive.setSelected(poController.PromotionFreebieList(pnFreebies).getRecordStatus());
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        tfFreebie.setText(poController.PromotionFreebieList(pnFreebies).getFreebieId());
-        tfQuantity.setText(String.valueOf(poController.PromotionFreebieList(pnFreebies).getQuantity()));
-        cbActive.setSelected(poController.PromotionFreebieList(pnFreebies).getRecordStatus());
     }
 
     private void loadRecordInclusion() {
-        if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
-            return;
+        try {
+            if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
+                return;
+            }
+            tfInclusion.setText(poController.PromotionInclusionList(pnInclusion).Inclusion().getDescription());
+            tfQuantityInclusion.setText(String.valueOf(poController.PromotionInclusionList(pnInclusion).getQuantity()));
+            cbActiveInclusion.setSelected(poController.PromotionInclusionList(pnInclusion).getRecordStatus());
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        tfInclusion.setText(poController.PromotionInclusionList(pnInclusion).getPromoInclusionId());
-        tfQuantityInclusion.setText(String.valueOf(poController.PromotionInclusionList(pnInclusion).getQuantity()));
-        cbActiveInclusion.setSelected(poController.PromotionInclusionList(pnInclusion).getRecordStatus());
     }
 
     private void loadRecordPromoAvailability() {
@@ -1010,7 +1022,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 //                                }
                                 addons_data.add(
                                         new ModelVehicleAddOn_Detail(String.valueOf(lnCtr + 1),
-                                                getData(String.valueOf(poController.PromotionAddOnList(lnCtr).getPromoType())),
+                                                getData(String.valueOf(poController.PromotionAddOnList(lnCtr).AddOnType().getAddTypeName())),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(lnCtr).AddOnType().getAmount(), false)),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(lnCtr).getDiscountAmount(), false)),
                                                 "",
@@ -1051,44 +1063,50 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     pbEntered = false;
                     // Setting data to table detail
                     Platform.runLater(() -> {
-                        int lnCtr;
-                        pbEntered = false;
-                        freebies_data.clear();
-                        for (lnCtr = 0; lnCtr < poController.getPromotionFreebieCount(); lnCtr++) {
-//                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
+                        try {
+
+                            int lnCtr;
+                            pbEntered = false;
+                            freebies_data.clear();
+                            for (lnCtr = 0; lnCtr < poController.getPromotionFreebieCount(); lnCtr++) {
+                                //if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
-                            freebies_data.add(
-                                    new ModelFreebies_Detail(String.valueOf(lnCtr + 1),
-                                            getData(String.valueOf(poController.PromotionFreebieList(lnCtr).getPromotionCode())),
-                                            String.valueOf(poController.PromotionFreebieList(lnCtr).getQuantity()),
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            String.valueOf(lnCtr)
-                                    ));
-                        }
+                                freebies_data.add(
+                                        new ModelFreebies_Detail(String.valueOf(lnCtr + 1),
+                                                getData(String.valueOf(poController.PromotionFreebieList(lnCtr).Freebie().getDescription())),
+                                                String.valueOf(poController.PromotionFreebieList(lnCtr).getQuantity()),
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                String.valueOf(lnCtr)
+                                        ));
 
-                        if (pnFreebies < 0 || pnFreebies
-                                >= freebies_data.size()) {
-                            if (!freebies_data.isEmpty()) {
-                                /* FOCUS ON FIRST ROW */
-                                tblViewFreebies.getSelectionModel().select(0);
-                                tblViewFreebies.getFocusModel().focus(0);
-                                pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
+                            }
+                            if (pnFreebies < 0 || pnFreebies
+                                    >= freebies_data.size()) {
+                                if (!freebies_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    tblViewFreebies.getSelectionModel().select(0);
+                                    tblViewFreebies.getFocusModel().focus(0);
+                                    pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
+                                    loadRecordFreebies();
+                                }
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                tblViewFreebies.getSelectionModel().select(pnFreebies);
+                                tblViewFreebies.getFocusModel().focus(pnFreebies);
                                 loadRecordFreebies();
                             }
-                        } else {
-                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                            tblViewFreebies.getSelectionModel().select(pnFreebies);
-                            tblViewFreebies.getFocusModel().focus(pnFreebies);
-                            loadRecordFreebies();
+                            loadRecordMaster();
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
-                        loadRecordMaster();
                     });
+
                 });
         loadTableInclusion = new JFXUtil.ReloadableTableTask(
                 tblViewInclusion,
@@ -1097,43 +1115,47 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     pbEntered = false;
                     // Setting data to table detail
                     Platform.runLater(() -> {
-                        int lnCtr;
-                        pbEntered = false;
-                        inclusion_data.clear();
-                        for (lnCtr = 0; lnCtr < poController.getPromotionInclusionCount(); lnCtr++) {
-//                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
+                        try {
+                            int lnCtr;
+                            pbEntered = false;
+                            inclusion_data.clear();
+                            for (lnCtr = 0; lnCtr < poController.getPromotionInclusionCount(); lnCtr++) {
+                                //  if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
-                            inclusion_data.add(
-                                    new ModelInclusion_Detail(String.valueOf(lnCtr + 1),
-                                            getData(String.valueOf(poController.PromotionInclusionList(lnCtr).getPromotionCode())),
-                                            String.valueOf(poController.PromotionInclusionList(lnCtr).getQuantity()),
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            "",
-                                            String.valueOf(lnCtr)
-                                    ));
-                        }
+                                inclusion_data.add(
+                                        new ModelInclusion_Detail(String.valueOf(lnCtr + 1),
+                                                getData(String.valueOf(poController.PromotionInclusionList(lnCtr).Inclusion().getDescription())),
+                                                String.valueOf(poController.PromotionInclusionList(lnCtr).getQuantity()),
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                "",
+                                                String.valueOf(lnCtr)
+                                        ));
 
-                        if (pnInclusion < 0 || pnInclusion
-                                >= inclusion_data.size()) {
-                            if (!inclusion_data.isEmpty()) {
-                                /* FOCUS ON FIRST ROW */
-                                tblViewInclusion.getSelectionModel().select(0);
-                                tblViewInclusion.getFocusModel().focus(0);
-                                pnInclusion = tblViewInclusion.getSelectionModel().getSelectedIndex();
+                            }
+                            if (pnInclusion < 0 || pnInclusion
+                                    >= inclusion_data.size()) {
+                                if (!inclusion_data.isEmpty()) {
+                                    /* FOCUS ON FIRST ROW */
+                                    tblViewInclusion.getSelectionModel().select(0);
+                                    tblViewInclusion.getFocusModel().focus(0);
+                                    pnInclusion = tblViewInclusion.getSelectionModel().getSelectedIndex();
+                                    loadRecordInclusion();
+                                }
+                            } else {
+                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                tblViewInclusion.getSelectionModel().select(pnInclusion);
+                                tblViewInclusion.getFocusModel().focus(pnInclusion);
                                 loadRecordInclusion();
                             }
-                        } else {
-                            /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                            tblViewInclusion.getSelectionModel().select(pnInclusion);
-                            tblViewInclusion.getFocusModel().focus(pnInclusion);
-                            loadRecordInclusion();
+                            loadRecordMaster();
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
-                        loadRecordMaster();
                     });
                 });
     }
@@ -1292,14 +1314,18 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
         JFXUtil.setButtonsVisibility(lbShow2, btnPrint);
-
+        JFXUtil.setButtonsVisibility(false, btnVoid);
         if (fnValue != EditMode.READY) {
             return;
         }
         switch (poController.Master().getRecordStatus()) {
+            case ValidityPeriodStatus.OPEN:
+            case ValidityPeriodStatus.APPROVED:
+                JFXUtil.setButtonsVisibility(true, btnVoid);
+                break;
             case ValidityPeriodStatus.VOID:
             case ValidityPeriodStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid);
                 break;
         }
     }
