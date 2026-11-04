@@ -34,6 +34,7 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.AddOnType;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.AddOnTypeStatus;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -61,7 +62,7 @@ public class AddOnsController implements Initializable, ScreenInterface {
     @FXML
     private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnVoid, btnDeactivate, btnHistory, btnClose;
     @FXML
-    private TextField tfAddOnID, tfDescription;
+    private TextField tfAddOnID, tfDescription, tfAmount;
     @FXML
     private ComboBox cmbSource;
     @FXML
@@ -273,6 +274,16 @@ public class AddOnsController implements Initializable, ScreenInterface {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "tfAmount":
+                        if(lsValue == null || "".equals(lsValue)){
+                            lsValue = "0.00";
+                        }
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.getModel().setAmount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
                 loadRecordMaster();
             });
@@ -291,9 +302,9 @@ public class AddOnsController implements Initializable, ScreenInterface {
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtMaster_Focus, tfDescription);
-
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfDescription, tfAmount);
+        CustomCommonUtil.inputDecimalOnly(tfAmount);
+       JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
     }
 
     private void initComboboxes() {
@@ -340,6 +351,7 @@ public class AddOnsController implements Initializable, ScreenInterface {
             JFXUtil.setCmbValue(cmbSource, !poController.getModel().getSource().equals("") ? Integer.valueOf(poController.getModel().getSource()) : -1);
         }
         tfDescription.setText(poController.getModel().getAddTypeName());
+        tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getModel().getAmount().doubleValue(), false));
     }
 
     private boolean isActive() {

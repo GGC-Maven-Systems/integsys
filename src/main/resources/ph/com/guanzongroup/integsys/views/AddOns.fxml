@@ -118,6 +118,7 @@
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="15.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
                                           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="10.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
@@ -148,6 +149,12 @@
                                              </font>
                                           </Label>
                                           <ComboBox fx:id="cmbSource" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                          <Label layoutX="49.0" layoutY="89.0" text="Amount" GridPane.rowIndex="4">
+                                             <font>
+                                                <Font size="12.0" />
+                                             </font>
+                                          </Label>
+                                          <TextField fx:id="tfAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="84.0" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                                     </children>
                                     </GridPane>
                                             </children>

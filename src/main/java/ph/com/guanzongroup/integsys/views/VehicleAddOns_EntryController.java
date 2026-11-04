@@ -551,6 +551,11 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     if (isContainsChecked()) {
                         processAction("cbActive", checkedBox.isSelected() ? "1" : "0");
                     } else {
+                        if(poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW){
+                            if(!checkedBox.isSelected()){
+                                poController.Detail(pnDetail).setAmount(0.00);
+                            }
+                        }
                         poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -788,6 +793,12 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 if (isConsistent) {
                     for (int i = 0; i < listCount.size(); i++) {
                         int number = listCount.get(i);
+                        
+                        if(poController.Detail(number).getEditMode() == EditMode.ADDNEW){
+                            if(!lbcb){
+                                poController.Detail(number).setAmount(0.00);
+                            }
+                        }
                         poController.Detail(number).setRecordStatus(lbcb);
                     }
 
