@@ -351,12 +351,11 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void retrievePromotions() {
         poJSON = new JSONObject();
-//        poJSON = poController.loadAPPaymentAdjustment("", tfSearchSupplier.getText(), tfSearchReferenceNo.getText());
-//        if (!"success".equals((String) poJSON.get("result"))) {
-//            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//        } else {
-//            loadTableMain();
-//        }
+        poJSON = poController.loadTransactionList();
+        if (!"success".equals((String) poJSON.get("result"))) {
+            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+        }
+        loadTableMain.reload();
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
