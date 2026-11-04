@@ -951,6 +951,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 "", "",
                                                 "", "", "", "", "", ""
                                         ));
+                                if (JFXUtil.isObjectEqualTo(poController.TransactionList(lnCtr).getRecordStatus(), ValidityPeriodStatus.CANCELLED)) {
+                                    JFXUtil.highlightByKey(tblViewMain, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+                                }
                             }
                         });
                     } catch (InterruptedException ex) {
