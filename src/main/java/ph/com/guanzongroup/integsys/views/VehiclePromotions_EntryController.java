@@ -353,10 +353,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void retrievePromotions() {
         poJSON = new JSONObject();
+        poController.setTransactionStatus("0123");
         poJSON = poController.loadTransactionList();
-        if (!"success".equals((String) poJSON.get("result"))) {
-            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-        }
         loadTableMain.reload();
     }
 
@@ -614,6 +612,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             });
 
     private void loadRecordMaster() {
+        if (poController.getDetailCount() <= 0) {
+            return;
+        }
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
         tfPromoCode.setText(poController.Detail(0).getPromotionCode());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
@@ -621,7 +622,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
         JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
         tfDescription.setText(poController.Detail(0).getDescription());
-        JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(0).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(0).getPaymentForm()) : -1);
+        JFXUtil.setCmbValue(cmbModeOfPayment, !JFXUtil.isObjectEqualTo(poController.Detail(0).getPaymentForm(), "", null) ? Integer.valueOf(poController.Detail(0).getPaymentForm()) : -1);
         tfDiscountAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(0).getDiscountAmount().doubleValue(), true));
     }
 
@@ -917,27 +918,32 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 tblViewMain,
                 main_data,
                 () -> {
-                    Platform.runLater(() -> {
-                        int lnCtr;
-                        main_data.clear();
-                        for (lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+                    try {
+                        Thread.sleep(100);
+                        Platform.runLater(() -> {
+                            int lnCtr;
+                            main_data.clear();
+                            for (lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
 //                                }
-                            main_data.add(
-                                    new ModelVehicleAddOn_List(
-                                            String.valueOf(lnCtr + 1),
-                                            getData(String.valueOf(poController.TransactionList(lnCtr).getValidityId())),
-                                            String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
-                                            String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
-                                            "",
-                                            "",
-                                            "",
-                                            "", "",
-                                            "", "", "", "", "", ""
-                                    ));
-                        }
-                    });
+                                main_data.add(
+                                        new ModelVehicleAddOn_List(
+                                                String.valueOf(lnCtr + 1),
+                                                getData(String.valueOf(poController.TransactionList(lnCtr).getValidityId())),
+                                                String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
+                                                String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
+                                                "",
+                                                "",
+                                                "",
+                                                "", "",
+                                                "", "", "", "", "", ""
+                                        ));
+                            }
+                        });
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
                 });
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -1285,7 +1291,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
-        JFXUtil.setButtonsVisibility(true, btnPrint);
+        JFXUtil.setButtonsVisibility(lbShow2, btnPrint);
 
         if (fnValue != EditMode.READY) {
             return;
