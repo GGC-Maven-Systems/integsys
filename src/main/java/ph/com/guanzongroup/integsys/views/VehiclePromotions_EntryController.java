@@ -969,8 +969,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     Platform.runLater(() -> {
                         int lnCtr;
                         pbEntered = false;
+
                         details_data.clear();
                         try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadApplicability();
+                            }
                             for (lnCtr = 0; lnCtr < poController.getPromotionApplicabilityCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
@@ -1006,6 +1010,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
                 });
@@ -1020,6 +1026,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         pbEntered = false;
                         addons_data.clear();
                         try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadAddOn();
+                            }
                             for (lnCtr = 0; lnCtr < poController.getPromotionAddOnCount(); lnCtr++) {
 //                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
 //                                    continue;
@@ -1057,6 +1066,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
                 });
@@ -1068,7 +1079,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     // Setting data to table detail
                     Platform.runLater(() -> {
                         try {
-
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadFreebie();
+                            }
                             int lnCtr;
                             pbEntered = false;
                             freebies_data.clear();
@@ -1108,6 +1121,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
 
@@ -1120,6 +1135,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     // Setting data to table detail
                     Platform.runLater(() -> {
                         try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadInclusion();
+                            }
                             int lnCtr;
                             pbEntered = false;
                             inclusion_data.clear();
@@ -1159,6 +1177,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             loadRecordMaster();
                         } catch (SQLException | GuanzonException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
                 });
@@ -1196,7 +1216,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void initDetailsGrid() {
-        JFXUtil.setColumnCenter(tblNoDetail);
+        JFXUtil.setColumnCenter(tblNoDetail, tblStatus);
         JFXUtil.setColumnLeft(tblBrand, tblModel, tblVariant, tblExclude);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
@@ -1254,7 +1274,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         tblViewAddOns.setOnMouseClicked(event -> {
             if (addons_data.size() > 0) {
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
-                    ModelVehicleAddOns_Detail selected = (ModelVehicleAddOns_Detail) tblViewAddOns.getSelectionModel().getSelectedItem();
+                    ModelVehicleAddOn_Detail selected = (ModelVehicleAddOn_Detail) tblViewAddOns.getSelectionModel().getSelectedItem();
                     if (selected != null) {
                         int lnRow = Integer.parseInt(addons_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex10());
                         pnAddOns = lnRow;
