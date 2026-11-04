@@ -915,7 +915,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         JFXUtil.setFocusListener(txtPromotionApplicability_Focus, tfBrand, tfModel, tfVariant);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
-        JFXUtil.setCommaFormatter(tfDiscountAmount);
+        JFXUtil.setCommaFormatter(tfDiscountAmount, tfDiscountAmountAddOns);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityInclusion);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail);
