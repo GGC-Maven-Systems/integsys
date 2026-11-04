@@ -30,7 +30,7 @@
 
 <?import java.net.URL?>
 
-<AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@../css/StyleSheet.css" />
         <URL value="@../css/Tables.css" />
@@ -341,7 +341,7 @@
                                                                                                                                     </padding>
                                                                                                                                 </Label>
                                                                                                                                 <TextField fx:id="tfClientName" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="3" />
-                                                                                                                                <Button fx:id="btnAddClient" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3">
+                                                                                                                                <Button fx:id="btnAddClient" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" visible="false" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3">
                                                                                                                                     <tooltip>
                                                                                                                                         <Tooltip text="Add New Client" />
                                                                                                                                     </tooltip>
@@ -494,7 +494,7 @@
                                                                                                    </padding>
                                                                                                 </Label>
                                                                                                 <TextField fx:id="tfCoClientName" promptText="PRESS F3 : Search" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="3" />
-                                                                                                <Button fx:id="btnAddClient1" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3">
+                                                                                                <Button fx:id="btnAddClient1" contentDisplay="CENTER" maxHeight="25.0" maxWidth="30.0" minWidth="25.0" mnemonicParsing="false" styleClass="button_process" visible="false" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3">
                                                                                                    <tooltip>
                                                                                                       <Tooltip text="Add New Client" />
                                                                                                    </tooltip>
