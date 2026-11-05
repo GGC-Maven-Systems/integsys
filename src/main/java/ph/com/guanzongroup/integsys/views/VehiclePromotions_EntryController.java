@@ -653,7 +653,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         }
 
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
-        tfPromoCode.setText(poController.PromotionMaster().getPromotionCode());
+        tfPromoCode.setText(poController.PromotionMaster().getValidityId());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
@@ -1347,6 +1347,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     return;
                 }
                 loadRecordMaster();
+                loadTableAddOns.reload();
+                loadTableFreebies.reload();
+                loadTableInclusion.reload();
+                loadTableDetail.reload();
             }
         } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
