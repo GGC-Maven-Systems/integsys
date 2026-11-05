@@ -621,6 +621,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             JFXUtil.clearTextFields(apMaster);
             return;
         }
+
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
         tfPromoCode.setText(poController.PromotionMaster().getPromotionCode());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
@@ -639,6 +640,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 JFXUtil.clearTextFields(apAddOns);
                 return;
             }
+            boolean lbShow = JFXUtil.isObjectEqualTo(poController.PromotionAddOnList(pnAddOns).getEditMode(), EditMode.UPDATE);
+            JFXUtil.setDisabled(lbShow, tfAddOn);
+
             tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).AddOnType().getAddTypeName());
             JFXUtil.setCmbValue(cmbPromoType, !JFXUtil.isObjectEqualTo(poController.PromotionAddOnList(pnAddOns).getPromoType(), "", null) ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
             tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), false));
@@ -656,6 +660,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 JFXUtil.clearTextFields(apFreebies);
                 return;
             }
+            boolean lbShow = JFXUtil.isObjectEqualTo(poController.PromotionFreebieList(pnFreebies).getEditMode(), EditMode.UPDATE);
+            JFXUtil.setDisabled(lbShow, tfFreebie);
+
             tfFreebie.setText(poController.PromotionFreebieList(pnFreebies).Freebie().getDescription());
             tfQuantity.setText(String.valueOf(poController.PromotionFreebieList(pnFreebies).getQuantity()));
             cbActive.setSelected(poController.PromotionFreebieList(pnFreebies).getRecordStatus());
@@ -672,6 +679,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 JFXUtil.clearTextFields(apInclusion);
                 return;
             }
+            boolean lbShow = JFXUtil.isObjectEqualTo(poController.PromotionInclusionList(pnInclusion).getEditMode(), EditMode.UPDATE);
+            JFXUtil.setDisabled(lbShow, tfInclusion);
+
             tfInclusion.setText(poController.PromotionInclusionList(pnInclusion).Inclusion().getDescription());
             tfQuantityInclusion.setText(String.valueOf(poController.PromotionInclusionList(pnInclusion).getQuantity()));
             cbActiveInclusion.setSelected(poController.PromotionInclusionList(pnInclusion).getRecordStatus());
@@ -687,6 +697,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             JFXUtil.clearTextFields(apPromotionApplicability);
             return;
         }
+        boolean lbShow = JFXUtil.isObjectEqualTo(poController.PromotionApplicabilityList(pnDetail).getEditMode(), EditMode.UPDATE);
+        JFXUtil.setDisabled(lbShow, tfBrand, tfModel, tfVariant);
         try {
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
