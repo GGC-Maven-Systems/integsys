@@ -152,10 +152,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             poController.setWithUI(true);
             initButton(pnEditMode);
             Platform.runLater(() -> {
-//            poController.setIndustryId(psIndustryId);
+                poController.setIndustryId(psIndustryId);
                 poController.Master().setCompanyId(psCompanyId);
                 poController.setCompanyId(psCompanyId);
-//            poController.setCategoryId(psCategoryId);
+                poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
                 loadRecordSearch();
                 btnNew.fire();
