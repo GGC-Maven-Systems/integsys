@@ -311,6 +311,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             } else {
+                                JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
+                                JFXUtil.highlightByKey(tblViewMain, String.valueOf(pnMain + 1), "#FAA0A0", highlightedRowsMain);
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
                             }
 
@@ -418,7 +420,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfModel);
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    tfModel.requestFocus();
+                                });
                             }
                             loadTableDetail.reload();
                             break;
@@ -427,7 +431,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfVariant);
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    tfVariant.requestFocus();
+                                });
                             }
                             loadTableDetail.reload();
                             break;
@@ -1323,9 +1329,13 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             ModelVehicleAddOn_List selected = (ModelVehicleAddOn_List) tblViewMain.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 String lsTransactionNo = selected.getIndex02();
-                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.PromotionMaster().getPromotionCode(), lsTransactionNo)) {
-                    return;
+                if (poController.getDetailCount() <= 0) {
+                } else {
+                    if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.PromotionMaster().getPromotionCode(), lsTransactionNo)) {
+                        return;
+                    }
                 }
+
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
