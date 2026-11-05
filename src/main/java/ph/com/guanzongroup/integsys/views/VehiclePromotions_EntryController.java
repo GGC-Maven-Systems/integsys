@@ -647,6 +647,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             JFXUtil.updateCaretPositions(apAddOns);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -662,6 +663,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             JFXUtil.updateCaretPositions(apFreebies);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -677,6 +679,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             JFXUtil.updateCaretPositions(apInclusion);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -716,7 +719,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     loadTableAddOns.reload();
                     break;
                 case "cbActive": // freebies
-                    if (poController.Detail(pnFreebies).getEditMode() == EditMode.ADDNEW) {
+                    if (poController.PromotionFreebieList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
                         if (!checkedBox.isSelected()) {
                             poController.PromotionFreebieList().remove(pnFreebies);
                         }
@@ -897,45 +900,60 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void moveNextAddOns(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apAddOns.requestFocus();
-            pnAddOns = isUp ? Integer.parseInt(addons_data.get(JFXUtil.moveToPreviousRow(tblViewAddOns)).getIndex10())
-                    : Integer.parseInt(addons_data.get(JFXUtil.moveToNextRow(tblViewAddOns)).getIndex10());
+        try {
+            if (continueNext) {
+                apAddOns.requestFocus();
+                pnAddOns = isUp ? Integer.parseInt(addons_data.get(JFXUtil.moveToPreviousRow(tblViewAddOns)).getIndex10())
+                        : Integer.parseInt(addons_data.get(JFXUtil.moveToNextRow(tblViewAddOns)).getIndex10());
+            }
+            loadRecordAddOns();
+            if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.PromotionAddOnList(pnAddOns).AddOnType().getAddTypeName(), tfAddOn},}, tfDiscountAmountAddOns); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-        loadRecordAddOns();
-        if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
-            return;
-        }
-        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.PromotionAddOnList(pnAddOns).getAddOnId(), tfAddOn},}, tfDiscountAmountAddOns); // default
     }
 
     private void moveNextFreebies(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apFreebies.requestFocus();
-            pnFreebies = isUp ? Integer.parseInt(freebies_data.get(JFXUtil.moveToPreviousRow(tblViewFreebies)).getIndex10())
-                    : Integer.parseInt(freebies_data.get(JFXUtil.moveToNextRow(tblViewFreebies)).getIndex10());
+        try {
+            if (continueNext) {
+                apFreebies.requestFocus();
+                pnFreebies = isUp ? Integer.parseInt(freebies_data.get(JFXUtil.moveToPreviousRow(tblViewFreebies)).getIndex10())
+                        : Integer.parseInt(freebies_data.get(JFXUtil.moveToNextRow(tblViewFreebies)).getIndex10());
+            }
+            loadRecordFreebies();
+            if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.PromotionFreebieList(pnFreebies).Freebie().getDescription(), tfFreebie},}, tfQuantity); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-        loadRecordFreebies();
-        if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
-            return;
-        }
-        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.PromotionFreebieList(pnFreebies).getPromoFreeId(), tfFreebie},}, tfQuantity); // default
     }
 
     private void moveNextInclusion(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apInclusion.requestFocus();
-            pnInclusion = isUp ? Integer.parseInt(inclusion_data.get(JFXUtil.moveToPreviousRow(tblViewInclusion)).getIndex10())
-                    : Integer.parseInt(inclusion_data.get(JFXUtil.moveToNextRow(tblViewInclusion)).getIndex10());
+        try {
+            if (continueNext) {
+                apInclusion.requestFocus();
+                pnInclusion = isUp ? Integer.parseInt(inclusion_data.get(JFXUtil.moveToPreviousRow(tblViewInclusion)).getIndex10())
+                        : Integer.parseInt(inclusion_data.get(JFXUtil.moveToNextRow(tblViewInclusion)).getIndex10());
+            }
+            loadRecordInclusion();
+            if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.PromotionInclusionList(pnInclusion).Inclusion().getDescription(), tfInclusion},}, tfQuantityInclusion); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-        loadRecordInclusion();
-        if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
-            return;
-        }
-        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.PromotionInclusionList(pnInclusion).getInclusionId(), tfInclusion},}, tfQuantityInclusion); // default
     }
 
     public void initTextFields() {
@@ -989,6 +1007,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         });
                     } catch (InterruptedException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                     }
                 });
         loadTableDetail = new JFXUtil.ReloadableTableTask(
@@ -1043,7 +1062,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -1101,7 +1121,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
@@ -1137,7 +1158,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 "",
                                                 String.valueOf(lnCtr)
                                         ));
-
                             }
                             int lnTempRow = JFXUtil.getDetailRow(freebies_data, pnFreebies, 10);
                             if (lnTempRow < 0 || lnTempRow
@@ -1156,13 +1176,11 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 loadRecordFreebies();
                             }
                             loadRecordMaster();
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
-
                 });
         loadTableInclusion = new JFXUtil.ReloadableTableTask(
                 tblViewInclusion,
@@ -1196,7 +1214,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 "",
                                                 String.valueOf(lnCtr)
                                         ));
-
                             }
                             int lnTempRow = JFXUtil.getDetailRow(inclusion_data, pnInclusion, 10);
                             if (lnTempRow < 0 || lnTempRow
@@ -1215,10 +1232,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 loadRecordInclusion();
                             }
                             loadRecordMaster();
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
