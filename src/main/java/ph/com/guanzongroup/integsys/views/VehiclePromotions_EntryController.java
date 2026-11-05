@@ -563,12 +563,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 switch (lsID) {
                     case "tfInclusion":
                         if (lsValue.isEmpty()) {
-                            poController.PromotionFreebieList(pnFreebies).setFreebieId("");
+                            poController.PromotionInclusionList(pnInclusion).setInclusionId("");
                         }
                         break;
                     case "tfQuantityInclusion":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        poJSON = poController.PromotionFreebieList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
+                        poJSON = poController.PromotionInclusionList(pnInclusion).setQuantity(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -622,7 +622,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
         tfDescription.setText(poController.Detail(0).getDescription());
         JFXUtil.setCmbValue(cmbModeOfPayment, !JFXUtil.isObjectEqualTo(poController.Detail(0).getPaymentForm(), "", null) ? Integer.valueOf(poController.Detail(0).getPaymentForm()) : -1);
-        tfDiscountAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(0).getDiscountAmount().doubleValue(), true));
+        tfDiscountAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(0).getDiscountAmount().doubleValue(), false));
     }
 
     private void loadRecordAddOns() {
@@ -633,7 +633,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
             tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).AddOnType().getAddTypeName());
             JFXUtil.setCmbValue(cmbPromoType, !JFXUtil.isObjectEqualTo(poController.PromotionAddOnList(pnAddOns).getPromoType(), "", null) ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
-            tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), true));
+            tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), false));
             cbAddOns.setSelected(poController.PromotionAddOnList(pnAddOns).getRecordStatus());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1105,7 +1105,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             freebies_data.clear();
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionFreebieCount(); lnCtr++) {
-                                if (!poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionFreebieList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1164,7 +1164,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             inclusion_data.clear();
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionInclusionCount(); lnCtr++) {
-                                if (!poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionInclusionList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
