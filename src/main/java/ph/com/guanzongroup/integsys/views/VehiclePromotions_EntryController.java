@@ -470,18 +470,24 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     }
                     break;
                 case "tblViewAddOns":
+                    newIndex = !isMovedDown ? Integer.parseInt(addons_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex10())
+                            : Integer.parseInt(addons_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10());
                     if (!addons_data.isEmpty()) {
                         pnAddOns = newIndex;
                         loadRecordAddOns();
                     }
                     break;
                 case "tblViewFreebies":
+                    newIndex = !isMovedDown ? Integer.parseInt(freebies_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex10())
+                            : Integer.parseInt(freebies_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10());
                     if (!freebies_data.isEmpty()) {
                         pnFreebies = newIndex;
                         loadRecordFreebies();
                     }
                     break;
                 case "tblViewInclusion":
+                    newIndex = !isMovedDown ? Integer.parseInt(inclusion_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex10())
+                            : Integer.parseInt(inclusion_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10());
                     if (!inclusion_data.isEmpty()) {
                         pnInclusion = newIndex;
                         loadRecordInclusion();
@@ -617,8 +623,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             });
 
     private void loadRecordMaster() {
-        JFXUtil.clearTextFields(apMaster);
         if (poController.getDetailCount() <= 0) {
+            JFXUtil.clearTextFields(apMaster);
             return;
         }
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
@@ -635,8 +641,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void loadRecordAddOns() {
         try {
-            JFXUtil.clearTextFields(apAddOns);
             if (pnAddOns < 0 || pnAddOns > poController.getPromotionAddOnCount() - 1) {
+                JFXUtil.clearTextFields(apAddOns);
                 return;
             }
 
@@ -653,8 +659,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void loadRecordFreebies() {
         try {
-            JFXUtil.clearTextFields(apFreebies);
             if (pnFreebies < 0 || pnFreebies > poController.getPromotionFreebieCount() - 1) {
+                JFXUtil.clearTextFields(apFreebies);
                 return;
             }
             tfFreebie.setText(poController.PromotionFreebieList(pnFreebies).Freebie().getDescription());
@@ -669,8 +675,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void loadRecordInclusion() {
         try {
-            JFXUtil.clearTextFields(apInclusion);
             if (pnInclusion < 0 || pnInclusion > poController.getPromotionInclusionCount() - 1) {
+                JFXUtil.clearTextFields(apInclusion);
                 return;
             }
             tfInclusion.setText(poController.PromotionInclusionList(pnInclusion).Inclusion().getDescription());
@@ -684,8 +690,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     private void loadRecordPromoApplicability() {
-        JFXUtil.clearTextFields(apPromotionApplicability);
         if (pnDetail < 0 || pnDetail > poController.getPromotionApplicabilityCount() - 1) {
+            JFXUtil.clearTextFields(apPromotionApplicability);
             return;
         }
         try {
