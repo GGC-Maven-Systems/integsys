@@ -691,7 +691,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
             tfVariant.setText(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription());
-            cbExclude.setSelected(poController.PromotionApplicabilityList(pnDetail).getExcludeFlag().equals(""));
+            cbExclude.setSelected("1".equals(poController.PromotionApplicabilityList(pnDetail).getExcludeFlag()));
             cbActivePromotionApplicability.setSelected(poController.PromotionApplicabilityList(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apPromotionApplicability);
         } catch (SQLException | GuanzonException ex) {
@@ -1024,7 +1024,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Brand().getDescription()),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Model().getDescription()),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription()),
-                                                poController.PromotionApplicabilityList(lnCtr).getExcludeFlag().equals("") ? "YES" : "NO",
+                                                "1".equals(poController.PromotionApplicabilityList(lnCtr).getExcludeFlag()) ? "YES" : "NO",
                                                 poController.PromotionApplicabilityList(lnCtr).getRecordStatus() ? "Active" : "Inactive",
                                                 "", "", "",
                                                 String.valueOf(lnCtr), "", "", "", "", ""
