@@ -329,12 +329,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-
-//                if (JFXUtil.isObjectEqualTo(lsButton, "btnApprove", "btnDisapprove", "btnVoid")) {
-//                } else {
-//                    loadRecordDetail();
-//                    loadTableDetail.reload();
-//                }
                 loadTableAddOns.reload();
                 loadTableFreebies.reload();
                 loadTableInclusion.reload();
@@ -645,7 +639,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 JFXUtil.clearTextFields(apAddOns);
                 return;
             }
-
             tfAddOn.setText(poController.PromotionAddOnList(pnAddOns).AddOnType().getAddTypeName());
             JFXUtil.setCmbValue(cmbPromoType, !JFXUtil.isObjectEqualTo(poController.PromotionAddOnList(pnAddOns).getPromoType(), "", null) ? Integer.valueOf(poController.PromotionAddOnList(pnAddOns).getPromoType()) : -1);
             tfDiscountAmountAddOns.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.PromotionAddOnList(pnAddOns).getDiscountAmount().doubleValue(), false));
@@ -732,7 +725,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     } else {
                         poController.PromotionFreebieList(pnFreebies).setRecordStatus(checkedBox.isSelected());
                     }
-
                     loadTableDetail.reload();
                     break;
                 case "cbActiveInclusion":
@@ -760,7 +752,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     } else {
                         poController.PromotionApplicabilityList(pnDetail).setRecordStatus(checkedBox.isSelected());
                     }
-
                     loadTableDetail.reload();
                     break;
             }
@@ -869,7 +860,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             if (!newValue) {
                 // Lost focus
                 if (JFXUtil.isObjectEqualTo(dpTo.getEditor().getText(), null, "")) {
-//                    try {
                     if (pbSuccess) {
                         poJSON = poController.Master().setThruDate(null);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -880,10 +870,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     pbSuccess = false;
                     loadTableDetail.reload();
                     pbSuccess = true;
-//                    } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
-//                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                    }
                 }
             }
         });
@@ -991,9 +977,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             int lnCtr;
                             main_data.clear();
                             for (lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-//                                if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
-//                                    continue;
-//                                }
                                 main_data.add(
                                         new ModelVehicleAddOn_List(
                                                 String.valueOf(lnCtr + 1),
@@ -1064,11 +1047,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 loadRecordPromoApplicability();
                             }
 //                            loadRecordMaster();
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
@@ -1123,11 +1103,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 loadRecordAddOns();
                             }
                             loadRecordMaster();
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
@@ -1299,7 +1276,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     public void loadTableDetailFromMain() {
         try {
             poJSON = new JSONObject();
-
             ModelVehicleAddOn_List selected = (ModelVehicleAddOn_List) tblViewMain.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
