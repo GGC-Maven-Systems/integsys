@@ -247,6 +247,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             //Clear data
                             poController.resetTransaction();
                             poController.InitTransaction();
+                            retrievePromotions();
                             clearTextFields();
                             poController.Master().setCompanyId(psCompanyId);
                             pnEditMode = EditMode.UNKNOWN;
@@ -328,6 +329,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         return;
                     case "btnRetrieve":
                         retrievePromotions();
+                        JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
                         return;
                     case "btnPrint":
                         poController.printTransaction();
@@ -376,6 +378,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     break;
                 case F3:
                     switch (lsID) {
+                        //apBrowse
+                        case "tfSearchDescription":
+                            retrievePromotions();
+                            break;
                         //apAddOns
                         case "tfAddOn":
                             poJSON = poController.SearchAddOn(lsValue, false, pnAddOns);
@@ -506,6 +512,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         }
                         break;
                 }
+                retrievePromotions();
             });
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -790,6 +797,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbSearchStatus":
+                        retrievePromotions();
                         break;
                     case "cmbModeOfPayment":
                         poJSON = poController.Detail(0).setPaymentForm(String.valueOf(selectedIndex));
@@ -1314,6 +1322,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             poJSON = new JSONObject();
             ModelVehicleAddOn_List selected = (ModelVehicleAddOn_List) tblViewMain.getSelectionModel().getSelectedItem();
             if (selected != null) {
+                String lsTransactionNo = selected.getIndex02();
+                if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.PromotionMaster().getPromotionCode(), lsTransactionNo)) {
+                    return;
+                }
                 int pnRowMain = Integer.parseInt(selected.getIndex01()) - 1;
                 pnMain = pnRowMain;
                 JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
