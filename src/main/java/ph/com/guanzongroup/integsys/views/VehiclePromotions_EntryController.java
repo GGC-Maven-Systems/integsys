@@ -47,10 +47,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Pagination;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.json.simple.parser.ParseException;
@@ -84,14 +86,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     private String psValidityId = "";
     boolean pbEntered = false;
     boolean pbKeyPressed = false;
-
+    private FilteredList<ModelVehicleAddOn_List> filteredData;
     private ObservableList<ModelVehicleAddOn_Detail> addons_data = FXCollections.observableArrayList();
     private ObservableList<ModelFreebies_Detail> freebies_data = FXCollections.observableArrayList();
     private ObservableList<ModelInclusion_Detail> inclusion_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleAddOn_Detail> details_data = FXCollections.observableArrayList();
     private ObservableList<ModelVehicleAddOn_List> main_data = FXCollections.observableArrayList();
     ObservableList<String> promotype = FXCollections.observableArrayList("Included", "Free", "Discounted");
-
+    ObservableList<String> statuses = FXCollections.observableArrayList("Approved", "Cancelled");
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
 
@@ -104,21 +106,23 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     @FXML
     private Label lblSource, lblStatus;
     @FXML
+    private TextField tfSearchDescription, tfPromoCode, tfDescription, tfDiscountAmount, tfAddOn, tfDiscountAmountAddOns, tfFreebie, tfQuantity, tfInclusion, tfQuantityInclusion, tfBrand, tfModel, tfVariant;
+    @FXML
+    private ComboBox cmbSearchStatus, cmbModeOfPayment, cmbPromoType;
+    @FXML
     private HBox hbButtons;
     @FXML
     private Button btnNew, btnUpdate, btnSearch, btnSave, btnVoid, btnCancel, btnHistory, btnPrint, btnRetrieve, btnClose;
     @FXML
-    private TextField tfPromoCode, tfDescription, tfDiscountAmount, tfAddOn, tfDiscountAmountAddOns, tfFreebie, tfQuantity, tfInclusion, tfQuantityInclusion, tfBrand, tfModel, tfVariant;
-    @FXML
     private DatePicker dpValidFrom, dpTo;
-    @FXML
-    private ComboBox cmbModeOfPayment, cmbPromoType;
     @FXML
     private CheckBox cbAddOns, cbActive, cbActiveInclusion, cbExclude, cbActivePromotionApplicability;
     @FXML
     private TableView tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail, tblViewMain;
     @FXML
-    private TableColumn tblNoAddOns, tblAddOn, tblAmount, tblDiscountAmt, tblNoFreebies, tblFreebie, tblQuantityFreebies, tblNoInclusion, tblInclusion, tblQuantityInclusion, tblNoDetail, tblBrand, tblModel, tblVariant, tblExclude, tblStatus, tblNoMain, tblFrom, tblTo, tblDescription;
+    private TableColumn tblNoAddOns, tblAddOn, tblAmount, tblDiscountAmt, tblNoFreebies, tblFreebie, tblQuantityFreebies, tblNoInclusion, tblInclusion, tblQuantityInclusion, tblNoDetail, tblBrand, tblModel, tblVariant, tblExclude, tblStatus, tblNoMain, tblPromoCode, tblFrom, tblTo, tblDescription;
+    @FXML
+    private Pagination pgPagination;
 
     LocalDate ValidFrom;
 
@@ -146,7 +150,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             initDatepickers();
             initTableOnClick();
             clearTextFields();
-
+            pgPagination.setPageCount(1);
             loadTableDetail.reload();
             pnEditMode = poController.getEditMode();
             poController.setWithUI(true);
@@ -215,6 +219,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         return;
                     case "btnNew":
                         //Clear data
+                        poController.resetTransaction();
                         poController.Detail().clear();
                         clearTextFields();
 
@@ -238,7 +243,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         break;
                     case "btnCancel":
                         if (ShowMessageFX.OkayCancel(null, pxeModuleName, "Do you want to disregard changes?") == true) {
+                            JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                             //Clear data
+                            poController.resetTransaction();
                             poController.InitTransaction();
                             clearTextFields();
                             poController.Master().setCompanyId(psCompanyId);
@@ -490,6 +497,16 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             }
         }
     };
+    ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
+            (lsID, lsValue) -> {
+                switch (lsID) {
+                    case "tfSearchDescription":
+                        if (lsValue.isEmpty()) {
+
+                        }
+                        break;
+                }
+            });
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -772,6 +789,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
+                    case "cmbSearchStatus":
+                        break;
                     case "cmbModeOfPayment":
                         poJSON = poController.Detail(0).setPaymentForm(String.valueOf(selectedIndex));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -857,10 +876,11 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
             });
 
     private void initComboboxes() {
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(promotype, cmbPromoType));
+
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(statuses, cmbSearchStatus), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(promotype, cmbPromoType));
         cmbModeOfPayment.getItems().add("Applicable to All");
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment, cmbPromoType);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment, cmbPromoType);
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
     }
 
     private void initDatepickers() {
@@ -961,6 +981,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     }
 
     public void initTextFields() {
+        JFXUtil.setFocusListener(txtBrowse_Focus, tfSearchDescription);
         JFXUtil.setFocusListener(txtMaster_Focus, tfDescription, tfDiscountAmount);
         JFXUtil.setFocusListener(txtAddOns_Focus, tfAddOn, tfDiscountAmountAddOns);
         JFXUtil.setFocusListener(txtFreebies_Focus, tfFreebie, tfQuantity);
@@ -988,6 +1009,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         Platform.runLater(() -> {
                             int lnCtr;
                             main_data.clear();
+                            JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
                             for (lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 main_data.add(
                                         new ModelVehicleAddOn_List(
@@ -995,7 +1017,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 getData(poController.TransactionList(lnCtr).getValidityId()),
                                                 String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
                                                 String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
-                                                "",
+                                                getData(poController.TransactionList(lnCtr).getValidityDescription()),
                                                 "",
                                                 "",
                                                 "", "",
@@ -1005,6 +1027,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                     JFXUtil.highlightByKey(tblViewMain, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
                                 }
                             }
+                            JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMain, filteredData);
                         });
                     } catch (InterruptedException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1237,9 +1260,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
 
     private void initMainGrid() {
         JFXUtil.setColumnCenter(tblNoMain);
-        JFXUtil.setColumnLeft(tblDescription, tblFrom, tblTo);
+        JFXUtil.setColumnLeft(tblDescription, tblFrom, tblTo, tblPromoCode);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewMain);
-        tblViewMain.setItems(main_data);
+        filteredData = new FilteredList<>(main_data, b -> true);
+        tblViewMain.setItems(filteredData);
     }
 
     private void initAddOnsGrid() {
