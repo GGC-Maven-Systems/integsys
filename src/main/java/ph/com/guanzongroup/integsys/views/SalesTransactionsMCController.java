@@ -3,6 +3,7 @@ package ph.com.guanzongroup.integsys.views;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.awt.image.BufferedImage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -53,6 +54,7 @@ import ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -64,7 +66,21 @@ import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.ScrollEvent;
+import javafx.util.Duration;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
 
 /**
@@ -123,6 +139,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private int pnRegInsurLoadSeq = 0;
     private int pnGawayLoadSeq = 0;
     private int pnAttachLoadSeq = 0;
+
+    double ldstackPaneWidth = 0;
+    double ldstackPaneHeight = 0;
     /**
      * The rows that were selected when a field got focus: the field's edit
      * belongs to THESE rows even if the user clicks another row (which changes
@@ -1482,6 +1501,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 case "btnClose":
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CLOSE, pxeModuleName, null)) {
+
                         new unloadForm().unloadForm(ChildAnchorPane, oApp, pxeModuleName);
                     }
                     break;
@@ -2849,8 +2869,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             poJSON = loRow instanceof Model_Sales_Registration
                     ? oSalesController.MCSales().removeSalesRegistration(regInsurEntryNo(loRow)) // removes it and realigns the entry nos
                     : oSalesController.MCSales().removeSalesInsurance(regInsurEntryNo(loRow));
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
         }
@@ -2869,8 +2888,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         Model_Sales_Giveaways loRow = gaway_data.get(fnRow);
         if (!isBlankGiveaway(loRow)) {
             poJSON = oSalesController.MCSales().removeSalesGiveAway(loRow.getEntryNo());   // removes it and realigns the entry nos
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
         }
@@ -2953,8 +2971,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             final Model_Sales_Master loMas = master();
             if (!pbCwtYes.get() && dbl(() -> loMas.getCWTAmount()) != 0) {
                 poJSON = loMas.setCWTAmount(0.0);   // No: no CWT
-                if ("error".equals(poJSON.get("result"))) {
-                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                if (hasError(poJSON)) {
                     return;
                 }
             }
@@ -3005,8 +3022,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     private void writeDueDate(LocalDate fdDue) throws Exception {
         poJSON = master().setDueDate(fdDue == null ? null : java.sql.Date.valueOf(fdDue));   // ASSUMED setter
-        if ("error".equals(poJSON.get("result"))) {
-            ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+        if (hasError(poJSON)) {
+            return;
         }
     }
 
@@ -3348,6 +3365,18 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         if (loFile == null) {
             return;
         }
+
+        if (loFile.getName().toLowerCase().endsWith(".pdf")) {
+            try (PDDocument document = PDDocument.load(loFile)) {
+                int pageCount = document.getNumberOfPages();
+                if (pageCount > 20) {
+                    ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
+                    return;
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         // the picked file lives in another folder than the attachment files: compare the FILE NAMES
         for (File loExisting : poAttachFiles) {
             if (loExisting.getName().equalsIgnoreCase(loFile.getName())) {
@@ -3355,12 +3384,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 return;
             }
         }
-        Image loImage = new Image(loFile.toURI().toString());
-        if (loImage.isError()) {
-            ShowMessageFX.Error(SalesTransactionStatic.MSG_ATTACHMENT_INVALID_IMAGE, pxeModuleName, null);
-            return;
-        }
-
         try {
             MCSales loSales = oSalesController.MCSales();
             loSales.copyFile(loFile.getAbsolutePath());                       // into sys.default.path.temp.attachments (saveOthers() reads it from there)
@@ -3386,8 +3409,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             // a new attachment is dropped, a saved one is deactivated: both are handled by MCSales
             poJSON = oSalesController.MCSales().removeAttachment(poAttachModelRows.get(pnAttachRow));
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
             reloadAttachmentTable();
@@ -3412,10 +3434,105 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     private void showAttachment(int fnIndex) {
         Image loImage = null;
-        if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
-            loImage = readImage(poAttachFiles.get(fnIndex));
+        try {
+            if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
+                if (!isPdfAttachment(poAttachFiles.get(fnIndex))) {
+                    loImage = readImage(poAttachFiles.get(fnIndex));
+                } else {
+
+                    PDDocument document = PDDocument.load(poAttachFiles.get(fnIndex));
+                    PDFRenderer renderer = new PDFRenderer(document);
+                    int pageCount = document.getNumberOfPages();
+
+                    VBox pdfContainer = new VBox(10);
+                    pdfContainer.setAlignment(Pos.CENTER);
+                    pdfContainer.setPrefWidth(ldstackPaneWidth);
+
+                    for (int i = 0; i < pageCount; i++) {
+
+                        BufferedImage pageImage = renderer.renderImageWithDPI(i, 150);
+                        Image fxImage = SwingFXUtils.toFXImage(pageImage, null);
+                        ImageView pageView = new ImageView(fxImage);
+                        pageView.setPreserveRatio(true);
+                        pageView.setFitWidth(ldstackPaneWidth);
+                        JFXUtil.adjustImageSize(fxImage, pageView, ldstackPaneWidth, ldstackPaneHeight);
+                        pdfContainer.getChildren().add(pageView);
+
+                    }
+
+                    Group pdfGroup = new Group(pdfContainer);
+                    StackPane centerPane = new StackPane(pdfGroup);
+                    centerPane.setAlignment(Pos.CENTER);
+
+                    ScrollPane scrollPane = new ScrollPane(centerPane);
+                    scrollPane.setPannable(true);
+                    scrollPane.setFitToWidth(true);
+                    scrollPane.setFitToHeight(true);
+
+                    stackPane.getChildren().setAll(scrollPane, btnArrowLeft, btnArrowRight);
+                    StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                    StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+                    StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                    StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+
+                    PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                    delay.setOnFinished(event -> Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane)));
+                    delay.play();
+                    document.close();
+
+                    final DoubleProperty zoomFactor = new SimpleDoubleProperty(1.0);
+                    scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+                        if (event.isControlDown()) {
+                            event.consume();
+                            double delta = event.getDeltaY() > 0 ? 1.1 : 0.9;
+                            zoomFactor.set(zoomFactor.get() * delta);
+                            pdfGroup.setScaleX(zoomFactor.get());
+                            pdfGroup.setScaleY(zoomFactor.get());
+
+                            Bounds viewportBounds = scrollPane.getViewportBounds();
+                            Bounds contentBounds = pdfGroup.getBoundsInParent();
+                            double mouseX = event.getX();
+                            double mouseY = event.getY();
+
+                            double hRatio = (scrollPane.getHvalue() * (contentBounds.getWidth() - viewportBounds.getWidth()) + mouseX) / contentBounds.getWidth();
+                            double vRatio = (scrollPane.getVvalue() * (contentBounds.getHeight() - viewportBounds.getHeight()) + mouseY) / contentBounds.getHeight();
+
+                            Platform.runLater(() -> {
+                                Bounds newBounds = pdfGroup.getBoundsInParent();
+                                double newH = (hRatio * newBounds.getWidth() - mouseX) / (newBounds.getWidth() - viewportBounds.getWidth());
+                                double newV = (vRatio * newBounds.getHeight() - mouseY) / (newBounds.getHeight() - viewportBounds.getHeight());
+                                scrollPane.setHvalue(Double.isNaN(newH) ? 0.5 : Math.min(Math.max(0, newH), 1.0));
+                                scrollPane.setVvalue(Double.isNaN(newV) ? 0.5 : Math.min(Math.max(0, newV), 1.0));
+                            });
+                        }
+                    });
+
+                    final ObjectProperty<Point2D> lastMouse = new SimpleObjectProperty<>();
+                    pdfGroup.setOnMousePressed(e -> lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY())));
+                    pdfGroup.setOnMouseDragged(e -> {
+                        if (lastMouse.get() != null) {
+                            double deltaX = e.getSceneX() - lastMouse.get().getX();
+                            double deltaY = e.getSceneY() - lastMouse.get().getY();
+                            pdfGroup.setTranslateX(pdfGroup.getTranslateX() + deltaX);
+                            pdfGroup.setTranslateY(pdfGroup.getTranslateY() + deltaY);
+                            lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY()));
+                        }
+                    });
+                    pdfGroup.setOnMouseReleased(e -> lastMouse.set(null));
+
+                }
+
+            }
+            displayAttachment(fnIndex, loImage);
+        } catch (IOException ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        displayAttachment(fnIndex, loImage);
+    }
+
+    private boolean isPdfAttachment(File file) {
+        return file != null
+                && file.getName() != null
+                && file.getName().toLowerCase(Locale.ROOT).endsWith(".pdf");
     }
 
     private void displayAttachment(int fnIndex, Image foImage) {
@@ -3512,8 +3629,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 return;
             }
             poJSON = oSalesController.MCSales().loadSalesQuotationNonItemizedList();
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
 
