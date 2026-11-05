@@ -4,7 +4,6 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
-import ph.com.guanzongroup.integsys.model.ModelVehicleAddOns_Detail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 import java.net.URL;
@@ -992,7 +991,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             }
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionApplicabilityCount(); lnCtr++) {
-                                if (poController.PromotionApplicabilityList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionApplicabilityList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1048,7 +1047,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             }
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionAddOnCount(); lnCtr++) {
-                                if (poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1106,7 +1105,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             freebies_data.clear();
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionFreebieCount(); lnCtr++) {
-                                if (poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1165,7 +1164,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             inclusion_data.clear();
                             int lnCount = 0;
                             for (lnCtr = 0; lnCtr < poController.getPromotionInclusionCount(); lnCtr++) {
-                                if (poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
+                                if (!poController.PromotionAddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
