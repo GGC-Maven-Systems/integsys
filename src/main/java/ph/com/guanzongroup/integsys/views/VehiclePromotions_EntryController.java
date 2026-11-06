@@ -96,7 +96,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     ObservableList<String> statuses = FXCollections.observableArrayList("Approved", "Cancelled");
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-
+    boolean tooltipShown = false;
     JFXUtil.ReloadableTableTask loadTableMain, loadTableDetail, loadTableAddOns, loadTableFreebies, loadTableInclusion;
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
@@ -388,9 +388,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchDescription":
-//                            poController.SearchDescription();
                             retrievePromotions();
-                            break;
+                            if (!tooltipShown) {
+                                JFXUtil.showTooltip("NOTE: Results appear directly in the table view, no pop-up dialog.", txtField);
+                                tooltipShown = true;
+                            }
+                            return;
                         //apAddOns
                         case "tfAddOn":
                             poJSON = poController.SearchAddOn(lsValue, false, pnAddOns);
@@ -473,6 +476,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ScriptException ex) {
+            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
