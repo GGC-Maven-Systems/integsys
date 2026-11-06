@@ -327,7 +327,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         }
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse,apAddOns, apFreebies, apInclusion, apPromotionApplicability);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
                         return;
                     case "btnRetrieve":
                         retrievePromotions();
@@ -742,7 +742,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         try {
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
-            tfVariant.setText(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription());
+            tfVariant.setText(JFXUtil.concatStrings(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription(),
+                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
+                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().Color().getDescription()));
             cbExclude.setSelected("1".equals(poController.PromotionApplicabilityList(pnDetail).getExcludeFlag()));
             cbActivePromotionApplicability.setSelected(poController.PromotionApplicabilityList(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apPromotionApplicability);
@@ -1088,7 +1090,9 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                         new ModelVehicleAddOn_Detail(String.valueOf(lnCount),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Brand().getDescription()),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Model().getDescription()),
-                                                getData(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription()),
+                                                getData(JFXUtil.concatStrings(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription(),
+                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().VariantInsurance().getTransmission(),
+                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().Color().getDescription())),
                                                 "1".equals(poController.PromotionApplicabilityList(lnCtr).getExcludeFlag()) ? "YES" : "NO",
                                                 poController.PromotionApplicabilityList(lnCtr).getRecordStatus() ? "Active" : "Inactive",
                                                 "", "", "",
