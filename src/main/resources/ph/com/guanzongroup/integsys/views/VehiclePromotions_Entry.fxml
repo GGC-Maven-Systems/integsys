@@ -584,7 +584,7 @@
                                                             <TableColumn fx:id="tblNoDetail" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="No" />
                                                             <TableColumn fx:id="tblBrand" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Brand" />
                                                             <TableColumn fx:id="tblModel" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" text="Model" />
-                                                            <TableColumn fx:id="tblVariant" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" text="Variant" />
+                                                            <TableColumn fx:id="tblVariant" maxWidth="555.0" minWidth="555.0" prefWidth="555.0" text="Variant" />
                                                             <TableColumn fx:id="tblExclude" maxWidth="123.0" minWidth="123.0" prefWidth="123.0" text="Exclude" />
                                                             <TableColumn fx:id="tblStatus" maxWidth="123.0" minWidth="123.0" prefWidth="123.0" text="Status" />
                                                          </columns>
@@ -627,7 +627,7 @@
                                                 <TableColumn fx:id="tblPromoCode" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" text="Promo Code" />
                                                 <TableColumn fx:id="tblFrom" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" text="From" />
                                                 <TableColumn fx:id="tblTo" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" text="To" />
-                                                <TableColumn fx:id="tblDescription" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" text="Description" />
+                                                <TableColumn fx:id="tblDescription" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" text="Description" />
                                             </columns>
                                              <GridPane.margin>
                                                 <Insets left="5.0" right="5.0" />

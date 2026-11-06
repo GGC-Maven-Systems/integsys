@@ -780,6 +780,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     loadTableInclusion.reload();
                     break;
                 case "cbExclude":
+                    poJSON = poController.validateExclude(pnDetail, checkedBox.isSelected());
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        loadTableDetail.reload();
+                        break;
+                    }
                     poJSON = poController.PromotionApplicabilityList(pnDetail).setExcludeFlag(checkedBox.isSelected());
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -1344,6 +1350,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 poJSON = poController.OpenTransaction(poController.TransactionList(pnMain).getValidityId());
                 if ("error".equals((String) poJSON.get("result"))) {
                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                    pnEditMode = EditMode.UNKNOWN;
                     return;
                 }
                 loadRecordMaster();
