@@ -504,7 +504,7 @@
                                           </VBox>
                                        </children>
                                     </HBox>
-                                    <VBox spacing="5.0">
+                                    <VBox spacing="5.0" VBox.vgrow="ALWAYS">
                                        <children>
                                           <AnchorPane fx:id="apPromotionApplicability" style="-fx-border-color: FF8201;">
                                              <children>
