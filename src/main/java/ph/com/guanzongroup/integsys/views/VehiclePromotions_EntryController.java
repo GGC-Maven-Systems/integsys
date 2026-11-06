@@ -327,7 +327,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         }
                         break;
                     case "btnSearch":
-                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
+                        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apBrowse,apAddOns, apFreebies, apInclusion, apPromotionApplicability);
                         return;
                     case "btnRetrieve":
                         retrievePromotions();
@@ -1018,7 +1018,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         JFXUtil.setFocusListener(txtInclusion_Focus, tfInclusion, tfQuantityInclusion);
         JFXUtil.setFocusListener(txtPromotionApplicability_Focus, tfBrand, tfModel, tfVariant);
 
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apAddOns, apFreebies, apInclusion, apPromotionApplicability);
         JFXUtil.setCommaFormatter(tfDiscountAmount, tfDiscountAmountAddOns);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityInclusion);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail);
