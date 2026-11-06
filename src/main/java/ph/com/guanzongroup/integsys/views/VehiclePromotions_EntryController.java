@@ -779,7 +779,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     } else {
                         poController.PromotionFreebieList(pnFreebies).setRecordStatus(checkedBox.isSelected());
                     }
-                    loadTableDetail.reload();
+                    loadTableFreebies.reload();
                     break;
                 case "cbActiveInclusion":
                     if (poController.PromotionInclusionList(pnInclusion).getEditMode() == EditMode.ADDNEW) {
@@ -1099,13 +1099,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 String.valueOf(lnCtr), "", "", "", "", ""
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 10);
+                            int lnTempRow = getDetailRowFilter(details_data, pnDetail, 10);
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    pnDetail = tblViewDetail.getSelectionModel().getSelectedIndex();
+                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex10());
+                                    pnDetail = lnRow;
                                     loadRecordPromoApplicability();
                                 }
                             } else {
@@ -1115,7 +1116,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 pnDetail = lnRow;
                                 loadRecordPromoApplicability();
                             }
-//                            loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1155,13 +1155,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 String.valueOf(lnCtr), "", "", "", "", ""
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(addons_data, pnAddOns, 10);
+                            int lnTempRow = getDetailRowFilter(addons_data, pnAddOns, 10);
                             if (lnTempRow < 0 || lnTempRow
                                     >= addons_data.size()) {
                                 if (!addons_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewAddOns, 0);
-                                    pnAddOns = tblViewAddOns.getSelectionModel().getSelectedIndex();
+                                    int lnRow = Integer.parseInt(addons_data.get(0).getIndex10());
+                                    pnAddOns = lnRow;
                                     loadRecordAddOns();
                                 }
                             } else {
@@ -1171,7 +1172,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 pnAddOns = lnRow;
                                 loadRecordAddOns();
                             }
-                            loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1211,13 +1211,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(freebies_data, pnFreebies, 10);
+                            int lnTempRow = getDetailRowFilter(freebies_data, pnFreebies, 10);
                             if (lnTempRow < 0 || lnTempRow
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewFreebies, 0);
-                                    pnFreebies = tblViewFreebies.getSelectionModel().getSelectedIndex();
+                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex10());
+                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
@@ -1227,7 +1228,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 pnFreebies = lnRow;
                                 loadRecordFreebies();
                             }
-                            loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1267,13 +1267,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(inclusion_data, pnInclusion, 10);
+                            int lnTempRow = getDetailRowFilter(inclusion_data, pnInclusion, 10);
                             if (lnTempRow < 0 || lnTempRow
                                     >= inclusion_data.size()) {
                                 if (!inclusion_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewInclusion, 0);
-                                    pnInclusion = tblViewInclusion.getSelectionModel().getSelectedIndex();
+                                    int lnRow = Integer.parseInt(inclusion_data.get(0).getIndex10());
+                                    pnInclusion = lnRow;
                                     loadRecordInclusion();
                                 }
                             } else {
@@ -1283,13 +1284,34 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 pnInclusion = lnRow;
                                 loadRecordInclusion();
                             }
-                            loadRecordMaster();
                         } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
                 });
+    }
+
+    public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
+        try {
+            String getterName = String.format("getIndex%02d", columnIndex);
+
+            for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
+                Object item = dataList.get(lnCtr);
+
+                String value = (String) item.getClass()
+                        .getMethod(getterName)
+                        .invoke(item);
+
+                if (String.valueOf(lnpn).equals(value)) {
+                    return lnCtr;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1; // not found
     }
 
     private void initMainGrid() {
