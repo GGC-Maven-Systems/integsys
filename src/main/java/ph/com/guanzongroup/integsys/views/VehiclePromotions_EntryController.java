@@ -476,10 +476,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ScriptException ex) {
-            Logger.getLogger(VehiclePromotions_EntryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
