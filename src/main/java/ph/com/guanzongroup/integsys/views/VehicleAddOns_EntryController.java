@@ -152,8 +152,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 //            poController.setCategoryId(psCategoryId);
                 poController.setWithUI(true);
                 loadRecordSearch();
-                
-                if(psValidityId != null && !"".equals(psValidityId)){
+
+                if (psValidityId != null && !"".equals(psValidityId)) {
                     btnBrowse.fire();
                 } else {
                     btnNew.fire();
@@ -189,6 +189,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
     public void setValidityID(String fsValue) {
         psValidityId = fsValue;
     }
+
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -200,7 +201,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnClose":
-                        if(psValidityId != null && !"".equals(psValidityId)){
+                        if (psValidityId != null && !"".equals(psValidityId)) {
                             CommonUtils.closeStage(btnClose);
                         } else {
                             unloadForm appUnload = new unloadForm();
@@ -398,7 +399,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         case "tfAddOnType":
                             poJSON = poController.SearchAddOnType("", false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 return;
                             }
                             poController.populateVehicleList();
@@ -551,8 +552,8 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                     if (isContainsChecked()) {
                         processAction("cbActive", checkedBox.isSelected() ? "1" : "0");
                     } else {
-                        if(poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW){
-                            if(!checkedBox.isSelected()){
+                        if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
+                            if (!checkedBox.isSelected()) {
                                 poController.Detail(pnDetail).setAmount(0.00);
                             }
                         }
@@ -682,7 +683,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         if (pbSuccess) {
                             poJSON = poController.Master().setThruDate(null);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             dpTo.setValue(null);
                         }
@@ -793,9 +794,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 if (isConsistent) {
                     for (int i = 0; i < listCount.size(); i++) {
                         int number = listCount.get(i);
-                        
-                        if(poController.Detail(number).getEditMode() == EditMode.ADDNEW){
-                            if(!lbcb){
+
+                        if (poController.Detail(number).getEditMode() == EditMode.ADDNEW) {
+                            if (!lbcb) {
                                 poController.Detail(number).setAmount(0.00);
                             }
                         }
@@ -849,6 +850,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                         pbEntered = false;
                         details_data.clear();
                         try {
+                            JFXUtil.disableAllHighlight(tblViewDetail, highlightedRowsMain);
                             for (lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
                                 if (JFXUtil.isObjectEqualTo(poController.Detail(lnCtr).getVariantId(), null, "")) {
                                     continue;
@@ -866,6 +868,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                                 poController.Detail(lnCtr).getRecordStatus() ? "Active" : "Inactive",
                                                 String.valueOf(lnCtr)
                                         ));
+                                if (!poController.Detail(lnCtr).getRecordStatus()) {
+                                    JFXUtil.highlightByKey(tblViewDetail, String.valueOf(lnCtr + 1), "#FAA0A0", highlightedRowsMain);
+                                }
                             }
 
                             if (pnDetail < 0 || pnDetail
@@ -946,7 +951,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                 }
             }
         });
-        JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleAddOns_Detail) item).getIndex01(), highlightedRowsMain);
+        JFXUtil.applyRowHighlighting(tblViewDetail, item -> ((ModelVehicleAddOns_Detail) item).getIndex02(), highlightedRowsMain);
     }
 
     private void initButton(int fnValue) {
@@ -961,9 +966,9 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
-        
-        if(psValidityId != null && !"".equals(psValidityId)){
-            JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse,btnNew);
+
+        if (psValidityId != null && !"".equals(psValidityId)) {
+            JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
 
         if (fnValue != EditMode.READY) {
