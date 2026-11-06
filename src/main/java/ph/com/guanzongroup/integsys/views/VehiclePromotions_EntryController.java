@@ -742,9 +742,14 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         try {
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
-            tfVariant.setText(JFXUtil.concatStrings(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription(),
+            
+            String lsVariant = "";
+            if(poController.PromotionApplicabilityList(pnDetail).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(pnDetail).getVariantId())){
+                lsVariant = JFXUtil.concatStrings(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription(),
                     poController.PromotionApplicabilityList(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
-                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().Color().getDescription()));
+                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().Color().getDescription());
+            }
+            tfVariant.setText(lsVariant);
             cbExclude.setSelected("1".equals(poController.PromotionApplicabilityList(pnDetail).getExcludeFlag()));
             cbActivePromotionApplicability.setSelected(poController.PromotionApplicabilityList(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apPromotionApplicability);
@@ -1081,18 +1086,24 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                 poController.ReloadApplicability();
                             }
                             int lnCount = 0;
+                            String lsVariant = "";
                             for (lnCtr = 0; lnCtr < poController.getPromotionApplicabilityCount(); lnCtr++) {
                                 if (!poController.PromotionApplicabilityList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
+                                lsVariant = "";
+                                if(poController.PromotionApplicabilityList(lnCtr).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(lnCtr).getVariantId())){
+                                    lsVariant = getData(JFXUtil.concatStrings(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription(),
+                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().VariantInsurance().getTransmission(),
+                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().Color().getDescription()));
+                                }
+                                
                                 lnCount += 1;
                                 details_data.add(
                                         new ModelVehicleAddOn_Detail(String.valueOf(lnCount),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Brand().getDescription()),
                                                 getData(poController.PromotionApplicabilityList(lnCtr).Model().getDescription()),
-                                                getData(JFXUtil.concatStrings(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription(),
-                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().VariantInsurance().getTransmission(),
-                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().Color().getDescription())),
+                                                lsVariant,
                                                 "1".equals(poController.PromotionApplicabilityList(lnCtr).getExcludeFlag()) ? "YES" : "NO",
                                                 poController.PromotionApplicabilityList(lnCtr).getRecordStatus() ? "Active" : "Inactive",
                                                 "", "", "",
