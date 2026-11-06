@@ -146,9 +146,9 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnHistory" contentDisplay="TOP" ellipsisString="" layoutX="695.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
+                              <Button fx:id="btnPrint" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="BOOK" size="20" />
+                                    <FontAwesomeIconView glyphName="PRINT" size="20" />
                                  </graphic>
                                  <effect>
                                     <Blend />
@@ -157,9 +157,9 @@
                                     <Font size="12.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnPrint" contentDisplay="TOP" ellipsisString="" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="Print">
+                              <Button fx:id="btnHistory" contentDisplay="TOP" ellipsisString="" layoutX="695.0" layoutY="15.0" mnemonicParsing="false" onAction="#cmdButton_Click" prefHeight="70.0" prefWidth="70.0" styleClass="button_process" stylesheets="@../css/StyleSheet.css" text="History">
                                  <graphic>
-                                    <FontAwesomeIconView glyphName="PRINT" size="20" />
+                                    <FontAwesomeIconView glyphName="BOOK" size="20" />
                                  </graphic>
                                  <effect>
                                     <Blend />
@@ -518,7 +518,7 @@
                                                       <ColumnConstraints hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="300.0" />
                                                       <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="200.0" />
                                                       <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
-                                                      <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="20.0" />
+                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                                                    </columnConstraints>
                                                    <rowConstraints>
                                                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
@@ -554,17 +554,22 @@
                                                             <Font size="12.0" />
                                                          </font>
                                                       </Label>
-                                                                      <Label layoutX="27.0" layoutY="15.0" text="Active" GridPane.columnIndex="6">
-                                                         <font>
-                                                            <Font name="System Bold" size="14.0" />
-                                                         </font>
-                                                      </Label>
                                                                       <FontAwesomeIconView fill="#ff8201" glyphName="SHIELD" size="20" GridPane.halignment="LEFT" />
                                                                       <TextField fx:id="tfBrand" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                                       <TextField fx:id="tfModel" layoutX="115.0" layoutY="39.0" promptText="Press F3: Search" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                       <TextField fx:id="tfVariant" layoutX="115.0" layoutY="39.0" promptText="Press F3: Search" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                                                                       <CheckBox fx:id="cbExclude" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                                                                      <CheckBox fx:id="cbActivePromotionApplicability" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="8" GridPane.halignment="LEFT" />
+                                                      <Button fx:id="btnSort" alignment="CENTER" maxWidth="-Infinity" minWidth="70.0" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" onAction="#cmdButton_Click" prefHeight="28.0" prefWidth="72.0" styleClass="button_process" text="Sort Items" GridPane.columnIndex="8" GridPane.rowIndex="2" />
+                                                      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="8">
+                                                         <children>
+                                                                            <Label text="Active">
+                                                               <font>
+                                                                  <Font name="System Bold" size="14.0" />
+                                                               </font>
+                                                            </Label>
+                                                                            <CheckBox fx:id="cbActivePromotionApplicability" mnemonicParsing="false" onAction="#cmdCheckBox_Click" />
+                                                         </children>
+                                                      </HBox>
                                                                   </children>
                                                 </GridPane>
                                              </children>

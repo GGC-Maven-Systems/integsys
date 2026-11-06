@@ -112,7 +112,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnNew, btnUpdate, btnSearch, btnSave, btnVoid, btnCancel, btnHistory, btnPrint, btnRetrieve, btnClose;
+    private Button btnNew, btnUpdate, btnSearch, btnSave, btnVoid, btnCancel, btnPrint, btnHistory, btnRetrieve, btnClose, btnSort;
     @FXML
     private DatePicker dpValidFrom, dpTo;
     @FXML
@@ -336,6 +336,11 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     case "btnPrint":
                         poController.printTransaction();
                         return;
+                    case "btnSort":
+                        poController.sortDetail();
+                        pnDetail = 0;
+                        loadTableDetail.reload();
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -358,7 +363,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     private void retrievePromotions() {
         poJSON = new JSONObject();
         poController.setTransactionStatus("0123");
-        poJSON = poController.loadTransactionList();
+        int lnSelectedStatus = cmbSearchStatus.getSelectionModel().getSelectedIndex() + 1;
+        poJSON = poController.loadTransactionList(tfSearchDescription.getText(), String.valueOf(lnSelectedStatus));
         loadTableMain.reload();
     }
 
@@ -382,6 +388,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                     switch (lsID) {
                         //apBrowse
                         case "tfSearchDescription":
+//                            poController.SearchDescription();
                             retrievePromotions();
                             break;
                         //apAddOns
@@ -653,7 +660,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         }
 
         JFXUtil.setStatusValue(lblStatus, ValidityPeriodStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getRecordStatus());
-        tfPromoCode.setText(poController.PromotionMaster().getValidityId());
+        tfPromoCode.setText(poController.Master().getValidityId());
         String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
         JFXUtil.setDateValue(dpValidFrom, JFXUtil.isObjectEqualTo(lsValidFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd"));
         String lsTo = JFXUtil.formatDateToString(poController.Master().getThruDate());
@@ -1337,7 +1344,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                 String lsTransactionNo = selected.getIndex02();
                 if (poController.getDetailCount() <= 0) {
                 } else {
-                    if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.PromotionMaster().getPromotionCode(), lsTransactionNo)) {
+                    if (!JFXUtil.loadValidation(pnEditMode, pxeModuleName, poController.Master().getValidityId(), lsTransactionNo)) {
                         return;
                     }
                 }
