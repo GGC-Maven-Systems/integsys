@@ -345,6 +345,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
+                loadRecordMaster();
                 loadTableAddOns.reload();
                 loadTableFreebies.reload();
                 loadTableInclusion.reload();
