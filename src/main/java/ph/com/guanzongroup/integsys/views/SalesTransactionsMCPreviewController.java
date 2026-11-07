@@ -3,6 +3,8 @@ package ph.com.guanzongroup.integsys.views;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.awt.image.BufferedImage;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -16,36 +18,35 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.agent.services.Model;
 import org.guanzon.appdriver.agent.systables.Model_Transaction_Attachment;
-import org.guanzon.appdriver.base.GRiderCAS;
-import org.guanzon.appdriver.base.GuanzonException;
-import org.guanzon.appdriver.base.LogWrapper;
+import org.guanzon.appdriver.base.*;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.cas.client.model.Model_Client_Master;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.MCSales;
 import ph.com.guanzongroup.cas.sales.constant.SalesTransactionStatic;
-import ph.com.guanzongroup.cas.sales.model.*;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Detail;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Giveaways;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Insurance;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Master;
+import ph.com.guanzongroup.cas.sales.model.Model_Sales_Registration;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelTableDetail;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -53,6 +54,7 @@ import ph.com.guanzongroup.integsys.utility.ExplorerWindowUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -64,11 +66,30 @@ import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.ScrollEvent;
+import javafx.util.Duration;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
+import javafx.scene.Node;
 
 /**
- * Controller for SalesTransactionMC.fxml (Motorcycle Sales form).
+ * Controller for the Motorcycle Sales PREVIEW (the form opened as a popup from
+ * the landing list). Same logic as SalesTransactionsMCController; the only
+ * differences are: no New / Browse buttons, openFromList() opens the picked
+ * transaction, setOnClose() lets the list close the modal, Save / Cancel return
+ * to the saved record or close the popup.
  *
  * Structure follows SalesQoutationController: ScreenInterface + Initializable,
  * initButton(editMode), JFXUtil focus listeners that write straight to the
@@ -76,25 +97,17 @@ import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
  * transaction summary rebuilt from the model after every change.
  *
  * ------------------------------------------------------------------------------
- * CHANGES IN THIS VERSION 1-13. (earlier versions) compile + load fixes,
- * Registration & Insurance, Payment tab, Confirm / Void / History... 14.
- * ATTACHMENT TAB fixed (see "Attachment tab" section): - the tab is wired to
- * MCSales: Add copies the picked file to the temp attachment folder (copyFile)
- * and registers it (addAttachment(name)); Remove calls
- * removeAttachment(modelRow). Before, both only touched local lists, so nothing
- * was saved. - the attachments are loaded from the model after Browse / Update
- * / Confirm / Void (loadAttachments() runs in a Task, it downloads the files).
- * Before, the table was never filled for an existing transaction. - the table
- * columns use lambda cell factories (PropertyValueFactory("index01") cannot
- * read Model_Transaction_Attachment). - the duplicate check compares FILE NAMES
- * (the old one compared File objects of different folders: never equal). - the
- * attachment type combo is stored on the attachment, follows the selected row,
- * and changes the selected row's type. - AnchorAttach / AnchorAttach2 are no
- * longer disabled outside edit mode: it also disabled the viewer, the arrows
- * and the list, so a saved transaction could not be browsed. Add / Remove /
- * type are still bound to the edit mode. - missing import
- * org.guanzon.appdriver.constant.RecordStatus added (reloadAttachmentTable used
- * it).
+ * CHANGES IN THIS VERSION 1-14. (earlier versions) compile + load fixes,
+ * Registration & Insurance, Payment tab, Confirm / Void / History, Attachment
+ * tab wired to MCSales. 15. CWT is now a Yes / No combo
+ * (SalesTransactionStatic.CWT_RATES = {"Yes", "No"}): - Yes: tfPaymentCwt is
+ * editable; the typed amount is written to the master, then the units table and
+ * summary reload. - No : tfPaymentCwt is disabled and not editable; the CWT
+ * amount is forced to 0. - syncCwt() no longer computes rate x base (it would
+ * overwrite the typed amount); the rate helpers were removed. 16. Client type
+ * combo shows the master's client type (LoadMaster), New defaults to the
+ * model's default (Individual). 17. LoadClientInfo() / LoadCoClientInfo():
+ * blank birthplace / citizenship no longer stop the rest of the load.
  *
  * ASSUMED (not visible in the classes provided) - each one is used in ONE
  * place, fix it there: Model_Sales_Master getters mirroring the setters MCSales
@@ -107,8 +120,8 @@ import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
  * Model_Sales_Registration: getInsuranceAmount(), setInsuranceAmount(),
  * getInsuranceYear(), setInsuranceYear(), getChargeTo(), setChargeTo().
  * Model_Transaction_Attachment: the attachment type is kept in the raw column
- * ATTACH_TYPE_COLUMN ("sDocTypex") through getValue()/setValue(); change the
- * constant if your table names it differently.
+ * ATTACH_TYPE_COLUMN through getValue()/setValue(); change the constant if your
+ * table names it differently.
  *
  * NEW CONSTANTS NEEDED in SalesTransactionStatic: TBL_NO_REGINSUR,
  * MSG_CONFIRM_REMOVE_REGINSUR
@@ -136,6 +149,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private int pnRegInsurLoadSeq = 0;
     private int pnGawayLoadSeq = 0;
     private int pnAttachLoadSeq = 0;
+
+    double ldstackPaneWidth = 0;
+    double ldstackPaneHeight = 0;
     /**
      * The rows that were selected when a field got focus: the field's edit
      * belongs to THESE rows even if the user clicks another row (which changes
@@ -176,13 +192,25 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
      */
     private final BooleanProperty pbTermPayment = new SimpleBooleanProperty(false);
     /**
+     * true when the CWT combo is "Yes"; drives the CWT amount field.
+     */
+    private final BooleanProperty pbCwtYes = new SimpleBooleanProperty(false);
+    /**
      * Index of "Term" in SalesTransactionStatic.PAYMENT_FORMS = {"Cash",
      * "Term", "Cash Balance", "Financing"}.
      */
     private static final int PAYMENT_FORM_TERM = 1;
-
+    /**
+     * Index of "Yes" in SalesTransactionStatic.CWT_RATES = {"Yes", "No"}.
+     */
     private static final int CWT_YES = 0;
     private static final int CWT_NO = 1;
+    /**
+     * CWT PERCENTAGE (0 - 100, e.g. 2 for 2%) typed in tfPaymentCwt. MCSales.computeTransaction() reads the master's CWT
+     * field as this RATE and overwrites the same field with the AMOUNT (rate x (VAT sales + non-VAT sales)), and many MCSales
+     * getters run it. So the rate lives HERE, and recomputeTransaction() writes it to the master right before every compute.
+     */
+    private double pdCwtRate = 0.0;
     /**
      * true only in ADDNEW / UPDATE; combos, check boxes, date pickers and
      * action buttons are bound to it.
@@ -193,10 +221,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
      * field.
      */
     private final BooleanProperty pbCreditPayment = new SimpleBooleanProperty(false);
-    /**
-     * true when the CWT combo is "Yes"; drives the CWT amount field.
-     */
-    private final BooleanProperty pbCwtYes = new SimpleBooleanProperty(false);
+
     /**
      * Raw column of Transaction_Attachment that keeps the attachment type
      * (combo index as text). ASSUMED name.
@@ -433,8 +458,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private CheckBox cbRegIsCharge;
     @FXML
     private TextField tfInsurType;
-    //    @FXML private ComboBox cmbRegInsuranceOption;
-//    @FXML private TextField tfInsurDesc;
     @FXML
     private TextField tfInsurYear;
     @FXML
@@ -702,7 +725,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         pnEditMode = oSalesController.MCSales().getEditMode();
         initButton(pnEditMode);
         ClickButton();
-
         pbLoaded = true;
     }
 
@@ -781,12 +803,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             });
         }
     }
-
     /** Moves focus to the next focusable control, as if Tab was pressed. */
     private void focusNext(Node fnNode) {
         fnNode.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "\t", KeyCode.TAB,
                 false, false, false, false));
     }
+
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
         String lsID = txtInput.getId();
@@ -810,8 +832,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             }
                             oSalesController.MCSales().setClientType(String.valueOf(lnClientType));
                             poJSON = oSalesController.MCSales().searchClient(txtInput.getText(), true);
-                            if (poJSON.get("result").equals("error")) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
                                 break;
                             }
                             LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
@@ -826,10 +847,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             loadPaymentRecord();   // a source quotation also sets the payment form, term, advances...
                             break;
                         case "tfCoClientName":
-                            oSalesController.MCSales().getMaster().Client().setClientType("0");
-                            poJSON = oSalesController.MCSales().searchCoClient(txtInput.getText(), true);
-                            if (poJSON.get("result").equals("error")) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            oSalesController.MCSales().getMaster().CoClient().setClientType("0");
+                            poJSON = oSalesController.MCSales().searchCoClient(txtInput.getText(), false);
+                            if (hasError(poJSON)) {
                                 break;
                             }
                             LoadCoClientInfo();
@@ -849,8 +869,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             }
 
                             poJSON = oSalesController.MCSales().searchDetailBySerial(pnUnitRow, lsValuse, lnSearchType);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
                                 return;
                             }
 
@@ -878,15 +897,18 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             } finally {
                                 pbSearching = false;
                             }
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadUnitRecord(pnUnitRow);
                                 return;
                             }
+
                             psPromoAtFocus = oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription();
                             tfPomoCode.setText(psPromoAtFocus);
+                            tfFreight.setText(money(dbl(() -> oSalesController.MCSales().getDetail(pnUnitRow).getFreight())));
                             loadTableMCItem();          // the promo can change discount / freight
                             loadTableGiveaways();       // ...add giveaways
-                            loadTableRegAndInsur();     // ...and registration / insurance rows
+                            // no loadTableRegAndInsur(): the promo only ticks the Charge boxes, it does not show rows
+                            applyPromoFlags(selectedUnit());
                             break;
 
                         case "tfGawayBarrcode":
@@ -900,8 +922,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                                 break;
                             }
                             poJSON = oSalesController.MCSales().searchSalesGiveAway(loGawayRow.getEntryNo(), lsValuse, lbByCode);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadUnitRecord(pnUnitRow);
                                 return;
                             }
                             loadTableGiveaways();   // store the searched giveaway in the table
@@ -909,8 +931,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         case "tfPaymentTerm":
                             // MCSales has no term search: the master keeps a term CODE (setTermCode), typed in this field
                             poJSON = oSalesController.MCSales().SearchTerm(lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                restoreTermText();
                                 return;
                             }
                             restoreTermText();    // shows the searched term's description
@@ -918,8 +940,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             loadSummary();        // the summary shows the due date too
                             break;
                         case "tfSalesman":
-                            // with a source (quotation / reservation) the salesman comes from the source and is only displayed;
-                            // without a source the salesman is chosen here with F3
+                            // the salesman can be searched with F3 on every transaction, with or without a source
                             if (!canEdit()) {
                                 break;
                             }
@@ -933,9 +954,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
                             poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                                return;
+                            if (hasError(poJSON)) {
+                                break;
                             }
                             loadPaymentRecord();
                             break;
@@ -946,11 +966,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             }
                             // MCSales reads the serial from the selected UNIT and adds a registration/insurance row for it
                             poJSON = oSalesController.MCSales().searchInsuranceTypeRegistration(pnUnitRow, lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             selectNewRegInsur(false);   // the registration the search just added becomes the selected row
+                            applyDefaultCharge(poSelRegInsur, false);   // Registration checkbox follows the unit's promo
                             // TODO(model): default the amount here once Model_Insurance_Type / Model_Sales_Registration
                             // expose it (Model_Insurance_Type has no getAmount())
                             loadTableRegAndInsur();   // show the searched registration in the table
@@ -962,11 +983,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             }
                             // MCSales reads the serial from the selected UNIT and adds a registration/insurance row for it
                             poJSON = oSalesController.MCSales().searchInsuranceTypeInsurance(pnUnitRow, lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             selectNewRegInsur(true);   // the insurance the search just added becomes the selected row
+                            applyDefaultCharge(poSelRegInsur, true);   // Insurance checkbox follows the unit's promo
                             loadTableRegAndInsur();   // show the searched insurance in the table
                             break;
                         case "tfInsurPayer": {
@@ -978,8 +1000,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             normalizeRegInsurRows();   // before any backend call that computes over the rows
                             // searchInsuranceTypePayee(n) reads getSalesInsurance(n): n is the insurance ENTRY NO.
                             poJSON = oSalesController.MCSales().searchInsuranceTypePayee(loInsPayer.getEntryNo(), lsValuse, false);
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                            if (hasError(poJSON)) {
+                                loadSummary();
                                 return;
                             }
                             poSelRegInsur = loInsPayer;   // keep the same row selected
@@ -1020,6 +1042,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.WARNING, null, ex);
         }
     }
+
     /**
      * Number of days of the term saved on the master, 0 when it cannot be read.
      * The getter name on the term model was not provided, so the usual names
@@ -1103,8 +1126,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         String lsValue = txtInput.getText();
         try {
             switch (lsID) {
-                // TODO: write lsValue to the model, e.g.
-                // case "tfMCUnitPrice": trans().getModel().setUnitPrice(lsValue); break;
                 case "tfMCRemarks":
                 case "tfMCWarrantyNo":
                 case "tfMCKeyCode": {
@@ -1123,8 +1144,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     poJSON = "tfMCRemarks".equals(lsID) ? loUnit.setNotes(lsValue)
                             : "tfMCWarrantyNo".equals(lsID) ? loUnit.setWarrantyNo(lsValue)
                             : loUnit.setKeyCode(lsValue);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+                        loadUnitRecord(pnUnitRow);
                         return;
                     }
                     loadTableMCItem();
@@ -1140,9 +1161,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;   // unchanged
                     }
                     poJSON = loGaway.setQuantity(lnQty);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        return;
+                    if (hasError(poJSON)) {
+                        loadSummary();
+                        break;
                     }
                     loadTableGiveaways();
                     break;
@@ -1158,8 +1179,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;   // unchanged
                     }
                     poJSON = loReg.setInsuranceAmount(lnRegAmt);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+                        loadSummary();
                         return;
                     }
                     loadTableRegAndInsur();   // refreshes the Amount column and re-formats the field
@@ -1185,8 +1206,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         }
                         poJSON = loIns.setInsuranceYear(lnInsYear);    // ASSUMED setter
                     }
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+                        loadSummary();
                         return;
                     }
                     loadTableRegAndInsur();   // refresh the Amount / Year columns
@@ -1203,9 +1224,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     if (lsValue == null || lsValue.trim().isEmpty()) {
                         if (!textOf(() -> master().getTermCode()).trim().isEmpty()) {
                             poJSON = master().setTermCode("");   // same "no term" value cmb_Changed() uses
-                            if ("error".equals(poJSON.get("result"))) {
-                                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                                restoreTermText();   // the clear was refused: show what the master still holds
+                            if (hasError(poJSON)) {
+                                restoreTermText();
                                 return;
                             }
                         }
@@ -1234,11 +1254,17 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;      // it was already empty: nothing to remove
                     }
                     poJSON = loUnit.setPromoID("");                  // ASSUMED setter
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
+
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
+                    loUnit.setAddDiscount(0.00);
+                    loUnit.setDiscount(0.00);
+                    loUnit.setFreight(0.00);
+                    tfPromoAddDisc.setText(money(0.00));
+                    tfPromoDisc.setText(money(0.00));
+                    tfFreight.setText(money(0.00));
                     psPromoAtFocus = "";
                     loadTableMCItem();
                     loadTableGiveaways();
@@ -1286,8 +1312,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         }
                         poJSON = loUnit.setFreight(lnNew);           // ASSUMED setter
                     }
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
@@ -1299,23 +1324,25 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     if (!pbCwtYes.get()) {
                         break;   // field is disabled unless CWT = Yes
                     }
-                    double lnCwt = parseDouble(lsValue);
-                    final Model_Sales_Master loMas = master();
-                    if (lnCwt < 0) {
-                        ShowMessageFX.Warning("CWT amount cannot be negative.", "Warning", null);
+                    // the field holds the CWT PERCENTAGE: from 0.00 to 100.00 only
+                    final String lsCwt = lsValue == null ? "" : lsValue.replace("%", "").replace(",", "").trim();
+                    double lnCwt;
+                    try {
+                        lnCwt = lsCwt.isEmpty() ? 0.0 : Double.parseDouble(lsCwt);
+                    } catch (NumberFormatException ex) {
+                        lnCwt = -1.0;   // not a number: fails the range check below
+                    }
+                    if (Double.isNaN(lnCwt) || lnCwt < 0.0 || lnCwt > 100.0) {
+                        ShowMessageFX.Warning("CWT must be from 0.00 to 100.00.", "Warning", null);
                         loadSummary();   // put the saved value back
                         return;
                     }
-                    if (lnCwt == dbl(() -> loMas.getCWTAmount())) {
+                    lnCwt = Math.round(lnCwt * 100.0) / 100.0;
+                    if (Math.abs(lnCwt - pdCwtRate) < 0.005) {
                         break;   // unchanged
                     }
-                    poJSON = loMas.setCWTAmount(lnCwt);
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                        loadSummary();
-                        return;
-                    }
-                    recomputeTransaction();
+                    pdCwtRate = lnCwt;
+                    recomputeTransaction();   // MCSales: master CWT amount = rate x (VAT sales + non-VAT sales)
                     loadTableMCItem();   // refreshes tblUnits; its succeeded() reloads the summary too
                     break;
                 }
@@ -1334,11 +1361,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     private void initializeObject() {
         try {
-            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE,
-                    System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
-
-            oSalesController = new SalesControllers(oApp, logwrapr);   // <-- add this
-
+            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE, System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
+            oSalesController = new SalesControllers(oApp, logwrapr);
             oSalesController.MCSales().initTransaction();
             oSalesController.SalesQoutation().setRecordStatus(SalesTransactionStatic.OPEN);
             oSalesController.SalesQoutation().setWithUI(true);
@@ -1354,7 +1378,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private void initButton(int fnValue) {
         CustomCommonUtil.setVisible(false, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose);
         CustomCommonUtil.setManaged(false, btnUpdate, btnSave, btnCancel, btnApproved, btnVoid, btnHistory, btnClose);
-//        AnchorMCSales.setDisable(true);
         AnchorClient.setDisable(true);
         // AnchorAttach / AnchorAttach2 are NOT disabled here any more: they hold the viewer, the arrows and the list, which
         // must work on a saved transaction too. Add / Remove / type are bound to pbEditable in initAttachmentTab().
@@ -1376,7 +1399,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             case EditMode.UPDATE:
                 CustomCommonUtil.setVisible(true, btnSave, btnCancel);
                 CustomCommonUtil.setManaged(true, btnSave, btnCancel);
-//                AnchorMCSales.setDisable(false);
                 AnchorClient.setDisable(false);
                 AnchorMCPrice.setDisable(false);
                 anchorReg.setDisable(false);
@@ -1388,7 +1410,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 throw new IllegalStateException(SalesTransactionStatic.MSG_UNEXPECTED_VALUE + fnValue);
         }
         pbEditable.set(fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
-//        loadStatus(fnValue);
     }
 
     private void ClickButton() {
@@ -1399,11 +1420,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     /**
      * Refreshes the whole form from the transaction that is loaded in MCSales
-     * (after Update, Confirm, Void). The edit mode is read FIRST: the tables
-     * add their blank trailing row only while editing.
+     * (after openFromList, Update, Confirm, Void). The edit mode is read FIRST: the
+     * tables add their blank trailing row only while editing.
      */
     private void reloadRecord() throws GuanzonException, SQLException {
         pnEditMode = oSalesController.MCSales().getEditMode();
+        pdCwtRate = savedCwtRate();   // BEFORE anything can compute: in edit mode MCSales overwrites the CWT field
         pnUnitRow = -1;
         pnGawayRow = -1;
         pnRegInsurRow = -1;
@@ -1440,14 +1462,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     public boolean openFromList(String fsTransNo, boolean fbUpdate) {
         try {
             poJSON = oSalesController.MCSales().OpenTransaction(fsTransNo);   // ASSUMED name: same family as UpdateTransaction()
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return false;
             }
             if (fbUpdate) {
                 poJSON = oSalesController.MCSales().UpdateTransaction();
-                if ("error".equals(poJSON.get("result"))) {
-                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                if (hasError(poJSON)) {
                     // still show the record, in READY mode
                 }
             }
@@ -1467,8 +1487,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             switch (lsID) {
                 case "btnUpdate":
                     poJSON = oSalesController.MCSales().UpdateTransaction();
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     reloadRecord();   // now UPDATE: the tables get their blank row, the payment fields become editable
@@ -1479,9 +1498,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         ShowMessageFX.Warning(lsPaymentError, "Warning", null);
                         break;
                     }
+                    recomputeTransaction();   // the master CWT field must hold the AMOUNT (not the rate) when it is saved
                     poJSON = oSalesController.MCSales().saveTransaction();
-                    if (poJSON.get("result").equals("error")) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1495,8 +1514,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;
                     }
                     poJSON = oSalesController.MCSales().CloseTransaction();
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1507,8 +1525,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;
                     }
                     poJSON = oSalesController.MCSales().VoidTransaction();
-                    if ("error".equals(poJSON.get("result"))) {
-                        ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                    if (hasError(poJSON)) {
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
@@ -1542,8 +1559,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
                         // re-open the saved record: this throws away every unsaved edit and returns the model to READY
                         poJSON = oSalesController.MCSales().OpenTransaction(lsCancelTransNo);   // same call openFromList() uses
-                        if ("error".equals(poJSON.get("result"))) {
-                            ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        if (hasError(poJSON)) {
                             break;
                         }
                         reloadRecord();   // reads the edit mode first, then refills every tab, table and the attachments
@@ -1669,9 +1685,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             } else if (fcmb == cmbPaymentForm) {
                 poJSON = oSalesController.MCSales().getMaster().setPaymentForm(lsValue);
             } else if (fcmb == cmbPaymentCWT) {
-                syncCwt();   // the master keeps the CWT AMOUNT: rate x base, then the totals are recomputed
+                syncCwt();           // No: CWT amount is set to 0; Yes: keeps the amount, then totals are recomputed
                 loadTableMCItem();   // re-reads the unit cells (Net SRP, Discount, etc.) after the recompute
-                loadSummary();        // payment tab totals + transaction summary
+                loadSummary();       // payment tab totals + transaction summary
                 poJSON = null;
             } else if (fcmb == cmbAttachmentType) {
                 setSelectedAttachmentType(fnIndex);   // only changes the attachment selected in the table (if any)
@@ -1697,8 +1713,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 poJSON = null;   // combos with no model field yet
             }
 
-            if (poJSON != null && "error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
             if (fcmb == cmbRegistrationType) {
@@ -1736,27 +1751,26 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         try {
             if (fcb == cbRegIsCharge || fcb == cbInsurIsCharge) {
                 // ticked = Charge, unticked = Free; written to the row shown in that section
-                boolean lbReg = fcb == cbRegIsCharge;
-                Model loRow = lbReg ? poSectionReg : poSectionIns;
+                final boolean lbReg = fcb == cbRegIsCharge;
+                final Model loRow = lbReg ? poSectionReg : poSectionIns;
                 if (isBlankRegInsur(loRow)) {
                     // nothing in this section yet: undo the tick without triggering this handler again
-                    boolean lbPrev = pbSyncing;
-                    pbSyncing = true;
-                    try {
-                        fcb.setSelected(!fbSelected);
-                    } finally {
-                        pbSyncing = lbPrev;
-                    }
+                    revertCheckBox(fcb, !fbSelected);
+                    ShowMessageFX.Warning(lbReg ? "Please select or search a registration first."
+                            : "Please select or search an insurance first.", "Warning", null);
                     return;
                 }
+                String lsCharge = fbSelected ? CHARGE_YES : CHARGE_NO;
                 poJSON = lbReg
-                        ? poSectionReg.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO)
-                        : poSectionIns.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO);
-                if ("error".equals(poJSON.get("result"))) {
-                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+                        ? ((Model_Sales_Registration) loRow).setChargeTo(lsCharge)
+                        : ((Model_Sales_Insurance) loRow).setChargeTo(lsCharge);
+                if (hasError(poJSON)) {
+                    revertCheckBox(fcb, !fbSelected);   // keep the box in sync with the model
                     return;
                 }
-                loadTableRegAndInsur();   // the Status column shows Charge / Free, and the payer field follows
+                poSelRegInsur = loRow;      // keep this row selected after the reload
+                loadTableMCItem();          // recomputes totals, refreshes the Ins/Reg column and the summary
+                loadTableRegAndInsur();     // Status column (Charge / Free)
             }
             loadSummary();
         } catch (Exception ex) {
@@ -1859,8 +1873,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     // =========================================================================
     // Tables
     // NOTE: tblUnits, tblGawayItem and tblAttachments are bound directly to the model classes
-    // (lambda cell factories, lookups pre-loaded in the Task). The registration/insurance and invoice
-    // tables still use ModelTableDetail ("index01"...) until their backend models exist.
+    // (lambda cell factories, lookups pre-loaded in the Task). The invoice table still uses
+    // ModelTableDetail ("index01"...) until its backend model exists.
     // =========================================================================
     /**
      * Remove column: a trash button per row, enabled only while editing.
@@ -1958,9 +1972,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         tblRowRegAndInsurNo.setCellValueFactory(cd -> cell(() -> cd.getTableView().getItems().indexOf(cd.getValue()) + 1));
         tblRowRegAndInsurEngine.setCellValueFactory(cd -> cell(() -> regInsurEngine(cd.getValue())));
         tblRowRegAndInsurSource.setCellValueFactory(cd -> cell(() -> cd.getValue() instanceof Model_Sales_Registration ? "Registration" : "Insurance"));
-        // insurance rows use Model_Sales_Insurance getters; registration rows stay TODO until Model_Sales_Registration is known
         tblRowRegAndInsurDesc.setCellValueFactory(cd -> cell(() -> cd.getValue() instanceof Model_Sales_Insurance
-                ? ((Model_Sales_Insurance) cd.getValue()).InsuranceType().getInsuranceTypeName() // assumes Model_Insurance_Type.getDescription()
+                ? ((Model_Sales_Insurance) cd.getValue()).InsuranceType().getInsuranceTypeName()
                 : regInsurTypeId(cd.getValue())));
         tblRowRegAndInsurAmount.setCellValueFactory(cd -> cell(()
                 -> cd.getValue() instanceof Model_Sales_Insurance
@@ -2089,6 +2102,88 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         });
     }
 
+    private static boolean isTrueText(String fs) {
+        return "true".equalsIgnoreCase(fs) || "1".equals(fs);
+    }
+
+    /**
+     * true when the unit's promo (model or brand) includes insurance / registration.
+     */
+    private boolean promoHas(final Model_Sales_Detail foUnit, final boolean fbInsurance) {
+        if (isBlankUnit(foUnit)) {
+            return false;
+        }
+        String lsModel = fbInsurance ? textOf(() -> foUnit.PromotionModel().isInsuranceFree())
+                : textOf(() -> foUnit.PromotionModel().isRegistrationFree());
+        String lsBrand = fbInsurance ? textOf(() -> foUnit.PromotionBrand().isInsuranceFree())
+                : textOf(() -> foUnit.PromotionBrand().isRegistrationFree());
+        return isTrueText(lsModel) || isTrueText(lsBrand);
+    }
+
+    /**
+     * The unit row currently selected in tblUnits (null when none).
+     */
+    private Model_Sales_Detail selectedUnit() {
+        return (pnUnitRow >= 1 && pnUnitRow <= unit_data.size()) ? unit_data.get(pnUnitRow - 1) : null;
+    }
+
+    /**
+     * Ticks the Charge check boxes from the unit's promo, only while the
+     * section has no real row. Writes nothing to the model and adds nothing to
+     * the table.
+     */
+    private void applyPromoFlags(Model_Sales_Detail foUnit) {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;   // cb_Changed() must not run
+        try {
+            if (isBlankRegInsur(poSectionReg)) {
+                cbRegIsCharge.setSelected(promoHas(foUnit, false));
+            }
+            if (isBlankRegInsur(poSectionIns)) {
+                cbInsurIsCharge.setSelected(promoHas(foUnit, true));
+            }
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /**
+     * Default of the Charge check box for a row that a registration / insurance
+     * search just added: the same rule the promo uses (promoHas) for the
+     * section's OWN check box. Registration search -> cbRegIsCharge only,
+     * insurance search -> cbInsurIsCharge only. The default is written to the
+     * row (setChargeTo) so the box, the table Status column and the totals
+     * all agree; the user can still change it by hand afterwards.
+     */
+    private void applyDefaultCharge(Model foRow, boolean fbInsurance) {
+        if (isBlankRegInsur(foRow)) {
+            return;
+        }
+        try {
+            String lsCharge = promoHas(selectedUnit(), fbInsurance) ? CHARGE_YES : CHARGE_NO;
+            JSONObject loJSON = fbInsurance
+                    ? ((Model_Sales_Insurance) foRow).setChargeTo(lsCharge)
+                    : ((Model_Sales_Registration) foRow).setChargeTo(lsCharge);
+            if (hasError(loJSON)) {
+                return;
+            }
+            loadTableMCItem();   // recompute totals / Ins-Reg column / summary with the default
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
+    private void revertCheckBox(CheckBox fcb, boolean fbValue) {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            fcb.setSelected(fbValue);
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
     private void loadUnitRecord(int fnRow) {
         boolean lbPrev = pbSyncing;
         pbSyncing = true;
@@ -2104,7 +2199,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tfMCKeyCode.setText(textOf(() -> loUnit.getKeyCode()));
                 tfMCRemarks.setText(textOf(() -> loUnit.getNotes()));
                 tfMCUnitPrice.setText(money(dbl(() -> loUnit.getUnitPrice())));
-                tfMCInsurAmt.setText(money(dbl(() -> loUnit.getInsuranceAmount())));
                 tfPromoDisc.setText(money(dbl(() -> loUnit.getDiscount())));
                 tfPromoAddDisc.setText(money(dbl(() -> loUnit.getAddDiscount())));
                 tfFreight.setText(money(dbl(() -> loUnit.getFreight())));
@@ -2112,10 +2206,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tfRegEngineNo.setText(tfMCEngineNo.getText());
                 tfRegFrameNo.setText(tfMCFrameNo.getText());
 
-                tfMCInsurAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isInsuranceFree()))
-                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isInsuranceFree())) ? "Yes" : "No");
-                tfMCRegisAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isRegistrationFree()))
-                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isRegistrationFree())) ? "Yes" : "No");
+                tfMCInsurAmt.setText(promoHas(loUnit, true) ? "Yes" : "No");
+                tfMCRegisAmt.setText(promoHas(loUnit, false) ? "Yes" : "No");
+                applyPromoFlags(loUnit);   // tick Charge from the promo, no rows added
                 // TODO(model): tfMCRegisAmt, cmbVehicleType and the other combos / check boxes
             }
         } catch (Exception ex) {
@@ -2201,6 +2294,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 cbInsurIsCharge.setSelected(isChargeTo(loIns));
                 tfInsurPayer.setText(textOf(() -> loIns.InusrancePayeeClient().getCompanyName()));
             }
+            applyPromoFlags(selectedUnit());   // a section without a row follows the promo
         } finally {
             pbSyncing = lbPrev;
         }
@@ -2223,7 +2317,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
             }
         } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         } finally {
             pbSyncing = lbPrev;
@@ -2346,26 +2440,26 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 // a COPY for the table: never add to the model's own list, or every load duplicates the rows
                 List<Model_Sales_Detail> laRows = new ArrayList<Model_Sales_Detail>();
 
-                int lnCount = loSales.getSalesDetailList().size();
+                int lnCount = loSales.getDetailList().size();
                 if (lbEditing) {
                     try {
-                        if (lnCount == 0 || !isBlankUnit(loSales.getSalesDetailList().get(lnCount - 1))) {
+                        if (lnCount == 0 || !isBlankUnit(loSales.getDetailList().get(lnCount - 1))) {
                             // let the model create the blank row so it gets its trans no and entry no
                             int lnNextEntry = 0;
-                            for (Model_Sales_Detail loTmp : loSales.getSalesDetailList()) {
+                            for (Model_Sales_Detail loTmp : loSales.getDetailList()) {
                                 lnNextEntry = Math.max(lnNextEntry, loTmp.getEntryNo());
                             }
                             loSales.getDetail(lnNextEntry + 1);
-                            lnCount = loSales.getSalesDetailList().size();
+                            lnCount = loSales.getDetailList().size();
                         }
                     } catch (IndexOutOfBoundsException ex) {
                         Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.WARNING, null, ex);
-                        lnCount = loSales.getSalesDetailList().size();
+                        lnCount = loSales.getDetailList().size();
                     }
                 }
 
                 for (int lnCtr = 0; lnCtr < lnCount; lnCtr++) {
-                    Model_Sales_Detail loRow = loSales.getSalesDetailList().get(lnCtr);
+                    Model_Sales_Detail loRow = loSales.getDetailList().get(lnCtr);
                     if (loRow == null) {
                         break;
                     }
@@ -2406,10 +2500,10 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 }
                 refreshRegInsurEngine();
                 if (lbEditing) {
-                    syncCwt();               // ADDNEW / UPDATE: writes the CWT amount, then recomputes
+                    syncCwt();               // ADDNEW / UPDATE: CWT = No forces the amount to 0, then recomputes
                 } else {
                     recomputeTransaction();  // READY (browse): recompute so the totals exist for display
-                }       // the units changed the base the CWT rate applies to
+                }
                 loadSummary();   // totals come from the master (MCSales.computeTransaction())
                 loading.progressIndicator.setVisible(false);
             }
@@ -2554,6 +2648,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
         final int lnSelectRow = pnRegInsurRow;
         final int lnSeq = ++pnRegInsurLoadSeq;
+        final Model loKeep = poSelRegInsur;   // captured BEFORE setAll() clears the selection (listener nulls poSelRegInsur)
 
         Task<List<Model>> task = new Task<List<Model>>() {
             @Override
@@ -2587,8 +2682,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         tfInsurYear.clear();
                         tfInsurAmt.clear();
                         cmbRegistrationType.getSelectionModel().clearSelection();
-                        cbRegIsCharge.setSelected(false);
-                        cbInsurIsCharge.setSelected(false);
+                        applyPromoFlags(selectedUnit());   // no rows: the boxes follow the promo
                     } finally {
                         pbSyncing = false;
                     }
@@ -2596,7 +2690,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     pbRegistrationRow.set(false);
                 } else {
                     // keep the selected row (found by object, not entry no.); a just-searched row is selected by selectNewRegInsur()
-                    int lnIndex = poSelRegInsur != null ? reginsur_data.indexOf(poSelRegInsur) : -1;
+                    int lnIndex = loKeep != null ? reginsur_data.indexOf(loKeep) : -1;
                     if (lnIndex < 0) {
                         lnIndex = 0;
                     }
@@ -2909,10 +3003,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         return String.format("%,.2f", fn);
     }
 
-    private static double round2(double fn) {
-        return Math.round(fn * 100.0) / 100.0;
-    }
-
     // Helper methods to safely parse String results
     private double parseDouble(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -2948,8 +3038,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             poJSON = loRow instanceof Model_Sales_Registration
                     ? oSalesController.MCSales().removeSalesRegistration(regInsurEntryNo(loRow)) // removes it and realigns the entry nos
                     : oSalesController.MCSales().removeSalesInsurance(regInsurEntryNo(loRow));
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
         }
@@ -2968,8 +3057,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         Model_Sales_Giveaways loRow = gaway_data.get(fnRow);
         if (!isBlankGiveaway(loRow)) {
             poJSON = oSalesController.MCSales().removeSalesGiveAway(loRow.getEntryNo());   // removes it and realigns the entry nos
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
         }
@@ -2998,7 +3086,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     // =========================================================================
     // Payment tab
     // Reads / writes Model_Sales_Master. The totals are computed by MCSales.computeTransaction() (only while editing);
-    // this tab only displays them. CWT is the one value the UI feeds back: the combo holds a RATE, the master an AMOUNT.
+    // this tab only displays them. CWT: the combo is Yes / No, the master keeps the typed CWT AMOUNT.
     // =========================================================================
     /**
      * "" / invalid -> -1 (no selection); the master stores combo indexes as
@@ -3024,53 +3112,18 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     }
 
     /**
-     * First number in a label such as "1%" / "2 %"; 0 for "None" or blank.
-     */
-    private static double rateOf(String fsLabel) {
-        java.util.regex.Matcher loMatch = java.util.regex.Pattern.compile("\\d+(\\.\\d+)?").matcher(fsLabel == null ? "" : fsLabel);
-        return loMatch.find() ? Double.parseDouble(loMatch.group()) : 0.0;
-    }
-
-    private double cwtRate() {
-        return rateOf(comboText(cmbPaymentCWT));
-    }
-
-    /**
-     * Index of the CWT combo item whose rate is closest to fdRate (within 0.5),
-     * else -1.
-     */
-    private int cwtIndexFor(double fdRate) {
-        int lnBest = -1;
-        double lnBestDiff = 0.5;
-        for (int lnCtr = 0; lnCtr < cmbPaymentCWT.getItems().size(); lnCtr++) {
-            double lnDiff = Math.abs(rateOf(String.valueOf(cmbPaymentCWT.getItems().get(lnCtr))) - fdRate);
-            if (lnDiff <= lnBestDiff) {
-                lnBestDiff = lnDiff;
-                lnBest = lnCtr;
-            }
-        }
-        return lnBest;
-    }
-
-    /**
-     * The amount the CWT rate applies to: the net selling amount (total -
-     * discount - add. discount + freight). ASSUMED business rule, kept in this
-     * one method.
-     */
-    private double cwtBase() {
-        final Model_Sales_Master loMas = master();
-        return dbl(() -> loMas.getTransactionTotal()) - dbl(() -> loMas.getDiscount())
-                - dbl(() -> loMas.getAddDiscount()) + dbl(() -> loMas.getFreight());
-    }
-
-    /**
      * Runs MCSales.computeTransaction() (edit modes only) after the blank
      * numeric fields were fixed.
      */
     private void recomputeTransaction() {
         try {
             normalizeRegInsurRows();
-            oSalesController.MCSales().computeTransaction();
+            if (canEdit()) {
+                // MCSales reads this field as the RATE: put the rate back first, or a previous compute's AMOUNT
+                // would be used as the rate (the CWT would multiply on every call)
+                master().setCWTAmount(pdCwtRate);
+            }
+            oSalesController.MCSales().computeTransaction();   // the master field now holds the CWT AMOUNT
             System.out.println("[PAY] computeTransaction OK, mode=" + pnEditMode);
         } catch (Throwable ex) {
             System.out.println("[PAY] computeTransaction FAILED, mode=" + pnEditMode);
@@ -3079,28 +3132,29 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     }
 
     /**
-     * Writes the CWT AMOUNT (rate x base) to the master when a rate is picked
-     * in the combo, then recomputes the totals (a CWT amount above 0 turns the
-     * VAT sales into non-VAT sales in computeTransaction()).
+     * CWT = No: the percentage is set to 0 (MCSales then computes a 0 amount). CWT = Yes: the typed percentage
+     * is kept. The amount itself is never written here: MCSales calculates it from the percentage.
      */
     private void syncCwt() {
         if (!canEdit() || cmbPaymentCWT.getSelectionModel().getSelectedIndex() < 0) {
             return;
         }
-        try {
-            final Model_Sales_Master loMas = master();
-            if (!pbCwtYes.get() && dbl(() -> loMas.getCWTAmount()) != 0) {
-                poJSON = loMas.setCWTAmount(0.0);   // No: no CWT
-                if ("error".equals(poJSON.get("result"))) {
-                    ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
-                    return;
-                }
-            }
-            recomputeTransaction();
-        } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        if (!pbCwtYes.get()) {
+            pdCwtRate = 0.0;   // No: no CWT
         }
+        recomputeTransaction();
+    }
+
+    /**
+     * The percentage that the CWT amount SAVED on the master is of its VAT-exclusive base. Must be read
+     * BEFORE anything computes in edit mode (MCSales then overwrites the field). Not rounded, so computing
+     * it back gives the saved amount again.
+     */
+    private double savedCwtRate() {
+        final Model_Sales_Master loMas = master();
+        double lnBase = dbl(() -> loMas.getVATSales()) + dbl(() -> loMas.getNonVATSales());
+        double lnAmount = dbl(() -> loMas.getCWTAmount());
+        return (lnBase > 0 && lnAmount > 0) ? Math.min(100.0, lnAmount / lnBase * 100.0) : 0.0;
     }
 
     /**
@@ -3115,9 +3169,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             selectIndex(cmbPaymentTranType, indexOf(textOf(() -> loMas.getTransactionType())));
             selectIndex(cmbPaymentForm, indexOf(textOf(() -> loMas.getPaymentForm())));
 
-            // the master keeps the CWT amount: any amount above 0 means CWT = Yes
-            double lnCwtAmt = dbl(() -> loMas.getCWTAmount());
-            selectIndex(cmbPaymentCWT, lnCwtAmt > 0 ? CWT_YES : CWT_NO);
+            // any CWT percentage above 0 means CWT = Yes (the master only keeps the amount: see pdCwtRate)
+            selectIndex(cmbPaymentCWT, (pdCwtRate > 0 || (canEdit() && pbCwtYes.get())) ? CWT_YES : CWT_NO);
 
             tfPaymentTerm.setText(pbTermPayment.get() ? termText() : "");   // the field shows the term DESCRIPTION, like after F3
 
@@ -3132,7 +3185,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 }
                 setDate(dpPaymentDueDate, ldDue);
             } catch (Exception ex) {
-                Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.WARNING, null, ex);
             }
             tfPaymentDrNo.setText(tfReceipt.getText());   // DR No is a read-only mirror of the header
         } finally {
@@ -3143,8 +3196,8 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     private void writeDueDate(LocalDate fdDue) throws Exception {
         poJSON = master().setDueDate(fdDue == null ? null : java.sql.Date.valueOf(fdDue));   // ASSUMED setter
-        if ("error".equals(poJSON.get("result"))) {
-            ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+        if (hasError(poJSON)) {
+            return;
         }
     }
 
@@ -3180,11 +3233,14 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     /**
      * Fills the Payment tab totals and the transaction summary figures from the
-     * master (computed by MCSales). Net total = amount due + advances (amount
-     * due already subtracts the advances). Balance = amount due - CWT - amount
-     * paid. ASSUMED business rule.
+     * master (computed by MCSales). Amount due already subtracts the advances
+     * and the CWT, so: Net total = amount due + advances + CWT, Balance =
+     * amount due - amount paid. ASSUMED business rule.
      */
     private void loadPaymentTotals() {
+        if (canEdit()) {
+            recomputeTransaction();   // last compute with the rate in place: the master then holds the right CWT amount and amount due
+        }
         final Model_Sales_Master loMas = master();
         double lnTotal = dbl(() -> loMas.getTransactionTotal());
         double lnDisc = dbl(() -> loMas.getDiscount());
@@ -3220,15 +3276,17 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 lnFreight += dbl(() -> d.getFreight());
             }
             lnDue = lnTotal - lnDisc - lnAddDisc + lnFreight
-                    + chargedTotal(false) + chargedTotal(true) - lnAdvances;
+                    + chargedTotal(false) + chargedTotal(true) - lnAdvances - lnCwt;   // MCSales' amount due is net of the CWT
         }
 
-        double lnNet = lnDue + lnAdvances;
-        double lnBalance = lnDue - lnCwt - lnPaid;
+        // MCSales' amount due already subtracts the advances AND the CWT: the total adds them back,
+        // and the balance must not subtract the CWT a second time
+        double lnNet = lnDue + lnAdvances + lnCwt;
+        double lnBalance = lnDue - lnPaid;
 
         tfPaymentTotal.setText(money(lnNet));
         tfPaymentAdvances.setText(money(lnAdvances));
-        tfPaymentCwt.setText(money(lnCwt));
+        tfPaymentCwt.setText(String.format(Locale.US, "%.2f", pdCwtRate));   // the PERCENTAGE; the amount is in tfSummaryCwt
         tfPaymentAmountPaid.setText(money(lnPaid));
         tfPaymentBalance.setText(money(lnBalance));
 
@@ -3290,9 +3348,23 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     // pnAttachRow is an index in THESE lists; MCSales is always called with poAttachModelRows.get(pnAttachRow).
     // =========================================================================
     private void initAttachmentTab() {
+        // A rotated ImageView still reports its UNrotated size to the layout: a 90 degree turn made it taller than the
+        // pane, which stretched the StackPane and pushed the rotate buttons out of view. A Group measures the ROTATED
+        // bounds of its child, so the pane keeps its size.
+        stackPane.setMinSize(0, 0);
+        int lnViewIndex = stackPane.getChildren().indexOf(imageView);
+        if (lnViewIndex >= 0) {
+            Group loViewGroup = new Group();
+            stackPane.getChildren().set(lnViewIndex, loViewGroup);   // takes the image view's place (and z-order)
+            loViewGroup.getChildren().add(imageView);
+            poViewGroup = loViewGroup;
+            initImageZoom();
+        }
         imageView.setPreserveRatio(true);
-        imageView.fitWidthProperty().bind(stackPane.widthProperty().subtract(4));
-        imageView.fitHeightProperty().bind(stackPane.heightProperty().subtract(4));
+        // on a 90 / 270 degree turn the image's width is the pane's height (and the other way round)
+        imageView.fitWidthProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.heightProperty()).otherwise(stackPane.widthProperty()).subtract(4));
+        imageView.fitHeightProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.widthProperty()).otherwise(stackPane.heightProperty()).subtract(4));
+        initRotateButtons();
         tfAttachmentNo.setEditable(false);
 
         btnAddAttachment.disableProperty().bind(pbEditable.not());
@@ -3319,10 +3391,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         updateAttachmentArrows();
     }
 
-    /**
-     * The attachment type is kept as the combo index in a raw column (see
-     * ATTACH_TYPE_COLUMN).
-     */
     /**
      * The attachment type is kept as the combo index in a raw column (see
      * ATTACH_TYPE_COLUMN) AND in poAttachTypes.
@@ -3456,6 +3524,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         attach_data.clear();
         poAttachFiles.clear();
         poAttachModelRows.clear();
+        poAttachRotation.clear();
         pnAttachRow = -1;
 
         for (int lnCtr = 0; lnCtr < loSales.getTransactionAttachmentCount(); lnCtr++) {
@@ -3490,6 +3559,18 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         if (loFile == null) {
             return;
         }
+
+        if (loFile.getName().toLowerCase().endsWith(".pdf")) {
+            try (PDDocument document = PDDocument.load(loFile)) {
+                int pageCount = document.getNumberOfPages();
+                if (pageCount > 20) {
+                    ShowMessageFX.Warning(null, pxeModuleName, "PDF exceeds maximum allowed pages.");
+                    return;
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         // the picked file lives in another folder than the attachment files: compare the FILE NAMES
         for (File loExisting : poAttachFiles) {
             if (loExisting.getName().equalsIgnoreCase(loFile.getName())) {
@@ -3497,12 +3578,6 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 return;
             }
         }
-        Image loImage = new Image(loFile.toURI().toString());
-        if (loImage.isError()) {
-            ShowMessageFX.Error(SalesTransactionStatic.MSG_ATTACHMENT_INVALID_IMAGE, pxeModuleName, null);
-            return;
-        }
-
         try {
             MCSales loSales = oSalesController.MCSales();
             loSales.copyFile(loFile.getAbsolutePath());                       // into sys.default.path.temp.attachments (saveOthers() reads it from there)
@@ -3528,8 +3603,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         try {
             // a new attachment is dropped, a saved one is deactivated: both are handled by MCSales
             poJSON = oSalesController.MCSales().removeAttachment(poAttachModelRows.get(pnAttachRow));
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
             reloadAttachmentTable();
@@ -3552,12 +3626,125 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         return loImage.isError() ? null : loImage;
     }
 
+    /**
+     * What the viewer pane held before a PDF replaced it (the image view and
+     * the arrows). A PDF swaps the pane's children for a ScrollPane, so every
+     * other selection must put these back or the new image has nowhere to show.
+     */
+    private List<Node> poViewerDefaultNodes;
+
     private void showAttachment(int fnIndex) {
         Image loImage = null;
-        if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
-            loImage = readImage(poAttachFiles.get(fnIndex));
+        try {
+            // remember the original viewer content once (before any PDF replaces it), and put it back every time
+            if (poViewerDefaultNodes == null) {
+                poViewerDefaultNodes = new ArrayList<Node>(stackPane.getChildren());
+            }
+            if (!stackPane.getChildren().equals(poViewerDefaultNodes)) {
+                stackPane.getChildren().setAll(poViewerDefaultNodes);   // drops the previous PDF's ScrollPane
+            }
+            poPdfContainer = null;
+            resetImageZoom();   // a new attachment always opens at 100%, centered
+            if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
+                if (!isPdfAttachment(poAttachFiles.get(fnIndex))) {
+                    loImage = readImage(poAttachFiles.get(fnIndex));
+                } else {
+
+                    PDDocument document = PDDocument.load(poAttachFiles.get(fnIndex));
+                    PDFRenderer renderer = new PDFRenderer(document);
+                    int pageCount = document.getNumberOfPages();
+
+                    VBox pdfContainer = new VBox(10);
+                    pdfContainer.setAlignment(Pos.CENTER);
+                    pdfContainer.setPrefWidth(ldstackPaneWidth);
+
+                    for (int i = 0; i < pageCount; i++) {
+
+                        BufferedImage pageImage = renderer.renderImageWithDPI(i, 150);
+                        Image fxImage = SwingFXUtils.toFXImage(pageImage, null);
+                        ImageView pageView = new ImageView(fxImage);
+                        pageView.setPreserveRatio(true);
+                        pageView.setFitWidth(ldstackPaneWidth);
+                        JFXUtil.adjustImageSize(fxImage, pageView, ldstackPaneWidth, ldstackPaneHeight);
+                        pdfContainer.getChildren().add(pageView);
+
+                    }
+
+                    Group pdfGroup = new Group(pdfContainer);
+                    StackPane centerPane = new StackPane(pdfGroup);
+                    centerPane.setAlignment(Pos.CENTER);
+
+                    ScrollPane scrollPane = new ScrollPane(centerPane);
+                    scrollPane.setPannable(true);
+                    scrollPane.setFitToWidth(true);
+                    scrollPane.setFitToHeight(true);
+
+                    poPdfContainer = pdfContainer;
+                    stackPane.getChildren().setAll(scrollPane, btnArrowLeft, btnArrowRight, poRotateBox);
+                    StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
+                    StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
+                    StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
+                    StackPane.setMargin(btnArrowRight, new Insets(0, 10, 0, 0));
+
+                    PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                    delay.setOnFinished(event -> Platform.runLater(() -> JFXUtil.stackPaneClip(stackPane)));
+                    delay.play();
+                    document.close();
+
+                    final DoubleProperty zoomFactor = new SimpleDoubleProperty(1.0);
+                    scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+                        if (event.isControlDown()) {
+                            event.consume();
+                            double delta = event.getDeltaY() > 0 ? 1.1 : 0.9;
+                            zoomFactor.set(zoomFactor.get() * delta);
+                            pdfGroup.setScaleX(zoomFactor.get());
+                            pdfGroup.setScaleY(zoomFactor.get());
+
+                            Bounds viewportBounds = scrollPane.getViewportBounds();
+                            Bounds contentBounds = pdfGroup.getBoundsInParent();
+                            double mouseX = event.getX();
+                            double mouseY = event.getY();
+
+                            double hRatio = (scrollPane.getHvalue() * (contentBounds.getWidth() - viewportBounds.getWidth()) + mouseX) / contentBounds.getWidth();
+                            double vRatio = (scrollPane.getVvalue() * (contentBounds.getHeight() - viewportBounds.getHeight()) + mouseY) / contentBounds.getHeight();
+
+                            Platform.runLater(() -> {
+                                Bounds newBounds = pdfGroup.getBoundsInParent();
+                                double newH = (hRatio * newBounds.getWidth() - mouseX) / (newBounds.getWidth() - viewportBounds.getWidth());
+                                double newV = (vRatio * newBounds.getHeight() - mouseY) / (newBounds.getHeight() - viewportBounds.getHeight());
+                                scrollPane.setHvalue(Double.isNaN(newH) ? 0.5 : Math.min(Math.max(0, newH), 1.0));
+                                scrollPane.setVvalue(Double.isNaN(newV) ? 0.5 : Math.min(Math.max(0, newV), 1.0));
+                            });
+                        }
+                    });
+
+                    final ObjectProperty<Point2D> lastMouse = new SimpleObjectProperty<>();
+                    pdfGroup.setOnMousePressed(e -> lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY())));
+                    pdfGroup.setOnMouseDragged(e -> {
+                        if (lastMouse.get() != null) {
+                            double deltaX = e.getSceneX() - lastMouse.get().getX();
+                            double deltaY = e.getSceneY() - lastMouse.get().getY();
+                            pdfGroup.setTranslateX(pdfGroup.getTranslateX() + deltaX);
+                            pdfGroup.setTranslateY(pdfGroup.getTranslateY() + deltaY);
+                            lastMouse.set(new Point2D(e.getSceneX(), e.getSceneY()));
+                        }
+                    });
+                    pdfGroup.setOnMouseReleased(e -> lastMouse.set(null));
+
+                }
+
+            }
+            displayAttachment(fnIndex, loImage);
+            applyAttachmentRotation();   // after displayAttachment(): it sets the selected row the rotation is keyed on
+        } catch (IOException ex) {
+            Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        displayAttachment(fnIndex, loImage);
+    }
+
+    private boolean isPdfAttachment(File file) {
+        return file != null
+                && file.getName() != null
+                && file.getName().toLowerCase(Locale.ROOT).endsWith(".pdf");
     }
 
     private void displayAttachment(int fnIndex, Image foImage) {
@@ -3593,7 +3780,143 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         updateAttachmentArrows();
     }
 
+    // =========================================================================
+    // Image zoom / pan (a PDF has its own zoom inside showAttachment())
+    // =========================================================================
+    private Group poViewGroup;                 // wraps imageView; the zoom and the pan are applied to it
+    private double pnImageDragX;
+    private double pnImageDragY;
+
+    /**
+     * Ctrl + mouse wheel zooms the image towards the mouse pointer; dragging the image moves it. Only active while an
+     * image is shown: when a PDF is shown the event is left alone for the PDF's own scroll pane.
+     */
+    private void initImageZoom() {
+        stackPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, event -> {
+            if (!event.isControlDown() || poPdfContainer != null || imageView.getImage() == null) {
+                return;
+            }
+            event.consume();
+            double lnOld = poViewGroup.getScaleX();
+            double lnNew = Math.max(0.2, Math.min(8.0, lnOld * (event.getDeltaY() > 0 ? 1.1 : 0.9)));
+            double lnFactor = lnNew / lnOld;
+            // keep the point under the mouse where it is: the group scales around its own center
+            Bounds loBounds = poViewGroup.getBoundsInParent();
+            double lnCx = loBounds.getMinX() + loBounds.getWidth() / 2;
+            double lnCy = loBounds.getMinY() + loBounds.getHeight() / 2;
+            poViewGroup.setTranslateX(poViewGroup.getTranslateX() + (event.getX() - lnCx) * (1 - lnFactor));
+            poViewGroup.setTranslateY(poViewGroup.getTranslateY() + (event.getY() - lnCy) * (1 - lnFactor));
+            poViewGroup.setScaleX(lnNew);
+            poViewGroup.setScaleY(lnNew);
+        });
+        poViewGroup.setOnMousePressed(e -> {
+            pnImageDragX = e.getSceneX();
+            pnImageDragY = e.getSceneY();
+        });
+        poViewGroup.setOnMouseDragged(e -> {
+            poViewGroup.setTranslateX(poViewGroup.getTranslateX() + e.getSceneX() - pnImageDragX);
+            poViewGroup.setTranslateY(poViewGroup.getTranslateY() + e.getSceneY() - pnImageDragY);
+            pnImageDragX = e.getSceneX();
+            pnImageDragY = e.getSceneY();
+        });
+    }
+
+    private void resetImageZoom() {
+        if (poViewGroup != null) {
+            poViewGroup.setScaleX(1.0);
+            poViewGroup.setScaleY(1.0);
+            poViewGroup.setTranslateX(0);
+            poViewGroup.setTranslateY(0);
+        }
+    }
+
+    // =========================================================================
+    // Attachment rotation (view only: the file itself is never changed)
+    // =========================================================================
+    /** Rotation in degrees (0 / 90 / 180 / 270) of each attachment, by file path: it stays while browsing the list. */
+    private final Map<String, Integer> poAttachRotation = new HashMap<String, Integer>();
+    /** true while the shown attachment is turned 90 / 270 degrees: the image view swaps its fit width / height. */
+    private final BooleanProperty pbQuarterTurn = new SimpleBooleanProperty(false);
+    /** The page container of the PDF being shown (null when an image is shown). */
+    private Node poPdfContainer;
+    private HBox poRotateBox;
+
+    /** Adds the two rotate buttons (bottom middle) on top of the viewer pane. */
+    private void initRotateButtons() {
+        Button lbtnLeft = createRotateButton(FontAwesomeIcon.ROTATE_LEFT, "Rotate left");
+        Button lbtnRight = createRotateButton(FontAwesomeIcon.ROTATE_RIGHT, "Rotate right");
+        lbtnLeft.setOnAction(e -> rotateAttachment(-90));
+        lbtnRight.setOnAction(e -> rotateAttachment(90));
+        poRotateBox = new HBox(14, lbtnLeft, lbtnRight);
+        poRotateBox.setAlignment(Pos.CENTER);
+        poRotateBox.setPickOnBounds(false);
+        poRotateBox.setOnMouseClicked(javafx.scene.input.MouseEvent::consume);   // a double click on a rotate button must not open the file location
+        poRotateBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        StackPane.setAlignment(poRotateBox, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(poRotateBox, new Insets(0, 0, 14, 0));
+        // enabled only while an attachment is showing
+        poRotateBox.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> pnAttachRowProperty.get() < 0, pnAttachRowProperty));
+        stackPane.getChildren().add(poRotateBox);
+    }
+
+    private static final String ROTATE_STYLE = "-fx-background-color: rgba(30,41,59,0.85); -fx-background-radius: 28;"
+            + " -fx-border-color: rgba(255,255,255,0.35); -fx-border-radius: 28; -fx-border-width: 1;"
+            + " -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 8, 0.2, 0, 2);";
+    private static final String ROTATE_STYLE_HOVER = ROTATE_STYLE.replace("rgba(30,41,59,0.85)", "#FF8201");
+
+    /** A round, dark rotate button with a large white icon; it turns orange (#FF8201) on hover. */
+    private Button createRotateButton(FontAwesomeIcon foIcon, String fsTip) {
+        FontAwesomeIconView loIcon = new FontAwesomeIconView(foIcon);
+        loIcon.setSize("26");
+        loIcon.setFill(javafx.scene.paint.Color.WHITE);
+        Button lbtn = new Button();
+        lbtn.setGraphic(loIcon);
+        lbtn.setTooltip(new Tooltip(fsTip));
+        lbtn.setFocusTraversable(false);
+        lbtn.setMinSize(56, 56);
+        lbtn.setPrefSize(56, 56);
+        lbtn.setMaxSize(56, 56);
+        lbtn.setStyle(ROTATE_STYLE);
+        lbtn.hoverProperty().addListener((obs, was, is) -> lbtn.setStyle(is ? ROTATE_STYLE_HOVER : ROTATE_STYLE));
+        return lbtn;
+    }
+
+    private final javafx.beans.property.IntegerProperty pnAttachRowProperty = new javafx.beans.property.SimpleIntegerProperty(-1);
+
+    private String attachmentKey() {
+        if (pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size() || poAttachFiles.get(pnAttachRow) == null) {
+            return null;
+        }
+        return poAttachFiles.get(pnAttachRow).getAbsolutePath();
+    }
+
+    private int currentRotation() {
+        String lsKey = attachmentKey();
+        return lsKey == null ? 0 : poAttachRotation.getOrDefault(lsKey, 0);
+    }
+
+    private void rotateAttachment(int fnDelta) {
+        String lsKey = attachmentKey();
+        if (lsKey == null) {
+            return;
+        }
+        poAttachRotation.put(lsKey, ((currentRotation() + fnDelta) % 360 + 360) % 360);
+        applyAttachmentRotation();
+    }
+
+    /** Applies the stored rotation of the selected attachment to whatever the viewer is showing. */
+    private void applyAttachmentRotation() {
+        int lnDeg = currentRotation();
+        pbQuarterTurn.set(lnDeg == 90 || lnDeg == 270);
+        imageView.setRotate(lnDeg);
+        if (poPdfContainer != null) {
+            poPdfContainer.setRotate(lnDeg);   // the Group around it measures the turned pages, so scrolling / zoom still fit
+        }
+    }
+
     private void updateAttachmentArrows() {
+        pnAttachRowProperty.set(pnAttachRow);
         btnArrowLeft.setDisable(pnAttachRow <= 0);
         btnArrowRight.setDisable(pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size() - 1);
     }
@@ -3654,8 +3977,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 return;
             }
             poJSON = oSalesController.MCSales().loadSalesQuotationNonItemizedList();
-            if ("error".equals(poJSON.get("result"))) {
-                ShowMessageFX.Warning((String) poJSON.get("message"), "Warning", null);
+            if (hasError(poJSON)) {
                 return;
             }
 
@@ -3686,7 +4008,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
             // 2. APPLY SHADOW TO THE MAIN ANCHOR
             javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
-            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0)); // 40% Opacity black shadow
+            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0));
             shadow.setRadius(15.0);
             shadow.setOffsetX(0.0);
             shadow.setOffsetY(5.0);
@@ -3786,25 +4108,25 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     }
 
     private void LoadMaster() throws GuanzonException, SQLException {
-
         lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
         tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
         tfSourceDesc.setText(oSalesController.MCSales().getMaster().TransactionSource().getSourceName());
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
-        // Salesman: filled from the master (the source's salesman when there is a source). Only searchable (F3) while editing
-        // AND when there is no source; otherwise the field is display-only.
+        // Salesman: filled from the master (the source's salesman when there is a source). Searchable (F3) whenever editing,
+        // with or without a source; otherwise the field is display-only.
         tfSalesman.setText(salesmanName());
         tfSalesman.setEditable(canEdit());
         tfSalesman.setPromptText(canEdit() ? "PRESS F3: Search" : "");
+
+        // client type: shows the model's value (the model defaults a new client to Individual) without firing cmb_Changed
         boolean lbPrevType = pbSyncing;
-        pbSyncing = true;   // show the model's value without firing cmb_Changed
+        pbSyncing = true;
         try {
             selectIndex(cmbClientType, indexOf(textOf(() -> master().Client().getClientType())));
         } finally {
             pbSyncing = lbPrevType;
         }
-//        tfReceipt.setText(oSalesController.MCSales().getMaster().getr());
         // the customer line is built by showCustomerName() at the end of LoadClientInfo(): the client fields are
         // still empty here, because LoadMaster() runs before LoadClientInfo()
     }
@@ -4008,7 +4330,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
      * java.sql.Date has no toInstant(), so convert it with its own
      * toLocalDate().
      */
-    private static LocalDate toLocalDate(Date fdDate) {
+    private static LocalDate toLocalDate(java.util.Date fdDate) {
         if (fdDate == null) {
             return null;
         }
@@ -4023,6 +4345,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
      * It ensures that any unsaved data is not kept in the text fields.
      * */
     private void ClearAll() {
+        pdCwtRate = 0.0;
         ClearMaster();
         ClearClient();
         ClearMotorcycle();
@@ -4058,17 +4381,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         poPaymentFields.forEach(TextInputControl::clear);
     }
 
-    private boolean hasError(JSONObject foJSON) {
-        if (foJSON == null || !"error".equals(foJSON.get("result"))) {
-            return false;
-        }
-        String lsMessage = (String) foJSON.get("message");
-        if (lsMessage != null && !lsMessage.trim().isEmpty()) {
-            ShowMessageFX.Warning(lsMessage, "Warning", null);
-        }
-        return true;
-    }
-
+    /**
+     * Form-wide hot keys. F5 = approval status (matrix recipients), view only.
+     */
     private void initHotKeys() {
         ChildAnchorPane.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.F5) {
@@ -4078,6 +4393,10 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         });
     }
 
+    /**
+     * Shows who the approval request of the loaded transaction was sent to and
+     * their status. Works in every edit mode.
+     */
     private void showMatrixRecipients() {
         try {
             if (oSalesController.MCSales().getEditMode() == EditMode.ADDNEW) {
@@ -4097,5 +4416,16 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         }
+    }
+
+    private boolean hasError(JSONObject foJSON) {
+        if (foJSON == null || !"error".equals(foJSON.get("result"))) {
+            return false;
+        }
+        String lsMessage = (String) foJSON.get("message");
+        if (lsMessage != null && !lsMessage.trim().isEmpty()) {
+            ShowMessageFX.Warning(lsMessage, "Warning", null);
+        }
+        return true;
     }
 }

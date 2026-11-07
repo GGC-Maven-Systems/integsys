@@ -3313,9 +3313,24 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     // pnAttachRow is an index in THESE lists; MCSales is always called with poAttachModelRows.get(pnAttachRow).
     // =========================================================================
     private void initAttachmentTab() {
+        // A rotated ImageView still reports its UNrotated size to the layout: a 90 degree turn made it taller than the
+        // pane, which stretched the StackPane and pushed the rotate buttons out of view. A Group measures the ROTATED
+        // bounds of its child, so the pane keeps its size.
+        stackPane.setMinSize(0, 0);
+        int lnViewIndex = stackPane.getChildren().indexOf(imageView);
+        if (lnViewIndex >= 0) {
+            Group loViewGroup = new Group();
+            stackPane.getChildren().set(lnViewIndex, loViewGroup);   // takes the image view's place (and z-order)
+            loViewGroup.getChildren().add(imageView);
+            poViewGroup = loViewGroup;
+            initImageZoom();
+        }
         imageView.setPreserveRatio(true);
-        imageView.fitWidthProperty().bind(stackPane.widthProperty().subtract(4));
-        imageView.fitHeightProperty().bind(stackPane.heightProperty().subtract(4));
+        // on a 90 / 270 degree turn the image's width is the pane's height (and the other way round)
+        imageView.fitWidthProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.heightProperty()).otherwise(stackPane.widthProperty()).subtract(4));
+        imageView.fitHeightProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.widthProperty()).otherwise(stackPane.heightProperty()).subtract(4));
+        initRotateButtons();
+        initAttachmentKeys();
         tfAttachmentNo.setEditable(false);
 
         btnAddAttachment.disableProperty().bind(pbEditable.not());
@@ -3475,6 +3490,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         attach_data.clear();
         poAttachFiles.clear();
         poAttachModelRows.clear();
+        poAttachRotation.clear();
         pnAttachRow = -1;
 
         for (int lnCtr = 0; lnCtr < loSales.getTransactionAttachmentCount(); lnCtr++) {
@@ -3576,9 +3592,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         return loImage.isError() ? null : loImage;
     }
 
+    /**
+     * What the viewer pane held before a PDF replaced it (the image view and
+     * the arrows). A PDF swaps the pane's children for a ScrollPane, so every
+     * other selection must put these back or the new image has nowhere to show.
+     */
+    private List<Node> poViewerDefaultNodes;
+
     private void showAttachment(int fnIndex) {
         Image loImage = null;
         try {
+            // remember the original viewer content once (before any PDF replaces it), and put it back every time
+            if (poViewerDefaultNodes == null) {
+                poViewerDefaultNodes = new ArrayList<Node>(stackPane.getChildren());
+            }
+            if (!stackPane.getChildren().equals(poViewerDefaultNodes)) {
+                stackPane.getChildren().setAll(poViewerDefaultNodes);   // drops the previous PDF's ScrollPane
+            }
+            poPdfContainer = null;
+            resetImageZoom();   // a new attachment always opens at 100%, centered
             if (fnIndex >= 0 && fnIndex < poAttachFiles.size()) {
                 if (!isPdfAttachment(poAttachFiles.get(fnIndex))) {
                     loImage = readImage(poAttachFiles.get(fnIndex));
@@ -3613,7 +3645,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     scrollPane.setFitToWidth(true);
                     scrollPane.setFitToHeight(true);
 
-                    stackPane.getChildren().setAll(scrollPane, btnArrowLeft, btnArrowRight);
+                    poPdfContainer = pdfContainer;
+                    stackPane.getChildren().setAll(scrollPane, btnArrowLeft, btnArrowRight, poRotateBox);
                     StackPane.setAlignment(btnArrowLeft, Pos.CENTER_LEFT);
                     StackPane.setAlignment(btnArrowRight, Pos.CENTER_RIGHT);
                     StackPane.setMargin(btnArrowLeft, new Insets(0, 0, 0, 10));
@@ -3668,6 +3701,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
             }
             displayAttachment(fnIndex, loImage);
+            applyAttachmentRotation();   // after displayAttachment(): it sets the selected row the rotation is keyed on
         } catch (IOException ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -3712,7 +3746,182 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         updateAttachmentArrows();
     }
 
+    // =========================================================================
+    // Attachment keys: LEFT / RIGHT = previous / next attachment, UP = rotate right, DOWN = rotate left
+    // =========================================================================
+    private void initAttachmentKeys() {
+        stackPane.setFocusTraversable(true);
+        // clicking the viewer gives it the keyboard focus
+        stackPane.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> stackPane.requestFocus());
+        // the viewer and the attachment list react to the same keys (a filter runs before the ScrollPane / table use the arrows)
+        stackPane.addEventFilter(KeyEvent.KEY_PRESSED, this::attachmentKeyPressed);
+        tblAttachments.addEventFilter(KeyEvent.KEY_PRESSED, this::attachmentKeyPressed);
+    }
+
+    private void attachmentKeyPressed(KeyEvent event) {
+        if (poAttachFiles.isEmpty() || pnAttachRow < 0) {
+            return;
+        }
+        switch (event.getCode()) {
+            case LEFT:
+                if (pnAttachRow > 0) {
+                    showAttachment(pnAttachRow - 1);
+                }
+                break;
+            case RIGHT:
+                if (pnAttachRow < poAttachFiles.size() - 1) {
+                    showAttachment(pnAttachRow + 1);
+                }
+                break;
+            case UP:
+                rotateAttachment(90);
+                break;
+            case DOWN:
+                rotateAttachment(-90);
+                break;
+            default:
+                return;   // any other key is left alone
+        }
+        event.consume();
+    }
+
+    // =========================================================================
+    // Image zoom / pan (a PDF has its own zoom inside showAttachment())
+    // =========================================================================
+    private Group poViewGroup;                 // wraps imageView; the zoom and the pan are applied to it
+    private double pnImageDragX;
+    private double pnImageDragY;
+
+    /**
+     * Ctrl + mouse wheel zooms the image towards the mouse pointer; dragging the image moves it. Only active while an
+     * image is shown: when a PDF is shown the event is left alone for the PDF's own scroll pane.
+     */
+    private void initImageZoom() {
+        stackPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, event -> {
+            if (!event.isControlDown() || poPdfContainer != null || imageView.getImage() == null) {
+                return;
+            }
+            event.consume();
+            double lnOld = poViewGroup.getScaleX();
+            double lnNew = Math.max(0.2, Math.min(8.0, lnOld * (event.getDeltaY() > 0 ? 1.1 : 0.9)));
+            double lnFactor = lnNew / lnOld;
+            // keep the point under the mouse where it is: the group scales around its own center
+            Bounds loBounds = poViewGroup.getBoundsInParent();
+            double lnCx = loBounds.getMinX() + loBounds.getWidth() / 2;
+            double lnCy = loBounds.getMinY() + loBounds.getHeight() / 2;
+            poViewGroup.setTranslateX(poViewGroup.getTranslateX() + (event.getX() - lnCx) * (1 - lnFactor));
+            poViewGroup.setTranslateY(poViewGroup.getTranslateY() + (event.getY() - lnCy) * (1 - lnFactor));
+            poViewGroup.setScaleX(lnNew);
+            poViewGroup.setScaleY(lnNew);
+        });
+        poViewGroup.setOnMousePressed(e -> {
+            pnImageDragX = e.getSceneX();
+            pnImageDragY = e.getSceneY();
+        });
+        poViewGroup.setOnMouseDragged(e -> {
+            poViewGroup.setTranslateX(poViewGroup.getTranslateX() + e.getSceneX() - pnImageDragX);
+            poViewGroup.setTranslateY(poViewGroup.getTranslateY() + e.getSceneY() - pnImageDragY);
+            pnImageDragX = e.getSceneX();
+            pnImageDragY = e.getSceneY();
+        });
+    }
+
+    private void resetImageZoom() {
+        if (poViewGroup != null) {
+            poViewGroup.setScaleX(1.0);
+            poViewGroup.setScaleY(1.0);
+            poViewGroup.setTranslateX(0);
+            poViewGroup.setTranslateY(0);
+        }
+    }
+
+    // =========================================================================
+    // Attachment rotation (view only: the file itself is never changed)
+    // =========================================================================
+    /** Rotation in degrees (0 / 90 / 180 / 270) of each attachment, by file path: it stays while browsing the list. */
+    private final Map<String, Integer> poAttachRotation = new HashMap<String, Integer>();
+    /** true while the shown attachment is turned 90 / 270 degrees: the image view swaps its fit width / height. */
+    private final BooleanProperty pbQuarterTurn = new SimpleBooleanProperty(false);
+    /** The page container of the PDF being shown (null when an image is shown). */
+    private Node poPdfContainer;
+    private HBox poRotateBox;
+
+    /** Adds the two rotate buttons (bottom middle) on top of the viewer pane. */
+    private void initRotateButtons() {
+        Button lbtnLeft = createRotateButton(FontAwesomeIcon.ROTATE_LEFT, "Rotate left");
+        Button lbtnRight = createRotateButton(FontAwesomeIcon.ROTATE_RIGHT, "Rotate right");
+        lbtnLeft.setOnAction(e -> rotateAttachment(-90));
+        lbtnRight.setOnAction(e -> rotateAttachment(90));
+        poRotateBox = new HBox(14, lbtnLeft, lbtnRight);
+        poRotateBox.setAlignment(Pos.CENTER);
+        poRotateBox.setPickOnBounds(false);
+        poRotateBox.setOnMouseClicked(javafx.scene.input.MouseEvent::consume);   // a double click on a rotate button must not open the file location
+        poRotateBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        StackPane.setAlignment(poRotateBox, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(poRotateBox, new Insets(0, 0, 14, 0));
+        // enabled only while an attachment is showing
+        poRotateBox.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> pnAttachRowProperty.get() < 0, pnAttachRowProperty));
+        stackPane.getChildren().add(poRotateBox);
+    }
+
+    private static final String ROTATE_STYLE = "-fx-background-color: rgba(30,41,59,0.85); -fx-background-radius: 28;"
+            + " -fx-border-color: rgba(255,255,255,0.35); -fx-border-radius: 28; -fx-border-width: 1;"
+            + " -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 8, 0.2, 0, 2);";
+    private static final String ROTATE_STYLE_HOVER = ROTATE_STYLE.replace("rgba(30,41,59,0.85)", "#FF8201");
+
+    /** A round, dark rotate button with a large white icon; it turns orange (#FF8201) on hover. */
+    private Button createRotateButton(FontAwesomeIcon foIcon, String fsTip) {
+        FontAwesomeIconView loIcon = new FontAwesomeIconView(foIcon);
+        loIcon.setSize("26");
+        loIcon.setFill(javafx.scene.paint.Color.WHITE);
+        Button lbtn = new Button();
+        lbtn.setGraphic(loIcon);
+        lbtn.setTooltip(new Tooltip(fsTip));
+        lbtn.setFocusTraversable(false);
+        lbtn.setMinSize(56, 56);
+        lbtn.setPrefSize(56, 56);
+        lbtn.setMaxSize(56, 56);
+        lbtn.setStyle(ROTATE_STYLE);
+        lbtn.hoverProperty().addListener((obs, was, is) -> lbtn.setStyle(is ? ROTATE_STYLE_HOVER : ROTATE_STYLE));
+        return lbtn;
+    }
+
+    private final javafx.beans.property.IntegerProperty pnAttachRowProperty = new javafx.beans.property.SimpleIntegerProperty(-1);
+
+    private String attachmentKey() {
+        if (pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size() || poAttachFiles.get(pnAttachRow) == null) {
+            return null;
+        }
+        return poAttachFiles.get(pnAttachRow).getAbsolutePath();
+    }
+
+    private int currentRotation() {
+        String lsKey = attachmentKey();
+        return lsKey == null ? 0 : poAttachRotation.getOrDefault(lsKey, 0);
+    }
+
+    private void rotateAttachment(int fnDelta) {
+        String lsKey = attachmentKey();
+        if (lsKey == null) {
+            return;
+        }
+        poAttachRotation.put(lsKey, ((currentRotation() + fnDelta) % 360 + 360) % 360);
+        applyAttachmentRotation();
+    }
+
+    /** Applies the stored rotation of the selected attachment to whatever the viewer is showing. */
+    private void applyAttachmentRotation() {
+        int lnDeg = currentRotation();
+        pbQuarterTurn.set(lnDeg == 90 || lnDeg == 270);
+        imageView.setRotate(lnDeg);
+        if (poPdfContainer != null) {
+            poPdfContainer.setRotate(lnDeg);   // the Group around it measures the turned pages, so scrolling / zoom still fit
+        }
+    }
+
     private void updateAttachmentArrows() {
+        pnAttachRowProperty.set(pnAttachRow);
         btnArrowLeft.setDisable(pnAttachRow <= 0);
         btnArrowRight.setDisable(pnAttachRow < 0 || pnAttachRow >= poAttachFiles.size() - 1);
     }
