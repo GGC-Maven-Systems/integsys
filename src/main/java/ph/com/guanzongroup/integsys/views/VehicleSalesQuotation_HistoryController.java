@@ -672,7 +672,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     }
 
     public void initLoadTable() {
-        loadTableAddOns = new JFXUtil.ReloadableTableTask(
+         loadTableAddOns = new JFXUtil.ReloadableTableTask(
                 tblViewAddOns,
                 addOns_data,
                 () -> {
@@ -717,27 +717,25 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-
-                            if (pnAddOns < 0 || pnAddOns
+                            int lnTempRow = JFXUtil.getDetailRowFilter(addOns_data, pnAddOns, 7);
+                            if (lnTempRow < 0 || lnTempRow
                                     >= addOns_data.size()) {
                                 if (!addOns_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    tblViewAddOns.getSelectionModel().select(0);
-                                    tblViewAddOns.getFocusModel().focus(0);
-                                    pnAddOns = tblViewAddOns.getSelectionModel().getSelectedIndex();
+                                    JFXUtil.selectAndFocusRow(tblViewAddOns, 0);
+                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
+                                    pnAddOns = lnRow;
                                     loadRecordAddOns();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewAddOns.getSelectionModel().select(pnAddOns);
-                                tblViewAddOns.getFocusModel().focus(pnAddOns);
+                                JFXUtil.selectAndFocusRow(tblViewAddOns, lnTempRow);
+                                int lnRow = Integer.parseInt(addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex07());
+                                pnAddOns = lnRow;
                                 loadRecordAddOns();
                             }
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
@@ -774,7 +772,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(freebies_data, pnFreebies, 06); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRowFilter(freebies_data, pnFreebies, 6);
                             if (lnTempRow < 0 || lnTempRow
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
@@ -786,15 +784,13 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewFreebies.getSelectionModel().select(lnTempRow);
-                                tblViewFreebies.getFocusModel().focus(lnTempRow);
+                                JFXUtil.selectAndFocusRow(tblViewFreebies, lnTempRow);
+                                int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
+                                pnAddOns = lnRow;
                                 loadRecordFreebies();
                             }
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });

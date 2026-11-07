@@ -366,7 +366,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apVehicleInfo, apAdditionalInfo, apAddOns, apFreebies);
                         break;
                     case "btnDeduct":
-//                        openParameter();
+                        openParameter("", "");
                         break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
@@ -391,8 +391,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 //        }
         String lsFXML = "";
         Object controller = new Object();
-        VehicleSalesQuotationDiscountController controller1 = new VehicleSalesQuotationDiscountController(); //Should differ the parameter calling
-        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotationDialog.fxml";
+        VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
 
         controller1.setGRider(oApp);
         controller1.setIndustryID(psIndustryId);
@@ -1406,7 +1406,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRowFilter(freebies_data, pnFreebies, 7);
+                            int lnTempRow = JFXUtil.getDetailRowFilter(freebies_data, pnFreebies, 6);
                             if (lnTempRow < 0 || lnTempRow
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {

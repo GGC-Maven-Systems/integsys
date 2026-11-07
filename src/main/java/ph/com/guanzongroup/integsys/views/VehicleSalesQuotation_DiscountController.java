@@ -41,7 +41,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  *
  * @author Team 1
  */
-public class VehicleSalesQuotationDiscountController implements Initializable, ScreenInterface {
+public class VehicleSalesQuotation_DiscountController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
     static VehicleQuotation poController;
