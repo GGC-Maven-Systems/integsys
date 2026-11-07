@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_AddOns;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -57,6 +58,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.RecordStatus;
@@ -109,6 +111,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apRemarks, apAddOns, apFreebies;
     @FXML
@@ -386,6 +389,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         poController.printTransaction();
                         JFXUtil.disableAllHighlightByColor(tblViewMain, "#A7C7E7", highlightedRowsMain);
                         break;
+                    case "btnDeduct":
+                        openParameter("", "");
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -403,6 +409,35 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ParseException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+        String lsFXML = "";
+        Object controller = new Object();
+        VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
+
+        controller1.setGRider(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageDialog != null) {
+            stageDialog.closeDialog();
+            stageDialog = new JFXUtil.StageManager();
+        } else {
+            stageDialog = new JFXUtil.StageManager();
+        }
+        try {
+            stageDialog.setOnHidden(event -> {
+                stageDialog = null;
+            });
+            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
+        } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -688,8 +723,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             if (lsValue.isEmpty()) {
                                 if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                     if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
-                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")
-                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                     "Are you sure you want to change the brand?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {

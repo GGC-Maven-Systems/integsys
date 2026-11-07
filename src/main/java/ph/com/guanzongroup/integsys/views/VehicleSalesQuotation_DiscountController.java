@@ -84,6 +84,9 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             pnEditMode = EditMode.UNKNOWN;
             initButton(pnEditMode);
             poController.setWithUI(true);
+            Platform.runLater(() -> {
+                loadTableDetail.reload();
+            });
 //            poController.setRecordStatus("01234");
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -195,6 +198,26 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
 
+    @FXML
+    private void cmdCheckBox_Click(ActionEvent event) {
+        poJSON = new JSONObject();
+        Object source = event.getSource();
+        if (source instanceof CheckBox) {
+            CheckBox checkedBox = (CheckBox) source;
+            switch (checkedBox.getId()) {
+                case "cbActive": // freebies
+                    if (poController.DiscountList(pnDetail).getEditMode() == EditMode.ADDNEW) {
+                        if (!checkedBox.isSelected()) {
+                            poController.DiscountList().remove(pnDetail);
+                        }
+                    } else {
+                        poController.DiscountList(pnDetail).setRecordStatus(checkedBox.isSelected());
+                    }
+                    loadTableDetail.reload();
+                    break;
+            }
+        }
+    }
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
         protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
