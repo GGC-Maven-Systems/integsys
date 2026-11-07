@@ -84,7 +84,7 @@ public class SalesTransactionsLandingController implements Initializable, Screen
 
     private final String pxeModuleName = SalesTransactionStatic.MODULE_NAME;
     private static final String ENTRY_FXML = "SalesTransactionMC.fxml";   // ASSUMED location (same package folder as this one)
-    private static final String PREVIEW_FXML = "SalesTransactionsMCPreview.fxml";   // ASSUMED: set to your preview FXML name
+    private static final String PREVIEW_FXML = "/ph/com/guanzongroup/integsys/views/SalesTransactionsMCPreview.fxml";   // ASSUMED: set to your preview FXML name
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(SalesTransactionStatic.DATE_PATTERN);
     private static final Integer[] PAGE_SIZES = {10, 25, 50, 100};
     private static final int DEFAULT_DAYS = 7;   // default date filter: today minus 7 days up to today
@@ -666,13 +666,23 @@ public class SalesTransactionsLandingController implements Initializable, Screen
      * the preview shows up here.
      */
     private void showPreview(String fsTransNo, boolean fbUpdate) throws Exception {
+
+        if (oApp == null) {
+            ShowMessageFX.Error("GRider application instance is not initialized.", pxeModuleName, null);
+            return;
+        }
+
         FXMLLoader loLoader = new FXMLLoader(getClass().getResource(PREVIEW_FXML));
+
         SalesTransactionsMCPreviewController loPreview = new SalesTransactionsMCPreviewController();
+
         loPreview.setGRider(oApp);
         loPreview.setIndustryID(psIndustryId);
         loPreview.setCompanyID(psCompanyId);
         loPreview.setCategoryID(psCategoryId);
+
         loLoader.setController(loPreview);
+
         Parent loRoot = loLoader.load();
 
         Stage loStage = new Stage();
@@ -680,38 +690,13 @@ public class SalesTransactionsLandingController implements Initializable, Screen
         loStage.initStyle(StageStyle.UNDECORATED);
         loStage.initModality(Modality.APPLICATION_MODAL);
         loStage.initOwner(btnOpen.getScene().getWindow());
-        loPreview.setOnClose(loStage::close);   // the preview's Close button closes this modal
 
-        // load the record BEFORE showing: nothing is shown when it cannot be opened
+        loPreview.setOnClose(loStage::close);
+
         if (!loPreview.openFromList(fsTransNo, fbUpdate)) {
             return;
         }
 
-        // 1. MAKE THE MAIN ANCHOR MOVABLE
-        final double[] xOffset = new double[1];
-        final double[] yOffset = new double[1];
-
-        loRoot.setOnMousePressed(event -> {
-            xOffset[0] = event.getSceneX();
-            yOffset[0] = event.getSceneY();
-        });
-
-        loRoot.setOnMouseDragged(event -> {
-            loStage.setX(event.getScreenX() - xOffset[0]);
-            loStage.setY(event.getScreenY() - yOffset[0]);
-        });
-
-        // 2. APPLY SHADOW TO THE MAIN ANCHOR
-        javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
-        shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0)); // 40% Opacity black shadow
-        shadow.setRadius(15.0);
-        shadow.setOffsetX(0.0);
-        shadow.setOffsetY(5.0);
-        loRoot.setEffect(shadow);
-
-        // 3. BOUNDARY FIX FOR UNDECORATED SHADOWS
-        // To prevent the shadow from being clipped by the window edges,
-        // the scene is made transparent.
         Scene scene = new Scene(loRoot);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
 
@@ -719,7 +704,7 @@ public class SalesTransactionsLandingController implements Initializable, Screen
         loStage.setResizable(false);
         loStage.showAndWait();
 
-        loadTransactions();   // the preview may have changed the record
+        loadTransactions();
     }
 
     /** Puts a loaded root in place of whatever is in ChildAnchorPane, stretched to the edges. */

@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -781,12 +782,23 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         }
     }
 
+    /** Moves focus to the next focusable control, as if Tab was pressed. */
+    private void focusNext(Node fnNode) {
+        fnNode.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "\t", KeyCode.TAB,
+                false, false, false, false));
+    }
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
         String lsID = txtInput.getId();
         String lsValuse = txtInput.getText();
         try {
             switch (event.getCode()) {
+                case ENTER:
+                    if (!(txtInput instanceof TextArea)) {   // a TextArea needs Enter for new lines
+                        event.consume();
+                        focusNext(txtInput);
+                    }
+                    break;
                 case F3:
                     switch (lsID) {
                         case "tfClientName":
@@ -1322,7 +1334,10 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
 
     private void initializeObject() {
         try {
-            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE, System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
+            LogWrapper logwrapr = new LogWrapper(SalesTransactionStatic.LOG_SOURCE,
+                    System.getProperty(SalesTransactionStatic.LOG_PATH_PROPERTY) + SalesTransactionStatic.LOG_FILE_NAME);
+
+            oSalesController = new SalesControllers(oApp, logwrapr);   // <-- add this
 
             oSalesController.MCSales().initTransaction();
             oSalesController.SalesQoutation().setRecordStatus(SalesTransactionStatic.OPEN);
@@ -2208,11 +2223,28 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
             }
         } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
         } finally {
             pbSyncing = lbPrev;
         }
+    }
+    /** true when the giveaway row came from a source (quotation / reservation). */
+    private static boolean gawayHasSource(Model_Sales_Giveaways fo) {
+        if (fo == null) {
+            return false;
+        }
+        for (String lsGetter : SalesTransactionStatic.GAWAY_SOURCE_GETTERS) {
+            try {
+                Object loVal = fo.getClass().getMethod(lsGetter).invoke(fo);
+                return loVal != null && !String.valueOf(loVal).trim().isEmpty();
+            } catch (NoSuchMethodException ex) {
+                // try the next name
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+        return false;
     }
 
     private static String textOf(Getter fg) {
@@ -2275,10 +2307,12 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             pnGawayRow = lnIndex >= 0 ? lnIndex + 1 : -1;   // model entry no. (1-based)
             clearGawayItemTextFields();
             if (loSelected != null && pnGawayRow >= 1) {
-                loadGiveawayRecord(pnGawayRow);
-                if (event.getClickCount() == 2) {
-                    tfGawayQty.requestFocus();
+                loadGiveawayRecord(pnGawayRow);   // also sets the enabled / disabled state of tfGawayQty
+                if (event.getClickCount() == 2 && !tfGawayQty.isDisabled()) {
+                    tfGawayQty.requestFocus();    // only rows without a source can be edited
                 }
+            } else {
+                tfGawayQty.setDisable(false);
             }
         }
     }

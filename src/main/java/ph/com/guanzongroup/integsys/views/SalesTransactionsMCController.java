@@ -82,6 +82,7 @@ import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import ph.com.guanzongroup.cas.sales.authmatrix.MatrixRecipientDialog;
+import javafx.scene.Node;
 
 /**
  * Controller for SalesTransactionMC.fxml (Motorcycle Sales form).
@@ -195,6 +196,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      */
     private static final int CWT_YES = 0;
     private static final int CWT_NO = 1;
+    /**
+     * CWT PERCENTAGE (0 - 100, e.g. 2 for 2%) typed in tfPaymentCwt. MCSales.computeTransaction() reads the master's CWT
+     * field as this RATE and overwrites the same field with the AMOUNT (rate x (VAT sales + non-VAT sales)), and many MCSales
+     * getters run it. So the rate lives HERE, and recomputeTransaction() writes it to the master right before every compute.
+     */
+    private double pdCwtRate = 0.0;
     /**
      * true only in ADDNEW / UPDATE; combos, check boxes, date pickers and
      * action buttons are bound to it.
@@ -791,6 +798,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             });
         }
     }
+    /** Moves focus to the next focusable control, as if Tab was pressed. */
+    private void focusNext(Node fnNode) {
+        fnNode.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "\t", KeyCode.TAB,
+                false, false, false, false));
+    }
 
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
@@ -798,6 +810,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         String lsValuse = txtInput.getText();
         try {
             switch (event.getCode()) {
+                case ENTER:
+                    if (!(txtInput instanceof TextArea)) {   // a TextArea needs Enter for new lines
+                        event.consume();
+                        focusNext(txtInput);
+                    }
+                    break;
                 case F3:
                     switch (lsID) {
                         case "tfClientName":
@@ -881,9 +899,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
                             psPromoAtFocus = oSalesController.MCSales().getDetail(pnUnitRow).PromotionMaster().getPromoDescription();
                             tfPomoCode.setText(psPromoAtFocus);
+                            tfFreight.setText(money(dbl(() -> oSalesController.MCSales().getDetail(pnUnitRow).getFreight())));
                             loadTableMCItem();          // the promo can change discount / freight
                             loadTableGiveaways();       // ...add giveaways
-                            loadTableRegAndInsur();     // ...and registration / insurance rows
+                            // no loadTableRegAndInsur(): the promo only ticks the Charge boxes, it does not show rows
+                            applyPromoFlags(selectedUnit());
                             break;
 
                         case "tfGawayBarrcode":
@@ -946,6 +966,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 return;
                             }
                             selectNewRegInsur(false);   // the registration the search just added becomes the selected row
+                            applyDefaultCharge(poSelRegInsur, false);   // Registration checkbox follows the unit's promo
                             // TODO(model): default the amount here once Model_Insurance_Type / Model_Sales_Registration
                             // expose it (Model_Insurance_Type has no getAmount())
                             loadTableRegAndInsur();   // show the searched registration in the table
@@ -962,6 +983,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                                 return;
                             }
                             selectNewRegInsur(true);   // the insurance the search just added becomes the selected row
+                            applyDefaultCharge(poSelRegInsur, true);   // Insurance checkbox follows the unit's promo
                             loadTableRegAndInsur();   // show the searched insurance in the table
                             break;
                         case "tfInsurPayer": {
@@ -1228,9 +1250,16 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     }
                     poJSON = loUnit.setPromoID("");                  // ASSUMED setter
                     if (hasError(poJSON)) {
+
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
+                    loUnit.setAddDiscount(0.00);
+                    loUnit.setDiscount(0.00);
+                    loUnit.setFreight(0.00);
+                    tfPromoAddDisc.setText(money(0.00));
+                    tfPromoDisc.setText(money(0.00));
+                    tfFreight.setText(money(0.00));
                     psPromoAtFocus = "";
                     loadTableMCItem();
                     loadTableGiveaways();
@@ -1290,22 +1319,25 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     if (!pbCwtYes.get()) {
                         break;   // field is disabled unless CWT = Yes
                     }
-                    double lnCwt = parseDouble(lsValue);
-                    final Model_Sales_Master loMas = master();
-                    if (lnCwt < 0) {
-                        ShowMessageFX.Warning("CWT amount cannot be negative.", "Warning", null);
+                    // the field holds the CWT PERCENTAGE: from 0.00 to 100.00 only
+                    final String lsCwt = lsValue == null ? "" : lsValue.replace("%", "").replace(",", "").trim();
+                    double lnCwt;
+                    try {
+                        lnCwt = lsCwt.isEmpty() ? 0.0 : Double.parseDouble(lsCwt);
+                    } catch (NumberFormatException ex) {
+                        lnCwt = -1.0;   // not a number: fails the range check below
+                    }
+                    if (Double.isNaN(lnCwt) || lnCwt < 0.0 || lnCwt > 100.0) {
+                        ShowMessageFX.Warning("CWT must be from 0.00 to 100.00.", "Warning", null);
                         loadSummary();   // put the saved value back
                         return;
                     }
-                    if (lnCwt == dbl(() -> loMas.getCWTAmount())) {
+                    lnCwt = Math.round(lnCwt * 100.0) / 100.0;
+                    if (Math.abs(lnCwt - pdCwtRate) < 0.005) {
                         break;   // unchanged
                     }
-                    poJSON = loMas.setCWTAmount(lnCwt);
-                    if (hasError(poJSON)) {
-                        loadSummary();
-                        return;
-                    }
-                    recomputeTransaction();
+                    pdCwtRate = lnCwt;
+                    recomputeTransaction();   // MCSales: master CWT amount = rate x (VAT sales + non-VAT sales)
                     loadTableMCItem();   // refreshes tblUnits; its succeeded() reloads the summary too
                     break;
                 }
@@ -1389,6 +1421,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      */
     private void reloadRecord() throws GuanzonException, SQLException {
         pnEditMode = oSalesController.MCSales().getEditMode();
+        pdCwtRate = savedCwtRate();   // BEFORE anything can compute: in edit mode MCSales overwrites the CWT field
         pnUnitRow = -1;
         pnGawayRow = -1;
         pnRegInsurRow = -1;
@@ -1452,6 +1485,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         ShowMessageFX.Warning(lsPaymentError, "Warning", null);
                         break;
                     }
+                    recomputeTransaction();   // the master CWT field must hold the AMOUNT (not the rate) when it is saved
                     poJSON = oSalesController.MCSales().saveTransaction();
                     if (hasError(poJSON)) {
                         break;
@@ -1682,26 +1716,26 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         try {
             if (fcb == cbRegIsCharge || fcb == cbInsurIsCharge) {
                 // ticked = Charge, unticked = Free; written to the row shown in that section
-                boolean lbReg = fcb == cbRegIsCharge;
-                Model loRow = lbReg ? poSectionReg : poSectionIns;
+                final boolean lbReg = fcb == cbRegIsCharge;
+                final Model loRow = lbReg ? poSectionReg : poSectionIns;
                 if (isBlankRegInsur(loRow)) {
                     // nothing in this section yet: undo the tick without triggering this handler again
-                    boolean lbPrev = pbSyncing;
-                    pbSyncing = true;
-                    try {
-                        fcb.setSelected(!fbSelected);
-                    } finally {
-                        pbSyncing = lbPrev;
-                    }
+                    revertCheckBox(fcb, !fbSelected);
+                    ShowMessageFX.Warning(lbReg ? "Please select or search a registration first."
+                            : "Please select or search an insurance first.", "Warning", null);
                     return;
                 }
+                String lsCharge = fbSelected ? CHARGE_YES : CHARGE_NO;
                 poJSON = lbReg
-                        ? poSectionReg.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO)
-                        : poSectionIns.setChargeTo(fbSelected ? CHARGE_YES : CHARGE_NO);
+                        ? ((Model_Sales_Registration) loRow).setChargeTo(lsCharge)
+                        : ((Model_Sales_Insurance) loRow).setChargeTo(lsCharge);
                 if (hasError(poJSON)) {
+                    revertCheckBox(fcb, !fbSelected);   // keep the box in sync with the model
                     return;
                 }
-                loadTableRegAndInsur();   // the Status column shows Charge / Free, and the payer field follows
+                poSelRegInsur = loRow;      // keep this row selected after the reload
+                loadTableMCItem();          // recomputes totals, refreshes the Ins/Reg column and the summary
+                loadTableRegAndInsur();     // Status column (Charge / Free)
             }
             loadSummary();
         } catch (Exception ex) {
@@ -2033,6 +2067,88 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         });
     }
 
+    private static boolean isTrueText(String fs) {
+        return "true".equalsIgnoreCase(fs) || "1".equals(fs);
+    }
+
+    /**
+     * true when the unit's promo (model or brand) includes insurance / registration.
+     */
+    private boolean promoHas(final Model_Sales_Detail foUnit, final boolean fbInsurance) {
+        if (isBlankUnit(foUnit)) {
+            return false;
+        }
+        String lsModel = fbInsurance ? textOf(() -> foUnit.PromotionModel().isInsuranceFree())
+                : textOf(() -> foUnit.PromotionModel().isRegistrationFree());
+        String lsBrand = fbInsurance ? textOf(() -> foUnit.PromotionBrand().isInsuranceFree())
+                : textOf(() -> foUnit.PromotionBrand().isRegistrationFree());
+        return isTrueText(lsModel) || isTrueText(lsBrand);
+    }
+
+    /**
+     * The unit row currently selected in tblUnits (null when none).
+     */
+    private Model_Sales_Detail selectedUnit() {
+        return (pnUnitRow >= 1 && pnUnitRow <= unit_data.size()) ? unit_data.get(pnUnitRow - 1) : null;
+    }
+
+    /**
+     * Ticks the Charge check boxes from the unit's promo, only while the
+     * section has no real row. Writes nothing to the model and adds nothing to
+     * the table.
+     */
+    private void applyPromoFlags(Model_Sales_Detail foUnit) {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;   // cb_Changed() must not run
+        try {
+            if (isBlankRegInsur(poSectionReg)) {
+                cbRegIsCharge.setSelected(promoHas(foUnit, false));
+            }
+            if (isBlankRegInsur(poSectionIns)) {
+                cbInsurIsCharge.setSelected(promoHas(foUnit, true));
+            }
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
+    /**
+     * Default of the Charge check box for a row that a registration / insurance
+     * search just added: the same rule the promo uses (promoHas) for the
+     * section's OWN check box. Registration search -> cbRegIsCharge only,
+     * insurance search -> cbInsurIsCharge only. The default is written to the
+     * row (setChargeTo) so the box, the table Status column and the totals
+     * all agree; the user can still change it by hand afterwards.
+     */
+    private void applyDefaultCharge(Model foRow, boolean fbInsurance) {
+        if (isBlankRegInsur(foRow)) {
+            return;
+        }
+        try {
+            String lsCharge = promoHas(selectedUnit(), fbInsurance) ? CHARGE_YES : CHARGE_NO;
+            JSONObject loJSON = fbInsurance
+                    ? ((Model_Sales_Insurance) foRow).setChargeTo(lsCharge)
+                    : ((Model_Sales_Registration) foRow).setChargeTo(lsCharge);
+            if (hasError(loJSON)) {
+                return;
+            }
+            loadTableMCItem();   // recompute totals / Ins-Reg column / summary with the default
+        } catch (Exception ex) {
+            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        }
+    }
+
+    private void revertCheckBox(CheckBox fcb, boolean fbValue) {
+        boolean lbPrev = pbSyncing;
+        pbSyncing = true;
+        try {
+            fcb.setSelected(fbValue);
+        } finally {
+            pbSyncing = lbPrev;
+        }
+    }
+
     private void loadUnitRecord(int fnRow) {
         boolean lbPrev = pbSyncing;
         pbSyncing = true;
@@ -2048,7 +2164,6 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfMCKeyCode.setText(textOf(() -> loUnit.getKeyCode()));
                 tfMCRemarks.setText(textOf(() -> loUnit.getNotes()));
                 tfMCUnitPrice.setText(money(dbl(() -> loUnit.getUnitPrice())));
-                tfMCInsurAmt.setText(money(dbl(() -> loUnit.getInsuranceAmount())));
                 tfPromoDisc.setText(money(dbl(() -> loUnit.getDiscount())));
                 tfPromoAddDisc.setText(money(dbl(() -> loUnit.getAddDiscount())));
                 tfFreight.setText(money(dbl(() -> loUnit.getFreight())));
@@ -2056,10 +2171,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfRegEngineNo.setText(tfMCEngineNo.getText());
                 tfRegFrameNo.setText(tfMCFrameNo.getText());
 
-                tfMCInsurAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isInsuranceFree()))
-                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isInsuranceFree())) ? "Yes" : "No");
-                tfMCRegisAmt.setText("true".equals(textOf(() -> loUnit.PromotionModel().isRegistrationFree()))
-                        || "true".equals(textOf(() -> loUnit.PromotionBrand().isRegistrationFree())) ? "Yes" : "No");
+                tfMCInsurAmt.setText(promoHas(loUnit, true) ? "Yes" : "No");
+                tfMCRegisAmt.setText(promoHas(loUnit, false) ? "Yes" : "No");
+                applyPromoFlags(loUnit);   // tick Charge from the promo, no rows added
                 // TODO(model): tfMCRegisAmt, cmbVehicleType and the other combos / check boxes
             }
         } catch (Exception ex) {
@@ -2145,6 +2259,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 cbInsurIsCharge.setSelected(isChargeTo(loIns));
                 tfInsurPayer.setText(textOf(() -> loIns.InusrancePayeeClient().getCompanyName()));
             }
+            applyPromoFlags(selectedUnit());   // a section without a row follows the promo
         } finally {
             pbSyncing = lbPrev;
         }
@@ -2172,6 +2287,23 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         } finally {
             pbSyncing = lbPrev;
         }
+    }
+    /** true when the giveaway row came from a source (quotation / reservation). */
+    private static boolean gawayHasSource(Model_Sales_Giveaways fo) {
+        if (fo == null) {
+            return false;
+        }
+        for (String lsGetter : SalesTransactionStatic.GAWAY_SOURCE_GETTERS) {
+            try {
+                Object loVal = fo.getClass().getMethod(lsGetter).invoke(fo);
+                return loVal != null && !String.valueOf(loVal).trim().isEmpty();
+            } catch (NoSuchMethodException ex) {
+                // try the next name
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+        return false;
     }
 
     private static String textOf(Getter fg) {
@@ -2234,10 +2366,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             pnGawayRow = lnIndex >= 0 ? lnIndex + 1 : -1;   // model entry no. (1-based)
             clearGawayItemTextFields();
             if (loSelected != null && pnGawayRow >= 1) {
-                loadGiveawayRecord(pnGawayRow);
-                if (event.getClickCount() == 2) {
-                    tfGawayQty.requestFocus();
+                loadGiveawayRecord(pnGawayRow);   // also sets the enabled / disabled state of tfGawayQty
+                if (event.getClickCount() == 2 && !tfGawayQty.isDisabled()) {
+                    tfGawayQty.requestFocus();    // only rows without a source can be edited
                 }
+            } else {
+                tfGawayQty.setDisable(false);
             }
         }
     }
@@ -2271,26 +2405,26 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 // a COPY for the table: never add to the model's own list, or every load duplicates the rows
                 List<Model_Sales_Detail> laRows = new ArrayList<Model_Sales_Detail>();
 
-                int lnCount = loSales.getSalesDetailList().size();
+                int lnCount = loSales.getDetailList().size();
                 if (lbEditing) {
                     try {
-                        if (lnCount == 0 || !isBlankUnit(loSales.getSalesDetailList().get(lnCount - 1))) {
+                        if (lnCount == 0 || !isBlankUnit(loSales.getDetailList().get(lnCount - 1))) {
                             // let the model create the blank row so it gets its trans no and entry no
                             int lnNextEntry = 0;
-                            for (Model_Sales_Detail loTmp : loSales.getSalesDetailList()) {
+                            for (Model_Sales_Detail loTmp : loSales.getDetailList()) {
                                 lnNextEntry = Math.max(lnNextEntry, loTmp.getEntryNo());
                             }
                             loSales.getDetail(lnNextEntry + 1);
-                            lnCount = loSales.getSalesDetailList().size();
+                            lnCount = loSales.getDetailList().size();
                         }
                     } catch (IndexOutOfBoundsException ex) {
                         Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.WARNING, null, ex);
-                        lnCount = loSales.getSalesDetailList().size();
+                        lnCount = loSales.getDetailList().size();
                     }
                 }
 
                 for (int lnCtr = 0; lnCtr < lnCount; lnCtr++) {
-                    Model_Sales_Detail loRow = loSales.getSalesDetailList().get(lnCtr);
+                    Model_Sales_Detail loRow = loSales.getDetailList().get(lnCtr);
                     if (loRow == null) {
                         break;
                     }
@@ -2479,6 +2613,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
         final int lnSelectRow = pnRegInsurRow;
         final int lnSeq = ++pnRegInsurLoadSeq;
+        final Model loKeep = poSelRegInsur;   // captured BEFORE setAll() clears the selection (listener nulls poSelRegInsur)
 
         Task<List<Model>> task = new Task<List<Model>>() {
             @Override
@@ -2512,8 +2647,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                         tfInsurYear.clear();
                         tfInsurAmt.clear();
                         cmbRegistrationType.getSelectionModel().clearSelection();
-                        cbRegIsCharge.setSelected(false);
-                        cbInsurIsCharge.setSelected(false);
+                        applyPromoFlags(selectedUnit());   // no rows: the boxes follow the promo
                     } finally {
                         pbSyncing = false;
                     }
@@ -2521,7 +2655,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     pbRegistrationRow.set(false);
                 } else {
                     // keep the selected row (found by object, not entry no.); a just-searched row is selected by selectNewRegInsur()
-                    int lnIndex = poSelRegInsur != null ? reginsur_data.indexOf(poSelRegInsur) : -1;
+                    int lnIndex = loKeep != null ? reginsur_data.indexOf(loKeep) : -1;
                     if (lnIndex < 0) {
                         lnIndex = 0;
                     }
@@ -2949,7 +3083,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void recomputeTransaction() {
         try {
             normalizeRegInsurRows();
-            oSalesController.MCSales().computeTransaction();
+            if (canEdit()) {
+                // MCSales reads this field as the RATE: put the rate back first, or a previous compute's AMOUNT
+                // would be used as the rate (the CWT would multiply on every call)
+                master().setCWTAmount(pdCwtRate);
+            }
+            oSalesController.MCSales().computeTransaction();   // the master field now holds the CWT AMOUNT
             System.out.println("[PAY] computeTransaction OK, mode=" + pnEditMode);
         } catch (Throwable ex) {
             System.out.println("[PAY] computeTransaction FAILED, mode=" + pnEditMode);
@@ -2958,28 +3097,29 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     }
 
     /**
-     * CWT = No: the CWT amount on the master is forced to 0. CWT = Yes: the
-     * amount the user typed is kept (it is written by txtField_LostFocus
-     * "tfPaymentCwt"). Then the totals are recomputed (a CWT amount above 0
-     * turns the VAT sales into non-VAT sales in computeTransaction()).
+     * CWT = No: the percentage is set to 0 (MCSales then computes a 0 amount). CWT = Yes: the typed percentage
+     * is kept. The amount itself is never written here: MCSales calculates it from the percentage.
      */
     private void syncCwt() {
         if (!canEdit() || cmbPaymentCWT.getSelectionModel().getSelectedIndex() < 0) {
             return;
         }
-        try {
-            final Model_Sales_Master loMas = master();
-            if (!pbCwtYes.get() && dbl(() -> loMas.getCWTAmount()) != 0) {
-                poJSON = loMas.setCWTAmount(0.0);   // No: no CWT
-                if (hasError(poJSON)) {
-                    return;
-                }
-            }
-            recomputeTransaction();
-        } catch (Exception ex) {
-            Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
+        if (!pbCwtYes.get()) {
+            pdCwtRate = 0.0;   // No: no CWT
         }
+        recomputeTransaction();
+    }
+
+    /**
+     * The percentage that the CWT amount SAVED on the master is of its VAT-exclusive base. Must be read
+     * BEFORE anything computes in edit mode (MCSales then overwrites the field). Not rounded, so computing
+     * it back gives the saved amount again.
+     */
+    private double savedCwtRate() {
+        final Model_Sales_Master loMas = master();
+        double lnBase = dbl(() -> loMas.getVATSales()) + dbl(() -> loMas.getNonVATSales());
+        double lnAmount = dbl(() -> loMas.getCWTAmount());
+        return (lnBase > 0 && lnAmount > 0) ? Math.min(100.0, lnAmount / lnBase * 100.0) : 0.0;
     }
 
     /**
@@ -2994,9 +3134,8 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             selectIndex(cmbPaymentTranType, indexOf(textOf(() -> loMas.getTransactionType())));
             selectIndex(cmbPaymentForm, indexOf(textOf(() -> loMas.getPaymentForm())));
 
-            // the master keeps the CWT amount: any amount above 0 means CWT = Yes
-            double lnCwtAmt = dbl(() -> loMas.getCWTAmount());
-            selectIndex(cmbPaymentCWT, lnCwtAmt > 0 ? CWT_YES : CWT_NO);
+            // any CWT percentage above 0 means CWT = Yes (the master only keeps the amount: see pdCwtRate)
+            selectIndex(cmbPaymentCWT, (pdCwtRate > 0 || (canEdit() && pbCwtYes.get())) ? CWT_YES : CWT_NO);
 
             tfPaymentTerm.setText(pbTermPayment.get() ? termText() : "");   // the field shows the term DESCRIPTION, like after F3
 
@@ -3059,11 +3198,14 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
 
     /**
      * Fills the Payment tab totals and the transaction summary figures from the
-     * master (computed by MCSales). Net total = amount due + advances (amount
-     * due already subtracts the advances). Balance = amount due - CWT - amount
-     * paid. ASSUMED business rule.
+     * master (computed by MCSales). Amount due already subtracts the advances
+     * and the CWT, so: Net total = amount due + advances + CWT, Balance =
+     * amount due - amount paid. ASSUMED business rule.
      */
     private void loadPaymentTotals() {
+        if (canEdit()) {
+            recomputeTransaction();   // last compute with the rate in place: the master then holds the right CWT amount and amount due
+        }
         final Model_Sales_Master loMas = master();
         double lnTotal = dbl(() -> loMas.getTransactionTotal());
         double lnDisc = dbl(() -> loMas.getDiscount());
@@ -3099,15 +3241,17 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 lnFreight += dbl(() -> d.getFreight());
             }
             lnDue = lnTotal - lnDisc - lnAddDisc + lnFreight
-                    + chargedTotal(false) + chargedTotal(true) - lnAdvances;
+                    + chargedTotal(false) + chargedTotal(true) - lnAdvances - lnCwt;   // MCSales' amount due is net of the CWT
         }
 
-        double lnNet = lnDue + lnAdvances;
-        double lnBalance = lnDue - lnCwt - lnPaid;
+        // MCSales' amount due already subtracts the advances AND the CWT: the total adds them back,
+        // and the balance must not subtract the CWT a second time
+        double lnNet = lnDue + lnAdvances + lnCwt;
+        double lnBalance = lnDue - lnPaid;
 
         tfPaymentTotal.setText(money(lnNet));
         tfPaymentAdvances.setText(money(lnAdvances));
-        tfPaymentCwt.setText(money(lnCwt));
+        tfPaymentCwt.setText(String.format(Locale.US, "%.2f", pdCwtRate));   // the PERCENTAGE; the amount is in tfSummaryCwt
         tfPaymentAmountPaid.setText(money(lnPaid));
         tfPaymentBalance.setText(money(lnBalance));
 
@@ -3997,6 +4141,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
      * It ensures that any unsaved data is not kept in the text fields.
      * */
     private void ClearAll() {
+        pdCwtRate = 0.0;
         ClearMaster();
         ClearClient();
         ClearMotorcycle();
