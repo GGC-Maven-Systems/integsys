@@ -4215,4 +4215,26 @@ public class JFXUtil {
 
         return loStringBuilder.toString();
     }
+
+    public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
+        try {
+            String getterName = String.format("getIndex%02d", columnIndex);
+
+            for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
+                Object item = dataList.get(lnCtr);
+
+                String value = (String) item.getClass()
+                        .getMethod(getterName)
+                        .invoke(item);
+
+                if (String.valueOf(lnpn).equals(value)) {
+                    return lnCtr;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1; // not found
+    }
 }
