@@ -983,7 +983,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 btnVoid.setText(lsStat);
             });
 
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -1017,7 +1017,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     private void loadRecordVehicleInfo() {
         try {
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());

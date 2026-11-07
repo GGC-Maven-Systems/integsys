@@ -909,6 +909,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 loadRecordMaster();
             });
+
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -930,7 +931,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 btnVoid.setText(lsStat);
             });
 
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -964,7 +965,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordVehicleInfo() {
         try {
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());

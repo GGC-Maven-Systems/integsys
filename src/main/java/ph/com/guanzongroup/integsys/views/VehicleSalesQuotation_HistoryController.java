@@ -352,7 +352,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 JFXUtil.setStatusValue(lblStatus, VehicleQuotationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
             });
 
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -386,7 +386,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void loadRecordVehicleInfo() {
         try {
-            if (poController.getDetailCount() <= 0) {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
