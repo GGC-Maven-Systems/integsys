@@ -271,13 +271,42 @@ public class SalesTransactionsLandingController implements Initializable, Screen
         dpDateFrom.setValue(LocalDate.now().minusDays(DEFAULT_DAYS));
     }
 
-    /** Enter in the search box runs the search. */
+    /** true while the filters are set by the code (Clear): the listeners below must not filter once per field. */
+    private boolean pbFilterSyncing = false;
+    /** Short pause after the last key, so a fast typist does not filter on every single letter. */
+    private final javafx.animation.PauseTransition poSearchDelay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
+
+    /**
+     * The list refreshes as the filters change: every letter typed in the search box, a new date, a new payment form
+     * or a new status. Enter / the Search button still work and filter at once.
+     */
     private void initFilterHandlers() {
+        poSearchDelay.setOnFinished(e -> applyFilter());
+        tfSearch.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!pbLoaded || pbFilterSyncing) {
+                return;
+            }
+            poSearchDelay.playFromStart();   // restarts the pause on every key
+        });
         tfSearch.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
+                poSearchDelay.stop();
                 applyFilter();
             }
         });
+
+        dpDateFrom.valueProperty().addListener((obs, oldVal, newVal) -> filterChanged());
+        dpDateTo.valueProperty().addListener((obs, oldVal, newVal) -> filterChanged());
+        cmbPaymentFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterChanged());
+        cmbStatusFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterChanged());
+    }
+
+    private void filterChanged() {
+        if (!pbLoaded || pbFilterSyncing) {
+            return;
+        }
+        poSearchDelay.stop();   // a pending typed search is included by this filter run
+        applyFilter();
     }
 
     /** Filters poAllRows into poFiltered (in memory), then shows the first page. */
@@ -318,10 +347,16 @@ public class SalesTransactionsLandingController implements Initializable, Screen
     }
 
     private void clearFilter() {
-        tfSearch.clear();
-        setDefaultDateRange();
-        cmbPaymentFilter.getSelectionModel().clearSelection();
-        cmbStatusFilter.getSelectionModel().selectFirst();   // back to Opened
+        poSearchDelay.stop();
+        pbFilterSyncing = true;   // one refresh at the end, not one per field
+        try {
+            tfSearch.clear();
+            setDefaultDateRange();
+            cmbPaymentFilter.getSelectionModel().clearSelection();
+            cmbStatusFilter.getSelectionModel().selectFirst();   // back to Opened
+        } finally {
+            pbFilterSyncing = false;
+        }
         applyFilter();
     }
 
@@ -536,8 +571,14 @@ public class SalesTransactionsLandingController implements Initializable, Screen
         double lnAdvances = dbl(() -> foMaster.getAdvances());
         double lnCwt = dbl(() -> foMaster.getCWTAmount());
         loRow.paid = dbl(() -> foMaster.getValue("nAmtPaidx"));   // raw column: MCSales never sets it
-        loRow.total = lnDue + lnAdvances;                          // same rule as the entry screen: amount due + advances
-        loRow.balance = lnDue - lnCwt - loRow.paid;                // same rule as the entry screen
+
+        // Total = the master's transaction total. The amount due is only computed by MCSales in edit mode, so a
+        // browsed master holds 0 there: the balance then falls back to total - advances - CWT.
+        loRow.total = dbl(() -> foMaster.getTransactionTotal());
+        if (lnDue == 0 && loRow.total > 0) {
+            lnDue = loRow.total - lnAdvances - lnCwt;
+        }
+        loRow.balance = lnDue - loRow.paid;   // the amount due is already net of the advances and the CWT
 
         StringBuilder loSerials = foSerials.get(loRow.transNo);
         loRow.searchText = (loRow.transNo + " " + loRow.customer + (loSerials == null ? "" : loSerials)).toLowerCase(Locale.ROOT);

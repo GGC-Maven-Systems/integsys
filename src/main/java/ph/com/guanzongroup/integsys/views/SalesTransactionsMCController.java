@@ -1232,7 +1232,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 case "tfPomoCode": {
                     if (pbSearching) {
-                        break;                          // focus left only because the F3 search ran
+                        break;
                     }
                     final Model_Sales_Detail loUnit = poEditUnit;
                     if (isBlankUnit(loUnit)) {
@@ -1241,26 +1241,27 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     String lsText = lsValue == null ? "" : lsValue.trim();
                     if (!lsText.isEmpty()) {
                         if (!lsText.equals(psPromoAtFocus.trim())) {
-                            loadUnitRecord(pnUnitRow);               // typed text isn't a promo: put the saved one back
+                            loadUnitRecord(pnUnitRow);
                         }
                         break;
                     }
                     if (psPromoAtFocus.trim().isEmpty()) {
-                        break;      // it was already empty: nothing to remove
+                        break;
                     }
-                    poJSON = loUnit.setPromoID("");                  // ASSUMED setter
-                    if (hasError(poJSON)) {
 
+                    // removes the promo's giveaways AND clears promo id / discount / add. discount / freight
+                    poJSON = oSalesController.MCSales().removeSalesDetailPromotion(pnUnitRow);
+                    if (hasError(poJSON)) {
                         loadUnitRecord(pnUnitRow);
                         return;
                     }
-                    loUnit.setAddDiscount(0.00);
-                    loUnit.setDiscount(0.00);
-                    loUnit.setFreight(0.00);
+
                     tfPromoAddDisc.setText(money(0.00));
                     tfPromoDisc.setText(money(0.00));
                     tfFreight.setText(money(0.00));
                     psPromoAtFocus = "";
+
+                    pnGawayRow = -1;            // the selected giveaway row may no longer exist
                     loadTableMCItem();
                     loadTableGiveaways();
                     loadTableRegAndInsur();
