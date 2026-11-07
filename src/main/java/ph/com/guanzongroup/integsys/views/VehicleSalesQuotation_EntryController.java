@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
@@ -59,7 +58,6 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
-import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
@@ -106,6 +104,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    ObservableList<String> receivingmethod = FXCollections.observableArrayList("Pickup", "Delivery");
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apRemarks, apAddOns, apFreebies;
     @FXML
@@ -670,8 +669,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (lsValue.isEmpty()) {
                                 if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                     if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
-                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")
-                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getVariantId(), null, "")) {
+                                    && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Model().getModelId(), null, "")) {
                                         if (!pbKeyPressed) {
                                             if (ShowMessageFX.YesNo(null, pxeModuleName,
                                                     "Are you sure you want to change the brand?\nPlease note that doing so will delete the other inputs exists.\n\nDo you wish to proceed?") == true) {
@@ -917,6 +915,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "cmbModeOfPayment":
                         break;
                 }
+                loadRecordVehicleInfo();
             });
 
     private void loadRecordMaster() {
@@ -931,7 +930,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 btnVoid.setText(lsStat);
             });
 
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            if (poController.getDetailCount() <= 0) {
                 return;
             }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
@@ -965,6 +964,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordVehicleInfo() {
         try {
+            if (poController.getDetailCount() <= 0) {
+                return;
+            }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
             tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission()));
@@ -1029,6 +1031,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
+            if (!lbIsDiscountNone) {
+//                tfTotalDiscount.setText(poController.get);
+            }
+            JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
             poController.computeFields();
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
@@ -1221,9 +1228,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void initComboboxes() {
         // ComboBox setup
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment);
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment, cmbReceivingMethod);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment, cmbReceivingMethod);
     }
 
     private void initDatepickers() {

@@ -95,6 +95,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    ObservableList<String> receivingmethod = FXCollections.observableArrayList("Pickup", "Delivery");
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apRemarks, apAddOns, apFreebies;
     @FXML
@@ -349,44 +350,53 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         try {
             Platform.runLater(() -> {
                 JFXUtil.setStatusValue(lblStatus, VehicleQuotationStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
-
-                String lsStat = "Void";
-                if (VehicleQuotationStatus.APPROVED.equals(poController.Master().getTransactionStatus())) {
-                    lsStat = "Cancel";
-                }
             });
-            //if update then disable other nodes
-            //if update only enable the expected and valid thru
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+
+            if (poController.getDetailCount() <= 0) {
                 return;
             }
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
             JFXUtil.setDateValue(dpTransactionDate, JFXUtil.isObjectEqualTo(lsTransactionDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTransactionDate, "yyyy-MM-dd"));
 
-            String lsExpectedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getExpectedDate());
-            JFXUtil.setDateValue(dpExpectedDate, JFXUtil.isObjectEqualTo(lsExpectedDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsExpectedDate, "yyyy-MM-dd"));
-            String lsValidThru = JFXUtil.formatDateToString(poController.Detail(pnDetail).getValidThruDate());
-            JFXUtil.setDateValue(dpValidThru, JFXUtil.isObjectEqualTo(lsValidThru, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidThru, "yyyy-MM-dd"));
-
-            tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
             tfClient.setText(poController.Master().Client().getCompanyName());
             tfAddress.setText(poController.getFullAddress());
             tfContactNo.setText(poController.Master().ClientMobile().getMobileNo());
             tfEmail.setText(poController.Master().ClientEmail().getMailAddress());
+
+            String lsExpectedDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).getExpectedDate());
+            JFXUtil.setDateValue(dpExpectedDate, JFXUtil.isObjectEqualTo(lsExpectedDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsExpectedDate, "yyyy-MM-dd"));
+            String lsValidThru = JFXUtil.formatDateToString(poController.Detail(pnDetail).getValidThruDate());
+            JFXUtil.setDateValue(dpValidThru, JFXUtil.isObjectEqualTo(lsValidThru, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsValidThru, "yyyy-MM-dd"));
             tfInquiryNo.setText(poController.Detail(pnDetail).getSourceNo());
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
+            tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
             tfSalesPerson.setText(poController.Detail(pnDetail).SalesInquiry().SalesPerson().getFullName());
+            taRemarks.setText(poController.Detail(pnDetail).getRemarks());
 
+            JFXUtil.updateCaretPositions(apMaster);
+            loadRecordVehicleInfo();
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void loadRecordVehicleInfo() {
+        try {
+            if (poController.getDetailCount() <= 0) {
+                return;
+            }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
-            tfVariant.setText(poController.Detail(pnDetail).ModelVariant().getDescription());
+            tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission()));
+            tfTransmission.setText(poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission());
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-            taRemarks.setText(poController.Detail(pnDetail).getRemarks());
-            JFXUtil.updateCaretPositions(apMaster);
+//        JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
+            JFXUtil.updateCaretPositions(apVehicleInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -434,6 +444,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
+            if (!lbIsDiscountNone) {
+//                tfTotalDiscount.setText(poController.get);
+            }
+            JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
             poController.computeFields();
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
@@ -540,9 +555,9 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void initComboboxes() {
         // ComboBox setup
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment);
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbModeOfPayment, cmbReceivingMethod);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbModeOfPayment, cmbReceivingMethod);
     }
 
     private void initDatepickers() {
@@ -672,7 +687,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     }
 
     public void initLoadTable() {
-         loadTableAddOns = new JFXUtil.ReloadableTableTask(
+        loadTableAddOns = new JFXUtil.ReloadableTableTask(
                 tblViewAddOns,
                 addOns_data,
                 () -> {
