@@ -1196,7 +1196,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                     case "dpExpectedDate":
                         //cannot be before transactiondate
-                        String lsValidThru = sdfFormat.format(poController.Master().getTransactionDate());
+                        String lsValidThru = sdfFormat.format(poController.Detail(pnDetail).getValidThruDate());
                         LocalDate ldValidThruDate = LocalDate.parse(lsValidThru, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         //cannot be before transactiondate
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {

@@ -1141,7 +1141,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "dpInquiryDate":
                         break;
                     case "dpExpectedDate":
-                        String lsValidThru = sdfFormat.format(poController.Master().getTransactionDate());
+                        String lsValidThru = sdfFormat.format(poController.Detail(pnDetail).getValidThruDate());
                         LocalDate ldValidThruDate = LocalDate.parse(lsValidThru, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         //cannot be before transactiondate
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
