@@ -31,11 +31,10 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
-import ph.com.guanzongroup.cas.sales.AddOnType;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Main;
+import ph.com.guanzongroup.integsys.model.ModelSalesQuotationDiscount;
+import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -53,10 +52,7 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
     private String psCompanyId = "";
     private boolean pbEntered = false;
     private int pnDetail = 0;
-    private boolean isForDialog = false;
-    private boolean isForUpdate = false;
-    private String lsStandardRateID = "";
-    private ObservableList<ModelVehicleQuotation_Main> details_data = FXCollections.observableArrayList();
+    private ObservableList<ModelSalesQuotationDiscount> details_data = FXCollections.observableArrayList();
     JFXUtil.ReloadableTableTask loadTableDetail;
     @FXML
     private AnchorPane apBrowse, apButton, apDetail;
@@ -121,29 +117,24 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
         poJSON = new JSONObject();
         Object source = event.getSource();
         if (source instanceof Button) {
-//            try {
+            try {
                 Button clickedButton = (Button) source;
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnClose":
-                        unloadForm appUnload = new unloadForm();
-                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-//                            appUnload.unloadForm(apAnchorPane, oApp, pxeModuleName);
-                        } else {
-                            return;
-                        }
+                        CommonUtils.closeStage(btnClose);
                         break;
                     case "btnOkay":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to deactivate the record?") == false) {
                             return;
                         }
-//                        poJSON = poController.DeactivateRecord("");
+                        poJSON = poController.SaveTransaction();
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            btnClose.fire();
                         }
-//                        poController.openRecord(poController.getModel().getAddTypeCode());
                         pnEditMode = poController.getEditMode();
                         break;
                     default:
@@ -153,10 +144,10 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
                 loadRecordDetail();
 
                 initButton(pnEditMode);
-//            } catch (CloneNotSupportedException | SQLException | GuanzonException | ParseException ex) {
-//                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//            }
+            } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+            }
         }
     }
 
@@ -165,19 +156,31 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
                 switch (lsID) {
                     case "tfDiscountType":
                         if (lsValue.isEmpty()) {
+                            poController.DiscountList(pnDetail).setDiscountType("");
                         }
                         break;
                     case "tfAmount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.DiscountList(pnDetail).setDiscountAmount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                 }
+                loadTableDetail.reload();
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "taRemarks":
+                        poJSON = poController.DiscountList(pnDetail).setRemarks(lsValue);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
                         break;
                 }
+                loadRecordDetail();
             });
 
     public void initTextFields() {
@@ -233,10 +236,10 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
     }
 
     private void loadRecordDetail() {
-        tfDiscountType.setText("");
-        tfAmount.setText("");
-//        cbActive.setSelected(fromController.equals("1") ? true : false);
-        taRemarks.setText("");
+        tfDiscountType.setText(poController.DiscountList(pnDetail).getDiscountType());
+        tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(pnDetail).getDiscountAmount(), false));
+        cbActive.setSelected(poController.DiscountList(pnDetail).getRecordStatus());
+        taRemarks.setText(poController.DiscountList(pnDetail).getRemarks());
     }
 
     private void initDetailGrid() {
@@ -254,54 +257,47 @@ public class VehicleSalesQuotationDiscountController implements Initializable, S
                     Platform.runLater(() -> {
                         int lnCtr;
                         details_data.clear();
-//                        try {
-//                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                poController.ReloadAddOnList();
-//                            }
-                            int lnCount = 0;
-                            for (lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
-//                                if (pnEditMode == EditMode.READY
-//                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName(), null, "")
-//                                        && JFXUtil.isObjectEqualTo(poController.AddOnList(lnCtr).Inventory().getStockId(), null, "")) {
-//                                    continue;
-//                                }
-                                lnCount += 1;
-                                String lsDescription = "";
-
-//                                details_data.add(
-//                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
-//                                                String.valueOf(lnCount),
-//                                                getData(lsDescription),
-//                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
-//                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getQuantity(), false)),
-//                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getTotalAmount(), false)),
-//                                                String.valueOf(lnCtr)
-//                                        ));
+                        try {
+                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadDiscountList();
                             }
-                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 7);
+                            int lnCount = 0;
+                            for (lnCtr = 0; lnCtr < poController.getDiscountListCount(); lnCtr++) {
+                                if (!poController.DiscountList(lnCtr).getRecordStatus()) {
+                                    continue;
+                                }
+                                lnCount += 1;
+                                details_data.add(
+                                        new ModelSalesQuotationDiscount(String.valueOf(lnCount),
+                                                poController.DiscountList(lnCtr).getDiscountType(),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(lnCtr).getDiscountAmount(), false)),
+                                                String.valueOf(lnCtr)
+                                        ));
+                            }
+                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 4);
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex07());
+                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex04());
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex07());
+                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex04());
                                 pnDetail = lnRow;
                                 loadRecordDetail();
                             }
-//                        } catch (SQLException | GuanzonException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        } catch (CloneNotSupportedException ex) {
-//                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                        }
+                        } catch (SQLException | GuanzonException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        }
                     });
                 });
     }
