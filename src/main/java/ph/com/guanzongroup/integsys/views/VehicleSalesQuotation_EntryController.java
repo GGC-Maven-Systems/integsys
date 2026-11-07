@@ -1141,9 +1141,15 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "dpInquiryDate":
                         break;
                     case "dpExpectedDate":
+                        String lsValidThru = sdfFormat.format(poController.Master().getTransactionDate());
+                        LocalDate ldValidThruDate = LocalDate.parse(lsValidThru, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
                         //cannot be before transactiondate
                         if (ldSelectedDate.isBefore(ldTransactionDate)) {
                             JFXUtil.setJSONError(poJSON, "Expected date cannot be before the Transaction Date.");
+                            pbSuccess = false;
+                        }
+                        if (ldSelectedDate.isAfter(ldValidThruDate)) {
+                            JFXUtil.setJSONError(poJSON, "Expected date cannot be after the Valid Thru Date.");
                             pbSuccess = false;
                         } else {
                             poController.Detail(pnDetail).setExpectedDate(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -1458,7 +1464,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     public void clearTextFields() {
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.clearTextFields(apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
     }
 
     private void resetCheckboxSelection() {

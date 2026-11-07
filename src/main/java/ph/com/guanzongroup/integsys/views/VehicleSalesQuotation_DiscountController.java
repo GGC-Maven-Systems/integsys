@@ -248,6 +248,13 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                 event.consume();
                 break;
             case F3:
+                
+                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                    ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                } else {
+                    JFXUtil.textFieldMoveNext(tfAmount);
+                }
+                loadTableDetail.reload();
                 break;
             default:
                 break;
@@ -259,6 +266,9 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     }
 
     private void loadRecordDetail() {
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
         tfDiscountType.setText(poController.DiscountList(pnDetail).getDiscountType());
         tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(pnDetail).getDiscountAmount(), false));
         cbActive.setSelected(poController.DiscountList(pnDetail).getRecordStatus());
