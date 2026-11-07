@@ -31,11 +31,18 @@ public class APStatusController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Same base look as APList chips
+        if (!apMainAnchor.getStyleClass().contains("chip-container")) {
+            apMainAnchor.getStyleClass().add("chip-container");
+        }
+
         btnAction.setOnAction(e -> {
             e.consume();
             handleAction();
         });
+
         apMainAnchor.setOnMouseClicked(e -> {
+            setSelected(!pbSelected);
             if (poOnSelect != null) {
                 poOnSelect.run();
             }
@@ -46,19 +53,12 @@ public class APStatusController implements Initializable {
         lblDisplay.setText(text);
     }
 
-    /**
-     * @param isAddNew true  -> record does not exist on file yet (brand-new
-     *                        transaction, or item added this session):
-     *                        action button behaves as TRASH / hard remove.
-     *                 false -> record already persisted: action button
-     *                        toggles isWithActive() instead of removing.
-     */
     public void setMode(boolean isAddNew) {
         this.pbIsAddNew = isAddNew;
         refreshIcon();
+        refreshHighlight();
     }
 
-    /** Only relevant when setMode(false) was used. */
     public void setActive(boolean isActive) {
         this.pbIsActive = isActive;
         refreshIcon();
@@ -74,10 +74,13 @@ public class APStatusController implements Initializable {
     }
 
     private void refreshHighlight() {
+        apMainAnchor.setStyle(""); // never use inline styles
         if (!pbIsAddNew && !pbIsActive) {
-            apMainAnchor.setStyle("-fx-background-color: #FFC0CB; -fx-background-radius: 15;");
+            if (!apMainAnchor.getStyleClass().contains("chip-inactive")) {
+                apMainAnchor.getStyleClass().add("chip-inactive");
+            }
         } else {
-            apMainAnchor.setStyle("-fx-background-color: #B5B5B5; -fx-background-radius: 15;");
+            apMainAnchor.getStyleClass().remove("chip-inactive");
         }
     }
 
@@ -109,9 +112,12 @@ public class APStatusController implements Initializable {
 
     public void setSelected(boolean selected) {
         this.pbSelected = selected;
-        refreshHighlight();
         if (selected) {
-            apMainAnchor.setStyle(apMainAnchor.getStyle() + " -fx-border-color: #FF8201; -fx-border-width: 2;");
+            if (!apMainAnchor.getStyleClass().contains("chip-selected")) {
+                apMainAnchor.getStyleClass().add("chip-selected");
+            }
+        } else {
+            apMainAnchor.getStyleClass().remove("chip-selected");
         }
     }
 }

@@ -6,34 +6,36 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     Created on : Sep 21, 2026, 3:16:45 PM
     Author     : Maynard
 */
-
+/* Chip */
 .chip-container {
-    -fx-background-color: #FFE6B9;
-    -fx-background-radius: 15;
-    -fx-border-color: #FF8201;
-    -fx-border-radius: 15;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 5;
+    -fx-border-color: #CFCFCF;
+    -fx-border-radius: 5;
     -fx-border-width: 1;
     -fx-cursor: hand;
 }
 
 .chip-container:hover {
-    -fx-background-color: #FFDFA0;
-    -fx-border-color: #E67300;
+    -fx-background-color: #EEEEEE;
+    -fx-border-color: #616161;
 }
 
 .chip-container.chip-selected {
-    -fx-background-color: #FF8201;
-    -fx-border-color: #CC6800;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #212121;
+    -fx-border-width: 1.5;
 }
 
 .chip-container.chip-selected .label {
-    -fx-text-fill: white;
+    -fx-text-fill: #000000;
     -fx-font-weight: bold;
 }
 
+/* Remove button */
 .chip-remove-btn {
     -fx-background-color: transparent;
-    -fx-background-radius: 50%;
+    -fx-background-radius: 10;
     -fx-min-width: 20;
     -fx-min-height: 20;
     -fx-max-width: 20;
@@ -50,14 +52,25 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color: rgba(0, 0, 0, 0.3);
 }
 
+/* Table exception row */
 .table-row-cell.row-model-exception {
-    -fx-background-color: #FFF3E0;
+    -fx-background-color: #F2F2F2;
 }
 
 .table-row-cell.row-model-exception:selected {
-    -fx-background-color: #FFCC80;
+    -fx-background-color: #BDBDBD;
 }
 
 .table-row-cell.row-model-exception .table-cell {
-    -fx-text-fill: #8B4000;
+    -fx-text-fill: #212121;
+}
+
+.chip-container.chip-inactive {
+    -fx-background-color: #E0E0E0;
+    -fx-border-color: #9E9E9E;
+}
+
+.chip-container.chip-inactive .label {
+    -fx-text-fill: #757575;
+    -fx-strikethrough: true;
 }

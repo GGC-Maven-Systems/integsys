@@ -332,7 +332,7 @@
                                                       <DatePicker fx:id="dpPromoStart" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                                                       <DatePicker fx:id="dpPromoEnd" editable="false" GridPane.columnIndex="5" GridPane.rowIndex="4" />
                                                       <ComboBox fx:id="cbPromoSource" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                                                      <AnchorPane fx:id="apShopType" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="5">
+                                                      <AnchorPane fx:id="apShopType" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="5">
                                                          <children>
                                                             <GridPane hgap="3.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <columnConstraints>
@@ -357,12 +357,12 @@
                                                       <TextField fx:id="tfReferenceNo" maxHeight="25.0" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                                                       <TextField fx:id="tfSubject" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="10" />
                                                       <TextField fx:id="tfRemarks" maxHeight="25.0" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="11" />
-                                                      <Separator style="-fx-background-color: orange;" GridPane.columnSpan="2147483647" GridPane.rowIndex="12">
+                                                      <Separator style="-fx-background-color: #4D5656;" GridPane.columnSpan="2147483647" GridPane.rowIndex="12">
                                                          <GridPane.margin>
                                                             <Insets left="20.0" right="20.0" />
                                                          </GridPane.margin>
                                                       </Separator>
-                                                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="13">
+                                                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="13">
                                                          <children>
                                                             <GridPane hgap="3.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                               <columnConstraints>
@@ -383,7 +383,7 @@
                                                             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                                          </padding>
                                                       </AnchorPane>
-                                                      <AnchorPane layoutX="140.0" layoutY="217.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="15">
+                                                      <AnchorPane layoutX="140.0" layoutY="217.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="15">
                                                          <children>
                                                             <HBox fx:id="hbArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                          </children>
@@ -438,7 +438,7 @@
                                                                                     <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Brand" />
                                                                                     <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Model" GridPane.rowIndex="1" />
                                                                                     <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Model Exception" GridPane.rowIndex="2" />
-                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4">
+                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="4">
                                                                                        <padding>
                                                                                           <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                                                                        </padding>
@@ -456,7 +456,7 @@
                                                                                           </GridPane>
                                                                                        </children>
                                                                                     </AnchorPane>
-                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="1">
+                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="1">
                                                                                        <padding>
                                                                                           <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                                                                        </padding>
@@ -475,7 +475,7 @@
                                                                                           </GridPane>
                                                                                        </children>
                                                                                     </AnchorPane>
-                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2">
+                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.rowIndex="2">
                                                                                        <GridPane.margin>
                                                                                           <Insets />
                                                                                        </GridPane.margin>
@@ -558,7 +558,7 @@
                                                                                  </rowConstraints>
                                                                                  <children>
                                                                                     <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Give Away" />
-                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #E0E0E0; -fx-border-color: #FF8201; -fx-border-radius: 10; -fx-background-radius: 10;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.vgrow="ALWAYS">
+                                                                                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #FFFFFF; -fx-border-color: #CFCFCF; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="2" GridPane.columnSpan="4" GridPane.vgrow="ALWAYS">
                                                                                        <padding>
                                                                                           <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                                                                        </padding>
@@ -646,9 +646,9 @@
                                     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
                                  </rowConstraints>
                                  <children>
-                                    <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;">
+                                    <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: #4D5656;">
                                        <children>
-                                          <Label alignment="CENTER" contentDisplay="CENTER" text="MECHANICS DETAIL" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <Label alignment="CENTER" contentDisplay="CENTER" text="MECHANICS DETAIL" textAlignment="CENTER" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
@@ -696,9 +696,9 @@
                                                       <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
                                                   </rowConstraints>
                                                    <children>
-                                                      <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="2147483647">
+                                                      <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: #4D5656;" GridPane.columnSpan="2147483647">
                                                          <children>
-                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="PROMOTION DETAIL" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="PROMOTION DETAIL" textAlignment="CENTER" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <font>
                                                                   <Font name="System Bold" size="14.0" />
                                                                </font>
@@ -767,7 +767,7 @@
                                                       <RadioButton fx:id="rbRegistration1" mnemonicParsing="false" text="Yes" GridPane.columnIndex="2" GridPane.rowIndex="11" />
                                                       <RadioButton fx:id="rbInsurance0" mnemonicParsing="false" text="No" GridPane.columnIndex="3" GridPane.rowIndex="10" />
                                                       <RadioButton fx:id="rbRegistration0" mnemonicParsing="false" text="No" GridPane.columnIndex="3" GridPane.rowIndex="11" />
-                                                      <Separator style="-fx-background-color: orange;" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
+                                                      <Separator style="-fx-background-color: #B5B5B5;" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
                                                    </children>
                                                 </GridPane>
                                              </children>
@@ -789,9 +789,9 @@
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                    </rowConstraints>
                                                    <children>
-                                                      <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="2147483647">
+                                                      <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: #4D5656;" GridPane.columnSpan="2147483647">
                                                          <children>
-                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="SALESMAN BENEFITS" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                            <Label alignment="CENTER" contentDisplay="CENTER" text="SALESMAN BENEFITS" textAlignment="CENTER" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <font>
                                                                   <Font name="System Bold" size="14.0" />
                                                                </font>
@@ -843,9 +843,9 @@
                                           <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
-                                          <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: FF8201;" GridPane.columnSpan="2147483647">
+                                          <AnchorPane minHeight="-Infinity" prefHeight="28.0" prefWidth="402.0" style="-fx-background-color: #4D5656;" GridPane.columnSpan="2147483647">
                                              <children>
-                                                <Label alignment="CENTER" contentDisplay="CENTER" text="GIVE AWAY LIST" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <Label alignment="CENTER" contentDisplay="CENTER" text="GIVE AWAY LIST" textAlignment="CENTER" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <font>
                                                       <Font name="System Bold" size="14.0" />
                                                    </font>
