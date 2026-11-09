@@ -916,6 +916,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             if (loGawayRow == null) {
                                 break;
                             }
+                            if (gawayHasSource(loGawayRow)) {
+                                break;   // the giveaway has a source no: it cannot be changed
+                            }
                             poJSON = oSalesController.MCSales().searchSalesGiveAway(loGawayRow.getEntryNo(), lsValuse, lbByCode);
                             if (hasError(poJSON)) {
                                 loadUnitRecord(pnUnitRow);
@@ -1173,6 +1176,9 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     final Model_Sales_Giveaways loGaway = poEditGaway;   // the giveaway that was being edited
                     if (isBlankGiveaway(loGaway)) {
                         break;   // no giveaway chosen on this row yet: nothing to write
+                    }
+                    if (gawayHasSource(loGaway)) {
+                        break;   // the giveaway has a source no: its quantity cannot be changed
                     }
                     int lnQty = parseInt(lsValue.replace(",", ""));   // blank / invalid -> 0
                     if (String.valueOf(lnQty).equals(numText(() -> loGaway.getQuantity()))) {
@@ -2308,6 +2314,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tfGawayIssued.setText(numText(() -> loGaway.getIssued()));
                 tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
             }
+            applyGawayLock(loGaway);   // a giveaway with a source no cannot be edited
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
@@ -2315,22 +2322,42 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
             pbSyncing = lbPrev;
         }
     }
-    /** true when the giveaway row came from a source (quotation / reservation). */
+    /**
+     * true when the giveaway row has a source no (it came from a quotation /
+     * reservation, or from a promo): such a row is read-only.
+     */
     private static boolean gawayHasSource(Model_Sales_Giveaways fo) {
         if (fo == null) {
             return false;
         }
-        for (String lsGetter : SalesTransactionStatic.GAWAY_SOURCE_GETTERS) {
-            try {
-                Object loVal = fo.getClass().getMethod(lsGetter).invoke(fo);
-                return loVal != null && !String.valueOf(loVal).trim().isEmpty();
-            } catch (NoSuchMethodException ex) {
-                // try the next name
-            } catch (Exception ex) {
-                return false;
-            }
+        try {
+            String lsSourceNo = fo.getSourceNo();
+            return lsSourceNo != null && !lsSourceNo.trim().isEmpty();
+        } catch (Exception ex) {
+            return false;
         }
-        return false;
+    }
+
+    // the giveaway fields' own disable flag from the FXML, remembered so unlocking restores it
+    private static final String GAWAY_BASE_DISABLED = "gawayBaseDisabled";
+
+    /**
+     * Locks every giveaway field (barcode, description, remarks, given, issued,
+     * qty) while the selected giveaway has a source no; unlocks them otherwise
+     * (null or a blank row = unlocked). Uses isDisable(), the field's OWN flag,
+     * so the parent anchor being disabled in READY mode is never remembered as
+     * the field's own state.
+     */
+    private void applyGawayLock(Model_Sales_Giveaways foGaway) {
+        final boolean lbLocked = !isBlankGiveaway(foGaway) && gawayHasSource(foGaway);
+        for (TextInputControl loField : poGiveawayFields) {
+            Object loBase = loField.getProperties().get(GAWAY_BASE_DISABLED);
+            if (loBase == null) {
+                loBase = Boolean.valueOf(loField.isDisable());
+                loField.getProperties().put(GAWAY_BASE_DISABLED, loBase);
+            }
+            loField.setDisable(((Boolean) loBase).booleanValue() || lbLocked);
+        }
     }
 
     private static String textOf(Getter fg) {
@@ -2377,6 +2404,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         pbSyncing = true;
         try {
             poGiveawayFields.forEach(TextInputControl::clear);
+            applyGawayLock(null);
         } finally {
             pbSyncing = lbPrev;
         }
@@ -2398,7 +2426,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     tfGawayQty.requestFocus();    // only rows without a source can be edited
                 }
             } else {
-                tfGawayQty.setDisable(false);
+                applyGawayLock(null);
             }
         }
     }
@@ -2603,6 +2631,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                 tblGawayItem.refresh();
                 if (gaway_data.isEmpty()) {
                     pnGawayRow = -1;
+                    applyGawayLock(null);
                     tblGawayItem.setPlaceholder(loading.placeholderLabel);
                 } else {
                     JFXUtil.selectAndFocusRow(tblGawayItem,
@@ -3235,7 +3264,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
         }
         final Model_Sales_Master loMas = master();
         double lnTotal = dbl(() -> loMas.getTransactionTotal());
-        double lnDisc = dbl(() -> loMas.getDiscount());
+        double lnDisc = dbl(() -> oSalesController.MCSales().getTotalDiscount());
         double lnAddDisc = dbl(() -> loMas.getAddDiscount());
         double lnFreight = dbl(() -> loMas.getFreight());
         double lnDue = dbl(() -> loMas.getAmountDue());

@@ -921,6 +921,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             if (loGawayRow == null) {
                                 break;
                             }
+                            if (gawayHasSource(loGawayRow)) {
+                                break;   // the giveaway has a source no: it cannot be changed
+                            }
                             poJSON = oSalesController.MCSales().searchSalesGiveAway(loGawayRow.getEntryNo(), lsValuse, lbByCode);
                             if (hasError(poJSON)) {
                                 loadUnitRecord(pnUnitRow);
@@ -1177,6 +1180,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     final Model_Sales_Giveaways loGaway = poEditGaway;   // the giveaway that was being edited
                     if (isBlankGiveaway(loGaway)) {
                         break;   // no giveaway chosen on this row yet: nothing to write
+                    }
+                    if (gawayHasSource(loGaway)) {
+                        break;   // the giveaway has a source no: its quantity cannot be changed
                     }
                     int lnQty = parseInt(lsValue.replace(",", ""));   // blank / invalid -> 0
                     if (String.valueOf(lnQty).equals(numText(() -> loGaway.getQuantity()))) {
@@ -1527,10 +1533,24 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
-                    pnEditMode = EditMode.UNKNOWN;   // preview only: no new transaction is started
-                    oSalesController.MCSales().initTransaction();   // reset the model BEFORE ClearAll(): its loadSummary() reads the model
-                    ClearAll();                                       // clears the fields and the observable lists
-                    lblStatus.setText("UNKNOWN");
+                    // preview: stay on the saved transaction. Re-open it so the form shows the data as saved,
+                    // and initButton() below returns to the READY buttons (Update / Confirm / Void / History / Close).
+                    String lsSavedTransNo = oSalesController.MCSales().getMaster().getTransactionNo();
+                    if (lsSavedTransNo == null || lsSavedTransNo.trim().isEmpty()) {
+                        pnEditMode = EditMode.UNKNOWN;
+                        oSalesController.MCSales().initTransaction();
+                        ClearAll();
+                        lblStatus.setText("UNKNOWN");
+                        break;
+                    }
+                    poJSON = oSalesController.MCSales().OpenTransaction(lsSavedTransNo);   // same call openFromList() uses
+                    if (hasError(poJSON)) {
+                        break;
+                    }
+                    // mode read BEFORE ClearAll() so it does not recompute (and zero the CWT) on the reopened record
+                    pnEditMode = oSalesController.MCSales().getEditMode();
+                    ClearAll();       // clear every field: reloadRecord() only overwrites the fields it loads
+                    reloadRecord();   // refills every tab, table and the attachments from the saved record
                     break;
                 case "btnApproved":   // "Confirm"
                     if (!ShowMessageFX.YesNo("Do you want to confirm this transaction?", pxeModuleName, null)) {
@@ -2344,6 +2364,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tfGawayIssued.setText(numText(() -> loGaway.getIssued()));
                 tfGawayQty.setText(numText(() -> loGaway.getQuantity()));
             }
+            applyGawayLock(loGaway);   // a giveaway with a source no cannot be edited
         } catch (Exception ex) {
             Logger.getLogger(SalesTransactionsMCPreviewController.class.getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, null);
@@ -2351,22 +2372,42 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
             pbSyncing = lbPrev;
         }
     }
-    /** true when the giveaway row came from a source (quotation / reservation). */
+    /**
+     * true when the giveaway row has a source no (it came from a quotation /
+     * reservation, or from a promo): such a row is read-only.
+     */
     private static boolean gawayHasSource(Model_Sales_Giveaways fo) {
         if (fo == null) {
             return false;
         }
-        for (String lsGetter : SalesTransactionStatic.GAWAY_SOURCE_GETTERS) {
-            try {
-                Object loVal = fo.getClass().getMethod(lsGetter).invoke(fo);
-                return loVal != null && !String.valueOf(loVal).trim().isEmpty();
-            } catch (NoSuchMethodException ex) {
-                // try the next name
-            } catch (Exception ex) {
-                return false;
-            }
+        try {
+            String lsSourceNo = fo.getSourceNo();
+            return lsSourceNo != null && !lsSourceNo.trim().isEmpty();
+        } catch (Exception ex) {
+            return false;
         }
-        return false;
+    }
+
+    // the giveaway fields' own disable flag from the FXML, remembered so unlocking restores it
+    private static final String GAWAY_BASE_DISABLED = "gawayBaseDisabled";
+
+    /**
+     * Locks every giveaway field (barcode, description, remarks, given, issued,
+     * qty) while the selected giveaway has a source no; unlocks them otherwise
+     * (null or a blank row = unlocked). Uses isDisable(), the field's OWN flag,
+     * so the parent anchor being disabled in READY mode is never remembered as
+     * the field's own state.
+     */
+    private void applyGawayLock(Model_Sales_Giveaways foGaway) {
+        final boolean lbLocked = !isBlankGiveaway(foGaway) && gawayHasSource(foGaway);
+        for (TextInputControl loField : poGiveawayFields) {
+            Object loBase = loField.getProperties().get(GAWAY_BASE_DISABLED);
+            if (loBase == null) {
+                loBase = Boolean.valueOf(loField.isDisable());
+                loField.getProperties().put(GAWAY_BASE_DISABLED, loBase);
+            }
+            loField.setDisable(((Boolean) loBase).booleanValue() || lbLocked);
+        }
     }
 
     private static String textOf(Getter fg) {
@@ -2413,6 +2454,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         pbSyncing = true;
         try {
             poGiveawayFields.forEach(TextInputControl::clear);
+            applyGawayLock(null);
         } finally {
             pbSyncing = lbPrev;
         }
@@ -2434,7 +2476,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                     tfGawayQty.requestFocus();    // only rows without a source can be edited
                 }
             } else {
-                tfGawayQty.setDisable(false);
+                applyGawayLock(null);
             }
         }
     }
@@ -2639,6 +2681,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                 tblGawayItem.refresh();
                 if (gaway_data.isEmpty()) {
                     pnGawayRow = -1;
+                    applyGawayLock(null);
                     tblGawayItem.setPlaceholder(loading.placeholderLabel);
                 } else {
                     JFXUtil.selectAndFocusRow(tblGawayItem,
@@ -3271,7 +3314,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         }
         final Model_Sales_Master loMas = master();
         double lnTotal = dbl(() -> loMas.getTransactionTotal());
-        double lnDisc = dbl(() -> loMas.getDiscount());
+        double lnDisc = dbl(() -> oSalesController.MCSales().getTotalDiscount());
         double lnAddDisc = dbl(() -> loMas.getAddDiscount());
         double lnFreight = dbl(() -> loMas.getFreight());
         double lnDue = dbl(() -> loMas.getAmountDue());
