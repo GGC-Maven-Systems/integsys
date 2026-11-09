@@ -946,6 +946,28 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             LoadMaster();          // shows the searched salesman in tfSalesman
                             loadPaymentRecord();   // the credit advisor follows the salesman
                             break;
+                        case "tfSourceNo":
+                        case "tfSourceDesc":
+                            if (!canEdit()) {
+                                break;
+                            }
+                            // searching from the description field is by description (byCode = false); from the source no it is by code
+                            boolean lbSourceByCode = !"tfSourceDesc".equals(lsID);
+                            poJSON = oSalesController.MCSales().searchClientSource(txtInput.getText(), lbSourceByCode);
+                            if (hasError(poJSON)) {
+                                break;
+                            }
+                            LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
+                            LoadClientInfo();   // also fills taCustomerName
+                            // the search may have loaded a source quotation / reservation into the model:
+                            // forget the previous client's selected rows so the table reloads from the first row
+                            pnUnitRow = -1;
+                            pnGawayRow = -1;
+                            loadTableMCItem();
+                            loadTableGiveaways();
+                            loadTableRegAndInsur();
+                            loadPaymentRecord();   // a source quotation also sets the payment form, term, advances...
+                            break;
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
                             poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
@@ -3964,6 +3986,11 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void initOtherButtons() {
         btnAddClient.disableProperty().bind(pbEditable.not());
         btnAddClient1.disableProperty().bind(pbEditable.not());
+        // source no / source desc / salesman are searchable (F3) only while editing a loaded transaction:
+        // with no transaction loaded (or when not editing) they are disabled
+        for (TextField ltfSearch : Arrays.asList(tfSourceNo, tfSourceDesc, tfSalesman)) {
+            ltfSearch.disableProperty().bind(pbEditable.not().or(tfTransNo.textProperty().isEmpty()));
+        }
         btnAddClient.setOnAction(e -> addClient(false));
         btnAddClient1.setOnAction(e -> addClient(true));
         btnNonItemize.setOnAction(e -> showNonItemizeGiveaways());   // read-only list: works in every edit mode
@@ -4116,14 +4143,22 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
     private void LoadMaster() throws GuanzonException, SQLException {
         lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
-        tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
-        tfSourceDesc.setText(oSalesController.MCSales().getMaster().TransactionSource().getSourceName());
+        // textOf() tolerates a missing source (null / exception) so the rest of LoadMaster() still runs
+        tfSourceNo.setText(textOf(() -> master().getSourceNo()));
+        tfSourceDesc.setText(textOf(() -> master().TransactionSource().getSourceName()));
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
         // Salesman: filled from the master (the source's salesman when there is a source). Searchable (F3) whenever editing,
         // with or without a source; otherwise the field is display-only.
         tfSalesman.setText(salesmanName());
         tfSalesman.setEditable(canEdit());
         tfSalesman.setPromptText(canEdit() ? "PRESS F3: Search" : "");
+
+        // source fields: the text was set above from the master; only the edit state / prompt are set here
+        tfSourceDesc.setEditable(canEdit());
+        tfSourceDesc.setPromptText(canEdit() ? "PRESS F3: Search" : "");
+
+        tfSourceNo.setEditable(canEdit());
+        tfSourceNo.setPromptText(canEdit() ? "PRESS F3: Search" : "");
 
         // client type: shows the model's value (the model defaults a new client to Individual) without firing cmb_Changed
         boolean lbPrevType = pbSyncing;
