@@ -885,7 +885,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 switch (lsID) {
                     case "tfDescription":
                         if (lsValue.isEmpty()) {
-                            switch (freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex05()) {
+                            switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex05()) {
                                 case "AddOn":
                                     poController.AddOnList(pnFreebies).setAddOnId("");
                                     break;
@@ -991,8 +991,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             }
             tfBrand.setText(poController.Detail(pnDetail).Brand().getDescription());
             tfModel.setText(poController.Detail(pnDetail).Model().getDescription());
-            tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission()));
-            tfTransmission.setText(poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission());
+            String lsTransmission = "";
+            if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).ModelVariant().getDescription(), null, "")) {
+                lsTransmission = poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission();
+            }
+
+            tfVariant.setText(JFXUtil.concatStrings(poController.Detail(pnDetail).ModelVariant().getDescription(), lsTransmission));
+            tfTransmission.setText(lsTransmission);
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
 //        JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
@@ -1036,7 +1041,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
                 JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
             }
-            switch (addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex08()) {
+            switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, 2)).getIndex08()) {
                 case "AddOn":
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
@@ -1055,6 +1060,33 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    public static int getDetailFilter(ObservableList<?> dataList, int lnpn, int columnIndex, int indexReturnValue) {
+        String compareGetter = String.format("getIndex%02d", columnIndex);
+        String returnGetter = String.format("getIndex%02d", indexReturnValue);
+
+        try {
+            for (Object item : dataList) {
+                Class<?> clazz = item.getClass();
+
+                Object compareValue = clazz.getMethod(compareGetter).invoke(item);
+
+                if (String.valueOf(lnpn).equals(String.valueOf(compareValue))) {
+                    Object result = clazz.getMethod(returnGetter).invoke(item);
+                    if (result == null) {
+                        return 0;
+                    }
+
+                    int value = Integer.parseInt(String.valueOf(result).trim());
+                    return value > 0 ? value - 1 : 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0; // default: not found, null, or not a number
     }
 
     private void loadRecordPricing() {
@@ -1110,7 +1142,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
-            switch (freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex05()) {
+            switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex05()) {
                 case "AddOn":
                     tfDescription.setText(poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName());
                     tfQuantityFreebies.setText(String.valueOf(poController.AddOnList(pnFreebies).getQuantity()));
@@ -1242,7 +1274,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
                             if (!lbisTrue) {
-                                switch (addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex08()) {
+                                switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, 2)).getIndex08()) {
                                     case "AddOn":
                                         if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
                                             int lnRow = rowIndex;
@@ -1329,7 +1361,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             //add identifier by getting its identifying index
-            switch (addOns_data.get(pnFreebies).getIndex08()) {
+            switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, 2)).getIndex08()) {
                 case "AddOn":
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.AddOnList(pnAddOns).getAddOnId(), tfAddOns},
@@ -1367,7 +1399,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             //add identifier by getting its identifying index
-            switch (freebies_data.get(pnFreebies).getIndex05()) {
+            switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex05()) {
                 case "AddOn":
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName(), tfDescription},}, tfQuantityFreebies); // default
@@ -1506,7 +1538,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewAddOns, lnTempRow);
-                                int lnRow = Integer.parseInt(addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex07());
+                                int lnRow = Integer.parseInt(addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, 2)).getIndex07());
                                 pnAddOns = lnRow;
                                 loadRecordAddOns();
                             }
@@ -1590,7 +1622,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewFreebies, lnTempRow);
-                                int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
+                                int lnRow = Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex06());
                                 pnAddOns = lnRow;
                                 loadRecordFreebies();
                             }
@@ -1655,7 +1687,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleQuotation_AddOns selected = (ModelVehicleQuotation_AddOns) tblViewAddOns.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex07());
+                        int lnRow = Integer.parseInt(addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, 2)).getIndex07());
                         pnAddOns = lnRow;
                         loadRecordAddOns();
                         moveNextAddOns(false, false);
@@ -1668,7 +1700,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
                     ModelVehicleQuotation_Freebies selected = (ModelVehicleQuotation_Freebies) tblViewFreebies.getSelectionModel().getSelectedItem();
                     if (selected != null) {
-                        int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
+                        int lnRow = Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex06());
                         pnFreebies = lnRow;
                         loadRecordFreebies();
                         moveNextFreebies(false, false);
