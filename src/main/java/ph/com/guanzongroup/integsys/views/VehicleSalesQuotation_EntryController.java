@@ -1689,14 +1689,15 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0);
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0); //focus
                                     int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
                                     pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, 1));
+                                //lsIdentifier
+                                JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, 1)); //focus
                                 int lnRow = Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex06());
                                 pnAddOns = lnRow;
                                 loadRecordFreebies();
@@ -1778,7 +1779,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
                         pnFreebies = lnRow;
                         loadRecordFreebies();
-                        moveNextFreebies(false, false);
+//                        moveNextFreebies(false, false);
                     }
                 }
             }
