@@ -1241,7 +1241,16 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     switch (colIndex) {
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
-//                            if (!lbisTrue) {
+                            if (!lbisTrue) {
+                                switch (addOns_data.get(pnFreebies).getIndex08()) {
+                                    case "AddOn":
+                                        break;
+                                    case "Freebies":
+                                        break;
+                                    case "Inclusion":
+                                        break;
+                                }
+
 //                                if (!JFXUtil.isObjectEqualTo(poController.AddOnList(rowIndex).getStockId(), null, "")) {
 //                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
 //                                        int lnRow = rowIndex;
@@ -1252,7 +1261,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 //                                } else {
 //                                    poController.AddOnList(rowIndex).setQuantity(0);
 //                                }
-//                            }
+                            }
                             checkedItem.set(rowIndex, lbisTrue ? "1" : "0");
                             //set external temporary data of index to save as reference
                             // if detected unchecked then must update
@@ -1502,7 +1511,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if (pnEditMode == EditMode.READY
                                         && (poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId()))
-                                        && (poController.AddOnList(lnCtr).getAmount() <= 0.00)) {
+                                        && (poController.AddOnList(lnCtr).getAmount() > 0.00)) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1518,7 +1527,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
-                                        && (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        && (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1534,7 +1543,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId()))
-                                        && (poController.InclusionList(lnCtr).getAmount() <= 0.00)) {
+                                        && (poController.InclusionList(lnCtr).getAmount() > 0.00)) {
                                     continue;
                                 }
                                 freebies_data.add(
