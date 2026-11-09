@@ -1036,7 +1036,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
                 JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
             }
-            switch (addOns_data.get(pnAddOns).getIndex08()) {
+            switch (addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex08()) {
                 case "AddOn":
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
@@ -1110,7 +1110,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
-            switch (freebies_data.get(pnDetail).getIndex05()) {
+            switch (freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex05()) {
                 case "AddOn":
                     tfDescription.setText(poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName());
                     tfQuantityFreebies.setText(String.valueOf(poController.AddOnList(pnFreebies).getQuantity()));
@@ -1242,15 +1242,32 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         case 0:
                             poController.AddOnList(rowIndex).setRecordStatus(lbisTrue);
                             if (!lbisTrue) {
-                                switch (addOns_data.get(pnFreebies).getIndex08()) {
+                                switch (addOns_data.get(tblViewAddOns.getSelectionModel().getSelectedIndex()).getIndex08()) {
                                     case "AddOn":
+                                        if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                            int lnRow = rowIndex;
+                                            poController.AddOnList().remove(lnRow);
+                                        } else {
+                                            poController.AddOnList(rowIndex).setQuantity(0);
+                                        }
                                         break;
                                     case "Freebies":
+                                        if (poController.FreebiesList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                            int lnRow = rowIndex;
+                                            poController.FreebiesList().remove(lnRow);
+                                        } else {
+                                            poController.FreebiesList(rowIndex).setQuantity(0);
+                                        }
                                         break;
                                     case "Inclusion":
+                                        if (poController.InclusionList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                            int lnRow = rowIndex;
+                                            poController.InclusionList().remove(lnRow);
+                                        } else {
+                                            poController.InclusionList(rowIndex).setQuantity(0);
+                                        }
                                         break;
                                 }
-
 //                                if (!JFXUtil.isObjectEqualTo(poController.AddOnList(rowIndex).getStockId(), null, "")) {
 //                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
 //                                        int lnRow = rowIndex;
@@ -1410,26 +1427,26 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         try {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadAddOnList();
+                                poController.ReloadFreebiesList();
+                                poController.ReloadInclusionList();
                             }
                             int lnCount = 0;
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
-                                if (pnEditMode == EditMode.READY
-                                        && (poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId()))
-                                        && (poController.AddOnList(lnCtr).getAmount() <= 0.00)) {
+                                if ((poController.AddOnList(lnCtr).getTotalAmount() <= 0.00)) {
                                     continue;
                                 }
+                                checkedItems(lnCount);
                                 lnCount += 1;
-                                checkedItems(lnCtr);
                                 if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
-                                    checkedItem.set(lnCtr, "1");
+                                    checkedItem.set(lnCount, "1");
                                 } else {
-                                    checkedItem.set(lnCtr, "0");
+                                    checkedItem.set(lnCount, "0");
                                 }
 
                                 String lsDescription = poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName();
 
                                 addOns_data.add(
-                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
+                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCount),
                                                 String.valueOf(lnCount),
                                                 getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(lnCtr).getAmount(), false)),
@@ -1439,13 +1456,19 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                         ));
                             }
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
-                                if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
-                                        && (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
+                                if ((poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
                                     continue;
+                                }
+                                checkedItems(lnCount);
+                                lnCount += 1;
+                                if (poController.FreebiesList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
+                                    checkedItem.set(lnCount, "1");
+                                } else {
+                                    checkedItem.set(lnCount, "0");
                                 }
                                 String lsDescription = poController.FreebiesList(lnCtr).Freebie().getDescription();
                                 addOns_data.add(
-                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
+                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCount),
                                                 String.valueOf(lnCount),
                                                 getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(lnCtr).getAmount(), false)),
@@ -1456,13 +1479,19 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
-                                if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId()))
-                                        && (poController.InclusionList(lnCtr).getAmount() <= 0.00)) {
+                                if ((poController.InclusionList(lnCtr).getTotalAmount() <= 0.00)) {
                                     continue;
+                                }
+                                checkedItems(lnCount);
+                                lnCount += 1;
+                                if (poController.InclusionList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
+                                    checkedItem.set(lnCount, "1");
+                                } else {
+                                    checkedItem.set(lnCount, "0");
                                 }
                                 String lsDescription = poController.InclusionList(lnCtr).Inclusion().getDescription();
                                 addOns_data.add(
-                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCtr),
+                                        new ModelVehicleQuotation_AddOns(checkedItem.get(lnCount),
                                                 String.valueOf(lnCount),
                                                 getData(lsDescription),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(lnCtr).getAmount(), false)),
@@ -1505,13 +1534,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         freebies_data.clear();
                         try {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
+                                poController.ReloadAddOnList();
                                 poController.ReloadFreebiesList();
+                                poController.ReloadInclusionList();
                             }
                             int lnCount = 0;
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
-                                if (pnEditMode == EditMode.READY
-                                        && (poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId()))
-                                        && (poController.AddOnList(lnCtr).getAmount() > 0.00)) {
+                                if ((poController.AddOnList(lnCtr).getAmount() > 0.00)) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1526,8 +1555,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
 
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
-                                if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
-                                        && (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)) {
+                                if ((poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1542,8 +1570,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
-                                if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId()))
-                                        && (poController.InclusionList(lnCtr).getAmount() > 0.00)) {
+                                if ((poController.InclusionList(lnCtr).getAmount() > 0.00)) {
                                     continue;
                                 }
                                 freebies_data.add(
