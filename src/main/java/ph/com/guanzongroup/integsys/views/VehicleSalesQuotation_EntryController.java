@@ -921,18 +921,16 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                     case "tfQuantityFreebies":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        if (lsValue.isEmpty()) {
-                            switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex05()) {
-                                case "AddOn":
-                                    poJSON = poController.AddOnList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
-                                    break;
-                                case "Freebies":
-                                    poJSON = poController.FreebiesList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
-                                    break;
-                                case "Inclusion":
-                                    poJSON = poController.InclusionList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
-                                    break;
-                            }
+                        switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, 1)).getIndex05()) {
+                            case "AddOn":
+                                poJSON = poController.AddOnList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
+                                break;
+                            case "Freebies":
+                                poJSON = poController.FreebiesList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
+                                break;
+                            case "Inclusion":
+                                poJSON = poController.InclusionList(pnFreebies).setQuantity(Integer.parseInt(lsValue));
+                                break;
                         }
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -1779,7 +1777,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         int lnRow = Integer.parseInt(freebies_data.get(tblViewFreebies.getSelectionModel().getSelectedIndex()).getIndex06());
                         pnFreebies = lnRow;
                         loadRecordFreebies();
-//                        moveNextFreebies(false, false);
+                        moveNextFreebies(false, false);
                     }
                 }
             }
