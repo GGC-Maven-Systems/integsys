@@ -951,6 +951,28 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                             LoadMaster();          // shows the searched salesman in tfSalesman
                             loadPaymentRecord();   // the credit advisor follows the salesman
                             break;
+                        case "tfSourceNo":
+                        case "tfSourceDesc":
+                            if (!canEdit()) {
+                                break;
+                            }
+                            // searching from the description field is by description (byCode = false); from the source no it is by code
+                            boolean lbSourceByCode = !"tfSourceDesc".equals(lsID);
+                            poJSON = oSalesController.MCSales().searchClientSource(txtInput.getText(), lbSourceByCode);
+                            if (hasError(poJSON)) {
+                                break;
+                            }
+                            LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
+                            LoadClientInfo();   // also fills taCustomerName
+                            // the search may have loaded a source quotation / reservation into the model:
+                            // forget the previous client's selected rows so the table reloads from the first row
+                            pnUnitRow = -1;
+                            pnGawayRow = -1;
+                            loadTableMCItem();
+                            loadTableGiveaways();
+                            loadTableRegAndInsur();
+                            loadPaymentRecord();   // a source quotation also sets the payment form, term, advances...
+                            break;
                         case "tfPaymentCreditAdvisor":
                             // the credit advisor is the salesman of the transaction
                             poJSON = oSalesController.MCSales().searchSalesMan(lsValuse, false);
@@ -1505,9 +1527,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         break;
                     }
                     ShowMessageFX.Information((String) poJSON.get("message"), "Information", null);
-                    ClearAll();                                       // clears the fields and the observable lists
-                    oSalesController.MCSales().initTransaction();
                     pnEditMode = EditMode.UNKNOWN;   // preview only: no new transaction is started
+                    oSalesController.MCSales().initTransaction();   // reset the model BEFORE ClearAll(): its loadSummary() reads the model
+                    ClearAll();                                       // clears the fields and the observable lists
                     lblStatus.setText("UNKNOWN");
                     break;
                 case "btnApproved":   // "Confirm"
@@ -1551,9 +1573,9 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                                 poOnClose.run();
                                 return;
                             }
-                            ClearAll();
-                            oSalesController.MCSales().initTransaction();
                             pnEditMode = EditMode.UNKNOWN;
+                            oSalesController.MCSales().initTransaction();
+                            ClearAll();
                             lblStatus.setText("UNKNOWN");
                             break;
                         }
@@ -1563,6 +1585,11 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
                         if (hasError(poJSON)) {
                             break;
                         }
+                        // clear every field first: reloadRecord() only overwrites the fields it loads, so anything typed in the
+                        // others (client email, co-client contact, giveaway / registration / insurance sections...) would stay.
+                        // The mode is read BEFORE ClearAll() so it does not recompute (and zero the CWT) on the reopened record.
+                        pnEditMode = oSalesController.MCSales().getEditMode();
+                        ClearAll();
                         reloadRecord();   // reads the edit mode first, then refills every tab, table and the attachments
                     }
                     break;
@@ -3366,6 +3393,7 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
         imageView.fitWidthProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.heightProperty()).otherwise(stackPane.widthProperty()).subtract(4));
         imageView.fitHeightProperty().bind(Bindings.when(pbQuarterTurn).then(stackPane.widthProperty()).otherwise(stackPane.heightProperty()).subtract(4));
         initRotateButtons();
+        initAttachmentKeys();
         tfAttachmentNo.setEditable(false);
 
         btnAddAttachment.disableProperty().bind(pbEditable.not());
@@ -3782,6 +3810,45 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     }
 
     // =========================================================================
+    // Attachment keys: LEFT / RIGHT = previous / next attachment, UP = rotate right, DOWN = rotate left
+    // =========================================================================
+    private void initAttachmentKeys() {
+        stackPane.setFocusTraversable(true);
+        // clicking the viewer gives it the keyboard focus
+        stackPane.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> stackPane.requestFocus());
+        // the viewer and the attachment list react to the same keys (a filter runs before the ScrollPane / table use the arrows)
+        stackPane.addEventFilter(KeyEvent.KEY_PRESSED, this::attachmentKeyPressed);
+        tblAttachments.addEventFilter(KeyEvent.KEY_PRESSED, this::attachmentKeyPressed);
+    }
+
+    private void attachmentKeyPressed(KeyEvent event) {
+        if (poAttachFiles.isEmpty() || pnAttachRow < 0) {
+            return;
+        }
+        switch (event.getCode()) {
+            case LEFT:
+                if (pnAttachRow > 0) {
+                    showAttachment(pnAttachRow - 1);
+                }
+                break;
+            case RIGHT:
+                if (pnAttachRow < poAttachFiles.size() - 1) {
+                    showAttachment(pnAttachRow + 1);
+                }
+                break;
+            case UP:
+                rotateAttachment(90);
+                break;
+            case DOWN:
+                rotateAttachment(-90);
+                break;
+            default:
+                return;   // any other key is left alone
+        }
+        event.consume();
+    }
+
+    // =========================================================================
     // Image zoom / pan (a PDF has its own zoom inside showAttachment())
     // =========================================================================
     private Group poViewGroup;                 // wraps imageView; the zoom and the pan are applied to it
@@ -3959,6 +4026,11 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private void initOtherButtons() {
         btnAddClient.disableProperty().bind(pbEditable.not());
         btnAddClient1.disableProperty().bind(pbEditable.not());
+        // source no / source desc / salesman are searchable (F3) only while editing a loaded transaction:
+        // with no transaction loaded (or when not editing) they are disabled
+        for (TextField ltfSearch : Arrays.asList(tfSourceNo, tfSourceDesc, tfSalesman)) {
+            ltfSearch.disableProperty().bind(pbEditable.not().or(tfTransNo.textProperty().isEmpty()));
+        }
         btnAddClient.setOnAction(e -> addClient(false));
         btnAddClient1.setOnAction(e -> addClient(true));
         btnNonItemize.setOnAction(e -> showNonItemizeGiveaways());   // read-only list: works in every edit mode
@@ -4111,14 +4183,22 @@ public class SalesTransactionsMCPreviewController implements Initializable, Scre
     private void LoadMaster() throws GuanzonException, SQLException {
         lblStatus.setText(StatusText(oSalesController.MCSales().getMaster().getTransactionStatus()));
         tfTransNo.setText(oSalesController.MCSales().getMaster().getTransactionNo());
-        tfSourceNo.setText(oSalesController.MCSales().getMaster().getSourceNo());
-        tfSourceDesc.setText(oSalesController.MCSales().getMaster().TransactionSource().getSourceName());
+        // textOf() tolerates a missing source (null / exception) so the rest of LoadMaster() still runs
+        tfSourceNo.setText(textOf(() -> master().getSourceNo()));
+        tfSourceDesc.setText(textOf(() -> master().TransactionSource().getSourceName()));
         setDate(dpTransDate, toLocalDate(oSalesController.MCSales().getMaster().getTransactionDate()));
         // Salesman: filled from the master (the source's salesman when there is a source). Searchable (F3) whenever editing,
         // with or without a source; otherwise the field is display-only.
         tfSalesman.setText(salesmanName());
         tfSalesman.setEditable(canEdit());
         tfSalesman.setPromptText(canEdit() ? "PRESS F3: Search" : "");
+
+        // source fields: the text was set above from the master; only the edit state / prompt are set here
+        tfSourceDesc.setEditable(canEdit());
+        tfSourceDesc.setPromptText(canEdit() ? "PRESS F3: Search" : "");
+
+        tfSourceNo.setEditable(canEdit());
+        tfSourceNo.setPromptText(canEdit() ? "PRESS F3: Search" : "");
 
         // client type: shows the model's value (the model defaults a new client to Individual) without firing cmb_Changed
         boolean lbPrevType = pbSyncing;

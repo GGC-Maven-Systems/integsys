@@ -957,6 +957,7 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                             if (hasError(poJSON)) {
                                 break;
                             }
+                            System.out.println("[SRC] no=" + master().getSourceNo() + " code=" + master().getSourceCode());
                             LoadMaster();       // the search may have set the source (tfSourceNo / tfSourceDesc), status, salesman
                             LoadClientInfo();   // also fills taCustomerName
                             // the search may have loaded a source quotation / reservation into the model:
@@ -1550,9 +1551,12 @@ public class SalesTransactionsMCController implements Initializable, ScreenInter
                     break;
                 case "btnCancel":
                     if (ShowMessageFX.YesNo(SalesTransactionStatic.MSG_CONFIRM_CANCEL, pxeModuleName, null)) {
-                        ClearAll();                                       // clears the fields and the observable lists
-                        oSalesController.MCSales().initTransaction();
+                        // reset the model and the edit mode BEFORE clearing: ClearAll() ends with loadSummary(), which recomputes
+                        // (in UPDATE mode) and re-reads the totals, giveaways and charged amounts from the model. With the old
+                        // transaction still loaded, the payment / summary fields were filled right back after being cleared.
                         pnEditMode = EditMode.UNKNOWN;
+                        oSalesController.MCSales().initTransaction();
+                        ClearAll();                                       // clears the fields and the observable lists
                         lblStatus.setText("UNKNOWN");
                     }
                     break;
