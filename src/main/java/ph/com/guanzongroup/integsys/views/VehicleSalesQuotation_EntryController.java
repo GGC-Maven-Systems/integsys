@@ -1366,12 +1366,34 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!lbisTrue) {
                                 switch (addOns_data.get(rowIndex).getIndex08()) {
                                     case "AddOn":
-                                        if (poController.AddOnList(lnRow).getEditMode() == EditMode.ADDNEW) {
-                                            poController.AddOnList().remove(lnRow);
-                                        } else {
-                                            poController.AddOnList(lnRow).setQuantity(0);
+                                        try {
+                                        if (poController.AddOnList(lnRow).getEditMode() == EditMode.ADDNEW
+                                        || poController.AddOnList(lnRow).getEditMode() == EditMode.UPDATE) {
+                                            String addOnType = poController.AddOnList(lnRow)
+                                                    .AddOnMaster()
+                                                    .AddOnType()
+                                                    .getAddTypeName();
+                                            if (addOnType != null) {
+                                                addOnType = addOnType.toUpperCase();
+                                                if (addOnType.contains("TPL")) {
+                                                    poController.Detail(pnDetail).setTPLAmount(0.0000);
+                                                } else if (addOnType.contains("LTO")) {
+                                                    poController.Detail(pnDetail).setLTOAmount(0.0000);
+                                                } else if (addOnType.contains("COMPREHENSIVE")) {
+                                                    poController.Detail(pnDetail).setComprehensiveAmount(0.0000);
+                                                }
+                                            }
                                         }
-                                        break;
+                                    } catch (SQLException | GuanzonException ex) {
+                                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                        ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                                    }
+                                    if (poController.AddOnList(lnRow).getEditMode() == EditMode.ADDNEW) {
+                                        poController.AddOnList().remove(lnRow);
+                                    } else {
+                                        poController.AddOnList(lnRow).setQuantity(0);
+                                    }
+                                    break;
                                     case "Freebies":
                                         if (poController.FreebiesList(lnRow).getEditMode() == EditMode.ADDNEW) {
                                             poController.FreebiesList().remove(lnRow);
