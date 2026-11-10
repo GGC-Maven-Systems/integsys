@@ -1094,21 +1094,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                     }
                     tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
-                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
+                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
                     break;
                 case "Freebies":
                     JFXUtil.setDisabled(true, tfAddOns);
                     JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.FreebiesList(pnAddOns).Freebie().getDescription());
-                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), true));
+                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.FreebiesList(pnAddOns).getQuantity()));
                     break;
                 case "Inclusion":
                     JFXUtil.setDisabled(true, tfAddOns);
                     JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.InclusionList(pnAddOns).Inclusion().getDescription());
-                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), true));
+                    tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.InclusionList(pnAddOns).getQuantity()));
                     break;
             }
