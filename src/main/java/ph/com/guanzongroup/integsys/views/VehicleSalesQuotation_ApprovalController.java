@@ -139,7 +139,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     private Pagination pgPagination;
 
     LocalDate ValidFrom;
-    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
 
     /**
      * Initializes the controller class.
@@ -394,9 +393,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     case "btnDeduct":
                         openParameter("", "");
                         break;
-                    case "btnDeduct":
-                        openParameter("", "");
-                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -414,41 +410,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ParseException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
-    }
-
-    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
-//        if (lsAddOnTypeId.isEmpty()) {
-//            ShowMessageFX.Warning(null, pxeModuleName, "Blank Add On Type Id, unable to display dialog!");
-//            return;
-//        }
-        String lsFXML = "";
-        Object controller = new Object();
-        VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
-        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
-
-        controller1.setGRider(oApp);
-        controller1.setIndustryID(psIndustryId);
-        controller1.setCompanyID(psCompanyId);
-        controller1.setObject(poController);
-        controller = controller1;
-
-        poJSON = new JSONObject();
-        if (stageDialog != null) {
-            stageDialog.closeDialog();
-            stageDialog = new JFXUtil.StageManager();
-        } else {
-            stageDialog = new JFXUtil.StageManager();
-        }
-        try {
-            stageDialog.setOnHidden(event -> {
-                stageDialog = null;
-                reloadRecords();
-            });
-            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
-        } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }

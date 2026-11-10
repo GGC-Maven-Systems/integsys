@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_AddOns;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -53,6 +54,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
@@ -121,6 +123,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     LocalDate ValidFrom;
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
+
     /**
      * Initializes the controller class.
      */
@@ -292,6 +295,14 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
+    }
+
+    private void reloadRecords() {
+        loadRecordMaster();
+        loadTableAddOns.reload();
+        loadTableFreebies.reload();
+        loadRecordPricing();
+        loadRecordAdditionalInfo();
     }
 
     private void txtField_KeyPressed(KeyEvent event) {
