@@ -1068,7 +1068,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     public void clearTextFields() {
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.clearTextFields(apRemarks, apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
     }
 
     private void resetCheckboxSelection() {

@@ -891,6 +891,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordAddOns();
                     loadTableAddOns.reload();
                 });
             });
@@ -1758,7 +1759,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 tblViewFreebies,
                 freebies_data,
                 () -> {
-                    pbEnteredAddOns = false;
+                    pbEnteredFreebies = false;
                     Platform.runLater(() -> {
                         pbEnteredFreebies = false;
                         freebies_data.clear();
@@ -1958,7 +1959,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     public void clearTextFields() {
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.clearTextFields(apRemarks, apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
     }
 
     private void resetCheckboxSelection() {
@@ -2029,8 +2030,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         boolean lbShow1 = (fnValue == EditMode.UPDATE);
         boolean lbShow2 = (fnValue == EditMode.READY);
         boolean lbShow3 = (fnValue == EditMode.UNKNOWN || fnValue == EditMode.READY);
-
-        JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel, btnDeduct);
+        JFXUtil.setButtonsVisibility(lbShow1 || lbShow2, btnDeduct);
+        JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 

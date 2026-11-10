@@ -76,11 +76,13 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         initTextFields();
         initLoadTable();
         initDetailGrid();
+        initTableOnClick();
         clearTextFields();
-        initButton(pnEditMode);
         Platform.runLater(() -> {
             loadTableDetail.reload();
         });
+        pnEditMode = poController.getEditMode();
+        initButton(pnEditMode);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     public void setCategoryID(String fsValue) {
         //No category
     }
-    
+
     public void setObject(VehicleQuotation object) {
         poController = object;
     }
@@ -143,9 +145,17 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(0.60, () -> {
+                                moveNext(false, true);
+                                pbEntered = false;
+                            });
+                        }
                         break;
                 }
-                loadTableDetail.reload();
+                JFXUtil.runWithDelay(0.50, () -> {
+                    loadTableDetail.reload();
+                });
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -173,6 +183,22 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
 
+    private void initTableOnClick() {
+        tblViewDetail.setOnMouseClicked(event -> {
+            if (details_data.size() > 0) {
+                if (event.getClickCount() == 1) {  // Detect single click (or use another condition for double click)
+                    ModelSalesQuotationDiscount selected = (ModelSalesQuotationDiscount) tblViewDetail.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex04());
+                        pnDetail = lnRow;
+                        loadRecordDetail();
+                        moveNext(false, false);
+                    }
+                }
+            }
+        });
+    }
+
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -196,9 +222,11 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
         protected void onRowMove(TableView<?> currentTable, String currentTableID, boolean isMovedDown) {
-            int newIndex = isMovedDown ? JFXUtil.moveToNextRow(currentTable) : JFXUtil.moveToPreviousRow(currentTable);
+            int newIndex = 0;
             switch (currentTableID) {
                 case "tblViewDetail":
+                    newIndex = !isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex04())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10());
                     if (!details_data.isEmpty()) {
                         pnDetail = newIndex;
                         loadRecordDetail();
@@ -215,7 +243,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             String lsValue = (txtField.getText() == null ? "" : txtField.getText());
             poJSON = new JSONObject();
             int lnRow = pnDetail;
-            
+
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
@@ -236,6 +264,14 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                     }
                     loadTableDetail.reload();
                     break;
+                case UP:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfDiscountType", "tfAmount"}, (Runnable) () -> moveNext(true, true)},});
+                    break;
+                case DOWN:
+                    JFXUtil.altSwitch(lsID, new Object[][]{
+                        {new String[]{"tfDiscountType", "tfAmount"}, (Runnable) () -> moveNext(false, true)},});
+                    break;
                 default:
                     break;
             }
@@ -251,7 +287,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
 
     private void loadRecordDetail() {
         try {
-            if (pnDetail < 0 || pnDetail > poController.getDiscountListCount()- 1) {
+            if (pnDetail < 0 || pnDetail > poController.getDiscountListCount() - 1) {
                 return;
             }
             tfDiscountType.setText(poController.DiscountList(pnDetail).DiscountType().getDiscountDescription());
@@ -260,6 +296,25 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             taRemarks.setText(poController.DiscountList(pnDetail).getRemarks());
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void moveNext(boolean isUp, boolean continueNext) {
+        try {
+            if (continueNext) {
+                apDetail.requestFocus();
+                pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex04())
+                        : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex04());
+            }
+            loadRecordDetail();
+            if (pnDetail < 0 || pnDetail > poController.getDiscountListCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.DiscountList(pnDetail).DiscountType().getDiscountDescription(), tfDiscountType},}, tfAmount); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
@@ -279,6 +334,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                     Platform.runLater(() -> {
                         int lnCtr;
                         details_data.clear();
+                        pbEntered = false;
                         try {
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 poController.ReloadDiscountList();
@@ -313,11 +369,8 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                                 pnDetail = lnRow;
                                 loadRecordDetail();
                             }
-                        } catch (SQLException | GuanzonException ex) {
+                        } catch (SQLException | GuanzonException | CloneNotSupportedException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
                     });
@@ -331,6 +384,6 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         if (fnValue != EditMode.READY) {
             return;
         }
-        JFXUtil.setDisabled(!lbShow, tfDiscountType, tfAmount,taRemarks);
+        JFXUtil.setDisabled(!lbShow, tfDiscountType, tfAmount, taRemarks);
     }
 }

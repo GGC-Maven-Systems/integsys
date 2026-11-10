@@ -834,6 +834,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordAddOns();
                     loadTableAddOns.reload();
                 });
             });
@@ -1697,7 +1698,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 tblViewFreebies,
                 freebies_data,
                 () -> {
-                    pbEnteredAddOns = false;
+                    pbEnteredFreebies = false;
                     Platform.runLater(() -> {
                         pbEnteredFreebies = false;
                         freebies_data.clear();
@@ -1816,7 +1817,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     public void clearTextFields() {
         resetCheckboxSelection();
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
+        JFXUtil.clearTextFields(apRemarks, apMaster, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies);
     }
 
     private void resetCheckboxSelection() {
@@ -1879,7 +1880,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         disableRowCheckbox.set(addOns_data.isEmpty());
-        JFXUtil.setButtonsVisibility(!lbShow1, btnNew, btnDeduct);
+        JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
+        JFXUtil.setButtonsVisibility(lbShow1 || lbShow2, btnDeduct);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
