@@ -1074,21 +1074,20 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
             }
-            if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
-                return;
-            }
+
             poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
-
-            if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
-                JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
-            } else {
-                JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
-            }
+            JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
             switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2)).getIndex08()) {
                 case "AddOn":
+                    if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
+                    if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    }
                     if (lbShow1) {
                         if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().getAddOnId(), null, "")) {
                             JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
@@ -1102,15 +1101,30 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
                     break;
                 case "Freebies":
-                    JFXUtil.setDisabled(true, tfAddOns);
-                    JFXUtil.setDisabled(false, tfAccessories);
+                    if (pnAddOns < 0 || pnAddOns > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
+                    if (poController.FreebiesList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    } else {
+                        JFXUtil.setDisabled(true, tfAddOns);
+                        JFXUtil.setDisabled(false, tfAccessories);
+                    }
+
                     tfAccessories.setText(poController.FreebiesList(pnAddOns).Freebie().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.FreebiesList(pnAddOns).getQuantity()));
                     break;
                 case "Inclusion":
-                    JFXUtil.setDisabled(true, tfAddOns);
-                    JFXUtil.setDisabled(false, tfAccessories);
+                    if (pnAddOns < 0 || pnAddOns > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
+                    if (poController.InclusionList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    } else {
+                        JFXUtil.setDisabled(true, tfAddOns);
+                        JFXUtil.setDisabled(false, tfAccessories);
+                    }
                     tfAccessories.setText(poController.InclusionList(pnAddOns).Inclusion().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.InclusionList(pnAddOns).getQuantity()));
@@ -1225,24 +1239,33 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private void loadRecordFreebies() {
         JFXUtil.clearTextFields(apFreebies);
         try {
-            if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
-                return;
-            }
-            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
 
+//            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
             //identifier 2
             switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                 case "AddOn":
+                    if (pnFreebies < 0 || pnFreebies > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.AddOnList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName());
                     tfQuantityFreebies.setText(String.valueOf(poController.AddOnList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.AddOnList(pnFreebies).getRecordStatus());
                     break;
                 case "Freebies":
+                    if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.AddOnList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.FreebiesList(pnFreebies).Freebie().getDescription());
                     tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.FreebiesList(pnFreebies).getRecordStatus());
                     break;
                 case "Inclusion":
+                    if (pnFreebies < 0 || pnFreebies > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.InclusionList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.InclusionList(pnFreebies).Inclusion().getDescription());
                     tfQuantityFreebies.setText(String.valueOf(poController.InclusionList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.InclusionList(pnFreebies).getRecordStatus());
