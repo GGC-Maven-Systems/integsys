@@ -59,7 +59,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnOkay, btnClose;
+    private Button btnClose;
     @FXML
     private TextField tfDiscountType, tfAmount;
     @FXML
@@ -292,7 +292,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                                 lnCount += 1;
                                 details_data.add(
                                         new ModelSalesQuotationDiscount(String.valueOf(lnCount),
-                                                poController.DiscountList(lnCtr).getDiscountType(),
+                                                poController.DiscountList(lnCtr).DiscountType().getDiscountDescription(),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(lnCtr).getDiscountAmount(), false)),
                                                 String.valueOf(lnCtr)
                                         ));
