@@ -139,6 +139,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     private Pagination pgPagination;
 
     LocalDate ValidFrom;
+    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
 
     /**
      * Initializes the controller class.
@@ -393,6 +394,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     case "btnDeduct":
                         openParameter("", "");
                         break;
+                    case "btnDeduct":
+                        openParameter("", "");
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -410,6 +414,41 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         } catch (ParseException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
+    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+//        if (lsAddOnTypeId.isEmpty()) {
+//            ShowMessageFX.Warning(null, pxeModuleName, "Blank Add On Type Id, unable to display dialog!");
+//            return;
+//        }
+        String lsFXML = "";
+        Object controller = new Object();
+        VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
+
+        controller1.setGRider(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
+        controller1.setObject(poController);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageDialog != null) {
+            stageDialog.closeDialog();
+            stageDialog = new JFXUtil.StageManager();
+        } else {
+            stageDialog = new JFXUtil.StageManager();
+        }
+        try {
+            stageDialog.setOnHidden(event -> {
+                stageDialog = null;
+                reloadRecords();
+            });
+            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
+        } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
@@ -1396,20 +1435,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                         }
                                         break;
                                 }
-                                checkedItem.size();
                                 int index = Integer.parseInt(String.valueOf(rowIndex));
                                 checkedItem.remove(index);
-                                checkedItem.size();
-//                                if (!JFXUtil.isObjectEqualTo(poController.AddOnList(rowIndex).getStockId(), null, "")) {
-//                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
-//                                        int lnRow = rowIndex;
-//                                        poController.AddOnList().remove(lnRow);
-//                                    } else {
-//                                        poController.AddOnList(rowIndex).setQuantity(0);
-//                                    }
-//                                } else {
-//                                    poController.AddOnList(rowIndex).setQuantity(0);
-//                                }
                             }
 
                             pnAddOns = rowIndex;
@@ -1523,103 +1550,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     public boolean isContainsChecked() {
         return checkedItem != null && checkedItem.contains("1");
-    }
-
-    private void processAction(String identifier, String lsValue) {
-        boolean lbcb = false;
-        String lsMessage = "";
-        lsMessage = "remove";
-        switch (identifier) {
-            case "cbActive":
-                lbcb = lsValue.equals("1");
-                lsMessage = "activate/deactivate";
-                break;
-            case "tfAmount":
-                lsMessage = "change amount of the";
-                break;
-        }
-
-        if (checkedItem.stream().anyMatch("1"::equals)) {
-        } else {
-            ShowMessageFX.Warning(null, pxeModuleName, "No items were selected to " + lsMessage + ".");
-            return;
-        }
-        if (!ShowMessageFX.OkayCancel(null, pxeModuleName, "Are you sure you want to " + lsMessage + " selected item/s?")) {
-            return;
-        }
-        String firstValue = null;
-        boolean isConsistent = true;
-        checkedItems.clear();
-        List<Integer> listCount = new ArrayList<>();
-        for (Object item : tblViewAddOns.getItems()) {
-            ModelVehicleQuotation_AddOns item1 = (ModelVehicleQuotation_AddOns) item;
-            String lschecked = item1.getIndex01();
-            int lnCtr = Integer.valueOf(item1.getIndex07());
-            if (lschecked.equals("1")) {
-                listCount.add(Integer.parseInt(item1.getIndex07()));
-                String currentValue = item1.getIndex09();
-                // checkedItems.add();
-                switch (identifier) {
-                    case "cbActive":
-                        if (firstValue == null) {
-                            // First value found
-                            firstValue = currentValue;
-                        } else {
-                            // Compare with the first value
-                            if (!Objects.equals(firstValue, currentValue)) {
-                                isConsistent = false;
-                                ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously update different statuses");
-                                return;
-                            }
-                        }
-                        break;
-                    case "tfAmount":
-                        if (firstValue == null) {
-                            // First value found
-                            firstValue = currentValue;
-                        } else {
-                            // Compare with the first value
-                            if (!Objects.equals(firstValue, currentValue)) {
-                                isConsistent = false;
-                                ShowMessageFX.Warning(null, pxeModuleName, "Unable to simultaneously update with an inactive status included");
-                                return;
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-        if (checkedItem.isEmpty()) {
-            return;
-        }
-
-        switch (identifier) {
-            case "cbActive":
-                if (isConsistent) {
-                    for (int i = 0; i < listCount.size(); i++) {
-                        int number = listCount.get(i);
-                        poController.Detail(number).setRecordStatus(lbcb);
-                    }
-                }
-                break;
-            case "tfAmount":
-                if (isConsistent) {
-                    for (int i = 0; i < listCount.size(); i++) {
-                        int number = listCount.get(i);
-                        if (poController.Detail(number).getEditMode() == EditMode.UPDATE
-                                && JFXUtil.isObjectEqualTo(poController.Detail(number).getRecordStatus(), RecordStatus.INACTIVE)) {
-                            continue;
-                        }
-                        lsValue = JFXUtil.removeComma(lsValue);
-//                        poController.Detail(number).setAmount(Double.parseDouble(lsValue));
-                    }
-                }
-                break;
-        }
-
-        resetCheckboxSelection();
-        pnEditMode = poController.getEditMode();
-        loadTableAddOns.reload();
     }
 
     public void retrieveVehicleSalesQuotation() {
@@ -1999,11 +1929,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 }
             }
             reloadRecords();
-        } catch (CloneNotSupportedException | SQLException | GuanzonException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (ScriptException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
