@@ -32,7 +32,6 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
-import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.model.ModelSalesQuotationDiscount;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
