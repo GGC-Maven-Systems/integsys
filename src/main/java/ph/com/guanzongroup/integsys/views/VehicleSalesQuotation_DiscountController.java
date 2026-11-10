@@ -320,8 +320,8 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     }
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblNo);
-        JFXUtil.setColumnRight(tblDiscountType, tblAmount);
+        JFXUtil.setColumnCenter(tblDiscountType, tblNo);
+        JFXUtil.setColumnRight(tblAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);;
     }

@@ -570,7 +570,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfQuantityFreebies);
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    tfQuantityFreebies.requestFocus();
+                                });
                             }
                             loadTableFreebies.reload();
                             loadRecordPricing();

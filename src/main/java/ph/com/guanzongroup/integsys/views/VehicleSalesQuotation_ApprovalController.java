@@ -615,7 +615,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
-                                JFXUtil.textFieldMoveNext(tfQuantityFreebies);
+                                JFXUtil.runWithDelay(.6, () -> {
+                                    tfQuantityFreebies.requestFocus();
+                                });
                             }
                             loadTableFreebies.reload();
                             loadRecordPricing();
