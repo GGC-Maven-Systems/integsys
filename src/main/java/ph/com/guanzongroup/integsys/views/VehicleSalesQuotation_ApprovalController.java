@@ -583,6 +583,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
                             loadTableAddOns.reload();
+                            loadRecordPricing();
                             break;
                         case "tfAccessories":
                             poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, false);
@@ -592,6 +593,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
                             loadTableAddOns.reload();
+                            loadRecordPricing();
                             break;
 
                         //apAdditionalInfo
@@ -909,28 +911,28 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfTPL":
+                    case "tfTPLAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setTPLAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfComprehensive":
+                    case "tfComprehensiveAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setComprehensiveAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfLTO":
+                    case "tfLTOAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setLTOAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfCHMODocStmp":
+                    case "tfCHMODocStamp":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setCHMOAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -1190,6 +1192,10 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             tfLTOAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getLTOAmount().doubleValue(), true));
             tfCHMODocStamp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCHMOAmount().doubleValue(), true));
             tfTotalDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDiscount().doubleValue(), false));
+
+            tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
+            tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
