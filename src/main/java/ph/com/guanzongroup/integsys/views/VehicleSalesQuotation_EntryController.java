@@ -540,7 +540,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadTableAddOns.reload();
                             break;
                         case "tfAccessories":
-                            poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, true);
+                            poJSON = poController.SearchVehicleAddOn(lsValue, false, pnAddOns, false);
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             } else {
