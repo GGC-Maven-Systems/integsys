@@ -409,6 +409,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         try {
             stageDialog.setOnHidden(event -> {
                 stageDialog = null;
+                reloadRecords();
             });
             stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
         } catch (IOException ex) {
@@ -1076,20 +1077,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
-//            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
-//                    && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
-//                JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
-//            } else if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
-//                JFXUtil.setDisabled(true, tfAddOns);
-//                JFXUtil.setDisabled(false, tfAccessories);
-//                tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
-//            } else {
-//                if (lbShow1) {
-//                    JFXUtil.setDisabled(false, tfAddOns);
-//                    JFXUtil.setDisabled(true, tfAccessories);
-//                }
-//                tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
-//            }
+
             if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
                 JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
             } else {
@@ -1193,7 +1181,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfComprehensiveAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getComprehensiveAmount().doubleValue(), true));
             tfLTOAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getLTOAmount().doubleValue(), true));
             tfCHMODocStamp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCHMOAmount().doubleValue(), true));
-            tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+            tfTotalDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDiscount().doubleValue(), false));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

@@ -132,9 +132,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     @FXML
     private TableView tblViewAddOns, tblViewFreebies, tblViewMain;
     @FXML
-    private CheckBox cbSelectAll, cbActive;
-    @FXML
     private TableColumn tblNoAddOns, tblDescriptionAddOns, tblAmount, tblQuantityAddOns, tblTotal, tblNoFreebies, tblDescriptionFreebies, tblQuantityFreebies, tblNoMain, tblDate, tblTransactionNo, tblClient;
+    @FXML
+    private CheckBox cbActive;
     @FXML
     private Pagination pgPagination;
 
@@ -437,6 +437,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         try {
             stageDialog.setOnHidden(event -> {
                 stageDialog = null;
+                reloadRecords();
             });
             stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
         } catch (IOException ex) {
@@ -1118,10 +1119,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         try {
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-                JFXUtil.setDisabled(true, cbSelectAll);
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-                JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
             }
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
@@ -1130,20 +1129,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
-//            if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")
-//                    && JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getStockId(), null, "")) {
-//                JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
-//            } else if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).getAddOnId(), null, "")) {
-//                JFXUtil.setDisabled(true, tfAddOns);
-//                JFXUtil.setDisabled(false, tfAccessories);
-//                tfAccessories.setText(poController.AddOnList(pnAddOns).Inventory().getDescription());
-//            } else {
-//                if (lbShow1) {
-//                    JFXUtil.setDisabled(false, tfAddOns);
-//                    JFXUtil.setDisabled(true, tfAccessories);
-//                }
-//                tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
-//            }
+
             if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
                 JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
             } else {
@@ -1151,24 +1137,28 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             }
             switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2)).getIndex08()) {
                 case "AddOn":
-//                    if (lbShow1) {
-//                        JFXUtil.setDisabled(false, tfAddOns);
-//                        JFXUtil.setDisabled(true, tfAccessories);
-//                    }
+                    if (lbShow1) {
+                        if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().getAddOnId(), null, "")) {
+                            JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
+                        } else {
+                            JFXUtil.setDisabled(false, tfAddOns);
+                            JFXUtil.setDisabled(true, tfAccessories);
+                        }
+                    }
                     tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
                     break;
                 case "Freebies":
-//                    JFXUtil.setDisabled(true, tfAddOns);
-//                    JFXUtil.setDisabled(false, tfAccessories);
+                    JFXUtil.setDisabled(true, tfAddOns);
+                    JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.FreebiesList(pnAddOns).Freebie().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.FreebiesList(pnAddOns).getQuantity()));
                     break;
                 case "Inclusion":
-//                    JFXUtil.setDisabled(true, tfAddOns);
-//                    JFXUtil.setDisabled(false, tfAccessories);
+                    JFXUtil.setDisabled(true, tfAddOns);
+                    JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.InclusionList(pnAddOns).Inclusion().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.InclusionList(pnAddOns).getQuantity()));
@@ -1199,7 +1189,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             tfComprehensiveAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getComprehensiveAmount().doubleValue(), true));
             tfLTOAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getLTOAmount().doubleValue(), true));
             tfCHMODocStamp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCHMOAmount().doubleValue(), true));
-            tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+            tfTotalDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDiscount().doubleValue(), false));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1267,49 +1257,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         if (source instanceof CheckBox) {
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
-                case "cbSelectAll": // this is the id
-                    //set to 1 all of column 2 row data value to enable checked
-                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
-                        switch (addOns_data.get(lnCtr).getIndex08()) {
-                            case "AddOn":
-                                if (checkedBox.isSelected()) {
-                                    poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    poController.AddOnList(lnCtr).setQuantity(0);
-                                    poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                            case "Freebies":
-                                if (checkedBox.isSelected()) {
-                                    poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    poController.FreebiesList(lnCtr).setQuantity(0);
-                                    poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                            case "Inclusion":
-                                if (checkedBox.isSelected()) {
-                                    poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    poController.InclusionList(lnCtr).setQuantity(0);
-                                    poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                        }
-
-                    }
-                    loadRecordAddOns();
-                    loadTableAddOns.reload();
-                    loadRecordAddOns();
-                    loadRecordPricing();
-                    loadRecordAdditionalInfo();
-                    break;
                 case "cbActive":
                     switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                         case "AddOn":
@@ -1465,13 +1412,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 //                                }
                             }
 
-                            //set external temporary data of index to save as reference
-                            // if detected unchecked then must update
-                            if (!checkedItem.isEmpty() && checkedItem.stream().allMatch(item -> "1".equals(item))) {
-                                cbSelectAll.setSelected(true);
-                            } else {
-                                cbSelectAll.setSelected(false);
-                            }
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
                                 loadTableAddOns.reload();
@@ -2100,7 +2040,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     private void resetCheckboxSelection() {
-        cbSelectAll.setSelected(false);
         if (!checkedItem.isEmpty()) {
             checkedItem.clear();
         }
