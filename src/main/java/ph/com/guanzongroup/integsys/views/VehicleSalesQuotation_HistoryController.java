@@ -570,24 +570,33 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     private void loadRecordFreebies() {
         JFXUtil.clearTextFields(apFreebies);
         try {
-            if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
-                return;
-            }
-            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
 
+//            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
             //identifier 2
             switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                 case "AddOn":
+                    if (pnFreebies < 0 || pnFreebies > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.AddOnList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName());
                     tfQuantityFreebies.setText(String.valueOf(poController.AddOnList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.AddOnList(pnFreebies).getRecordStatus());
                     break;
                 case "Freebies":
+                    if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.AddOnList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.FreebiesList(pnFreebies).Freebie().getDescription());
                     tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.FreebiesList(pnFreebies).getRecordStatus());
                     break;
                 case "Inclusion":
+                    if (pnFreebies < 0 || pnFreebies > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
+                    JFXUtil.setDisabled(poController.InclusionList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.InclusionList(pnFreebies).Inclusion().getDescription());
                     tfQuantityFreebies.setText(String.valueOf(poController.InclusionList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.InclusionList(pnFreebies).getRecordStatus());
@@ -679,24 +688,31 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         : Integer.parseInt(addOns_data.get(getDetailFilter(addOns_data, lnNum, 7, lsTypeAddOns, 8, 2)).getIndex07());
             }
             loadRecordAddOns();
-            if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
-                return;
-            }
+
             //add identifier by getting its identifying index
             switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2)).getIndex08()) {
                 case "AddOn":
+                    if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.AddOnList(pnAddOns).getAddOnId(), tfAddOns},
                         {poController.AddOnList(pnAddOns).AddOnMaster().getAmount(), tfAmount},
                         {poController.AddOnList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
                     break;
                 case "Freebies":
+                    if (pnAddOns < 0 || pnAddOns > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.FreebiesList(pnAddOns).Freebie().getDescription(), tfAddOns},
                         {poController.FreebiesList(pnAddOns).getAmount(), tfAmount},
                         {poController.FreebiesList(pnAddOns).getQuantity(), tfQuantity},}, tfQuantity); // default
                     break;
                 case "Inclusion":
+                    if (pnAddOns < 0 || pnAddOns > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.InclusionList(pnAddOns).Inclusion().getDescription(), tfAddOns},
                         {poController.InclusionList(pnAddOns).getAmount(), tfAmount},
@@ -722,20 +738,26 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         : Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, lnNum, 6, lsTypeFreebies, 5, 1)).getIndex06());
             }
             loadRecordFreebies();
-            if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
-                return;
-            }
             //add identifier by getting its identifying index
             switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                 case "AddOn":
+                    if (pnFreebies < 0 || pnFreebies > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.AddOnList(pnFreebies).AddOnMaster().AddOnType().getAddTypeName(), tfDescription},}, tfQuantityFreebies); // default
                     break;
                 case "Freebies":
+                    if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.FreebiesList(pnFreebies).Freebie().getDescription(), tfDescription},}, tfQuantityFreebies); // default
                     break;
                 case "Inclusion":
+                    if (pnFreebies < 0 || pnFreebies > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
                     JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
                         {poController.InclusionList(pnFreebies).Inclusion().getDescription(), tfDescription},}, tfQuantityFreebies); // default
                     break;
