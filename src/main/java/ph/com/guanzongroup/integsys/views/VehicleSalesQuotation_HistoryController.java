@@ -535,11 +535,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             tfComprehensiveAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getComprehensiveAmount().doubleValue(), true));
             tfLTOAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getLTOAmount().doubleValue(), true));
             tfCHMODocStamp.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCHMOAmount().doubleValue(), true));
+            JFXUtil.setVisibility(poController.getTotalDiscount().doubleValue() > 0.00, tfTotalDiscount, lblTotalDiscount);
             tfTotalDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDiscount().doubleValue(), false));
 
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
-
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
