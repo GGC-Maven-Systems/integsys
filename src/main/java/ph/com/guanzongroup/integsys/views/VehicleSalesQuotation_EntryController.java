@@ -396,6 +396,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         controller1.setGRider(oApp);
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
+        controller1.setObject(poController);
         controller = controller1;
 
         poJSON = new JSONObject();
@@ -1437,8 +1438,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         try {
             if (continueNext) {
                 apAddOns.requestFocus();
-                pnAddOns = isUp ? Integer.parseInt(addOns_data.get(JFXUtil.moveToPreviousRow(tblViewAddOns)).getIndex07())
-                        : Integer.parseInt(addOns_data.get(JFXUtil.moveToNextRow(tblViewAddOns)).getIndex07());
+                int lnNumber = isUp ? JFXUtil.moveToPreviousRow(tblViewAddOns)
+                        : JFXUtil.moveToNextRow(tblViewAddOns);
+                lsTypeAddOns = addOns_data.get(lnNumber).getIndex08();
+                int lnNum = Integer.parseInt(addOns_data.get(lnNumber).getIndex07());
+                pnAddOns = isUp ? Integer.parseInt(addOns_data.get(getDetailFilter(addOns_data, lnNum, 7, lsTypeAddOns, 8, 2)).getIndex07())
+                        : Integer.parseInt(addOns_data.get(getDetailFilter(addOns_data, lnNum, 7, lsTypeAddOns, 8, 2)).getIndex07());
             }
             loadRecordAddOns();
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
