@@ -573,6 +573,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 JFXUtil.textFieldMoveNext(tfQuantityFreebies);
                             }
                             loadTableFreebies.reload();
+                            loadRecordPricing();
                             break;
                     }
                     break;
@@ -1168,6 +1169,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+
+            JFXUtil.setDisabled(poController.isDisable("LTO"), tfLTOAmount);
+            JFXUtil.setDisabled(poController.isDisable("TPL"), tfTPLAmount);
+            JFXUtil.setDisabled(poController.isDisable("Comprehensive"), tfComprehensiveAmount);
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
             if (!lbIsDiscountNone) {
 //                tfTotalDiscount.setText(poController.get);
@@ -1874,7 +1879,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         disableRowCheckbox.set(addOns_data.isEmpty());
-        JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
+        JFXUtil.setButtonsVisibility(!lbShow1, btnNew, btnDeduct);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);

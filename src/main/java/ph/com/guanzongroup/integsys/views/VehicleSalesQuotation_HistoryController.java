@@ -1126,7 +1126,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void initButton(int fnValue) {
         boolean lbShow2 = fnValue == EditMode.READY;
-        JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint);
+        JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint, btnDeduct);
 
         JFXUtil.setDisabled(true, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
 
