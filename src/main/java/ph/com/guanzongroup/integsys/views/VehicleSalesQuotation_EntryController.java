@@ -1271,8 +1271,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
                                     checkedItem.set(lnCtr, "1");
                                 } else {
-                                    poController.AddOnList(lnCtr).setQuantity(0);
-                                    poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    if (poController.AddOnList(lnCtr).getEditMode() == EditMode.ADDNEW) {
+                                        poController.AddOnList().remove(lnCtr);
+                                    } else {
+                                        poController.AddOnList(lnCtr).setQuantity(0);
+                                        poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    }
                                     checkedItem.set(lnCtr, "0");
                                 }
                                 break;
@@ -1281,8 +1285,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
                                     checkedItem.set(lnCtr, "1");
                                 } else {
-                                    poController.FreebiesList(lnCtr).setQuantity(0);
-                                    poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    if (poController.FreebiesList(lnCtr).getEditMode() == EditMode.ADDNEW) {
+                                        poController.FreebiesList().remove(lnCtr);
+                                    } else {
+                                        poController.FreebiesList(lnCtr).setQuantity(0);
+                                        poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    }
                                     checkedItem.set(lnCtr, "0");
                                 }
                                 break;
@@ -1291,8 +1299,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
                                     checkedItem.set(lnCtr, "1");
                                 } else {
-                                    poController.InclusionList(lnCtr).setQuantity(0);
-                                    poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    if (poController.InclusionList(lnCtr).getEditMode() == EditMode.ADDNEW) {
+                                        poController.InclusionList().remove(lnCtr);
+                                    } else {
+                                        poController.InclusionList(lnCtr).setQuantity(0);
+                                        poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
+                                    }
                                     checkedItem.set(lnCtr, "0");
                                 }
                                 break;
@@ -1902,6 +1914,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         disableRowCheckbox.set(addOns_data.isEmpty());
+        JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
