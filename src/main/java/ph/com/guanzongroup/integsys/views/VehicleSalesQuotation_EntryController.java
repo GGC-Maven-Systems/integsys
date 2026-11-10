@@ -1098,24 +1098,28 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             }
             switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2)).getIndex08()) {
                 case "AddOn":
-//                    if (lbShow1) {
-//                        JFXUtil.setDisabled(false, tfAddOns);
-//                        JFXUtil.setDisabled(true, tfAccessories);
-//                    }
+                    if (lbShow1) {
+                        if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().getAddOnId(), null, "")) {
+                            JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
+                        } else {
+                            JFXUtil.setDisabled(false, tfAddOns);
+                            JFXUtil.setDisabled(true, tfAccessories);
+                        }
+                    }
                     tfAddOns.setText(poController.AddOnList(pnAddOns).AddOnMaster().AddOnType().getAddTypeName());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.AddOnList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
                     break;
                 case "Freebies":
-//                    JFXUtil.setDisabled(true, tfAddOns);
-//                    JFXUtil.setDisabled(false, tfAccessories);
+                    JFXUtil.setDisabled(true, tfAddOns);
+                    JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.FreebiesList(pnAddOns).Freebie().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.FreebiesList(pnAddOns).getQuantity()));
                     break;
                 case "Inclusion":
-//                    JFXUtil.setDisabled(true, tfAddOns);
-//                    JFXUtil.setDisabled(false, tfAccessories);
+                    JFXUtil.setDisabled(true, tfAddOns);
+                    JFXUtil.setDisabled(false, tfAccessories);
                     tfAccessories.setText(poController.InclusionList(pnAddOns).Inclusion().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), true));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.InclusionList(pnAddOns).getQuantity()));
