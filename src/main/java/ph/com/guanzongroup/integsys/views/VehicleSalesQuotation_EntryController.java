@@ -124,9 +124,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     @FXML
     private TableView tblViewAddOns, tblViewFreebies;
     @FXML
-    private CheckBox cbSelectAll, cbActive;
-    @FXML
     private TableColumn tblNoAddOns, tblDescriptionAddOns, tblAmount, tblQuantityAddOns, tblTotal, tblNoFreebies, tblDescriptionFreebies, tblQuantityFreebies;
+    @FXML
+    private CheckBox cbActive;
 
     LocalDate ValidFrom;
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
@@ -1065,10 +1065,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         try {
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-                JFXUtil.setDisabled(true, cbSelectAll);
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-                JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
             }
             if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
                 return;
@@ -1262,61 +1260,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         if (source instanceof CheckBox) {
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
-                case "cbSelectAll": // this is the id
-                    //set to 1 all of column 2 row data value to enable checked
-                    for (int lnCtr = 0; lnCtr < checkedItem.size(); lnCtr++) {
-                        switch (addOns_data.get(lnCtr).getIndex08()) {
-                            case "AddOn":
-                                if (checkedBox.isSelected()) {
-                                    poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    if (poController.AddOnList(lnCtr).getEditMode() == EditMode.ADDNEW) {
-                                        poController.AddOnList().remove(lnCtr);
-                                    } else {
-                                        poController.AddOnList(lnCtr).setQuantity(0);
-                                        poController.AddOnList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    }
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                            case "Freebies":
-                                if (checkedBox.isSelected()) {
-                                    poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    if (poController.FreebiesList(lnCtr).getEditMode() == EditMode.ADDNEW) {
-                                        poController.FreebiesList().remove(lnCtr);
-                                    } else {
-                                        poController.FreebiesList(lnCtr).setQuantity(0);
-                                        poController.FreebiesList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    }
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                            case "Inclusion":
-                                if (checkedBox.isSelected()) {
-                                    poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    checkedItem.set(lnCtr, "1");
-                                } else {
-                                    if (poController.InclusionList(lnCtr).getEditMode() == EditMode.ADDNEW) {
-                                        poController.InclusionList().remove(lnCtr);
-                                    } else {
-                                        poController.InclusionList(lnCtr).setQuantity(0);
-                                        poController.InclusionList(lnCtr).setRecordStatus(checkedBox.isSelected());
-                                    }
-                                    checkedItem.set(lnCtr, "0");
-                                }
-                                break;
-                        }
-
-                    }
-                    loadRecordAddOns();
-                    loadTableAddOns.reload();
-                    loadRecordAddOns();
-                    loadRecordPricing();
-                    loadRecordAdditionalInfo();
-                    break;
                 case "cbActive":
                     switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                         case "AddOn":
@@ -1459,24 +1402,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 int index = Integer.parseInt(String.valueOf(rowIndex));
                                 checkedItem.remove(index);
                                 checkedItem.size();
-//                                if (!JFXUtil.isObjectEqualTo(poController.AddOnList(rowIndex).getStockId(), null, "")) {
-//                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
-//                                        int lnRow = rowIndex;
-//                                        poController.AddOnList().remove(lnRow);
-//                                    } else {
-//                                        poController.AddOnList(rowIndex).setQuantity(0);
-//                                    }
-//                                } else {
-//                                    poController.AddOnList(rowIndex).setQuantity(0);
-//                                }
-                            }
-
-                            //set external temporary data of index to save as reference
-                            // if detected unchecked then must update
-                            if (!checkedItem.isEmpty() && checkedItem.stream().allMatch(item -> "1".equals(item))) {
-                                cbSelectAll.setSelected(true);
-                            } else {
-                                cbSelectAll.setSelected(false);
                             }
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
@@ -1870,7 +1795,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     private void resetCheckboxSelection() {
-        cbSelectAll.setSelected(false);
         if (!checkedItem.isEmpty()) {
             checkedItem.clear();
         }
@@ -1930,7 +1854,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
         disableRowCheckbox.set(addOns_data.isEmpty());
-        JFXUtil.setDisabled(addOns_data.isEmpty(), cbSelectAll);
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSave, btnCancel, btnSearch);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
