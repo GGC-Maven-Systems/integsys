@@ -1434,21 +1434,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!lbisTrue) {
                                 switch (addOns_data.get(rowIndex).getIndex08()) {
                                     case "AddOn":
-                                        if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                        if (poController.AddOnList(lnRow).getEditMode() == EditMode.ADDNEW) {
                                             poController.AddOnList().remove(lnRow);
                                         } else {
                                             poController.AddOnList(lnRow).setQuantity(0);
                                         }
                                         break;
                                     case "Freebies":
-                                        if (poController.FreebiesList(rowIndex).getEditMode() == EditMode.ADDNEW) {
-                                            poController.FreebiesList().remove(Integer.parseInt(addOns_data.get(rowIndex).getIndex07()));
+                                        if (poController.FreebiesList(lnRow).getEditMode() == EditMode.ADDNEW) {
+                                            poController.FreebiesList().remove(lnRow);
                                         } else {
                                             poController.FreebiesList(lnRow).setQuantity(0);
                                         }
                                         break;
                                     case "Inclusion":
-                                        if (poController.InclusionList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                        if (poController.InclusionList(lnRow).getEditMode() == EditMode.ADDNEW) {
                                             poController.InclusionList().remove(lnRow);
                                         } else {
                                             poController.InclusionList(lnRow).setQuantity(0);
@@ -1634,9 +1634,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 lnCount += 1;
                                 checkedItems(lnCountCheck);
                                 if (poController.AddOnList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
-                                    checkedItem.set(lnCtr, "1");
+                                    checkedItem.set(lnCountCheck, "1");
                                 } else {
-                                    checkedItem.set(lnCtr, "0");
+                                    checkedItem.set(lnCountCheck, "0");
                                 }
 
                                 String lsDescription = poController.AddOnList(lnCtr).AddOnMaster().AddOnType().getAddTypeName();
@@ -1655,10 +1655,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId())) //Do not reload extra row for freebie
                                         || (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
-                                    continue;
+                                    if (poController.FreebiesList(lnCtr).getIsFree()) {
+                                        continue;
+                                    }
                                 }
                                 lnCount += 1;
-                                checkedItems(lnCount);
+                                checkedItems(lnCountCheck);
+                                if (poController.FreebiesList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
+                                    checkedItem.set(lnCountCheck, "1");
+                                } else {
+                                    checkedItem.set(lnCountCheck, "0");
+                                }
                                 String lsDescription = poController.FreebiesList(lnCtr).Freebie().getDescription();
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCountCheck),
@@ -1675,10 +1682,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload extra row for inclusion
                                         || (poController.InclusionList(lnCtr).getTotalAmount() <= 0.00)) {
-                                    continue;
+                                    if (poController.InclusionList(lnCtr).getIsFree()) {
+                                        continue;
+                                    }
                                 }
                                 lnCount += 1;
                                 checkedItems(lnCountCheck);
+                                if (poController.InclusionList(lnCtr).getRecordStatus()) { // if true = Active // only this should activate during editMode of the row
+                                    checkedItem.set(lnCountCheck, "1");
+                                } else {
+                                    checkedItem.set(lnCountCheck, "0");
+                                }
                                 String lsDescription = poController.InclusionList(lnCtr).Inclusion().getDescription();
                                 addOns_data.add(
                                         new ModelVehicleQuotation_AddOns(checkedItem.get(lnCountCheck),
@@ -1762,7 +1776,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
-                                        || (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)) {
+                                        || (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)
+                                        || (!poController.FreebiesList(lnCtr).getIsFree())) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1778,7 +1793,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload empty inclusion Id in freebies table
-                                        || (poController.InclusionList(lnCtr).getTotalAmount() > 0.00)) {
+                                        || (poController.InclusionList(lnCtr).getTotalAmount() > 0.00)
+                                        || (!poController.InclusionList(lnCtr).getIsFree())) {
                                     continue;
                                 }
                                 lnCount += 1;
