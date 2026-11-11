@@ -145,6 +145,12 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (pbEntered) {
+                            JFXUtil.runWithDelay(0.60, () -> {
+                                moveNext(false, true);
+                                pbEntered = false;
+                            });
+                        }
                         break;
                 }
                 JFXUtil.runWithDelay(0.50, () -> {
@@ -159,12 +165,6 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                         poJSON = poController.DiscountList(pnDetail).setRemarks(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        if (pbEntered) {
-                            JFXUtil.runWithDelay(0.60, () -> {
-                                moveNext(false, true);
-                                pbEntered = false;
-                            });
                         }
                         break;
                 }
