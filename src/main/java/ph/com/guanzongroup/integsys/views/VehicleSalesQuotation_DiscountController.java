@@ -41,7 +41,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  * @author Team 1
  */
 public class VehicleSalesQuotation_DiscountController implements Initializable, ScreenInterface {
-
+    
     private GRiderCAS oApp;
     static VehicleQuotation poController;
     private JSONObject poJSON;
@@ -69,7 +69,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     private TableView tblViewDetail;
     @FXML
     private TableColumn tblNo, tblDiscountType, tblAmount;
-
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         poJSON = new JSONObject();
@@ -84,32 +84,32 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         pnEditMode = poController.getEditMode();
         initButton(pnEditMode);
     }
-
+    
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-
+    
     @Override
     public void setIndustryID(String fsValue) {
         System.out.println(fsValue);
         this.psIndustryId = fsValue;
     }
-
+    
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-
+    
     @Override
     public void setCategoryID(String fsValue) {
         //No category
     }
-
+    
     public void setObject(VehicleQuotation object) {
         poController = object;
     }
-
+    
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -126,11 +126,11 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                     break;
             }
             loadRecordDetail();
-
+            
             initButton(pnEditMode);
         }
     }
-
+    
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -157,7 +157,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                     loadTableDetail.reload();
                 });
             });
-
+    
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
@@ -170,19 +170,19 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                 }
                 loadRecordDetail();
             });
-
+    
     public void initTextFields() {
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
         JFXUtil.setFocusListener(txtDetail_Focus, tfDiscountType, tfAmount);
-
+        
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail);
         JFXUtil.setCommaFormatter(tfAmount);
-
+        
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
-
+        
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
-
+    
     private void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (details_data.size() > 0) {
@@ -198,7 +198,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             }
         });
     }
-
+    
     @FXML
     private void cmdCheckBox_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -235,7 +235,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             }
         }
     };
-
+    
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -243,7 +243,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             String lsValue = (txtField.getText() == null ? "" : txtField.getText());
             poJSON = new JSONObject();
             int lnRow = pnDetail;
-
+            
             switch (event.getCode()) {
                 case TAB:
                 case ENTER:
@@ -280,11 +280,11 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     public void clearTextFields() {
         JFXUtil.clearTextFields(apDetail);
     }
-
+    
     private void loadRecordDetail() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDiscountListCount() - 1) {
@@ -294,12 +294,13 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(pnDetail).getDiscountAmount(), false));
             cbActive.setSelected(poController.DiscountList(pnDetail).getRecordStatus());
             taRemarks.setText(poController.DiscountList(pnDetail).getRemarks());
+            JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     private void moveNext(boolean isUp, boolean continueNext) {
         try {
             if (continueNext) {
@@ -318,14 +319,14 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblDiscountType, tblNo);
         JFXUtil.setColumnRight(tblAmount);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);;
     }
-
+    
     private void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -376,7 +377,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                     });
                 });
     }
-
+    
     private void initButton(int fnValue) {
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;

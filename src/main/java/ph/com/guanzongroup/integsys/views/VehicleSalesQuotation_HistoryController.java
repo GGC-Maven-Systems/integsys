@@ -537,10 +537,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 return;
             }
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
-            if (!lbIsDiscountNone) {
-//                tfTotalDiscount.setText(poController.get);
-            }
             JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
+
+            JFXUtil.setDisabled(poController.isDisable("LTO"), tfLTOAmount);
+            JFXUtil.setDisabled(poController.isDisable("TPL"), tfTPLAmount);
+            JFXUtil.setDisabled(poController.isDisable("Comprehensive"), tfComprehensiveAmount);
             poController.computeFields();
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
@@ -554,6 +555,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -643,7 +645,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 switch (cmbId) {
                     case "cmbModeOfPayment":
                         break;
-                    case "cmbReceivingMethod":          
+                    case "cmbReceivingMethod":
                         break;
                 }
             });
@@ -921,9 +923,9 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                     >= addOns_data.size()) {
                                 if (!addOns_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewAddOns, 0);
-                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
-                                    pnAddOns = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewAddOns, getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2));
+//                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
+//                                    pnAddOns = lnRow;
                                     loadRecordAddOns();
                                 }
                             } else {
@@ -943,7 +945,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 tblViewFreebies,
                 freebies_data,
                 () -> {
-                    pbEnteredAddOns = false;
+                    pbEnteredFreebies = false;
                     Platform.runLater(() -> {
                         pbEnteredFreebies = false;
                         freebies_data.clear();
@@ -1022,9 +1024,9 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0); //focus
-                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
-                                    pnFreebies = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)); //focus
+//                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
+//                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {

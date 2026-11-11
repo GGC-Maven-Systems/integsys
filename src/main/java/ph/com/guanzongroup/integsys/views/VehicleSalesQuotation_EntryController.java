@@ -528,6 +528,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
+                            loadRecordVehicleInfo();
                             reloadRecords();
                             break;
 
@@ -1065,8 +1066,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfTransmission.setText(lsTransmission);
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-            JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).getReceivingMethod().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getReceivingMethod(), null, "") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1192,15 +1194,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
+            JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
 
             JFXUtil.setDisabled(poController.isDisable("LTO"), tfLTOAmount);
             JFXUtil.setDisabled(poController.isDisable("TPL"), tfTPLAmount);
             JFXUtil.setDisabled(poController.isDisable("Comprehensive"), tfComprehensiveAmount);
-            boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
-            if (!lbIsDiscountNone) {
-//                tfTotalDiscount.setText(poController.get);
-            }
-            JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
             poController.computeFields();
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
@@ -1220,7 +1219,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
     private void loadRecordAdditionalInfo() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -1720,9 +1718,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     >= addOns_data.size()) {
                                 if (!addOns_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewAddOns, 0);
-                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
-                                    pnAddOns = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewAddOns, getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2));
+//                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
+//                                    pnAddOns = lnRow;
                                     loadRecordAddOns();
                                 }
                             } else {
@@ -1821,9 +1819,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0); //focus
-                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
-                                    pnFreebies = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)); //focus
+//                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
+//                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
