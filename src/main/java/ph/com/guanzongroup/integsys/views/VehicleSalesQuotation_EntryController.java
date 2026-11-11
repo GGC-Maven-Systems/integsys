@@ -852,7 +852,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
-                    case "tfReservationAmt":
+                    case "tfReservationAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setReservationAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
