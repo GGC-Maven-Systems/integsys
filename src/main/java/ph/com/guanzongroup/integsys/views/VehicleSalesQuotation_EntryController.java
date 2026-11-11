@@ -1219,6 +1219,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
+
     private void loadRecordAdditionalInfo() {
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -1260,7 +1261,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     if (pnFreebies < 0 || pnFreebies > poController.getFreebiesListCount() - 1) {
                         return;
                     }
-                    JFXUtil.setDisabled(poController.AddOnList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
+                    JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
                     tfDescription.setText(poController.FreebiesList(pnFreebies).Freebie().getDescription());
                     tfQuantityFreebies.setText(String.valueOf(poController.FreebiesList(pnFreebies).getQuantity()));
                     cbActive.setSelected(poController.FreebiesList(pnFreebies).getRecordStatus());
@@ -1819,9 +1820,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)); //focus
-//                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
-//                                    pnFreebies = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0); //focus
+                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
+                                    pnFreebies = lnRow;
                                     loadRecordFreebies();
                                 }
                             } else {
