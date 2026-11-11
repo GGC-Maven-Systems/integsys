@@ -995,6 +995,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "cmbReceivingMethod":
+                        poJSON = poController.Detail(pnDetail).setReceivingMethod(String.valueOf(selectedValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
                 loadRecordVehicleInfo();
             });
@@ -1059,7 +1065,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfTransmission.setText(lsTransmission);
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-//        JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).getReceivingMethod().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

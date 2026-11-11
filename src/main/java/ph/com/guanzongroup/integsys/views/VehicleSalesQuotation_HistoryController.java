@@ -453,7 +453,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             tfTransmission.setText(poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission());
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-//        JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).getReceivingMethod().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -468,21 +468,20 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             } else {
                 disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
             }
-            if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
-                return;
-            }
+
             poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
             JFXUtil.clearNodes(tfAccessories, tfAddOns);
-
-            if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
-                JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
-            } else {
-                JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
-            }
+            JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
             switch (addOns_data.get(getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2)).getIndex08()) {
                 case "AddOn":
+                    if (pnAddOns < 0 || pnAddOns > poController.getAddOnListCount() - 1) {
+                        return;
+                    }
+                    if (poController.AddOnList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    }
                     if (lbShow1) {
                         if (JFXUtil.isObjectEqualTo(poController.AddOnList(pnAddOns).AddOnMaster().getAddOnId(), null, "")) {
                             JFXUtil.setDisabled(false, tfAddOns, tfAccessories);
@@ -496,15 +495,30 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.AddOnList(pnAddOns).getQuantity()));
                     break;
                 case "Freebies":
-                    JFXUtil.setDisabled(true, tfAddOns);
-                    JFXUtil.setDisabled(false, tfAccessories);
+                    if (pnAddOns < 0 || pnAddOns > poController.getFreebiesListCount() - 1) {
+                        return;
+                    }
+                    if (poController.FreebiesList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    } else {
+                        JFXUtil.setDisabled(true, tfAddOns);
+                        JFXUtil.setDisabled(false, tfAccessories);
+                    }
+
                     tfAccessories.setText(poController.FreebiesList(pnAddOns).Freebie().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.FreebiesList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.FreebiesList(pnAddOns).getQuantity()));
                     break;
                 case "Inclusion":
-                    JFXUtil.setDisabled(true, tfAddOns);
-                    JFXUtil.setDisabled(false, tfAccessories);
+                    if (pnAddOns < 0 || pnAddOns > poController.getInclusionListCount() - 1) {
+                        return;
+                    }
+                    if (poController.InclusionList(pnAddOns).getEditMode() == EditMode.UPDATE) {
+                        JFXUtil.setDisabled(true, tfAddOns, tfAccessories);
+                    } else {
+                        JFXUtil.setDisabled(true, tfAddOns);
+                        JFXUtil.setDisabled(false, tfAccessories);
+                    }
                     tfAccessories.setText(poController.InclusionList(pnAddOns).Inclusion().getDescription());
                     tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.InclusionList(pnAddOns).getAmount().doubleValue(), false));
                     tfQuantity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.InclusionList(pnAddOns).getQuantity()));
@@ -628,6 +642,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
                     case "cmbModeOfPayment":
+                        break;
+                    case "cmbReceivingMethod":          
                         break;
                 }
             });
