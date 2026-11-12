@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="AnchorMain" minWidth="1487.0" prefWidth="789.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="AnchorMain" minWidth="1050.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane layoutX="107.0" layoutY="129.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -91,7 +91,7 @@
                         </AnchorPane>
                     </bottom>
                     <center>
-                        <AnchorPane fx:id="AnchorInputs" minHeight="600.0" minWidth="800.0" prefWidth="550.0" BorderPane.alignment="CENTER_LEFT">
+                        <AnchorPane fx:id="AnchorInputs" minHeight="600.0" BorderPane.alignment="CENTER_LEFT">
                             <opaqueInsets>
                                 <Insets />
                             </opaqueInsets>
@@ -226,7 +226,7 @@
                                                 </GridPane>
                                                         </children>
                                              <VBox.margin>
-                                                <Insets left="5.0" right="5.0" top="5.0" />
+                                                <Insets top="5.0" />
                                              </VBox.margin>
                                                     </AnchorPane>
                                                 </children>
@@ -237,7 +237,7 @@
                                  <content>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <HBox prefHeight="100.0" prefWidth="1032.0" spacing="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                          <HBox prefHeight="100.0" prefWidth="1032.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0">
                                              <children>
                                                 <AnchorPane prefHeight="200.0" style="-fx-border-color: FF8201;">
                                                    <children>

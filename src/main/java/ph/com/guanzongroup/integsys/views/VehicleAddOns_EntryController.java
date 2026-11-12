@@ -285,6 +285,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 btnCancel.fire();
                             }
+                            resetCheckboxSelection();
                             pnEditMode = poController.Master().getEditMode();
                         } else {
                             return;
@@ -966,7 +967,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
-
+        disableRowCheckbox.set(details_data.isEmpty() || !lbShow1); // set enable/disable in checkboxes in requirements
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }

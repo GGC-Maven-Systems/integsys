@@ -743,12 +743,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         try {
             tfBrand.setText(poController.PromotionApplicabilityList(pnDetail).Brand().getDescription());
             tfModel.setText(poController.PromotionApplicabilityList(pnDetail).Model().getDescription());
-            
+
             String lsVariant = "";
-            if(poController.PromotionApplicabilityList(pnDetail).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(pnDetail).getVariantId())){
+            if (poController.PromotionApplicabilityList(pnDetail).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(pnDetail).getVariantId())) {
                 lsVariant = JFXUtil.concatStrings(poController.PromotionApplicabilityList(pnDetail).ModelVariant().getDescription(),
-                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
-                    poController.PromotionApplicabilityList(pnDetail).ModelVariant().Color().getDescription());
+                        poController.PromotionApplicabilityList(pnDetail).ModelVariant().VariantInsurance().getTransmission(),
+                        poController.PromotionApplicabilityList(pnDetail).ModelVariant().Color().getDescription());
             }
             tfVariant.setText(lsVariant);
             cbExclude.setSelected("1".equals(poController.PromotionApplicabilityList(pnDetail).getExcludeFlag()));
@@ -1031,6 +1031,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityInclusion);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewAddOns, tblViewFreebies, tblViewInclusion, tblViewDetail);
+
+        JFXUtil.applyHoverTooltip("Auto Sort Order of lists based on Brand, Model, and Variant", btnSort);
     }
 
     private String getData(Object lsValue) {
@@ -1093,12 +1095,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                     continue;
                                 }
                                 lsVariant = "";
-                                if(poController.PromotionApplicabilityList(lnCtr).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(lnCtr).getVariantId())){
+                                if (poController.PromotionApplicabilityList(lnCtr).getVariantId() != null && !"".equals(poController.PromotionApplicabilityList(lnCtr).getVariantId())) {
                                     lsVariant = getData(JFXUtil.concatStrings(poController.PromotionApplicabilityList(lnCtr).ModelVariant().getDescription(),
-                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().VariantInsurance().getTransmission(),
-                                                        poController.PromotionApplicabilityList(lnCtr).ModelVariant().Color().getDescription()));
+                                            poController.PromotionApplicabilityList(lnCtr).ModelVariant().VariantInsurance().getTransmission(),
+                                            poController.PromotionApplicabilityList(lnCtr).ModelVariant().Color().getDescription()));
                                 }
-                                
+
                                 lnCount += 1;
                                 details_data.add(
                                         new ModelVehicleAddOn_Detail(String.valueOf(lnCount),
