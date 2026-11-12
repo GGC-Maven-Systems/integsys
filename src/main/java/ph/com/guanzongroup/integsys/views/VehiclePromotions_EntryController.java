@@ -226,6 +226,8 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                         poJSON = poController.NewTransaction();
                         if ("error".equals((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            pnEditMode = EditMode.UNKNOWN;
+                            initButton(pnEditMode);
                             return;
                         }
                         poController.initFields();
