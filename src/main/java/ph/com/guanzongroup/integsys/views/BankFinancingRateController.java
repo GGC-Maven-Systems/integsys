@@ -642,7 +642,7 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
             if (details_data.size() > 0) {
                 ModelBankFinancingRate_Detail selected = (ModelBankFinancingRate_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 pnDetail = Integer.parseInt(selected.getIndex08()) - 1;
-                if (event.getClickCount() == 2) {
+                if (event.getClickCount() == 1) {
                     if (selected != null) {
                         try {
                             if (stageRateDialog != null) {
