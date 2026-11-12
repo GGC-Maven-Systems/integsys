@@ -111,7 +111,11 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    public static ObservableList<String> PurchaseType = FXCollections.observableArrayList(
+            "Cash",
+            "Financing",
+            "PO"
+    );
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
     ObservableList<String> receivingmethod = FXCollections.observableArrayList("Pickup", "Delivery");
     @FXML

@@ -98,7 +98,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     boolean tooltipShown = false;
     JFXUtil.ReloadableTableTask loadTableMain, loadTableDetail, loadTableAddOns, loadTableFreebies, loadTableInclusion;
-    ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    public static ObservableList<String> PurchaseType = FXCollections.observableArrayList(
+            "Cash",
+            "Financing",
+            "PO",
+            "Applicable to All"
+    );
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML

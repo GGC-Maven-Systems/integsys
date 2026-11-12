@@ -96,7 +96,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     ArrayList<String> checkedItem = new ArrayList<>();
     ArrayList<String> checkedItems = new ArrayList<>();
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    public static ObservableList<String> PurchaseType = FXCollections.observableArrayList(
+            "Cash",
+            "Financing",
+            "PO"
+    );
     ObservableList<String> receivingmethod = FXCollections.observableArrayList("Pickup", "Delivery");
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apRemarks, apAddOns, apFreebies;
