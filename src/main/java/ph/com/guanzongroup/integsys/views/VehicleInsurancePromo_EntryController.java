@@ -475,12 +475,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
                 case "cbActive":
-                    if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
-                        poController.Detail().remove(pnDetail);
-                    } else {
-//                        poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
-                        poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
-                    }
+//                    if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
+//                        poController.Detail().remove(pnDetail);
+//                    } else {
+////                        poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
+//                        poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
+//                    }
+                     poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
                     loadTableDetail.reload();
                     if (checkedBox.isSelected()) {
                         moveNext(false, false);
