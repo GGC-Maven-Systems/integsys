@@ -709,6 +709,11 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfYearModel":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        if (lsValue.length() > 4) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Invalid year format. Please enter a 4-digit year");
+                            loadRecordMaster();
+                            return;
+                        }
                         poJSON = poController.getModel().setYearModel(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));

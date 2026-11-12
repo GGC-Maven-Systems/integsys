@@ -923,7 +923,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     private void initComboboxes() {
 
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(statuses, cmbSearchStatus), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(promotype, cmbPromoType));
-        cmbModeOfPayment.getItems().add("Applicable to All");
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
     }
