@@ -284,7 +284,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 poController.AddDetail();
-                                loadTableAddOns.reload();
+                                reloadRecords();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
@@ -540,7 +540,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
-                            loadTableAddOns.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
                         case "tfAccessories":
@@ -550,7 +550,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             } else {
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
-                            loadTableAddOns.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
                         case "tfBank":
@@ -575,7 +575,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     tfQuantityFreebies.requestFocus();
                                 });
                             }
-                            loadTableFreebies.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
                     }
@@ -838,7 +838,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 }
                 JFXUtil.runWithDelay(.5, () -> {
                     loadRecordAddOns();
-                    loadTableAddOns.reload();
+                    reloadFreebiesAndAddOns();
                 });
             });
 
@@ -970,7 +970,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
-                    loadTableFreebies.reload();
+                    reloadFreebiesAndAddOns();
                 });
             });
 
@@ -1315,7 +1315,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             break;
                     }
 
-                    loadTableFreebies.reload();
+                    reloadFreebiesAndAddOns();
                     if (!checkedBox.isSelected()) {
                         moveNextFreebies(false, true);
                     }
@@ -1457,7 +1457,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
-                                loadTableAddOns.reload();
+                                reloadFreebiesAndAddOns();
                                 loadRecordAddOns();
                                 loadRecordPricing();
                                 loadRecordAdditionalInfo();
@@ -1918,6 +1918,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         });
     }
 
+    private void reloadFreebiesAndAddOns() {
+        loadTableFreebies.reload();
+        loadTableAddOns.reload();
+    }
+
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
@@ -1942,6 +1947,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         if (fnValue != EditMode.READY) {
             return;
         }
+        JFXUtil.setButtonsVisibility(poController.getTotalDiscount().doubleValue() > 0.00, btnDeduct);
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:
                 break;

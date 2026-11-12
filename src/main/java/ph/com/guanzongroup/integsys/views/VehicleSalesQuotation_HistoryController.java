@@ -1172,6 +1172,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         if (fnValue != EditMode.READY) {
             return;
         }
+        JFXUtil.setButtonsVisibility(poController.getTotalDiscount().doubleValue() > 0.00, btnDeduct);
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:
             case VehicleQuotationStatus.VOID:

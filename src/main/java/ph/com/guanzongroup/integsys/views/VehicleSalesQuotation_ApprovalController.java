@@ -164,7 +164,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             initTableOnClick();
             clearTextFields();
             pgPagination.setPageCount(1);
-            loadTableAddOns.reload();
             pnEditMode = EditMode.UNKNOWN;
             poController.setWithUI(true);
             initButton(pnEditMode);
@@ -298,7 +297,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 poController.AddDetail();
-                                loadTableAddOns.reload();
+                                reloadRecords();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
@@ -447,6 +446,11 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         }
     }
 
+    private void reloadFreebiesAndAddOns() {
+        loadTableFreebies.reload();
+        loadTableAddOns.reload();
+    }
+
     private void txtField_KeyPressed(KeyEvent event) {
         try {
             TextField txtField = (TextField) event.getSource();
@@ -583,7 +587,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             } else {
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
-                            loadTableAddOns.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
                         case "tfAccessories":
@@ -593,7 +597,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             } else {
                                 JFXUtil.textFieldMoveNext(tfAmount);
                             }
-                            loadTableAddOns.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
 
@@ -620,7 +624,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                     tfQuantityFreebies.requestFocus();
                                 });
                             }
-                            loadTableFreebies.reload();
+                            reloadFreebiesAndAddOns();
                             loadRecordPricing();
                             break;
                     }
@@ -895,7 +899,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 }
                 JFXUtil.runWithDelay(.5, () -> {
                     loadRecordAddOns();
-                    loadTableAddOns.reload();
+                    reloadFreebiesAndAddOns();
                 });
             });
 
@@ -1025,7 +1029,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
-                    loadTableFreebies.reload();
+                    reloadFreebiesAndAddOns();
                 });
             });
 
@@ -1324,7 +1328,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             break;
                     }
 
-                    loadTableFreebies.reload();
+                    reloadFreebiesAndAddOns();
                     if (!checkedBox.isSelected()) {
                         moveNextFreebies(false, true);
                     }
@@ -1467,7 +1471,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
-                                loadTableAddOns.reload();
+                                reloadFreebiesAndAddOns();
                                 loadRecordAddOns();
                                 loadRecordPricing();
                                 loadRecordAdditionalInfo();
@@ -2090,6 +2094,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         if (fnValue != EditMode.READY) {
             return;
         }
+        JFXUtil.setButtonsVisibility(poController.getTotalDiscount().doubleValue() > 0.00, btnDeduct);
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:
                 JFXUtil.setButtonsVisibility(false, btnPrint);
