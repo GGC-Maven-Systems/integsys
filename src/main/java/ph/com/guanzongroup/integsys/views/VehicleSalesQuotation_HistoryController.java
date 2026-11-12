@@ -453,7 +453,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             tfTransmission.setText(poController.Detail(pnDetail).ModelVariant().VariantInsurance().getTransmission());
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-            JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).getReceivingMethod().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getReceivingMethod(), null, "") ? poController.Detail(pnDetail).getReceivingMethod() : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

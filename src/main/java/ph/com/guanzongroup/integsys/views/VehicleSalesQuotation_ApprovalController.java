@@ -1120,7 +1120,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             tfTransmission.setText(lsTransmission);
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-            JFXUtil.setCmbValue(cmbReceivingMethod, !poController.Detail(pnDetail).getReceivingMethod().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getReceivingMethod(), null, "") ? poController.Detail(pnDetail).getReceivingMethod() : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1614,7 +1614,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setFocusListener(txtAddOns_Focus, tfAddOns, tfAccessories, tfAmount, tfQuantity);
         JFXUtil.setFocusListener(txtFreebies_Focus, tfDescription, tfQuantityFreebies);
 
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse,apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apAddOns, apFreebies);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apAddOns, apFreebies);
         JFXUtil.inputDecimalOnly(tfRate);
         JFXUtil.setCommaFormatter(tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfAmount);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies);

@@ -1066,7 +1066,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfTransmission.setText(lsTransmission);
             tfYear.setText(String.valueOf(poController.Detail(pnDetail).ModelVariant().getYearModel()));
             tfColor.setText(poController.Detail(pnDetail).ModelVariant().Color().getDescription());
-            JFXUtil.setCmbValue(cmbReceivingMethod, !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getReceivingMethod(), null, "") ? Integer.valueOf(poController.Detail(pnDetail).getReceivingMethod()) : -1);
+            JFXUtil.setCmbValue(cmbReceivingMethod, !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getReceivingMethod(), null, "") ? poController.Detail(pnDetail).getReceivingMethod() : -1);
             JFXUtil.updateCaretPositions(apVehicleInfo);
 
         } catch (SQLException | GuanzonException ex) {
