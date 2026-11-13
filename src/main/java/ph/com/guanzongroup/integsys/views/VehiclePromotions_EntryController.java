@@ -285,8 +285,10 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                             poJSON = poController.SaveTransaction();
                             if (!"success".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                                poController.AddDetail();
                                 loadTableDetail.reload();
+                                loadTableAddOns.reload();
+                                loadTableFreebies.reload();
+                                loadTableInclusion.reload();
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
