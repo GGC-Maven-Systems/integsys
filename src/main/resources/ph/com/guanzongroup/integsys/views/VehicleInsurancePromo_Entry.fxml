@@ -362,11 +362,11 @@
                                                       <Font size="12.0" />
                                                    </font>
                                                 </Label>
-                                                <TextField fx:id="tfStandard1stYear" alignment="CENTER_RIGHT" disable="true" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                                                <TextField fx:id="tfStandard2ndYear" alignment="CENTER_RIGHT" disable="true" layoutX="115.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="6" />
-                                                <TextField fx:id="tfStandard3rdYear" alignment="CENTER_RIGHT" disable="true" layoutX="369.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="6" />
-                                                <TextField fx:id="tfStandard4thYear" alignment="CENTER_RIGHT" disable="true" layoutX="623.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="6" />
-                                                <TextField fx:id="tfStandard5thYear" alignment="CENTER_RIGHT" disable="true" layoutX="877.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="6" />
+                                                <TextField fx:id="tfStandard1stYear" alignment="CENTER_RIGHT" disable="true" editable="false" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                                <TextField fx:id="tfStandard2ndYear" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="115.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+                                                <TextField fx:id="tfStandard3rdYear" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="369.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="8" GridPane.rowIndex="6" />
+                                                <TextField fx:id="tfStandard4thYear" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="623.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="11" GridPane.rowIndex="6" />
+                                                <TextField fx:id="tfStandard5thYear" alignment="CENTER_RIGHT" disable="true" editable="false" layoutX="877.0" layoutY="152.0" promptText="0.00" GridPane.columnIndex="14" GridPane.rowIndex="6" />
                                                 <Label layoutX="271.0" layoutY="82.0" text="2nd Year Amount" GridPane.columnIndex="3" GridPane.rowIndex="6">
                                                    <font>
                                                       <Font size="12.0" />

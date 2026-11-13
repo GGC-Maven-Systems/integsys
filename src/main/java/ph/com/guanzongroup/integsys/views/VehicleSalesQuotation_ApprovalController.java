@@ -693,6 +693,8 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             poController.Detail(pnDetail).setReservationAmount(0.0000);
             poController.Detail(pnDetail).setPromptPaymentDiscount(0.00);
             poController.Detail(pnDetail).setQuotationRate("");
+            poController.Detail(pnDetail).setDuration(0);
+            poController.Detail(pnDetail).setRateValue(0.00);
         }
     }
 
