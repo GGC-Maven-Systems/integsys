@@ -98,7 +98,12 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     boolean tooltipShown = false;
     JFXUtil.ReloadableTableTask loadTableMain, loadTableDetail, loadTableAddOns, loadTableFreebies, loadTableInclusion;
-    ObservableList<String> PurchaseType = ModelSalesInquiry_Detail.PurchaseType;
+    public static ObservableList<String> PurchaseType = FXCollections.observableArrayList(
+            "Cash",
+            "Financing",
+            "PO",
+            "Applicable to All"
+    );
     BooleanProperty disableRowCheckbox = new SimpleBooleanProperty(false);
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     @FXML
@@ -918,7 +923,6 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
     private void initComboboxes() {
 
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(statuses, cmbSearchStatus), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(promotype, cmbPromoType));
-        cmbModeOfPayment.getItems().add("Applicable to All");
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbSearchStatus, cmbModeOfPayment, cmbPromoType);
     }
