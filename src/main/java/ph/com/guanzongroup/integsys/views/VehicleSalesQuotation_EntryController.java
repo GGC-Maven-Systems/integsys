@@ -1859,9 +1859,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     >= freebies_data.size()) {
                                 if (!freebies_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewFreebies, 0); //focus
-                                    int lnRow = Integer.parseInt(freebies_data.get(0).getIndex06());
-                                    pnFreebies = lnRow;
+                                    JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)); //focus
                                     loadRecordFreebies();
                                 }
                             } else {

@@ -290,6 +290,10 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
             if (pnDetail < 0 || pnDetail > poController.getDiscountListCount() - 1) {
                 return;
             }
+            if (pnEditMode != EditMode.READY) {
+                JFXUtil.setDisabled(poController.DiscountList(pnDetail).getEditMode() == EditMode.UPDATE, tfDiscountType);
+            }
+
             tfDiscountType.setText(poController.DiscountList(pnDetail).DiscountType().getDiscountDescription());
             tfAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.DiscountList(pnDetail).getDiscountAmount(), false));
             cbActive.setSelected(poController.DiscountList(pnDetail).getRecordStatus());
