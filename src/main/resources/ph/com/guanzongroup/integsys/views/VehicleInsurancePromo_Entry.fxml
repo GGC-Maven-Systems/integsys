@@ -349,7 +349,7 @@
                                                       <Insets />
                                                    </GridPane.margin>
                                                 </Separator>
-                                                <Label text="Suggested Value" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="4" GridPane.valignment="BOTTOM">
+                                                <Label text="Suggested Amount" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="4" GridPane.valignment="BOTTOM">
                                                    <font>
                                                       <Font name="System Bold" size="14.0" />
                                                    </font>
