@@ -434,7 +434,6 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
             tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
-            JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).SalesInquiry().getPurchaseType().equals("") ? Integer.valueOf(poController.Detail(pnDetail).SalesInquiry().getPurchaseType()) : -1);
             tfSalesPerson.setText(poController.Detail(pnDetail).SalesInquiry().SalesPerson().getFullName());
             taRemarks.setText(poController.Detail(pnDetail).getRemarks());
 
@@ -543,10 +542,11 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
             JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
 
-            JFXUtil.setDisabled(poController.isDisable("LTO"), tfLTOAmount);
-            JFXUtil.setDisabled(poController.isDisable("TPL"), tfTPLAmount);
-            JFXUtil.setDisabled(poController.isDisable("Comprehensive"), tfComprehensiveAmount);
             poController.computeFields();
+
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.LTO), tfLTOAmount);
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.TPL), tfTPLAmount);
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.COMPREHENSIVE), tfComprehensiveAmount);
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
             tfReservationAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), true));
@@ -559,6 +559,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+            JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
 
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

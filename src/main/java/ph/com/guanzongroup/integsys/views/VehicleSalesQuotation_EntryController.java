@@ -644,6 +644,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             poController.Detail(pnDetail).setSRPAmount(0.0000);
             poController.Detail(pnDetail).setDownPayment(0.0000);
             poController.Detail(pnDetail).setReservationAmount(0.0000);
+            poController.Detail(pnDetail).setPromptPaymentDiscount(0.00);
+            poController.Detail(pnDetail).setQuotationRate("");
         }
     }
 
@@ -995,19 +997,40 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
-                switch (cmbId) {
-                    case "cmbModeOfPayment":
-                        poJSON = poController.Detail(pnDetail).setPaymentForm(String.valueOf(selectedIndex));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
-                    case "cmbReceivingMethod":
-                        poJSON = poController.Detail(pnDetail).setReceivingMethod(String.valueOf(selectedValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
+                try {
+                    switch (cmbId) {
+                        case "cmbModeOfPayment":
+                            //detect if changed
+                            String lsModeofPayment = String.valueOf(selectedIndex);
+                            if (lsModeofPayment.equals("0")
+                            && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).FinancingRate().Bank().getBankName(), null, "")) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the mode of payment into Cash?\n This action will reset the Additional Info") == true) {
+                                    poController.Detail(0).setPromptPaymentDiscount(0.00);
+                                    poController.Detail(0).setQuotationRate("");
+                                    loadRecordPricing();
+                                    loadRecordAdditionalInfo();
+                                } else {
+                                    loadRecordPricing();
+                                    return;
+                                }
+                            }
+                            poJSON = poController.Detail(pnDetail).setPaymentForm(String.valueOf(selectedIndex));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordPricing();
+                            loadRecordAdditionalInfo();
+                            break;
+                        case "cmbReceivingMethod":
+                            poJSON = poController.Detail(pnDetail).setReceivingMethod(String.valueOf(selectedValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            break;
+                    }
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
                 loadRecordVehicleInfo();
             });
@@ -1044,7 +1067,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             String lsInquiryDate = JFXUtil.formatDateToString(poController.Detail(pnDetail).SalesInquiry().getTransactionDate());
             JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
             tfBranch.setText(poController.Detail(pnDetail).Branch().getBranchName());
-            JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
             tfSalesPerson.setText(poController.Detail(pnDetail).SalesInquiry().SalesPerson().getFullName());
             taRemarks.setText(poController.Detail(pnDetail).getRemarks());
 
@@ -1058,6 +1080,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordVehicleInfo() {
         try {
+            if (pnEditMode == EditMode.UPDATE) {
+                JFXUtil.setDisabled(true, tfBrand, tfModel, tfVariant);
+            } else {
+                JFXUtil.setDisabled(pnEditMode != EditMode.ADDNEW, tfBrand, tfModel, tfVariant);
+            }
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
@@ -1145,6 +1172,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     break;
             }
             JFXUtil.updateCaretPositions(apAddOns);
+            loadRecordPricing();
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1203,10 +1231,11 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
             JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
 
-            JFXUtil.setDisabled(poController.isDisable("LTO"), tfLTOAmount);
-            JFXUtil.setDisabled(poController.isDisable("TPL"), tfTPLAmount);
-            JFXUtil.setDisabled(poController.isDisable("Comprehensive"), tfComprehensiveAmount);
             poController.computeFields();
+
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.LTO), tfLTOAmount);
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.TPL), tfTPLAmount);
+            JFXUtil.setDisabled(poController.isDisable(VehicleQuotationStatus.AddOnType.COMPREHENSIVE), tfComprehensiveAmount);
             tfSRP.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getSRPAmount().doubleValue(), true));
             tfDownpayment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDownPayment().doubleValue(), true));
             tfReservationAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getReservationAmount().doubleValue(), true));
@@ -1219,6 +1248,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
+            JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
 
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1941,7 +1971,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
-        JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient, tfBrand, tfModel, tfVariant);
+        JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
@@ -1953,6 +1983,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         if (fnValue != EditMode.READY) {
             return;
         }
+
+        //lock if the transaction record stat is update 
         JFXUtil.setButtonsVisibility(poController.getTotalDiscount().doubleValue() > 0.00, btnDeduct);
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:

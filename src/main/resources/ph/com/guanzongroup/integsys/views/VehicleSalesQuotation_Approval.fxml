@@ -513,7 +513,7 @@
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                                                        <ComboBox fx:id="cmbModeOfPayment" prefWidth="150.0" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                                                                                                        <ComboBox fx:id="cmbModeOfPayment" prefWidth="150.0" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                                                                                                         <TextField fx:id="tfSRP" alignment="CENTER_RIGHT" disable="true" maxHeight="25.0" promptText="0.0000" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                                                                                         <TextField fx:id="tfDownpayment" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="40.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                                                                         <TextField fx:id="tfReservationAmount" alignment="CENTER_RIGHT" layoutX="115.0" layoutY="97.0" maxHeight="25.0" promptText="0.0000" GridPane.columnIndex="2" GridPane.rowIndex="4" />
