@@ -1062,7 +1062,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             String lsModeofPayment = String.valueOf(selectedIndex);
                             if (lsModeofPayment.equals("0")
                             && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).FinancingRate().Bank().getBankName(), null, "")) {
-                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the mode of payment into Cash?\n This action will reset the Additional Info") == true) {
+                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the mode of payment into Cash?\nThis action will reset the Additional Info.") == true) {
                                     poController.Detail(0).setPromptPaymentDiscount(0.00);
                                     poController.Detail(0).setQuotationRate("");
                                     loadRecordPricing();
