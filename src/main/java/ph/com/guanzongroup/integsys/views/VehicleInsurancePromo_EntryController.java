@@ -84,15 +84,15 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
     JFXUtil.ReloadableTableTask loadTableDetail;
 
     @FXML
-    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster, apDetail, apDetail112;
     @FXML
     private Label lblSource, lblStatus;
     @FXML
-    private HBox hbButtons, hboxid;
+    private HBox hbButtons;
     @FXML
     private Button btnBrowse, btnNew, btnUpdate, btnSave, btnCancel, btnApprove, btnVoid, btnHistory, btnPrint, btnClose;
     @FXML
-    private TextField tfValidityID, tfValidityPeriod, tfInsuranceID, tfDescription, tfSRP, tf1stYear, tf2ndYear, tf3rdYear, tf4thYear, tf5thYear;
+    private TextField tfValidityID, tfValidityPeriod, tfInsuranceID, tfDescription, tf1stYear, tf2ndYear, tfSRP, tf3rdYear, tf4thYear, tf5thYear, tfStandard1stYear, tfStandard2ndYear, tfStandard3rdYear, tfStandard4thYear, tfStandard5thYear;
     @FXML
     private DatePicker dpValidFrom, dpValidTo;
     @FXML
@@ -481,7 +481,7 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
 ////                        poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
 //                        poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
 //                    }
-                     poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
+                    poController.Activate(poController.Detail(pnDetail).getVariantId(), checkedBox.isSelected());
                     loadTableDetail.reload();
                     if (checkedBox.isSelected()) {
                         moveNext(false, false);
@@ -527,6 +527,13 @@ public class VehicleInsurancePromo_EntryController implements Initializable, Scr
 
             cbActive.setSelected(poController.Detail(pnDetail).getRecordStatus());
             JFXUtil.updateCaretPositions(apDetail);
+
+            Double lnSellingPrice = poController.Detail(pnDetail).ModelVariant().getSellingPrice();
+            tfStandard1stYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getSuggestedAmount(lnSellingPrice, 1), false));
+            tfStandard2ndYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getSuggestedAmount(lnSellingPrice, 2), false));
+            tfStandard3rdYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getSuggestedAmount(lnSellingPrice, 3), false));
+            tfStandard4thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getSuggestedAmount(lnSellingPrice, 4), false));
+            tfStandard5thYear.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getSuggestedAmount(lnSellingPrice, 5), false));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
