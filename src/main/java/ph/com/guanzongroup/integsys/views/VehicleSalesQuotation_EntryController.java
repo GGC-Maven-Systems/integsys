@@ -1630,7 +1630,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apAddOns, apFreebies);
         JFXUtil.inputDecimalOnly(tfRate);
-        JFXUtil.setCommaFormatter(tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfAmount);
+        JFXUtil.inputIntegersOnly(tfTerms);
+        JFXUtil.setCommaFormatter(tfPromptPaymentDiscount, tfCHMODocStamp, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfAmount);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies);
 
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewAddOns, tblViewFreebies);
