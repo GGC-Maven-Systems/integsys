@@ -1475,32 +1475,32 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                         ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                                     }
-
-                                    if (poController.AddOnList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                    if (poController.AddOnList(lnRow).getEditMode() == EditMode.ADDNEW) {
                                         poController.AddOnList().remove(lnRow);
                                     } else {
                                         poController.AddOnList(lnRow).setQuantity(0);
                                     }
                                     break;
                                     case "Freebies":
-                                        if (poController.FreebiesList(rowIndex).getEditMode() == EditMode.ADDNEW) {
-                                            poController.FreebiesList().remove(Integer.parseInt(addOns_data.get(rowIndex).getIndex07()));
+                                        if (poController.FreebiesList(lnRow).getEditMode() == EditMode.ADDNEW) {
+                                            poController.FreebiesList().remove(lnRow);
                                         } else {
                                             poController.FreebiesList(lnRow).setQuantity(0);
                                         }
                                         break;
                                     case "Inclusion":
-                                        if (poController.InclusionList(rowIndex).getEditMode() == EditMode.ADDNEW) {
+                                        if (poController.InclusionList(lnRow).getEditMode() == EditMode.ADDNEW) {
                                             poController.InclusionList().remove(lnRow);
                                         } else {
                                             poController.InclusionList(lnRow).setQuantity(0);
                                         }
                                         break;
                                 }
+                                checkedItem.size();
                                 int index = Integer.parseInt(String.valueOf(rowIndex));
                                 checkedItem.remove(index);
+                                checkedItem.size();
                             }
-
                             pnAddOns = rowIndex;
                             Platform.runLater(() -> {
                                 reloadFreebiesAndAddOns();
