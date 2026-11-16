@@ -1199,6 +1199,17 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         if (fnValue != EditMode.READY) {
             return;
         }
+        try {
+            boolean lbIsHide1 = poController.Detail(0).getValidThruDate().after(oApp.getServerDate())
+                    && VehicleQuotationStatus.APPROVED.equals(poController.Master().getTransactionStatus());
+            boolean lbIsHide2 = VehicleQuotationStatus.OPEN.equals(poController.Master().getTransactionStatus())
+                    && poController.Detail(0).getValidThruDate().after(oApp.getServerDate());
+            if (lbIsHide1 || lbIsHide2) {
+                JFXUtil.setButtonsVisibility(false, btnRemake);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
         JFXUtil.setButtonsVisibility(poController.getTotalDiscount().doubleValue() > 0.00, btnDeduct);
         switch (poController.Master().getTransactionStatus()) {
             case VehicleQuotationStatus.OPEN:
