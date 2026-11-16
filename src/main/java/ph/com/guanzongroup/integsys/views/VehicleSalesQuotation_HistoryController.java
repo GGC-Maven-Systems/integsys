@@ -57,6 +57,7 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
+import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
@@ -111,7 +112,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnDeduct, btnPrint, btnHistory, btnClose;
+    private Button btnBrowse, btnDeduct, btnPrint, btnHistory, btnClose, btnRemake;
     @FXML
     private DatePicker dpTransactionDate, dpExpectedDate, dpInquiryDate, dpValidThru;
     @FXML
@@ -248,6 +249,23 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                     case "btnDeduct":
                         openParameter("", "");
                         break;
+                    case "btnRemake":
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to remake the transaction?") == true) {
+                            //OPEN Quotation Entry in new tab
+                            //loController.setRemake(true);
+                            //loController.setTransNo(poController.Master().getTransactionNo());
+                        }
+                        
+                        
+                        //////////////////////sample call of remake in quotation entry///////////////////////
+//                        poJSON = poController.remake(poController.Master().getTransactionNo());
+//                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+//                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+//                            return;
+//                        }
+//                        ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+//                        pnEditMode = poController.Master().getEditMode();
+                        break;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -260,10 +278,10 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 loadRecordPricing();
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException  ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
+        } 
     }
 
     private void openParameter(String lsAddOnTypeId, String lsVariantId) {
@@ -1169,7 +1187,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void initButton(int fnValue) {
         boolean lbShow2 = fnValue == EditMode.READY;
-        JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint, btnDeduct);
+        JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint, btnDeduct, btnRemake);
 
         JFXUtil.setDisabled(true, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
 
