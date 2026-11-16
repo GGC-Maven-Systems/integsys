@@ -83,7 +83,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-    private String psValidityId = "";
+    private String psTransactionNo = "";
     boolean lbresetpredicate = false;
     boolean pbEnteredAddOns = false, pbEnteredFreebies = false;
     boolean pbKeyPressed = false;
@@ -171,7 +171,24 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 } else {
                     poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
-                btnNew.fire();
+                
+                if(psTransactionNo != null && !"".equals(psTransactionNo)){
+                    try {
+                        poJSON = poController.remake(psTransactionNo);
+                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
+                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
+                            return;
+                        }
+                        ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                        pnEditMode = poController.Master().getEditMode();
+                        reloadRecords();
+                        initButton(pnEditMode);
+                    } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException | ParseException ex) {
+                        Logger.getLogger(VehicleSalesQuotation_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    btnNew.fire();
+                }
             });
             loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
@@ -201,8 +218,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         psCategoryId = fsValue;
     }
 
-    public void setValidityID(String fsValue) {
-        psValidityId = fsValue;
+    public void setTransactionNo(String fsValue) {
+        psTransactionNo = fsValue;
     }
 
     @FXML
@@ -216,7 +233,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 String lsButton = clickedButton.getId();
                 switch (lsButton) {
                     case "btnClose":
-                        if (psValidityId != null && !"".equals(psValidityId)) {
+                        if (psTransactionNo != null && !"".equals(psTransactionNo)) {
                             CommonUtils.closeStage(btnClose);
                         } else {
                             unloadForm appUnload = new unloadForm();
@@ -308,7 +325,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                     case "btnBrowse":
                         poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
-                        poJSON = poController.SearchTransaction(psValidityId, true);
+                        poJSON = poController.SearchTransaction(psTransactionNo, true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
 //                            tfValidityID.requestFocus();
@@ -1973,7 +1990,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
         JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient);
-        if (psValidityId != null && !"".equals(psValidityId)) {
+        if (psTransactionNo != null && !"".equals(psTransactionNo)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
 
