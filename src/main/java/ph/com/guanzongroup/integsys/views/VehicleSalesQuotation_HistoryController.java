@@ -247,25 +247,14 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                         pnEditMode = poController.Master().getEditMode();
                         break;
                     case "btnDeduct":
-                        openParameter("", "");
+                        openParameter("deduct", "");
                         break;
                     case "btnRemake":
                         if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to remake the transaction?") == true) {
                             //OPEN Quotation Entry in new tab
-                            //loController.setRemake(true);
-                            //loController.setTransNo(poController.Master().getTransactionNo());
+                            openParameter("remake", poController.Master().getTransactionNo());
                         }
-                        
-                        
-                        //////////////////////sample call of remake in quotation entry///////////////////////
-//                        poJSON = poController.remake(poController.Master().getTransactionNo());
-//                        if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
-//                            ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                            return;
-//                        }
-//                        ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
-//                        pnEditMode = poController.Master().getEditMode();
-                        break;
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
@@ -278,28 +267,44 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 loadRecordPricing();
                 initButton(pnEditMode);
             }
-        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException  ex) {
+        } catch (CloneNotSupportedException | SQLException | GuanzonException | ScriptException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } 
+        }
     }
 
-    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
-//        if (lsAddOnTypeId.isEmpty()) {
-//            ShowMessageFX.Warning(null, pxeModuleName, "Blank Add On Type Id, unable to display dialog!");
-//            return;
-//        }
+    private void openParameter(String lsType, String lsTransactionNo) {
         String lsFXML = "";
+        String lsTitle = "";
         Object controller = new Object();
-        VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
-        lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
 
-        controller1.setGRider(oApp);
-        controller1.setIndustryID(psIndustryId);
-        controller1.setCompanyID(psCompanyId);
-        controller1.setObject(poController);
-        controller = controller1;
-
+        switch (lsType) {
+            case "deduct":
+                VehicleSalesQuotation_DiscountController controller1 = new VehicleSalesQuotation_DiscountController(); //Should differ the parameter calling
+                lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Discount.fxml";
+                controller1.setGRider(oApp);
+                controller1.setIndustryID(psIndustryId);
+                controller1.setCompanyID(psCompanyId);
+                controller1.setObject(poController);
+                controller = controller1;
+                lsTitle = "Vehicle Sales QUuotation Discount Dialog";
+                break;
+            case "remake":
+                if (lsTransactionNo.isEmpty()) {
+                    ShowMessageFX.Warning(null, pxeModuleName, "Transaction No cannot be empty.");
+                    return;
+                }
+                VehicleSalesQuotation_EntryController controller2 = new VehicleSalesQuotation_EntryController(); //Should differ the parameter calling
+                //pass id in controller of entry
+                lsFXML = "/ph/com/guanzongroup/integsys/views/VehicleSalesQuotation_Entry.fxml";
+                controller2.setGRider(oApp);
+                controller2.setIndustryID(psIndustryId);
+                controller2.setCompanyID(psCompanyId);
+                controller2.setTransactionNo(lsTransactionNo);
+                controller = controller2;
+                lsTitle = "Vehicle Sales QUuotation Entry Dialog";
+                break;
+        }
         poJSON = new JSONObject();
         if (stageDialog != null) {
             stageDialog.closeDialog();
@@ -312,7 +317,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 stageDialog = null;
                 reloadRecords();
             });
-            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Vehicle Sales QUuotation Discount Dialog", true, false, false);
+            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, lsTitle, true, false, false);
         } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
