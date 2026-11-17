@@ -105,7 +105,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
 // key = variant description (the parent group), value = expanded or not
     private final Map<String, Boolean> poExpandedState = new HashMap<>();
     JFXUtil.ReloadableTableTask loadTableDetail, loadTablePriceHistory;
-    ObservableList<String> comboboxliststatus = FXCollections.observableArrayList("OPEN", "APPROVED", "CANCELLED", "VOID");
+    ObservableList<String> comboboxliststatus = FXCollections.observableArrayList("OPEN", "APPROVED", "CANCELLED", "VOID", "-All-");
     ObservableList<String> pricelistyears = FXCollections.observableArrayList();
     TreeItem<ModelVehiclePriceList_Detail> root = new TreeItem<>(new ModelVehiclePriceList_Detail("", "", "", "", "", "", "", "", "", ""));
     JFXUtil.StageManager stageDescription = new JFXUtil.StageManager();
@@ -294,7 +294,7 @@ public class VehiclePriceListController implements Initializable, ScreenInterfac
                     case "btnBrowse":
                         poController.Master().setRecordStatus("01234");
                         poJSON = poController.SearchTransaction(cmbSearchPriceListYear.getSelectionModel().getSelectedItem().toString(),
-                                String.valueOf(cmbSearchStatus.getSelectionModel().getSelectedIndex()));
+                                String.valueOf(cmbSearchStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbSearchStatus.getSelectionModel().getSelectedIndex()));
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             tfValidityID.requestFocus();
