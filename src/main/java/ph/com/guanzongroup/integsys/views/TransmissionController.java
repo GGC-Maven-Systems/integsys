@@ -20,16 +20,15 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
-import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
-
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ph.com.guanzongroup.cas.sales.TransmissionType;
-import ph.com.guanzongroup.cas.sales.status.TransmissionTypeStatus;
+import org.guanzon.cas.parameter.TransmissionType;
+import org.guanzon.cas.parameter.services.ParamControllers;
+import org.guanzon.cas.parameter.status.TransmissionTypeStatus;
 
 /**
  *
@@ -65,7 +64,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            poController = new SalesControllers(oApp, null).TransmissionType();
+            poController = new ParamControllers(oApp, null).TransmissionType();
             poController.initialize();
             poJSON = new JSONObject();
             initTextFields();
