@@ -91,9 +91,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     @FXML
     private Label lblStatus;
     @FXML
-    private TextField tfVariantID, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity, tfAttachmentNo, tfSearchVariant;
+    private TextField tfVariantID, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfTransmission, tfAuthorizeCapacity, tfAttachmentNo, tfSearchVariant;
     @FXML
-    private ComboBox cmbTransmission, cmbVehicleType, cmbBodyType;
+    private ComboBox cmbVehicleType, cmbBodyType;
     @FXML
     private CheckBox cbEndOfLife;
     @FXML
@@ -685,20 +685,20 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 switch (lsID) {
                     case "tfBrand":
                         if (lsValue.isEmpty()) {
-                            poController.setBrandIdId(null);
-                            poController.getModel().setModelId(null);
-                            poController.getModel().setColorId(null);
+                            poController.setBrandIdId("");
+                            poController.getModel().setModelId("");
+                            poController.getModel().setColorId("");
                         }
                         break;
                     case "tfModel":
                         if (lsValue.isEmpty()) {
-                            poController.getModel().setModelId(null);
-                            poController.getModel().setColorId(null);
+                            poController.getModel().setModelId("");
+                            poController.getModel().setColorId("");
                         }
                         break;
                     case "tfColor":
                         if (lsValue.isEmpty()) {
-                            poController.getModel().setColorId(null);
+                            poController.getModel().setColorId("");
                         }
                         break;
                     case "tfVariant":
@@ -709,7 +709,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         break;
                     case "tfYearModel":
                         lsValue = JFXUtil.removeComma(lsValue);
-                        if (lsValue.length() > 4) {
+                        if (lsValue.length() > 4 || lsValue.length() < 4) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Invalid year format. Please enter a 4-digit year");
                             loadRecordMaster();
                             return;
@@ -730,6 +730,11 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                         if (lsValue.isEmpty()) {
                         }
                         break;
+                    case "tfTransmission":
+                        if (lsValue.isEmpty()) {
+                            poController.getModelVariantInsurance().setTransmission("");
+                        }
+                        break;
                 }
                 loadRecordMaster();
             });
@@ -737,12 +742,6 @@ public class VehicleDescription_EntryController implements Initializable, Screen
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
-                    case "cmbTransmission":
-                        poJSON = poController.getModelVariantInsurance().setTransmission(String.valueOf(selectedValue));
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                        }
-                        break;
                     case "cmbVehicleType":
                         poJSON = poController.getModelVariantInsurance().setVehicleType(String.valueOf(selectedValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -760,7 +759,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
             });
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfSearchVariant, tfBrand, tfModel, tfColor, tfVariant, tfYearModel, tfAuthorizeCapacity, tfTransmission);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster);
         JFXUtil.inputIntegersOnly(tfYearModel, tfAuthorizeCapacity);
     }
@@ -824,6 +823,13 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                             }
                             loadRecordMaster();
                             break;
+                        case "tfTransmission":
+                            poJSON = poController.SearchTransmission(lsValue, false);
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadRecordMaster();
+                            break;
                     }
                     break;
                 default:
@@ -870,12 +876,7 @@ public class VehicleDescription_EntryController implements Initializable, Screen
                 JFXUtil.setCmbValue(cmbVehicleType, !poController.getModelVariantInsurance().getVehicleType().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getVehicleType()) : -1);
             }
 
-            if (JFXUtil.isObjectEqualTo(poController.getModelVariantInsurance().getTransmission(), "", null) && pnEditMode == EditMode.ADDNEW) {
-                poController.getModelVariantInsurance().setTransmission("Manual");
-                JFXUtil.setCmbValue(cmbTransmission, !poController.getModelVariantInsurance().getTransmission().equals("") ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
-            } else {
-                JFXUtil.setCmbValue(cmbTransmission, !poController.getModelVariantInsurance().getTransmission().equals("") && pnEditMode != EditMode.UNKNOWN ? String.valueOf(poController.getModelVariantInsurance().getTransmission()) : -1);
-            }
+            tfTransmission.setText(poController.getModelVariantInsurance().Transmission().getTransmissionDescription());
             tfAuthorizeCapacity.setText(CustomCommonUtil.setDecimalValueToIntegerFormat(poController.getModelVariantInsurance().getAuthCapx()));
             cbEndOfLife.setSelected(JFXUtil.isObjectEqualTo(poController.getModel().getEndOfLife(), "1"));
             JFXUtil.updateCaretPositions(apMaster);
@@ -905,9 +906,9 @@ public class VehicleDescription_EntryController implements Initializable, Screen
 
     private void initComboboxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlistBodyType, cmbBodyType),
-                new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType), new JFXUtil.Pairs<>(comboboxlistTransmission, cmbTransmission));
-        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType, cmbTransmission);
-        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType, cmbTransmission);
+                new JFXUtil.Pairs<>(comboboxlistVehicleType, cmbVehicleType));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbBodyType, cmbVehicleType);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbBodyType, cmbVehicleType);
     }
 
     private void initButton(int fnValue) {
