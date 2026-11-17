@@ -29,7 +29,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.Inclusion;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.FreebieStatus;
+import ph.com.guanzongroup.cas.sales.status.InclusionStatus;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -301,7 +301,7 @@ public class InclusionController implements Initializable, ScreenInterface {
 
     private void loadRecordMaster() {
         Platform.runLater(() -> {
-            JFXUtil.setStatusValue(lblStatus, FreebieStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
+            JFXUtil.setStatusValue(lblStatus, InclusionStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         });
         tfInclusionID.setText(poController.getModel().getInclusionId());
         tfDescription.setText(poController.getModel().getDescription());
@@ -309,7 +309,7 @@ public class InclusionController implements Initializable, ScreenInterface {
 
     private boolean isActive() {
         switch (poController.getModel().getRecordStatus()) {
-            case FreebieStatus.ACTIVE:
+            case InclusionStatus.ACTIVE:
                 return true;
         }
         return false;
@@ -332,20 +332,20 @@ public class InclusionController implements Initializable, ScreenInterface {
         }
         //enables disables visibility of buttons
         switch (poController.getModel().getRecordStatus()) {
-            case FreebieStatus.OPEN:
+            case InclusionStatus.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnVoid, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
-            case FreebieStatus.ACTIVE:
+            case InclusionStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnVoid);
                 break;
-            case FreebieStatus.INACTIVE:
+            case InclusionStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 break;
-            case FreebieStatus.VOID:
+            case InclusionStatus.VOID:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate);
