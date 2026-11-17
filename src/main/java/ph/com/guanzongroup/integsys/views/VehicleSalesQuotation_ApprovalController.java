@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javafx.util.Pair;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.BooleanProperty;
@@ -61,15 +60,12 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
-import org.guanzon.appdriver.constant.RecordStatus;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
-import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Freebies;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Main;
-import static ph.com.guanzongroup.integsys.views.VehicleSalesQuotation_EntryController.poController;
 
 /**
  * FXML Controller class
@@ -978,6 +974,11 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                     case "tfPromptPaymentDiscount":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.validatePromptPaymentDiscount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
+                        }
                         poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -1238,6 +1239,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                 return;
             }
             //detect if selected in cmbModeOfPayment is Cash, PO, Finance
+            JFXUtil.setDisabled(false, tfBank, tfRate, tfTerms, tfPromptPaymentDiscount);
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentForm(), null, "")) {
                 switch (poController.Detail(pnDetail).getPaymentForm()) {
                     case "0":
@@ -1246,7 +1248,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     case "1":
                         break;
                     case "2":
-                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
+                        JFXUtil.setDisabled(true, tfTerms, tfRate);
                         break;
                 }
             }

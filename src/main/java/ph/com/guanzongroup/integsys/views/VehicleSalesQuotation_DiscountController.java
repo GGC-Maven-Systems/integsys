@@ -141,6 +141,12 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
                         break;
                     case "tfAmount":
                         lsValue = JFXUtil.removeComma(lsValue);
+
+                        poJSON = poController.validateDiscount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
+                        }
                         poJSON = poController.DiscountList(pnDetail).setDiscountAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));

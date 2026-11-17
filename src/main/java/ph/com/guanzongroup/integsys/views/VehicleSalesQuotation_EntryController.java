@@ -62,7 +62,6 @@ import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
-import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Freebies;
 
 /**
@@ -936,6 +935,12 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                     case "tfPromptPaymentDiscount":
                         lsValue = JFXUtil.removeComma(lsValue);
+
+                        poJSON = poController.validatePromptPaymentDiscount(Double.parseDouble(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
+                        }
                         poJSON = poController.Detail(pnDetail).setPromptPaymentDiscount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -1248,6 +1253,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             //detect if selected in cmbModeOfPayment is Cash, PO, Finance
+            JFXUtil.setDisabled(false, tfBank, tfRate, tfTerms, tfPromptPaymentDiscount);
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentForm(), null, "")) {
                 switch (poController.Detail(pnDetail).getPaymentForm()) {
                     case "0":
@@ -1256,7 +1262,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "1":
                         break;
                     case "2":
-                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
+                        JFXUtil.setDisabled(true, tfTerms, tfRate);
                         break;
                 }
             }
