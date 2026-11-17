@@ -789,6 +789,96 @@
                                                       </AnchorPane>
                                                    </content>
                                                 </Tab>
+                                                <Tab closable="false" style="-fx-font-weight: bold;" text="Special Requests">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <AnchorPane minHeight="210.0" style="-fx-border-color: FF8201;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                               <children>
+                                                                  <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane fx:id="apSpecialRequests">
+                                                                           <children>
+                                                                              <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                 <columnConstraints>
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="105.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="500.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="18.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                                                                                 </columnConstraints>
+                                                                                 <rowConstraints>
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                 </rowConstraints>
+                                                                                 <children>
+                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Description">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="54.0" layoutY="16.0" text="Remarks" GridPane.rowIndex="1">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label text="Quantity" GridPane.columnIndex="4">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="684.0" layoutY="16.0" text="Amount" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label layoutX="687.0" layoutY="44.0" text="Charge To" GridPane.columnIndex="4" GridPane.rowIndex="2">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label text="Active" GridPane.columnIndex="7">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <TextField fx:id="tfSpecialRequestDesc" maxHeight="25.0" GridPane.columnIndex="2" />
+                                                                                    <TextField fx:id="tfSpecialRequestQuantity" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" />
+                                                                                    <TextField fx:id="tfSpecialRequestAmount" alignment="CENTER_RIGHT" layoutX="735.0" layoutY="12.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                                                                                    <ComboBox fx:id="cmbSpecialRequestChargeTo" prefWidth="150.0" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                                                                                    <CheckBox fx:id="cbActiveSpecialRequest" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" GridPane.halignment="LEFT" />
+                                                                                    <TextArea fx:id="taSpecialRequestRemarks" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2" />
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <TableView fx:id="tblViewSpecialRequests" VBox.vgrow="ALWAYS">
+                                                                           <columns>
+                                                                              <TableColumn fx:id="tblSpecialRequestNo" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
+                                                                              <TableColumn fx:id="tblSpecialRequestDescription" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
+                                                                              <TableColumn fx:id="tblSpecialRequestAmount" maxWidth="80.0" minWidth="80.0" text="Amount" />
+                                                                              <TableColumn fx:id="tblSpecialRequestQuantity" maxWidth="80.0" minWidth="80.0" text="Quantity" />
+                                                                              <TableColumn fx:id="tblSpecialRequestTotalAmount" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Total Amount" />
+                                                                              <TableColumn fx:id="tblSpecialRequestChargeTo" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Charge To" />
+                                                                           </columns>
+                                                                           <VBox.margin>
+                                                                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                                           </VBox.margin>
+                                                                        </TableView>
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
                                              </tabs>
                                           </TabPane>
                                        </children>
