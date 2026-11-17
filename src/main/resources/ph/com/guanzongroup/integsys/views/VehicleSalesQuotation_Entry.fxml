@@ -762,6 +762,74 @@
                                                       </AnchorPane>
                                                   </content>
                                                 </Tab>
+                                                <Tab closable="false" style="-fx-font-weight: bold;" text="Add Ons">
+                                                   <content>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <AnchorPane minHeight="210.0" style="-fx-border-color: FF8201;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                               <children>
+                                                                  <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane fx:id="apAddOns">
+                                                                           <children>
+                                                                              <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                 <columnConstraints>
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="105.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="500.0" />
+                                                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="10.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
+                                                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="18.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="5.0" />
+                                                                                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                                                                                 </columnConstraints>
+                                                                                 <rowConstraints>
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
+                                                                                    <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                 </rowConstraints>
+                                                                                 <children>
+                                                                                    <Label layoutX="66.0" layoutY="45.0" text="Description">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label text="Quantity" GridPane.columnIndex="4">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <Label text="Active" GridPane.columnIndex="7">
+                                                                                       <font>
+                                                                                          <Font size="12.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                    <TextField fx:id="tfDescriptionAddOns" maxHeight="25.0" promptText="Press F3: Search" GridPane.columnIndex="2" />
+                                                                                    <TextField fx:id="tfQuantityFreebies1" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" />
+                                                                                    <CheckBox fx:id="cbActive1" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" GridPane.halignment="LEFT" />
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <TableView fx:id="tblViewFreebies1" VBox.vgrow="ALWAYS">
+                                                                           <columns>
+                                                                              <TableColumn fx:id="tblNoFreebies1" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" text="No" />
+                                                                              <TableColumn fx:id="tblDescriptionFreebies1" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" text="Description" />
+                                                                              <TableColumn fx:id="tblQuantityFreebies1" maxWidth="80.0" minWidth="80.0" text="Quantity" />
+                                                                           </columns>
+                                                                           <VBox.margin>
+                                                                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                                                                           </VBox.margin>
+                                                                        </TableView>
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
                                              </tabs>
                                              <VBox.margin>
                                                 <Insets top="5.0" />
