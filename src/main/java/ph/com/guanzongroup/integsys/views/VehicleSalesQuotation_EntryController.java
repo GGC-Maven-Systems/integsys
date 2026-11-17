@@ -2017,30 +2017,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                     continue;
                                 }
                                 lnCount += 1;
-                                String lsChargeTo = "";
-                                switch (poController.SpecialRequestList(lnCtr).getChargeTo()) {
-                                    case "0":
-                                        lsChargeTo = "Client";
-                                        break;
-                                    case "1":
-                                        lsChargeTo = "Dealer";
-                                        break;
-                                    case "2":
-                                        lsChargeTo = "Bank";
-                                        break;
-                                    case "3":
-                                        lsChargeTo = "Charge";
-                                        break;
-                                    case "4":
-                                        lsChargeTo = "Free";
-                                        break;
-                                    case "5":
-                                        lsChargeTo = "None";
-                                        break;
-                                    default:
-                                        lsChargeTo = "";
-                                        break;
-                                }
+                                String lsChargeTo = getChargeTo(Integer.parseInt(poController.SpecialRequestList(lnCtr).getChargeTo()));
                                 specialrequests_data.add(
                                         new ModelVehicleQuotation_SpecialRequests(String.valueOf(lnCount),
                                                 getData(poController.SpecialRequestList(lnCtr).getRequestDescription()),
@@ -2074,6 +2051,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                     });
                 });
+    }
+
+    public String getChargeTo(int index) {
+        if (index >= 0 && index < chargeTo.size()) {
+            return chargeTo.get(index);
+        }
+        return null; // or "None" / throw an exception
     }
 
     private void initAddOnsGrid() {
