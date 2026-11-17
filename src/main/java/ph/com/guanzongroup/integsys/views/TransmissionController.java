@@ -20,9 +20,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
-import ph.com.guanzongroup.cas.sales.DiscountType;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
-import ph.com.guanzongroup.cas.sales.status.DiscountTypeStatus;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 import java.net.URL;
@@ -30,6 +28,8 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ph.com.guanzongroup.cas.sales.TransmissionType;
+import ph.com.guanzongroup.cas.sales.status.TransmissionTypeStatus;
 
 /**
  *
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 public class TransmissionController implements Initializable, ScreenInterface {
 
     private GRiderCAS oApp;
-    static DiscountType poController;
+    static TransmissionType poController;
     private JSONObject poJSON;
     public int pnEditMode;
     private String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
@@ -65,7 +65,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            poController = new SalesControllers(oApp, null).DiscountType();
+            poController = new SalesControllers(oApp, null).TransmissionType();
             poController.initialize();
             poJSON = new JSONObject();
             initTextFields();
@@ -184,7 +184,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, "Record saved successfully.");
-                                poJSON = poController.openRecord(poController.getModel().getDiscountType());
+                                poJSON = poController.openRecord(poController.getModel().getTransmissionCode());
                                 if ("success".equals((String) poJSON.get("result"))) {
                                     if (ShowMessageFX.YesNo(null, pxeModuleName, "Do you want to activate the record?") == false) {
                                         pnEditMode = poController.getEditMode();
@@ -196,7 +196,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                                     } else {
                                         ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                     }
-                                    poController.openRecord(poController.getModel().getDiscountType());
+                                    poController.openRecord(poController.getModel().getTransmissionCode());
                                 }
                                 pnEditMode = poController.getEditMode();
                             }
@@ -214,7 +214,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        poController.openRecord(poController.getModel().getDiscountType());
+                        poController.openRecord(poController.getModel().getTransmissionCode());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnVoid":
@@ -227,7 +227,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        poController.openRecord(poController.getModel().getDiscountType());
+                        poController.openRecord(poController.getModel().getTransmissionCode());
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnDeactivate":
@@ -240,7 +240,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                         } else {
                             ShowMessageFX.Information(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        poController.openRecord(poController.getModel().getDiscountType());
+                        poController.openRecord(poController.getModel().getTransmissionCode());
                         pnEditMode = poController.getEditMode();
                         break;
                     default:
@@ -260,7 +260,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfDescription":
-                        poJSON = poController.getModel().setDiscountDescription(lsValue);
+                        poJSON = poController.getModel().setTransmissionDescription(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -301,15 +301,15 @@ public class TransmissionController implements Initializable, ScreenInterface {
 
     private void loadRecordMaster() {
         Platform.runLater(() -> {
-            JFXUtil.setStatusValue(lblStatus, DiscountTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
+            JFXUtil.setStatusValue(lblStatus, TransmissionTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         });
-        tfTransmissionID.setText(poController.getModel().getDiscountType());
-        tfDescription.setText(poController.getModel().getDiscountDescription());
+        tfTransmissionID.setText(poController.getModel().getTransmissionCode());
+        tfDescription.setText(poController.getModel().getTransmissionDescription());
     }
 
     private boolean isActive() {
         switch (poController.getModel().getRecordStatus()) {
-            case DiscountTypeStatus.ACTIVE:
+            case TransmissionTypeStatus.ACTIVE:
                 return true;
         }
         return false;
@@ -331,20 +331,20 @@ public class TransmissionController implements Initializable, ScreenInterface {
         }
 
         switch (poController.getModel().getRecordStatus()) {
-            case DiscountTypeStatus.OPEN:
+            case TransmissionTypeStatus.OPEN:
                 JFXUtil.setButtonsVisibility(true, btnVoid, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnDeactivate);
                 break;
-            case DiscountTypeStatus.ACTIVE:
+            case TransmissionTypeStatus.ACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnActivate, btnVoid);
                 break;
-            case DiscountTypeStatus.INACTIVE:
+            case TransmissionTypeStatus.INACTIVE:
                 JFXUtil.setButtonsVisibility(true, btnActivate);
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 break;
-            case DiscountTypeStatus.VOID:
+            case TransmissionTypeStatus.VOID:
                 JFXUtil.setButtonsVisibility(false, btnUpdate);
                 JFXUtil.setButtonsVisibility(false, btnVoid, btnDeactivate);
                 JFXUtil.setButtonsVisibility(false, btnActivate);

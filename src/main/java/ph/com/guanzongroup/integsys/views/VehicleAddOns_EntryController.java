@@ -967,7 +967,7 @@ public class VehicleAddOns_EntryController implements Initializable, ScreenInter
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail, cbActiveAll);
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove);
-        disableRowCheckbox.set(details_data.isEmpty() || !lbShow1); // set enable/disable in checkboxes in requirements
+        disableRowCheckbox.set(!lbShow1); // set enable/disable in checkboxes in requirements
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);
         }
