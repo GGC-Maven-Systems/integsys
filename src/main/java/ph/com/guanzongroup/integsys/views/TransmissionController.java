@@ -1,5 +1,6 @@
 package ph.com.guanzongroup.integsys.views;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -55,7 +56,9 @@ public class TransmissionController implements Initializable, ScreenInterface {
     @FXML
     private Button btnBrowse, btnNew, btnSave, btnUpdate, btnCancel, btnActivate, btnVoid, btnDeactivate, btnHistory, btnClose;
     @FXML
-    private TextField tfDiscType, tfDescription;
+    private FontAwesomeIconView faActivate111, faActivate, faActivate1, faActivate11;
+    @FXML
+    private TextField tfTransmissionID, tfDescription;
     @FXML
     private Label lblStatus;
 
@@ -115,7 +118,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
                         poJSON = poController.searchRecord("", false);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-                            tfDiscType.requestFocus();
+                            tfTransmissionID.requestFocus();
                             return;
                         }
                         pnEditMode = poController.getEditMode();
@@ -300,7 +303,7 @@ public class TransmissionController implements Initializable, ScreenInterface {
         Platform.runLater(() -> {
             JFXUtil.setStatusValue(lblStatus, DiscountTypeStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.getModel().getRecordStatus());
         });
-        tfDiscType.setText(poController.getModel().getDiscountType());
+        tfTransmissionID.setText(poController.getModel().getDiscountType());
         tfDescription.setText(poController.getModel().getDiscountDescription());
     }
 
