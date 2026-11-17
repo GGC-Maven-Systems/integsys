@@ -1064,7 +1064,7 @@ public class VehiclePromotions_EntryController implements Initializable, ScreenI
                                                 String.valueOf(lnCtr + 1),
                                                 getData(poController.TransactionList(lnCtr).getValidityId()),
                                                 String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
-                                                String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getFromDate())),
+                                                String.valueOf(CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getThruDate())),
                                                 getData(poController.TransactionList(lnCtr).getValidityDescription()),
                                                 "",
                                                 "",
