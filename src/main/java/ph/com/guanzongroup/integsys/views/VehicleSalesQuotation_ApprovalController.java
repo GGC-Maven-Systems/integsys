@@ -1237,6 +1237,19 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            //detect if selected in cmbModeOfPayment is Cash, PO, Finance
+            if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentForm(), null, "")) {
+                switch (poController.Detail(pnDetail).getPaymentForm()) {
+                    case "0":
+                        JFXUtil.setDisabled(true, tfBank, tfRate, tfTerms, tfPromptPaymentDiscount);
+                        break;
+                    case "1":
+                        break;
+                    case "2":
+                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
+                        break;
+                }
+            }
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
             JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
 

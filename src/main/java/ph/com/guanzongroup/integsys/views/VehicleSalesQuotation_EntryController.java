@@ -171,8 +171,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 } else {
                     poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
-                
-                if(psTransactionNo != null && !"".equals(psTransactionNo)){
+
+                if (psTransactionNo != null && !"".equals(psTransactionNo)) {
                     try {
                         poJSON = poController.remake(psTransactionNo);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
@@ -1246,6 +1246,19 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         try {
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
+            }
+            //detect if selected in cmbModeOfPayment is Cash, PO, Finance
+            if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentForm(), null, "")) {
+                switch (poController.Detail(pnDetail).getPaymentForm()) {
+                    case "0":
+                        JFXUtil.setDisabled(true, tfBank, tfRate, tfTerms, tfPromptPaymentDiscount);
+                        break;
+                    case "1":
+                        break;
+                    case "2":
+                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
+                        break;
+                }
             }
             boolean lbIsDiscountNone = poController.getDiscountListCount() <= 0;
             JFXUtil.setVisibility(!lbIsDiscountNone, tfTotalDiscount);
