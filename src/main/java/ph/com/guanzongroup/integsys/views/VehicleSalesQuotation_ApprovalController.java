@@ -340,7 +340,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             return;
                         }
                         pnEditMode = poController.Master().getEditMode();
-//                        poController.populateVehicleList();
                         break;
                     case "btnApprove":
                         poJSON = new JSONObject();
@@ -726,6 +725,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         loadTableFreebies.reload();
         loadRecordPricing();
         loadRecordAdditionalInfo();
+        loadTableSpecialRequests.reload();
     }
     ChangeListener<Boolean> txtBrowse_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -1383,9 +1383,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     private void loadRecordFreebies() {
         JFXUtil.clearTextFields(apFreebies);
         try {
-
-//            JFXUtil.setDisabled(poController.FreebiesList(pnFreebies).getEditMode() == EditMode.UPDATE, tfDescription);
-            //identifier 2
             switch (freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex05()) {
                 case "AddOn":
                     if (pnFreebies < 0 || pnFreebies > poController.getAddOnListCount() - 1) {
@@ -1741,23 +1738,17 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     }
 
     public void moveNextSpecialRequests(boolean isUp, boolean continueNext) {
-//        try {
         if (continueNext) {
             apSpecialRequests.requestFocus();
-            //must get as well the lstype even in here for proper movenext
             pnSpecialRequest = isUp ? Integer.parseInt(specialrequests_data.get(JFXUtil.moveToPreviousRow(tblViewSpecialRequests)).getIndex07())
                     : Integer.parseInt(specialrequests_data.get(JFXUtil.moveToNextRow(tblViewSpecialRequests)).getIndex07());
         }
         loadRecordSpecialRequest();
-        //add identifier by getting its identifying index
         if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
             return;
         }
         JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
             {poController.SpecialRequestList(pnSpecialRequest).getRequestDescription(), tfSpecialRequestDesc},}, tfSpecialRequestAmount); // default
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     public boolean isContainsChecked() {
@@ -1961,8 +1952,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 if (!addOns_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewAddOns, getDetailFilter(addOns_data, pnAddOns, 7, lsTypeAddOns, 8, 2));
-//                                    int lnRow = Integer.parseInt(addOns_data.get(0).getIndex07());
-//                                    pnAddOns = lnRow;
                                     loadRecordAddOns();
                                 }
                             } else {
@@ -2066,7 +2055,6 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                //lsTypeFreebies
                                 JFXUtil.selectAndFocusRow(tblViewFreebies, getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)); //focus
                                 int lnRow = Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, pnFreebies, 6, lsTypeFreebies, 5, 1)).getIndex06());
                                 pnFreebies = lnRow;
@@ -2336,7 +2324,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks);
+        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate);
