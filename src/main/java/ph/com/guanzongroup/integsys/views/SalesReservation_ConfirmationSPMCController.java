@@ -537,6 +537,8 @@ public class SalesReservation_ConfirmationSPMCController implements Initializabl
                     .getName()).log(Level.SEVERE, null, ex);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SalesReservation_ConfirmationSPMCController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SalesReservation_ConfirmationSPMCController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

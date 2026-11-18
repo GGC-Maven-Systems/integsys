@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+
+<AnchorPane fx:id="apRoot" maxHeight="30.0" styleClass="chip-container" stylesheets="@css/APListChip.css" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label fx:id="lblDisplay" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Pangangisan" HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnRemove" mnemonicParsing="false" styleClass="chip-remove-btn">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CLOSE" size="11" />
+                    </graphic>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+    <padding>
+        <Insets bottom="3.0" left="8.0" right="5.0" top="3.0" />
+    </padding>
+</AnchorPane>

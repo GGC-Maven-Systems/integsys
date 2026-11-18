@@ -209,7 +209,7 @@ public class SalesInquiry_EntryMPController implements Initializable, ScreenInte
 
                         break;
                     case "btnAddClient":
-                        if(pnEditMode == EditMode.ADDNEW){
+                        if (pnEditMode == EditMode.ADDNEW) {
                             if (poSalesInquiryController.SalesInquiry().getDetailCount() > 1) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName,
                                         "Are you sure you want to change the client?\nPlease note that this action will delete all sales inquiry details.\n\nDo you wish to proceed?") == true) {
@@ -972,6 +972,9 @@ public class SalesInquiry_EntryMPController implements Initializable, ScreenInte
         } catch (GuanzonException | SQLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
 
@@ -1114,7 +1117,7 @@ public class SalesInquiry_EntryMPController implements Initializable, ScreenInte
         dragLock.isEnabled = lbShow;
 
         // Manage visibility and managed state of other buttons
-        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW , btnAddClient);
+        JFXUtil.setButtonsVisibility(fnValue == EditMode.ADDNEW, btnAddClient);
         JFXUtil.setButtonsVisibility(!lbShow, btnNew);
         JFXUtil.setButtonsVisibility(lbShow, btnSearch, btnSave, btnCancel);
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
