@@ -477,15 +477,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             loadRecordMaster();
                             break;
-                        case "tfFinancingRate":
-                            poJSON = poController.SearchVehicleFinancing(lsValue, false, pnDetail);
-                            if (!JFXUtil.isJSONSuccess(poJSON)) {
-                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-                            } else {
-                                JFXUtil.textFieldMoveNext(tfBrand);
-                            }
-                            reloadRecords();
-                            break;
                         case "tfBrand":
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
                                 if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Brand().getBrandId(), null, "")
@@ -676,7 +667,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             poController.Detail(pnDetail).setDownPayment(0.0000);
             poController.Detail(pnDetail).setReservationAmount(0.0000);
             poController.Detail(pnDetail).setPromptPaymentDiscount(0.00);
-            poController.Detail(pnDetail).setQuotationRate("");
+            poController.Detail(pnDetail).setBankId("");
             poController.Detail(pnDetail).setDuration(0);
             poController.Detail(pnDetail).setRateValue(0.00);
         }
@@ -708,8 +699,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 poController.Detail(pnDetail).SalesInquiry().setClientId("");
                             }
                             break;
-                        case "tfFinancingRate":
-                            return;
 
                     }
                     loadRecordMaster();
@@ -939,7 +928,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 switch (lsID) {
                     case "tfBank":
                         if (lsValue.isEmpty()) {
-                            poController.Detail(pnDetail).setQuotationRate("");
+                            poController.Detail(pnDetail).setBankId("");
                         }
                         break;
                     case "tfTerms":
@@ -1084,10 +1073,10 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             //detect if changed
                             String lsModeofPayment = String.valueOf(selectedIndex);
                             if (lsModeofPayment.equals("0")
-                            && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).FinancingRate().Bank().getBankName(), null, "")) {
+                            && !JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Banks().getBankName(), null, "")) {
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the mode of payment into Cash?\nThis action will reset the Additional Info.") == true) {
                                     poController.Detail(0).setPromptPaymentDiscount(0.00);
-                                    poController.Detail(0).setQuotationRate("");
+                                    poController.Detail(0).setBankId("");
                                     loadRecordPricing();
                                     loadRecordAdditionalInfo();
                                 } else {
@@ -1391,7 +1380,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 return;
             }
             poController.computeFields();
-            tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
+            tfBank.setText(poController.Detail(pnDetail).Banks().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
             tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
@@ -1792,7 +1781,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
         JFXUtil.handleDisabledNodeClick(apAdditionalInfo, pnEditMode, nodeID -> {
             if (nodeID.equals("tfBank")) {
-                ShowMessageFX.Information(null, pxeModuleName, "Bank field is available only if Mode of Payment is Finance or PO");
+                ShowMessageFX.Information(null, pxeModuleName, "Bank field is available only if Mode of Payment is Financing or PO");
             }
         });
     }

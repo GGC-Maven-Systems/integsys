@@ -285,6 +285,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
+
     //unique OpenParameter() since btnRemake is available
     private void openParameter(String lsType, String lsTransactionNo) {
         String lsFXML = "";
@@ -619,7 +620,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 return;
             }
             poController.computeFields();
-            tfBank.setText(poController.Detail(pnDetail).FinancingRate().Bank().getBankName());
+            tfBank.setText(poController.Detail(pnDetail).Banks().getBankName());
             tfTerms.setText(String.valueOf(poController.Detail(pnDetail).getDuration()));
             tfAmountToFinance.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getFinancingAmount().doubleValue(), true));
             tfNetMonthlyInstallment.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getMonthlyAmount().doubleValue(), true));
