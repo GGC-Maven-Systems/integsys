@@ -1424,6 +1424,10 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         initButton(pnEditMode);
 
                         LoadRecord();
+                        // dropdowns left empty by the copied version default to index 0
+                        if (cmbDeliveryMethod.getSelectionModel().getSelectedIndex() < 0) cmbDeliveryMethod.getSelectionModel().select(0);
+                        if (cmbPaymentForm.getSelectionModel().getSelectedIndex() < 0) cmbPaymentForm.getSelectionModel().select(0);
+                        if (cmbPaymentVAT.getSelectionModel().getSelectedIndex() < 0) cmbPaymentVAT.getSelectionModel().select(0);
                         loadTableMCItem();
                         loadTableGawayItem();
                         break;
@@ -1566,6 +1570,11 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         initButton(pnEditMode);
 
                         LoadRecord();
+                        // all dropdowns default to index 0 (listeners write the value to the model)
+                        cmbDeliveryMethod.getSelectionModel().select(0);
+                        cmbPaymentForm.getSelectionModel().select(0);
+                        cmbPaymentVAT.getSelectionModel().select(0);
+                        clearMCItemTextFields();   // Registration / Insurance -> index 1
                         loadTableMCItem();
                         loadTableGawayItem();
                         break;
@@ -1599,6 +1608,17 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             initButton(pnEditMode);
                             clearTextFields();
                             clearTransactionSummary();
+                            // cancel (new entry or update mode): dropdowns go back to empty
+                            cmbDeliveryMethod.getSelectionModel().clearSelection();
+                            cmbPaymentForm.getSelectionModel().clearSelection();
+                            cmbPaymentVAT.getSelectionModel().clearSelection();
+                            pbSyncingMCCombos = true;
+                            try {
+                                cmbRegistration.getSelectionModel().clearSelection();
+                                cmbInsurance.getSelectionModel().clearSelection();
+                            } finally {
+                                pbSyncingMCCombos = false;
+                            }
                         }
                         break;
                 }
@@ -1693,7 +1713,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
 
                     case "tfMCItemBrand":
                     case "tfMCItemModel":
-                        if (pnMCRow < 0) break;
+                        if (pnMCRow < 0 || pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) break;
                         try {
                             if (tfMCItemBrand.getText().trim().isEmpty() || tfMCItemModel.getText().trim().isEmpty()) {
                                 tfMCItemBrand.clear();
@@ -1706,7 +1726,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         }
                         break;
                     case "tfMCItemPromo":
-                        if (pnMCRow < 0) break;
+                        if (pnMCRow < 0 || pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) break;
                         try {
                             if (tfMCItemPromo.getText().trim().isEmpty()) {
                                 String lsPromo = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode();
@@ -1726,7 +1746,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                         }
                         break;
                     case "tfMCItemQuantity":
-                        if (pnMCRow < 0) break;
+                        if (pnMCRow < 0 || pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) break;
                         try {
                             int lnQty = lsValue == null || lsValue.trim().isEmpty() ? 0 : Integer.parseInt(lsValue.trim());
                             poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setQuantity(lnQty);
@@ -1748,7 +1768,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                     case "tfMCItemRegisAmt":
                     case "tfMCItemInsuranceAmt":
                     case "tfMCItemAddDiscount":
-                        if (pnMCRow < 0) break;
+                        if (pnMCRow < 0 || pnMCRow >= oSalesController.SalesQoutation().Version().getDetailCount()) break;
                         try {
                             double lnAmt = lsValue == null || lsValue.trim().isEmpty()
                                     ? 0.00 : Double.parseDouble(lsValue.replace(",", "").trim());
@@ -2066,18 +2086,16 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
         tfMCItemQuantity.clear();
         tfMCItemPromo.clear();
 
-        // the constants are codes, not combo indexes, so look the index up in the code arrays
         pbSyncingMCCombos = true;
         try {
-            cmbRegistration.getSelectionModel().select(
-                    Arrays.asList(SalesQoutationStatic.REGISTRATION_CODE).indexOf(SalesQoutationStatic.Registration.EMPTY));
-            cmbInsurance.getSelectionModel().select(
-                    Arrays.asList(SalesQoutationStatic.INSURANCE_CODE).indexOf(SalesQoutationStatic.InsuranceType.EMPTY));
+            // Registration / Insurance default to index 1
+            cmbRegistration.getSelectionModel().select(1);
+            cmbInsurance.getSelectionModel().select(1);
         } finally {
             pbSyncingMCCombos = false;
         }
-        tfMCItemRegisAmt.setEditable(false);
-        tfMCItemInsuranceAmt.setEditable(false);
+        tfMCItemRegisAmt.setEditable(SalesQoutationStatic.Registration.YES.equals(SalesQoutationStatic.REGISTRATION_CODE[1]));
+        tfMCItemInsuranceAmt.setEditable(SalesQoutationStatic.InsuranceType.YES.equals(SalesQoutationStatic.INSURANCE_CODE[1]));
         updateMCComboState();
 
     }
