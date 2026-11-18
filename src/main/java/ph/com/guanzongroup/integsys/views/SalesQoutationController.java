@@ -1083,14 +1083,11 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                         if (pnEditMode == EditMode.ADDNEW
                                 || pnEditMode == EditMode.UPDATE) {
 
-                            int lnLast = loGiveaways.getGiveawayCount() - 1;
+                            // drop every blank placeholder row first (a promo search can leave
+                            // one in the middle of the list), then keep exactly one at the end
+                            loGiveaways.Giveaways().removeIf(m -> gawayRowRank(m) == 2);
 
-                            boolean lbLastBlank = lnLast >= 0
-                                    && gawayRowRank(loGiveaways.Giveaway(lnLast)) == 2;
-
-                            if (!lbLastBlank) {
-                                poJSON = loGiveaways.addGiveaway();
-                            }
+                            poJSON = loGiveaways.addGiveaway();
                         }
 
                         /*
@@ -1656,12 +1653,22 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                             if (tfMCItemPromo.getText().trim().isEmpty()) {
                                 String lsPromo = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode();
                                 if (lsPromo == null || lsPromo.isEmpty()) break;   // row has no promo: keep manually typed discounts
+
+                                // remove the giveaways that came from this promo (before the promo code is cleared)
+                                poJSON = oSalesController.SalesQoutation().RemoveMCItemPromoGiveaways(lsPromo);
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                }
+                                pnGawayRow = -1;
+                                clearGawayItemTextFields();
+
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setPromoCode(null);
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setDiscount(0.0);
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setAdditionalDiscount(0.0);
                                 tfMCItemDiscount.setText("0.0");
                                 tfMCItemAddDiscount.setText("0.0");
                                 loadTableMCItem();
+                                loadTableGawayItem();   // refresh the giveaway table
                                 return;
                             }
                             tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode());
@@ -1923,6 +1930,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 tfMCItemAddDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getAdditionalDiscount(), false));
                                 tfMCItemFreight.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getFreight(), false));
                                 loadTableMCItem();
+                                loadTableGawayItem();   // <-- added: refresh the giveaway table with the promo's giveaways
                                 break;
                             case "tfDeliveryAddress":
                                 String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
