@@ -135,7 +135,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     @FXML
     private Label lblSource, lblStatus, lblTotalDiscount;
     @FXML
-    private TextField tfSearchClient, tfSearchTransactionNo, tfTransactionNo, tfClient, tfAddress, tfContactNo, tfEmail, tfInquiryNo, tfBranch, tfSalesPerson, tfBrand, tfModel, tfVariant, tfTransmission, tfYear, tfColor, tfSRP, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp, tfOtherAddOnsTotal, tfTotalDiscount, tfTotalAmount, tfBank, tfTerms, tfRate, tfAmountToFinance, tfNetMonthlyInstallment, tfPromptPaymentDiscount, tfGrossMonthlyInstallment, tfPromissoryNoteAmount, tfAddOns, tfAccessories, tfAmount, tfQuantity, tfDescription, tfQuantityFreebies, tfSpecialRequestDesc, tfSpecialRequestQuantity, tfSpecialRequestAmount;
+    private TextField tfSearchClient, tfSearchTransactionNo, tfTransactionNo, tfClient, tfAddress, tfContactNo, tfEmail, tfInquiryNo, tfBranch, tfSalesPerson, tfBrand, tfModel, tfVariant, tfTransmission, tfYear, tfColor, tfSRP, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp, tfOtherAddOnsTotal, tfTotalDiscount, tfTotalAmount, tfCoverageYear, tfBank, tfTerms, tfRate, tfAmountToFinance, tfNetMonthlyInstallment, tfPromptPaymentDiscount, tfGrossMonthlyInstallment, tfPromissoryNoteAmount, tfAddOns, tfAccessories, tfAmount, tfQuantity, tfDescription, tfQuantityFreebies, tfSpecialRequestDesc, tfSpecialRequestQuantity, tfSpecialRequestAmount;
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
@@ -145,13 +145,13 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
     @FXML
     private ComboBox cmbReceivingMethod, cmbModeOfPayment, cmbPaymentTiming, cmbSpecialRequestChargeTo;
     @FXML
+    private CheckBox cbLockIn, cbActive, cbActiveSpecialRequest;
+    @FXML
     private TextArea taRemarks, taSpecialRequestRemarks;
     @FXML
     private TableView tblViewAddOns, tblViewFreebies, tblViewSpecialRequests, tblViewMain;
     @FXML
     private TableColumn tblNoAddOns, tblDescriptionAddOns, tblAmount, tblQuantityAddOns, tblTotal, tblNoFreebies, tblDescriptionFreebies, tblQuantityFreebies, tblSpecialRequestNo, tblSpecialRequestDescription, tblSpecialRequestAmount, tblSpecialRequestQuantity, tblSpecialRequestTotalAmount, tblSpecialRequestChargeTo, tblNoMain, tblDate, tblTransactionNo, tblClient;
-    @FXML
-    private CheckBox cbActive, cbActiveSpecialRequest;
     @FXML
     private Pagination pgPagination;
 
@@ -967,6 +967,21 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "tfCoverageYear":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        if (lsValue.length() > 1) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Invalid format. Please enter a 1-digit e.g. 0-5");
+                            loadRecordMaster();
+                            return;
+                        }
+                        if (Integer.parseInt(lsValue) == 0) {
+                            poController.Detail(pnDetail).setInsuranceLocked(false);
+                        }
+                        poJSON = poController.Detail(pnDetail).setInsuranceYears(Integer.parseInt(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
                 loadRecordPricing();
                 loadRecordAdditionalInfo();
@@ -1341,7 +1356,9 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
-
+            cbLockIn.setSelected(poController.Detail(pnDetail).isInsuranceLocked());
+            JFXUtil.setDisabled(!cbLockIn.isSelected(), tfCoverageYear);
+            tfCoverageYear.setText(String.valueOf(poController.Detail(pnDetail).getInsuranceYears()));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1467,6 +1484,18 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     if (!checkedBox.isSelected()) {
                         moveNextSpecialRequests(false, true);
                     }
+                    break;
+                case "cbLockIn":
+                    poJSON = poController.Detail(pnDetail).setInsuranceLocked(checkedBox.isSelected());
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    }
+                    if (!checkedBox.isSelected()) {
+                        poController.Detail(pnDetail).setInsuranceYears(0);
+                    } else {
+                        poController.Detail(pnDetail).setInsuranceYears(1);
+                    }
+                    loadRecordPricing();
                     break;
             }
         }
@@ -1769,7 +1798,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setFocusListener(txtSpecialRequests_Focus, tfSpecialRequestDesc, tfSpecialRequestQuantity, tfSpecialRequestAmount);
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apBrowse, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apAddOns, apFreebies);
-        JFXUtil.inputIntegersOnly(tfTerms);
+        JFXUtil.inputIntegersOnly(tfTerms, tfCoverageYear);
         JFXUtil.setCommaFormatter(tfSpecialRequestAmount, tfPromptPaymentDiscount, tfCHMODocStamp, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfAmount);
         CustomCommonUtil.inputIntegersOnly(tfSpecialRequestQuantity, tfQuantity, tfQuantityFreebies);
 

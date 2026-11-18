@@ -918,6 +918,21 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
+                    case "tfCoverageYear":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        if (lsValue.length() > 1) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Invalid format. Please enter a 1-digit e.g. 0-5");
+                            loadRecordMaster();
+                            return;
+                        }
+                        if (Integer.parseInt(lsValue) == 0) {
+                            poController.Detail(pnDetail).setInsuranceLocked(false);
+                        }
+                        poJSON = poController.Detail(pnDetail).setInsuranceYears(Integer.parseInt(lsValue));
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        break;
                 }
                 loadRecordPricing();
                 loadRecordAdditionalInfo();
@@ -1367,7 +1382,9 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfOtherAddOnsTotal.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getOtherAddOnTotal().doubleValue(), true));
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
-
+            cbLockIn.setSelected(poController.Detail(pnDetail).isInsuranceLocked());
+            JFXUtil.setDisabled(!cbLockIn.isSelected(), tfCoverageYear);
+            tfCoverageYear.setText(String.valueOf(poController.Detail(pnDetail).getInsuranceYears()));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1484,6 +1501,18 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     if (!checkedBox.isSelected()) {
                         moveNextSpecialRequests(false, true);
                     }
+                    break;
+                case "cbLockIn":
+                    poJSON = poController.Detail(pnDetail).setInsuranceLocked(checkedBox.isSelected());
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    }
+                    if (!checkedBox.isSelected()) {
+                        poController.Detail(pnDetail).setInsuranceYears(0);
+                    } else {
+                        poController.Detail(pnDetail).setInsuranceYears(1);
+                    }
+                    loadRecordPricing();
                     break;
             }
         }
@@ -1772,7 +1801,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apVehicleInfo, apPricing, apAdditionalInfo, apAddOns, apFreebies, apSpecialRequests);
         JFXUtil.inputDecimalOnly(tfRate);
-        JFXUtil.inputIntegersOnly(tfTerms);
+        JFXUtil.inputIntegersOnly(tfTerms, tfCoverageYear);
         JFXUtil.setCommaFormatter(tfSpecialRequestAmount, tfPromptPaymentDiscount, tfCHMODocStamp, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfAmount);
         CustomCommonUtil.inputIntegersOnly(tfQuantity, tfQuantityFreebies, tfSpecialRequestQuantity);
 
