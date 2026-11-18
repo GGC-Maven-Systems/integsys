@@ -183,7 +183,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 loadRecordSearch();
                 if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 } else {
-                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
+//                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
 
                 if (psTransactionNo != null && !"".equals(psTransactionNo)) {
@@ -280,7 +280,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-//                        ValidFrom = CustomCommonUtil.parseDateStringToLocalDate(CustomCommonUtil.formatDateToShortString(poController.Master().getFromDate()));
                         pnEditMode = poController.getEditMode();
                         break;
                     case "btnCancel":
@@ -290,7 +289,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             clearTextFields();
                             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                             } else {
-                                poController.Detail(pnDetail).setCompanyId(psCompanyId);
+//                                poController.Detail(pnDetail).setCompanyId(psCompanyId);
                             }
                             pnEditMode = EditMode.UNKNOWN;
                             break;
@@ -697,6 +696,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         loadTableFreebies.reload();
         loadRecordPricing();
         loadRecordAdditionalInfo();
+        loadTableSpecialRequests.reload();
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
@@ -1124,7 +1124,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             loadRecordPricing();
                             break;
                         case "cmbSpecialRequestChargeTo":
-                            poJSON = poController.SpecialRequestList(pnSpecialRequest).setChargeTo(String.valueOf(selectedValue));
+                            poJSON = poController.SpecialRequestList(pnSpecialRequest).setChargeTo(String.valueOf(selectedIndex));
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -1460,28 +1460,39 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             if (poController.AddOnList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
                                 poController.AddOnList().remove(pnFreebies);
                             } else {
-                                poController.AddOnList(pnFreebies).setRecordStatus(cbActive.isSelected());
+                                poController.AddOnList(pnFreebies).setRecordStatus(checkedBox.isSelected());
                             }
                             break;
                         case "Freebies":
                             if (poController.FreebiesList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
                                 poController.FreebiesList().remove(pnFreebies);
                             } else {
-                                poController.FreebiesList(pnFreebies).setRecordStatus(cbActive.isSelected());
+                                poController.FreebiesList(pnFreebies).setRecordStatus(checkedBox.isSelected());
                             }
                             break;
                         case "Inclusion":
                             if (poController.InclusionList(pnFreebies).getEditMode() == EditMode.ADDNEW) {
                                 poController.InclusionList().remove(pnFreebies);
                             } else {
-                                poController.InclusionList(pnFreebies).setRecordStatus(cbActive.isSelected());
+                                poController.InclusionList(pnFreebies).setRecordStatus(checkedBox.isSelected());
                             }
                             break;
-                    }
 
+                    }
                     reloadFreebiesAndAddOns();
                     if (!checkedBox.isSelected()) {
                         moveNextFreebies(false, true);
+                    }
+                    break;
+                case "cbActiveSpecialRequest":
+                    if (poController.SpecialRequestList(pnSpecialRequest).getEditMode() == EditMode.ADDNEW) {
+                        poController.SpecialRequestList().remove(pnSpecialRequest);
+                    } else {
+                        poController.SpecialRequestList(pnSpecialRequest).setRecordStatus(checkedBox.isSelected());
+                    }
+                    loadTableSpecialRequests.reload();
+                    if (!checkedBox.isSelected()) {
+                        moveNextSpecialRequests(false, true);
                     }
                     break;
             }
@@ -1638,7 +1649,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void initComboboxes() {
         // ComboBox setup
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(chargeTo, cmbPaymentTiming), new JFXUtil.Pairs<>(paymentTiming, cmbSpecialRequestChargeTo));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(paymentTiming, cmbPaymentTiming), new JFXUtil.Pairs<>(chargeTo, cmbSpecialRequestChargeTo));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbReceivingMethod, cmbModeOfPayment, cmbPaymentTiming, cmbSpecialRequestChargeTo);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbReceivingMethod, cmbModeOfPayment, cmbPaymentTiming, cmbSpecialRequestChargeTo);
     }
@@ -2043,8 +2054,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 poController.ReloadSpecialRequestList();
                             }
                             for (int lnCtr = 0; lnCtr < poController.getSpecialRequestListCount(); lnCtr++) {
-                                if ((poController.SpecialRequestList(lnCtr).getTransactionNo() == null || "".equals(poController.SpecialRequestList(lnCtr).getTransactionNo())) //Do not reload empty add on Id in freebies table
-                                        || !poController.SpecialRequestList(lnCtr).getRecordStatus()) {
+                                if ( //Do not reload empty add on Id in freebies table
+                                        !poController.SpecialRequestList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;

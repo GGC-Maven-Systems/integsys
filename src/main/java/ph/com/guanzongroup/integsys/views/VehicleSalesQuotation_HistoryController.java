@@ -57,11 +57,9 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javax.script.ScriptException;
 import org.guanzon.appdriver.base.SQLUtil;
-import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.cas.sales.VehicleQuotation;
 import ph.com.guanzongroup.cas.sales.services.SalesControllers;
 import ph.com.guanzongroup.cas.sales.status.VehicleQuotationStatus;
-import ph.com.guanzongroup.integsys.model.ModelSalesInquiry_Detail;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_Freebies;
 import ph.com.guanzongroup.integsys.model.ModelVehicleQuotation_SpecialRequests;
 
@@ -176,7 +174,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                 loadRecordSearch();
                 if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 } else {
-                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
+//                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
             });
             loadRecordSearch();
@@ -747,7 +745,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void initComboboxes() {
         // ComboBox setup
-        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(chargeTo, cmbPaymentTiming), new JFXUtil.Pairs<>(paymentTiming, cmbSpecialRequestChargeTo));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(receivingmethod, cmbReceivingMethod), new JFXUtil.Pairs<>(PurchaseType, cmbModeOfPayment), new JFXUtil.Pairs<>(paymentTiming, cmbPaymentTiming), new JFXUtil.Pairs<>(chargeTo, cmbSpecialRequestChargeTo));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbReceivingMethod, cmbModeOfPayment, cmbPaymentTiming, cmbSpecialRequestChargeTo);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbReceivingMethod, cmbModeOfPayment, cmbPaymentTiming, cmbSpecialRequestChargeTo);
     }
@@ -1139,8 +1137,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                                 poController.ReloadSpecialRequestList();
                             }
                             for (int lnCtr = 0; lnCtr < poController.getSpecialRequestListCount(); lnCtr++) {
-                                if ((poController.SpecialRequestList(lnCtr).getTransactionNo() == null || "".equals(poController.SpecialRequestList(lnCtr).getTransactionNo())) //Do not reload empty add on Id in freebies table
-                                        || !poController.SpecialRequestList(lnCtr).getRecordStatus()) {
+                                if (!poController.SpecialRequestList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
