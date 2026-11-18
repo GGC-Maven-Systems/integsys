@@ -803,8 +803,8 @@
                                                                                     <TextField fx:id="tfSpecialRequestQuantity" alignment="CENTER_RIGHT" maxHeight="25.0" promptText="0" GridPane.columnIndex="6" />
                                                                                     <TextField fx:id="tfSpecialRequestAmount" alignment="CENTER_RIGHT" layoutX="735.0" layoutY="12.0" maxHeight="25.0" promptText="0.00" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                                                                                     <ComboBox fx:id="cmbSpecialRequestChargeTo" prefWidth="150.0" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                                                                                    <CheckBox fx:id="cbActiveSpecialRequest" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" GridPane.halignment="LEFT" />
                                                                                     <TextArea fx:id="taSpecialRequestRemarks" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2" />
+                                                                                    <CheckBox fx:id="cbActiveSpecialRequest" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="9" GridPane.halignment="LEFT" />
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>
