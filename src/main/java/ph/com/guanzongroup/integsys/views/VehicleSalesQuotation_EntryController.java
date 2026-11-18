@@ -621,16 +621,14 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(true, true)},
                         {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(true, true)},
-                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(true, true)},
-                    });
+                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(true, true)},});
 
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(false, true)},
                         {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(false, true)},
-                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(false, true)},
-                    });
+                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(false, true)},});
                     break;
                 default:
                     break;
@@ -1053,9 +1051,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        JFXUtil.runWithDelay(0.40, () -> {
+                            if (pbEnteredSpecialRequests) {
+                                moveNextSpecialRequests(false, true);
+                                pbEnteredSpecialRequests = false;
+                            }
+                        });
                         break;
                 }
-                loadRecordSpecialRequest();
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableSpecialRequests.reload();
+                });
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -1066,6 +1072,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        loadRecordMaster();
                         break;
                     case "taSpecialRequestRemarks":
                         poJSON = poController.SpecialRequestList(pnSpecialRequest).setRemarks(lsValue);
@@ -1075,7 +1082,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         loadRecordSpecialRequest();
                         break;
                 }
-                loadRecordMaster();
             });
 
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(

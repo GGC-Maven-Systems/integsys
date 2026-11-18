@@ -1089,9 +1089,17 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        JFXUtil.runWithDelay(0.40, () -> {
+                            if (pbEnteredSpecialRequests) {
+                                moveNextSpecialRequests(false, true);
+                                pbEnteredSpecialRequests = false;
+                            }
+                        });
                         break;
                 }
-                loadRecordSpecialRequest();
+                JFXUtil.runWithDelay(.5, () -> {
+                    loadTableSpecialRequests.reload();
+                });
             });
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
@@ -1111,9 +1119,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         }
                         loadRecordSpecialRequest();
                         break;
-
                 }
-
             });
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
@@ -1147,9 +1153,15 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
                             break;
+                        case "cmbSpecialRequestChargeTo":
+                            poJSON = poController.SpecialRequestList(pnSpecialRequest).setChargeTo(String.valueOf(selectedValue));
+                            if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            }
+                            loadTableSpecialRequests.reload();
+                            break;
                     }
 
-                    loadRecordVehicleInfo();
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
