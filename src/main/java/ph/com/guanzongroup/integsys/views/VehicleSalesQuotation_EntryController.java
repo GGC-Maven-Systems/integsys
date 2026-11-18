@@ -620,13 +620,17 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                 case UP:
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(true, true)},
-                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(true, true)},});
+                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(true, true)},
+                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(true, true)},
+                    });
 
                     break;
                 case DOWN:
                     JFXUtil.altSwitch(lsID, new Object[][]{
                         {new String[]{"tfAddOns", "tfAccessories", "tfAmount", "tfQuantity"}, (Runnable) () -> moveNextAddOns(false, true)},
-                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(false, true)},});
+                        {new String[]{"tfDescription", "tfQuantityFreebies"}, (Runnable) () -> moveNextFreebies(false, true)},
+                        {new String[]{"tfSpecialRequestDesc", "tfSpecialRequestAmount"}, (Runnable) () -> moveNextSpecialRequests(false, true)},
+                    });
                     break;
                 default:
                     break;
@@ -663,6 +667,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         pnFreebies = isMovedDown ? Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, lnNum, 6, lsTypeFreebies, 5, 1)).getIndex06())
                                 : Integer.parseInt(freebies_data.get(getDetailFilter(freebies_data, lnNum, 6, lsTypeFreebies, 5, 1)).getIndex06());
                         loadRecordFreebies();
+                    }
+                    break;
+                case "tblViewSpecialRequests":
+                    if (!specialrequests_data.isEmpty()) {
+                        pnSpecialRequest = isMovedDown ? Integer.parseInt(specialrequests_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                                : Integer.parseInt(specialrequests_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
+                        loadRecordSpecialRequest();
                     }
                     break;
             }
@@ -1030,11 +1041,15 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         }
                         break;
                     case "tfSpecialRequestQuantity":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.SpecialRequestList(pnSpecialRequest).setQuantity(Integer.parseInt(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
                         break;
                     case "tfSpecialRequestAmount":
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.SpecialRequestList(pnSpecialRequest).setAmount(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -1051,6 +1066,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        break;
+                    case "taSpecialRequestRemarks":
+                        poJSON = poController.SpecialRequestList(pnSpecialRequest).setRemarks(lsValue);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        loadRecordSpecialRequest();
                         break;
                 }
                 loadRecordMaster();
@@ -1254,10 +1276,13 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     private void loadRecordSpecialRequest() {
+        if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
+            return;
+        }
         tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
         tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
         tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
-        JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnDetail).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
+        JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnSpecialRequest).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
         cbActiveSpecialRequest.setSelected(poController.SpecialRequestList(pnSpecialRequest).getRecordStatus());
         taSpecialRequestRemarks.setText(poController.SpecialRequestList(pnSpecialRequest).getRemarks());
     }
@@ -1724,7 +1749,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             return;
         }
         JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-            {poController.SpecialRequestList(pnSpecialRequest).getRequestDescription(), tfSpecialRequestDesc},}, tfSpecialRequestQuantity); // default
+            {poController.SpecialRequestList(pnSpecialRequest).getRequestDescription(), tfSpecialRequestDesc},}, tfSpecialRequestAmount); // default
 //        } catch (SQLException | GuanzonException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //        }
@@ -1735,7 +1760,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     public void initTextFields() {
-        JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
+        JFXUtil.setFocusListener(txtArea_Focus, taRemarks, taSpecialRequestRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient);
         JFXUtil.setFocusListener(txtVehicleInfo_Focus, tfBrand, tfModel, tfVariant);
         JFXUtil.setFocusListener(txtPricing_Focus, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp);
