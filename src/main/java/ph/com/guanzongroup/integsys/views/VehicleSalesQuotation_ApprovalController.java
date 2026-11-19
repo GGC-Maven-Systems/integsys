@@ -1331,7 +1331,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                     case "1":
                         break;
                     case "2":
-                        JFXUtil.setDisabled(true, tfTerms, tfRate);
+                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
                         break;
                 }
             }
@@ -1791,7 +1791,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks, taSpecialRequestRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient);
         JFXUtil.setFocusListener(txtVehicleInfo_Focus, tfBrand, tfModel, tfVariant);
-        JFXUtil.setFocusListener(txtPricing_Focus, tfCoverageYear,tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp);
+        JFXUtil.setFocusListener(txtPricing_Focus, tfCoverageYear, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp);
         JFXUtil.setFocusListener(txtAdditionalInfo_Focus, tfBank, tfTerms, tfRate, tfPromptPaymentDiscount);
         JFXUtil.setFocusListener(txtAddOns_Focus, tfAddOns, tfAccessories, tfAmount, tfQuantity);
         JFXUtil.setFocusListener(txtFreebies_Focus, tfDescription, tfQuantityFreebies);

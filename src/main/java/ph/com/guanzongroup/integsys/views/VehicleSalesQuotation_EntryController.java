@@ -1347,7 +1347,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            //detect if selected in cmbModeOfPayment is Cash, PO, Finance
+            //detect if selected in cmbModeOfPayment is Cash , Finance,PO
             JFXUtil.setDisabled(false, tfBank, tfRate, tfTerms, tfPromptPaymentDiscount);
             if (!JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).getPaymentForm(), null, "")) {
                 switch (poController.Detail(pnDetail).getPaymentForm()) {
@@ -1357,7 +1357,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                     case "1":
                         break;
                     case "2":
-                        JFXUtil.setDisabled(true, tfTerms, tfRate);
+                        JFXUtil.setDisabled(true, tfTerms, tfRate, tfPromptPaymentDiscount);
                         break;
                 }
             }
