@@ -228,7 +228,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
 //                    poController.Detail(pnDetail).setCompanyId(psCompanyId);
                 }
             });
-            poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
+            poController.setTransactionStatus(VehicleQuotationStatus.APPROVED);
             lblSource.setText(poController.Company().getCompanyName());
             loadRecordSearch();
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField); // for btnSearch Reference
@@ -369,7 +369,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
                         }
                         break;
                     case "btnBrowse":
-                        poController.setTransactionStatus(VehicleQuotationStatus.OPEN);
+                        poController.setTransactionStatus(VehicleQuotationStatus.APPROVED);
                         poJSON = poController.SearchTransaction(psValidityId, true);
                         if ("error".equalsIgnoreCase((String) poJSON.get("result"))) {
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
@@ -380,8 +380,8 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
                         break;
                     case "btnApprove":
                         poJSON = new JSONObject();
-                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to approve transaction?") == true) {
-                            poJSON = poController.ApproveTransaction();
+                        if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to confirm transaction?") == true) {
+                            poJSON = poController.ConfirmTransaction();
                             if ("error".equals((String) poJSON.get("result"))) {
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
@@ -2344,7 +2344,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
         JFXUtil.onTabSelected(tabPaneMain, tabTitle -> {
             switch (tabTitle) {
                 case "Attachment":
-                    if (pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE || pnEditMode == EditMode.ADDNEW) {
+                    if (pnEditMode == EditMode.READY) {
                         JFXUtil.clearTextFields(apAttachments);
                         try {
                             poController.loadAttachments();
@@ -2734,8 +2734,11 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
             case VehicleQuotationStatus.CANCELLED:
                 JFXUtil.setButtonsVisibility(false, btnUpdate, btnVoid, btnApprove, btnPrint);
                 break;
-            case VehicleQuotationStatus.APPROVED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnApprove);
+//            case VehicleQuotationStatus.APPROVED:
+//                JFXUtil.setButtonsVisibility(false, btnUpdate);
+//                break;
+            case VehicleQuotationStatus.CONFIRMED:
+                JFXUtil.setButtonsVisibility(false, btnUpdate,btnApprove);
                 break;
         }
     }
