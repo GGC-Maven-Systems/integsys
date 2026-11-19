@@ -145,9 +145,8 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
             "Client",
             "Dealer",
             "Bank",
-            "Charge",
-            "Free",
-            "None"
+            "Plant",
+            "Free"
     );
     ObservableList<String> paymentTiming = FXCollections.observableArrayList(
             "Pay with Quotation",

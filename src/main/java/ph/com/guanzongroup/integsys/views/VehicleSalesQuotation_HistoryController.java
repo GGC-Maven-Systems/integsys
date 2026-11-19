@@ -106,9 +106,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             "Client",
             "Dealer",
             "Bank",
-            "Charge",
-            "Free",
-            "None"
+            "Plant",
+            "Free"
     );
     ObservableList<String> paymentTiming = FXCollections.observableArrayList(
             "Pay with Quotation",

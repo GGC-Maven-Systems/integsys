@@ -110,9 +110,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             "Client",
             "Dealer",
             "Bank",
-            "Charge",
-            "Free",
-            "None"
+            "Plant",
+            "Free"
     );
     ObservableList<String> paymentTiming = FXCollections.observableArrayList(
             "Pay with Quotation",
