@@ -923,7 +923,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         if (lsValue.length() > 1) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Invalid format. Please enter a 1-digit e.g. 0-5");
                             loadRecordMaster();
-                            return;
+                            break;
                         }
                         if (Integer.parseInt(lsValue) == 0) {
                             poController.Detail(pnDetail).setInsuranceLocked(false);
@@ -1383,7 +1383,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             tfTotalAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getTotalAmount().doubleValue(), true));
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
             cbLockIn.setSelected(poController.Detail(pnDetail).isInsuranceLocked());
-            JFXUtil.setDisabled(!cbLockIn.isSelected(), tfCoverageYear);
+            JFXUtil.setDisabled(!poController.Detail(pnDetail).isInsuranceLocked(), tfCoverageYear);
             tfCoverageYear.setText(String.valueOf(poController.Detail(pnDetail).getInsuranceYears()));
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1793,7 +1793,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setFocusListener(txtArea_Focus, taRemarks, taSpecialRequestRemarks);
         JFXUtil.setFocusListener(txtMaster_Focus, tfClient);
         JFXUtil.setFocusListener(txtVehicleInfo_Focus, tfBrand, tfModel, tfVariant);
-        JFXUtil.setFocusListener(txtPricing_Focus, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp);
+        JFXUtil.setFocusListener(txtPricing_Focus, tfCoverageYear, tfDownpayment, tfReservationAmount, tfTPLAmount, tfComprehensiveAmount, tfLTOAmount, tfCHMODocStamp);
         JFXUtil.setFocusListener(txtAdditionalInfo_Focus, tfBank, tfTerms, tfRate, tfPromptPaymentDiscount);
         JFXUtil.setFocusListener(txtAddOns_Focus, tfAddOns, tfAccessories, tfAmount, tfQuantity);
         JFXUtil.setFocusListener(txtFreebies_Focus, tfDescription, tfQuantityFreebies);
