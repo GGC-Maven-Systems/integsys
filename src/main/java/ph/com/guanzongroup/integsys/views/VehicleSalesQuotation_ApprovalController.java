@@ -1101,6 +1101,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordSpecialRequest();
                     loadTableSpecialRequests.reload();
                 });
             });

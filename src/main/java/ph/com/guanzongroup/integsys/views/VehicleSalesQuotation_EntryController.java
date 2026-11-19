@@ -1055,6 +1055,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordSpecialRequest();
                     loadTableSpecialRequests.reload();
                 });
             });

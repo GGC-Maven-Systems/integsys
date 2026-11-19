@@ -4,6 +4,7 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -111,6 +112,8 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
     private TableView tblViewFinancingTerms, tblViewDetail;
     @FXML
     private TableColumn tblType, tblDurationFinancingTerms, tblRateFinancingTerms, tblRateID, tblBank, tblDurationViewDetail, tblRateViewDetail, tblDIRate, tblSIRate, tblStatus;
+    @FXML
+    private FontAwesomeIconView faInfo;
 
     /**
      * Initializes the controller class.
@@ -488,6 +491,9 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewFinancingTerms, tblViewDetail);
 
         JFXUtil.adjustColumnForScrollbar(tblViewFinancingTerms, tblViewDetail);
+//        icon.setOnMouseEntered(event -> {
+//            System.out.println("Mouse entered");
+//        });
     }
 
     private String getStandardType(String lsValue) {

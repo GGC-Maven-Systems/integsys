@@ -1244,6 +1244,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
                         break;
                 }
                 JFXUtil.runWithDelay(.5, () -> {
+                    loadRecordSpecialRequest();
                     loadTableSpecialRequests.reload();
                 });
             });
