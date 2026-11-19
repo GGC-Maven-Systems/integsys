@@ -1112,7 +1112,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             break;
                         case "cmbPaymentTiming":
-                            poJSON = poController.Detail(pnSpecialRequest).setPaymentOption(String.valueOf(selectedValue));
+                            poJSON = poController.Detail(pnSpecialRequest).setPaymentOption(String.valueOf(selectedIndex));
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
