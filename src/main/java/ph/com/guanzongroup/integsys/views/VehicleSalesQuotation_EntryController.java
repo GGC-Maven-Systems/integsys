@@ -2216,7 +2216,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
+        JFXUtil.setDisabled(!lbShow1, apVehicleInfo,apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient);
         if (psTransactionNo != null && !"".equals(psTransactionNo)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);

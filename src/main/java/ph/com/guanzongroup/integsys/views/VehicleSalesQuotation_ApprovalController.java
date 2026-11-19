@@ -2342,7 +2342,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
+        JFXUtil.setDisabled(!lbShow1, apVehicleInfo,apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate);

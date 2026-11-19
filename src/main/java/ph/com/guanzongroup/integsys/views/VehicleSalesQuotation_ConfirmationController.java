@@ -2698,15 +2698,15 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
         JFXUtil.setButtonsVisibility(lbShow2, btnApprove, btnPrint, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests, apAttachmentButtons);
-        JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru);
+        JFXUtil.setDisabled(true, apVehicleInfo,apMaster,apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests, apAttachmentButtons);
+        JFXUtil.setDisabled(true, dpExpectedDate, dpValidThru);
         if (psValidityId != null && !"".equals(psValidityId)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate);
         }
 
         boolean lbShow4 = fnValue == EditMode.UPDATE;
         if (lbShow4) {
-            JFXUtil.setDisabledExcept(true, apMaster, dpExpectedDate, dpValidThru);
+//            JFXUtil.setDisabledExcept(true, apMaster, dpExpectedDate, dpValidThru);
         }
         if (fnValue != EditMode.READY) {
             return;
