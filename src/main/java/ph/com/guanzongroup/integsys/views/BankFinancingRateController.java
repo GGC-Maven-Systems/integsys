@@ -491,9 +491,10 @@ public class BankFinancingRateController implements Initializable, ScreenInterfa
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewFinancingTerms, tblViewDetail);
 
         JFXUtil.adjustColumnForScrollbar(tblViewFinancingTerms, tblViewDetail);
-//        icon.setOnMouseEntered(event -> {
-//            System.out.println("Mouse entered");
-//        });
+
+        faInfo.setOnMouseClicked(event -> {
+            JFXUtil.showTooltip("Double-click a row to update the existing record.", faInfo);
+        });
     }
 
     private String getStandardType(String lsValue) {
