@@ -1731,15 +1731,25 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                             if (tfMCItemPromo.getText().trim().isEmpty()) {
                                 String lsPromo = oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode();
                                 if (lsPromo == null || lsPromo.isEmpty()) break;   // row has no promo: keep manually typed discounts
+
+                                // remove the giveaways that came from this promo (before the promo code is cleared)
+                                poJSON = oSalesController.SalesQoutation().RemoveMCItemPromoGiveaways(lsPromo);
+                                if ("error".equals((String) poJSON.get("result"))) {
+                                    ShowMessageFX.Warning((String) poJSON.get("message"), pxeModuleName, null);
+                                }
+                                pnGawayRow = -1;
+                                clearGawayItemTextFields();
+
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setPromoCode(null);
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setDiscount(0.0);
                                 poJSON = oSalesController.SalesQoutation().Version().Detail(pnMCRow).setAdditionalDiscount(0.0);
                                 tfMCItemDiscount.setText("0.0");
                                 tfMCItemAddDiscount.setText("0.0");
                                 loadTableMCItem();
+                                loadTableGawayItem();   // refresh the giveaway table
                                 return;
                             }
-                            tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode());
+                            tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).Promo().getPromoDescription());
 
                         } catch (Exception e) {
                             Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
@@ -1961,13 +1971,15 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
                                     return;
                                 }
                                 Model_Sales_Quotation_Version_Detail loDetx = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
-                                tfMCItemPromo.setText(poJSON.get("PromoDesc").toString());
+                                tfMCItemPromo.setText(loDetx.Promo().getPromoDescription());
                                 tfMCItemInsuranceAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getInsuranceAmount(), false));
                                 tfMCItemRegisAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getRegistrationAmount(), false));
                                 tfMCItemDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getDiscount(), false));
                                 tfMCItemAddDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getAdditionalDiscount(), false));
                                 tfMCItemFreight.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getFreight(), false));
                                 loadTableMCItem();
+                                loadTableGawayItem();   // <-- added: refresh the giveaway table with the promo's giveaways
+                                LoadMCItemRecord();
                                 break;
                             case "tfDeliveryAddress":
                                 String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
@@ -2119,7 +2131,7 @@ public class SalesQoutationPreviewController implements Initializable, ScreenInt
             tfMCItemRegisAmt.setText(safe(loDet::getRegistrationAmount));
             tfMCItemInsuranceAmt.setText(safe(loDet::getInsuranceAmount));
             tfMCItemQuantity.setText(safe(loDet::getQuantity));
-            tfMCItemPromo.setText(loDet.getPromoCode());
+            tfMCItemPromo.setText(loDet.Promo().getPromoDescription());
             tfMCItemAddDiscount.setText(safe(loDet::getAdditionalDiscount));
 
             pbSyncingMCCombos = true;

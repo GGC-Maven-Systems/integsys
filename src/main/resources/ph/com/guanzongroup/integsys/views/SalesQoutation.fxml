@@ -27,7 +27,7 @@
 
 <?import java.net.URL?>
 
-<AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.381" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="ChildAnchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -523,7 +523,7 @@
                                        <children>
                                           <TabPane style="-fx-border-color: F37C01;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                              <tabs>
-                                                <Tab text="MOTORCYCLE ITEM">
+                                                <Tab closable="false" text="MOTORCYCLE ITEM">
                                                    <content>
                                                       <AnchorPane>
                                                          <children>
@@ -667,7 +667,7 @@
                                                       </AnchorPane>
                                                    </content>
                                                 </Tab>
-                                                <Tab text="GIVEAWAY / SERVICES">
+                                                <Tab closable="false" text="GIVEAWAY / SERVICES">
                                                    <content>
                                                       <AnchorPane>
                                                          <children>
@@ -757,7 +757,7 @@
                                                       </AnchorPane>
                                                    </content>
                                                 </Tab>
-                                                <Tab text="ADDITIONAL REMARKS">
+                                                <Tab closable="false" text="ADDITIONAL REMARKS">
                                                    <content>
                                                       <AnchorPane>
                                                          <children>

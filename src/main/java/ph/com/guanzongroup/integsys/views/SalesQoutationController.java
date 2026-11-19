@@ -1671,7 +1671,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 loadTableGawayItem();   // refresh the giveaway table
                                 return;
                             }
-                            tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).getPromoCode());
+                            tfMCItemPromo.setText(oSalesController.SalesQoutation().Version().Detail(pnMCRow).Promo().getPromoDescription());
 
                         } catch (Exception e) {
                             Logger.getLogger(SalesQoutationController.class.getName()).log(Level.SEVERE, null, e);
@@ -1923,7 +1923,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                     return;
                                 }
                                 Model_Sales_Quotation_Version_Detail loDetx = oSalesController.SalesQoutation().Version().Detail(pnMCRow);
-                                tfMCItemPromo.setText(poJSON.get("PromoDesc").toString());
+                                tfMCItemPromo.setText(loDetx.Promo().getPromoDescription());
                                 tfMCItemInsuranceAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getInsuranceAmount(), false));
                                 tfMCItemRegisAmt.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getRegistrationAmount(), false));
                                 tfMCItemDiscount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getDiscount(), false));
@@ -1931,6 +1931,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
                                 tfMCItemFreight.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(loDetx.getFreight(), false));
                                 loadTableMCItem();
                                 loadTableGawayItem();   // <-- added: refresh the giveaway table with the promo's giveaways
+                                LoadMCItemRecord();
                                 break;
                             case "tfDeliveryAddress":
                                 String lsDeliveryMethod = String.valueOf(cmbDeliveryMethod.getSelectionModel().getSelectedIndex());
@@ -2084,7 +2085,7 @@ public class SalesQoutationController implements Initializable, ScreenInterface 
             tfMCItemRegisAmt.setText(safe(loDet::getRegistrationAmount));
             tfMCItemInsuranceAmt.setText(safe(loDet::getInsuranceAmount));
             tfMCItemQuantity.setText(safe(loDet::getQuantity));
-            tfMCItemPromo.setText(loDet.getPromoCode());
+            tfMCItemPromo.setText(loDet.Promo().getPromoDescription());
             tfMCItemAddDiscount.setText(safe(loDet::getAdditionalDiscount));
 
             // set the combos without triggering their listeners, then sync the editable state here instead
