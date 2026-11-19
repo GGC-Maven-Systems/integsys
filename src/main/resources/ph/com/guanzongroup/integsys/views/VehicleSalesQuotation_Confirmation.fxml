@@ -653,7 +653,7 @@
                                                                      </columnConstraints>
                                                                      <rowConstraints>
                                                                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="50.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints prefHeight="50.0" vgrow="SOMETIMES" />
                                                                      </rowConstraints>
                                                                      <children>
                                                                         <Label text="Remarks" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
