@@ -1246,6 +1246,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
 
     private void loadRecordAddOns() {
         try {
+            JFXUtil.clearTextFields(apAddOns);
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
             } else {

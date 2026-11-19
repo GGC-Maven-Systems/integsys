@@ -1216,6 +1216,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
     private void loadRecordAddOns() {
         try {
+            JFXUtil.clearTextFields(apAddOns);
             if (pnEditMode == EditMode.READY) {
                 disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
             } else {

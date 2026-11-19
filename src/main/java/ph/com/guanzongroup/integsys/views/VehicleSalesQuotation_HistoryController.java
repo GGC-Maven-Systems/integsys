@@ -513,6 +513,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void loadRecordAddOns() {
         try {
+            JFXUtil.clearTextFields(apAddOns);
             poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
