@@ -513,12 +513,6 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
     private void loadRecordAddOns() {
         try {
-            if (pnEditMode == EditMode.READY) {
-                disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-            } else {
-                disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-            }
-
             poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
@@ -1336,6 +1330,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
         JFXUtil.setButtonsVisibility(lbShow2, btnHistory, btnPrint, btnDeduct, btnRemake);
 
         JFXUtil.setDisabled(true, apMaster, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
+        disableRowCheckbox.set(true);
 
         if (fnValue != EditMode.READY) {
             return;

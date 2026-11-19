@@ -1389,12 +1389,6 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
 
     private void loadRecordAddOns() {
         try {
-            if (pnEditMode == EditMode.READY) {
-                disableRowCheckbox.set(true); // set true to disable the checkboxes in multiple rows
-            } else {
-                disableRowCheckbox.set(false); // set false to enable the checkboxes in multiple rows
-            }
-
             poController.computeFields();
             boolean lbShow1 = (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE);
             JFXUtil.setDisabled(!lbShow1, tfAddOns, tfAccessories);
@@ -1575,6 +1569,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
             if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
                 return;
             }
+            JFXUtil.setDisabled(poController.SpecialRequestList(pnSpecialRequest).getEditMode() == EditMode.UPDATE, tfSpecialRequestDesc);
             tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
             tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
             tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
@@ -2725,6 +2720,7 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
         if (lbShow4) {
 //            JFXUtil.setDisabledExcept(true, apMaster, dpExpectedDate, dpValidThru);
         }
+        disableRowCheckbox.set(true);
         if (fnValue != EditMode.READY) {
             return;
         }

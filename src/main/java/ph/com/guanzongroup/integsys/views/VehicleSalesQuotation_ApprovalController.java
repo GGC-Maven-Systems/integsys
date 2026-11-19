@@ -1432,6 +1432,7 @@ public class VehicleSalesQuotation_ApprovalController implements Initializable, 
             if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
                 return;
             }
+            JFXUtil.setDisabled(poController.SpecialRequestList(pnSpecialRequest).getEditMode() == EditMode.UPDATE, tfSpecialRequestDesc);
             tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
             tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
             tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
