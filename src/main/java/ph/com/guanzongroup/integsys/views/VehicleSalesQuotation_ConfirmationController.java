@@ -1963,38 +1963,42 @@ public class VehicleSalesQuotation_ConfirmationController implements Initializab
                 tblViewMain,
                 main_data,
                 () -> {
-                    Platform.runLater(() -> {
-                        main_data.clear();
-                        JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
-                        // Simulate loading delay
-//                        Thread.sleep(100);
-                        if (poController.getTransactionListCount() > 0) {
-                            for (int lnCtr = 0; lnCtr <= poController.getTransactionListCount() - 1; lnCtr++) {
-                                try {
-                                    main_data.add(new ModelVehicleQuotation_Main(String.valueOf(lnCtr + 1),
-                                            CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getTransactionDate()),
-                                            String.valueOf(poController.TransactionList(lnCtr).getTransactionNo()),
-                                            String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
-                                    ));
-                                } catch (Exception e) {
+                    try {
+                        Thread.sleep(100);
+                        Platform.runLater(() -> {
+                            main_data.clear();
+                            JFXUtil.disableAllHighlight(tblViewMain, highlightedRowsMain);
+                            // Simulate loading delay
+                            if (poController.getTransactionListCount() > 0) {
+                                for (int lnCtr = 0; lnCtr <= poController.getTransactionListCount() - 1; lnCtr++) {
+                                    try {
+                                        main_data.add(new ModelVehicleQuotation_Main(String.valueOf(lnCtr + 1),
+                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).getTransactionDate()),
+                                                String.valueOf(poController.TransactionList(lnCtr).getTransactionNo()),
+                                                String.valueOf(poController.TransactionList(lnCtr).Client().getCompanyName())
+                                        ));
+                                    } catch (Exception e) {
+                                    }
+                                }
+                                if (pnMain < 0 || pnMain
+                                        >= main_data.size()) {
+                                    if (!main_data.isEmpty()) {
+                                        /* FOCUS ON FIRST ROW */
+                                        tblViewMain.getSelectionModel().select(0);
+                                        tblViewMain.getFocusModel().focus(0);
+                                        pnMain = tblViewMain.getSelectionModel().getSelectedIndex();
+                                    }
+                                } else {
+                                    /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
+                                    tblViewMain.getSelectionModel().select(pnMain);
+                                    tblViewMain.getFocusModel().focus(pnMain);
                                 }
                             }
-                            if (pnMain < 0 || pnMain
-                                    >= main_data.size()) {
-                                if (!main_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    tblViewMain.getSelectionModel().select(0);
-                                    tblViewMain.getFocusModel().focus(0);
-                                    pnMain = tblViewMain.getSelectionModel().getSelectedIndex();
-                                }
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnRowDetail POINTS TO */
-                                tblViewMain.getSelectionModel().select(pnMain);
-                                tblViewMain.getFocusModel().focus(pnMain);
-                            }
-                        }
-                        JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMain, filteredData);
-                    });
+                            JFXUtil.loadTab(pgPagination, main_data.size(), ROWS_PER_PAGE, tblViewMain, filteredData);
+                        });
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
                 });
         loadTableAddOns = new JFXUtil.ReloadableTableTask(
                 tblViewAddOns,
