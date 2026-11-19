@@ -69,6 +69,7 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
     private TableView tblViewDetail;
     @FXML
     private TableColumn tblNo, tblDiscountType, tblAmount;
+    boolean isAlternative = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -81,7 +82,11 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         Platform.runLater(() -> {
             loadTableDetail.reload();
         });
-        pnEditMode = poController.getEditMode();
+        if (isAlternative) {
+
+        } else {
+            pnEditMode = poController.getEditMode();
+        }
         initButton(pnEditMode);
     }
 
@@ -108,6 +113,11 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
 
     public void setObject(VehicleQuotation object) {
         poController = object;
+    }
+
+    public void setEditMode(int lnEditMode) {
+        pnEditMode = lnEditMode;
+        isAlternative = true;
     }
 
     @FXML
@@ -396,9 +406,10 @@ public class VehicleSalesQuotation_DiscountController implements Initializable, 
         boolean lbShow = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
+        JFXUtil.setDisabled(!lbShow, apDetail);
+
         if (fnValue != EditMode.READY) {
             return;
         }
-        JFXUtil.setDisabled(!lbShow, tfDiscountType, tfAmount, taRemarks);
     }
 }

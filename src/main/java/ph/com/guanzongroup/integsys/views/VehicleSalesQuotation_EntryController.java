@@ -695,7 +695,6 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                                 poController.Detail(pnDetail).setSourceNo("");
                                 String lsInquiryDate = JFXUtil.formatDateToString(oApp.getServerDate());
                                 JFXUtil.setDateValue(dpInquiryDate, JFXUtil.isObjectEqualTo(lsInquiryDate, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsInquiryDate, "yyyy-MM-dd"));
-                                JFXUtil.setCmbValue(cmbModeOfPayment, -1);
                                 poController.Detail(pnDetail).SalesInquiry().setClientId("");
                             }
                             break;
@@ -1113,7 +1112,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             break;
                         case "cmbPaymentTiming":
-//                            poJSON = poController.Detail(pnSpecialRequest).setPayOption(String.valueOf(selectedValue));
+                            poJSON = poController.Detail(pnSpecialRequest).setPaymentOption(String.valueOf(selectedValue));
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             }
@@ -1287,15 +1286,22 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
     }
 
     private void loadRecordSpecialRequest() {
-        if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
-            return;
+        try {
+            poController.computeFields();
+            if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
+                return;
+            }
+            tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
+            tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
+            tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
+            JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnSpecialRequest).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
+            cbActiveSpecialRequest.setSelected(poController.SpecialRequestList(pnSpecialRequest).getRecordStatus());
+            taSpecialRequestRemarks.setText(poController.SpecialRequestList(pnSpecialRequest).getRemarks());
+            loadRecordPricing();
+            loadRecordAdditionalInfo();
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
-        tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
-        tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
-        JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnSpecialRequest).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
-        cbActiveSpecialRequest.setSelected(poController.SpecialRequestList(pnSpecialRequest).getRecordStatus());
-        taSpecialRequestRemarks.setText(poController.SpecialRequestList(pnSpecialRequest).getRemarks());
     }
 
     public static int getDetailFilter(ObservableList<?> dataList,
@@ -1385,6 +1391,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
             cbLockIn.setSelected(poController.Detail(pnDetail).isInsuranceLocked());
             JFXUtil.setDisabled(!poController.Detail(pnDetail).isInsuranceLocked(), tfCoverageYear);
             tfCoverageYear.setText(String.valueOf(poController.Detail(pnDetail).getInsuranceYears()));
+            JFXUtil.setCmbValue(cmbPaymentTiming, !"".equals(poController.Detail(pnDetail).getPaymentOption()) ? Integer.valueOf(poController.Detail(pnDetail).getPaymentOption()) : -1);
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -1838,7 +1846,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             int lnCountCheck = 0;
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if ((poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId()))
-                                        || (poController.AddOnList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.AddOnList(lnCtr).getTotalAmount() <= 0.00)
+                                        || !poController.AddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1864,7 +1873,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId())) //Do not reload extra row for freebie
-                                        || (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00) || !poController.FreebiesList(lnCtr).getRecordStatus()) {
                                     if (poController.FreebiesList(lnCtr).getIsFree()) {
                                         continue;
                                     }
@@ -1891,7 +1900,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload extra row for inclusion
-                                        || (poController.InclusionList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.InclusionList(lnCtr).getTotalAmount() <= 0.00) | !poController.InclusionList(lnCtr).getRecordStatus()) {
                                     if (poController.InclusionList(lnCtr).getIsFree()) {
                                         continue;
                                     }
@@ -1968,7 +1977,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             }
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if ((poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId())) //Do not reload empty add on Id in freebies table
-                                        || (poController.AddOnList(lnCtr).getTotalAmount() > 0.00)) {
+                                        || (poController.AddOnList(lnCtr).getTotalAmount() > 0.00)
+                                        || !poController.AddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1985,7 +1995,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
                                         || (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)
-                                        || (!poController.FreebiesList(lnCtr).getIsFree())) {
+                                        || (!poController.FreebiesList(lnCtr).getIsFree())
+                                        || !poController.FreebiesList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -2002,7 +2013,8 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload empty inclusion Id in freebies table
                                         || (poController.InclusionList(lnCtr).getTotalAmount() > 0.00)
-                                        || (!poController.InclusionList(lnCtr).getIsFree())) {
+                                        || (!poController.InclusionList(lnCtr).getIsFree())
+                                        || !poController.InclusionList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -2216,7 +2228,7 @@ public class VehicleSalesQuotation_EntryController implements Initializable, Scr
         JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnVoid);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apVehicleInfo,apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
+        JFXUtil.setDisabled(!lbShow1, apVehicleInfo, apAddOns, apPricing, apAdditionalInfo, apFreebies, apRemarks, apSpecialRequests);
         JFXUtil.setDisabled(!lbShow1, dpExpectedDate, dpValidThru, tfClient);
         if (psTransactionNo != null && !"".equals(psTransactionNo)) {
             JFXUtil.setButtonsVisibility(false, btnUpdate, btnBrowse, btnNew);

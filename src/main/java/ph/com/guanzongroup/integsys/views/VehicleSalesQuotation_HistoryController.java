@@ -609,6 +609,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
             JFXUtil.setCmbValue(cmbModeOfPayment, !poController.Detail(pnDetail).getPaymentForm().equals("") ? Integer.valueOf(poController.Detail(pnDetail).getPaymentForm()) : -1);
             cbLockIn.setSelected(poController.Detail(pnDetail).isInsuranceLocked());
             tfCoverageYear.setText(String.valueOf(poController.Detail(pnDetail).getInsuranceYears()));
+            JFXUtil.setCmbValue(cmbPaymentTiming, !"".equals(poController.Detail(pnDetail).getPaymentOption()) ? Integer.valueOf(poController.Detail(pnDetail).getPaymentOption()) : -1);
+
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -679,15 +681,22 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
     }
 
     private void loadRecordSpecialRequest() {
-        if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
-            return;
+        try {
+            poController.computeFields();
+            if (pnSpecialRequest < 0 || pnSpecialRequest > poController.getSpecialRequestListCount() - 1) {
+                return;
+            }
+            tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
+            tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
+            tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
+            JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnSpecialRequest).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
+            cbActiveSpecialRequest.setSelected(poController.SpecialRequestList(pnSpecialRequest).getRecordStatus());
+            taSpecialRequestRemarks.setText(poController.SpecialRequestList(pnSpecialRequest).getRemarks());
+            loadRecordPricing();
+            loadRecordAdditionalInfo();
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        tfSpecialRequestDesc.setText(poController.SpecialRequestList(pnSpecialRequest).getRequestDescription());
-        tfSpecialRequestQuantity.setText(String.valueOf(poController.SpecialRequestList(pnSpecialRequest).getQuantity()));
-        tfSpecialRequestAmount.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.SpecialRequestList(pnSpecialRequest).getAmount(), false));
-        JFXUtil.setCmbValue(cmbSpecialRequestChargeTo, !poController.SpecialRequestList(pnSpecialRequest).getChargeTo().equals("") ? Integer.valueOf(poController.SpecialRequestList(pnSpecialRequest).getChargeTo()) : -1);
-        cbActiveSpecialRequest.setSelected(poController.SpecialRequestList(pnSpecialRequest).getRecordStatus());
-        taSpecialRequestRemarks.setText(poController.SpecialRequestList(pnSpecialRequest).getRemarks());
     }
 
     @FXML
@@ -905,7 +914,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             int lnCountCheck = 0;
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if ((poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId()))
-                                        || (poController.AddOnList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.AddOnList(lnCtr).getTotalAmount() <= 0.00)
+                                        || !poController.AddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -931,7 +941,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             }
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId())) //Do not reload extra row for freebie
-                                        || (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.FreebiesList(lnCtr).getTotalAmount() <= 0.00) || !poController.FreebiesList(lnCtr).getRecordStatus()) {
                                     if (poController.FreebiesList(lnCtr).getIsFree()) {
                                         continue;
                                     }
@@ -958,7 +968,7 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
 
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload extra row for inclusion
-                                        || (poController.InclusionList(lnCtr).getTotalAmount() <= 0.00)) {
+                                        || (poController.InclusionList(lnCtr).getTotalAmount() <= 0.00) | !poController.InclusionList(lnCtr).getRecordStatus()) {
                                     if (poController.InclusionList(lnCtr).getIsFree()) {
                                         continue;
                                     }
@@ -1035,7 +1045,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             }
                             for (int lnCtr = 0; lnCtr < poController.getAddOnListCount(); lnCtr++) {
                                 if ((poController.AddOnList(lnCtr).getAddOnId() == null || "".equals(poController.AddOnList(lnCtr).getAddOnId())) //Do not reload empty add on Id in freebies table
-                                        || (poController.AddOnList(lnCtr).getTotalAmount() > 0.00)) {
+                                        || (poController.AddOnList(lnCtr).getTotalAmount() > 0.00)
+                                        || !poController.AddOnList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1052,7 +1063,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             for (int lnCtr = 0; lnCtr < poController.getFreebiesListCount(); lnCtr++) {
                                 if ((poController.FreebiesList(lnCtr).getFreebieId() == null || "".equals(poController.FreebiesList(lnCtr).getFreebieId()))
                                         || (poController.FreebiesList(lnCtr).getTotalAmount() > 0.00)
-                                        || (!poController.FreebiesList(lnCtr).getIsFree())) {
+                                        || (!poController.FreebiesList(lnCtr).getIsFree())
+                                        || !poController.FreebiesList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
@@ -1069,7 +1081,8 @@ public class VehicleSalesQuotation_HistoryController implements Initializable, S
                             for (int lnCtr = 0; lnCtr < poController.getInclusionListCount(); lnCtr++) {
                                 if ((poController.InclusionList(lnCtr).getInclusionId() == null || "".equals(poController.InclusionList(lnCtr).getInclusionId())) //Do not reload empty inclusion Id in freebies table
                                         || (poController.InclusionList(lnCtr).getTotalAmount() > 0.00)
-                                        || (!poController.InclusionList(lnCtr).getIsFree())) {
+                                        || (!poController.InclusionList(lnCtr).getIsFree())
+                                        || !poController.InclusionList(lnCtr).getRecordStatus()) {
                                     continue;
                                 }
                                 lnCount += 1;
