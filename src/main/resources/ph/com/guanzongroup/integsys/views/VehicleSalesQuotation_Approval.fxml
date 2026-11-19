@@ -543,7 +543,7 @@
                                                                                     <Font size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <CheckBox fx:id="cbLockIn" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                                                              <CheckBox fx:id="cbLockIn" mnemonicParsing="false" onAction="#cmdCheckBox_Click" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                                                                               <TextField fx:id="tfCoverageYear" alignment="CENTER_RIGHT" promptText="0" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                                                                                                     </children>
                                                                         </GridPane>
