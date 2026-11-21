@@ -212,7 +212,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
-                        poController.Detail().clear();
                         poJSON = poController.populateVehicleList();
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -532,6 +531,11 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
             CheckBox checkedBox = (CheckBox) source;
             switch (checkedBox.getId()) {
                 case "cbActive": // this is the id
+                    poJSON = poController.validateActiveStatus(pnDetail);
+                    if (!JFXUtil.isJSONSuccess(poJSON)) {
+                        ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        return;
+                    }
                     poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -569,6 +573,19 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 loadRecordMaster();
                                 return;
                             }
+                            //compare the dates
+                            String lsValidFrom = JFXUtil.formatDateToString(poController.Master().getFromDate());
+                            LocalDate fromdate = CustomCommonUtil.parseDateStringToLocalDate(lsValidFrom, "yyyy-MM-dd");
+                            LocalDate FromDate = dpValidFrom.getValue();
+                            if (!fromdate.equals(FromDate)) {
+                                //only appear if date was changed from existing
+                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the from date?\n"
+                                        + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                                } else {
+                                    loadRecordMaster();
+                                    return;
+                                }
+                            }
                             if (pbSuccess) {
                                 poController.Master().setFromDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                             } else {
@@ -576,7 +593,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
-                            poController.Detail().clear();
                             poJSON = poController.populateVehicleList();
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -593,6 +609,19 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                 loadRecordMaster();
                                 return;
                             }
+                            //compare the dates
+                            String lsValidThru = JFXUtil.formatDateToString(poController.Master().getThruDate());
+                            LocalDate thrudate = CustomCommonUtil.parseDateStringToLocalDate(lsValidThru, "yyyy-MM-dd");
+                            LocalDate ThruDate = dpTo.getValue();
+                            if (!thrudate.equals(ThruDate)) {
+                                //only appear if date was changed from existing
+                                if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the thru date?\n"
+                                        + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                                } else {
+                                    loadRecordMaster();
+                                    return;
+                                }
+                            }
                             if (pbSuccess) {
                                 poController.Master().setThruDate((SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE)));
                             } else {
@@ -600,7 +629,6 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
-                            poController.Detail().clear();
                             poJSON = poController.populateVehicleList();
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -635,7 +663,21 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             }
                             dpTo.setValue(null);
                         }
-                        poController.Detail().clear();
+
+                        //compare the dates
+                        String lsValidThru = JFXUtil.formatDateToString(poController.Master().getThruDate());
+                        LocalDate thrudate = CustomCommonUtil.parseDateStringToLocalDate(lsValidThru, "yyyy-MM-dd");
+                        LocalDate toDate = dpTo.getValue();
+                        if (!thrudate.equals(toDate)) {
+                            //only appear if date was changed from existing
+                            if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the thru date?\n"
+                                    + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                            } else {
+                                loadRecordMaster();
+                                return;
+                            }
+                        }
+
                         poJSON = poController.populateVehicleList();
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
