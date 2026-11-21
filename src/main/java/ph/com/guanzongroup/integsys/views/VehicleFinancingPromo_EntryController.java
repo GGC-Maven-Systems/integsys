@@ -212,6 +212,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                             return;
                         }
+                        poController.Detail().clear();
                         poJSON = poController.populateVehicleList();
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -575,6 +576,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
+                            poController.Detail().clear();
                             poJSON = poController.populateVehicleList();
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -598,6 +600,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                                     ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 }
                             }
+                            poController.Detail().clear();
                             poJSON = poController.populateVehicleList();
                             if (!JFXUtil.isJSONSuccess(poJSON)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
@@ -632,6 +635,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             }
                             dpTo.setValue(null);
                         }
+                        poController.Detail().clear();
                         poJSON = poController.populateVehicleList();
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
