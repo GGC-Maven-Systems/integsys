@@ -534,6 +534,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                     poJSON = poController.validateActiveStatus(pnDetail);
                     if (!JFXUtil.isJSONSuccess(poJSON)) {
                         ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        loadRecordDetail();
                         return;
                     }
                     poJSON = poController.Detail(pnDetail).setRecordStatus(checkedBox.isSelected());
@@ -580,7 +581,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             if (!fromdate.equals(FromDate)) {
                                 //only appear if date was changed from existing
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the from date?\n"
-                                        + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                                        + "This action might include/exclude dp rates & duration within validity period for variants in this transaction. Proceed?") == true) {
                                 } else {
                                     loadRecordMaster();
                                     return;
@@ -616,7 +617,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                             if (!thrudate.equals(ThruDate)) {
                                 //only appear if date was changed from existing
                                 if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the thru date?\n"
-                                        + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                                        + "This action might include/exclude dp rates & duration within validity period for variants in this transaction. Proceed?") == true) {
                                 } else {
                                     loadRecordMaster();
                                     return;
@@ -671,7 +672,7 @@ public class VehicleFinancingPromo_EntryController implements Initializable, Scr
                         if (!thrudate.equals(toDate)) {
                             //only appear if date was changed from existing
                             if (ShowMessageFX.YesNo(null, pxeModuleName, "Are you sure you want to change the thru date?\n"
-                                    + "This action will reset the encoded reservation amount of variants in this transaction. Proceed?") == true) {
+                                    + "This action might include/exclude dp rates & duration within validity period for variants in this transaction. Proceed?") == true) {
                             } else {
                                 loadRecordMaster();
                                 return;
