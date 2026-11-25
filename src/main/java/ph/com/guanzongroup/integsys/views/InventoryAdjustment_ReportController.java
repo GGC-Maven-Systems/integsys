@@ -43,8 +43,8 @@ import static javafx.scene.input.KeyCode.TAB;
 import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.FileChooser;
 import javafx.util.Pair;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
@@ -69,7 +69,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
     private int pnDetail = 0;
-    private int pnAttachment = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
     private InvAdjustment poController;
     public int pnEditMode;
@@ -89,18 +88,14 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private boolean pbEnteredDV = false;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
-    private int currentIndex = 0;
-    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     Map<String, String> imageinfo_temp = new HashMap<>();
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableAttachment;
-    private final JFXUtil.ImageViewer imageviewerutil = new JFXUtil.ImageViewer();
+    JFXUtil.ReloadableTableTask loadTableDetail;
     AnchorPane root = null;
     Scene scene = null;
-    private FileChooser fileChooser;
-    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRM", "VOID", "CANCELLED");
+    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
 
     @FXML
     private AnchorPane AnchorMain, apBrowse, apButton, apMaster;
@@ -187,6 +182,17 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         }
     }
 
+    private void retrieveLists() {
+        try {
+            poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
+                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()), cmbStatus.getSelectionModel().getSelectedItem().toString());
+            loadTableDetail.reload();
+        } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -197,6 +203,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             String lsButton = clickedButton.getId();
             switch (lsButton) {
                 case "btnRetrieve":
+                    retrieveLists();
                     break;
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
@@ -255,10 +262,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
                                 String lsDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
                                 dpDateFrom.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
-//                                psSearchDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
                                 return;
                             }
-//                            psSearchDateFrom = CustomCommonUtil.formatLocalDateToShortString(selectedFromDate);
                             loadTableDetail.reload();
                             break;
                         case "dpTo":
@@ -267,10 +272,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                             if (fromDate != null && selectedToDate.isBefore(fromDate)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
                                 dpTo.setValue(CustomCommonUtil.parseDateStringToLocalDate(ldCurrentDate.toString()));
-//                                psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(ldCurrentDate);
                                 return;
                             }
-//                            psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(selectedToDate);
                             loadTableDetail.reload();
                             break;
                         default:
@@ -278,6 +281,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     }
                 } catch (SQLException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
 
@@ -287,7 +291,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     }
 
     private void initComboboxes() {
-//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbStatus));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbStatus));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbStatus);
     }
@@ -346,7 +350,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                         }
                     });
                 });
-
     }
 
     private void initDetailGrid() {

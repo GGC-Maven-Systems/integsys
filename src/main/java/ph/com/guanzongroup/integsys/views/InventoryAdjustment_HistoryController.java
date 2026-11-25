@@ -4,13 +4,12 @@
  */
 package ph.com.guanzongroup.integsys.views;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -30,10 +29,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import static javafx.scene.input.KeyCode.DOWN;
@@ -44,8 +41,9 @@ import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Pair;
+import javax.script.ScriptException;
 import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
@@ -93,16 +91,11 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     private boolean pbEnteredDV = false;
     List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
     List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
-    private int currentIndex = 0;
-    private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
-    Map<String, String> imageinfo_temp = new HashMap<>();
-    JFXUtil.ReloadableTableTask loadTableDetail, loadTableAttachment;
-    private final JFXUtil.ImageViewer imageviewerutil = new JFXUtil.ImageViewer();
+    JFXUtil.ReloadableTableTask loadTableDetail;
     AnchorPane root = null;
     Scene scene = null;
-    private FileChooser fileChooser;
-    ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
-
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRM", "VOID", "CANCELLED");
+    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster;
     @FXML
@@ -197,6 +190,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             String lsButton = clickedButton.getId();
             switch (lsButton) {
                 case "btnRetrieve":
+                    retrieveLists();
                     break;
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
@@ -234,6 +228,17 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //        }
     }
 
+    private void retrieveLists() {
+        try {
+            poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
+                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()), cmbStatus.getSelectionModel().getSelectedItem().toString());
+            loadTableDetail.reload();
+        } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -255,10 +260,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
                                 String lsDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
                                 dpDateFrom.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
-//                                psSearchDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
                                 return;
                             }
-//                            psSearchDateFrom = CustomCommonUtil.formatLocalDateToShortString(selectedFromDate);
                             loadTableDetail.reload();
                             break;
                         case "dpTo":
@@ -267,10 +270,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                             if (fromDate != null && selectedToDate.isBefore(fromDate)) {
                                 ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
                                 dpTo.setValue(CustomCommonUtil.parseDateStringToLocalDate(ldCurrentDate.toString()));
-//                                psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(ldCurrentDate);
                                 return;
                             }
-//                            psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(selectedToDate);
                             loadTableDetail.reload();
                             break;
                         default:
@@ -278,6 +279,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     }
                 } catch (SQLException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
 
@@ -287,7 +289,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     }
 
     private void initComboboxes() {
-//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbStatus));
+        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbStatus));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbStatus);
     }
@@ -346,7 +348,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         }
                     });
                 });
-
     }
 
     private void initDetailGrid() {
@@ -365,10 +366,42 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                     pnDetail = lnRow;
                     loadRecordDetail();
-                    moveNext(false, false);
                 }
+            } else if (!details_data.isEmpty() && event.getClickCount() == 2) {
+                openParameter("", "");
             }
         });
+    }
+
+    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+        String lsFXML = "";
+        Object controller = new Object();
+        InventoryAdjustment_EntryController controller1 = new InventoryAdjustment_EntryController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/InventoryAdjustment_Entry.fxml";
+
+        controller1.setGRider(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
+//        controller1.setObject(poController);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageDialog != null) {
+            stageDialog.closeDialog();
+            stageDialog = new JFXUtil.StageManager();
+        } else {
+            stageDialog = new JFXUtil.StageManager();
+        }
+        try {
+            stageDialog.setOnHidden(event -> {
+                stageDialog = null;
+                loadTableDetail.reload();
+            });
+            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Inventory Adjustment Entry Dialog", true, false, false);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
     }
     JFXUtil.TableKeyEvent tableKeyEvents = new JFXUtil.TableKeyEvent() {
         @Override
@@ -447,38 +480,18 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //        }
     }
 
-    public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
-//                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        if (isSourceNoAvailable()) {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getDetailVatExempt(), tfVatExemptDetail},}, tfVatExemptDetail); // default
-//        } else {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getReferNo(), tfORNoDetail},
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getAmount(), tfAmountDetail},}, tfAmountDetail); // default
-//        }
-    }
-
     private void loadRecordDetail() {
 //        try {
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
-        tfSearch.setText("");
-        tfCategory.setText("");
-        dpDateFrom.setValue(null);
-        dpTo.setValue(null);
-        cmbStatus.getSelectionModel().clearSelection();
+//        tfSearch.setText(poController.Master().getSearch());
+//        tfCategory.setText(poController.Master().getCategory());
+//        String lsDateFrom = JFXUtil.formatDateToString(poController.Master().getDateFrom());
+//        JFXUtil.setDateValue(dpDateFrom, JFXUtil.isObjectEqualTo(lsDateFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
+//        String lsTo = JFXUtil.formatDateToString(poController.Master().getTo());
+//        JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
+//        JFXUtil.setCmbValue(cmbStatus, !poController.Master().getStatus().equals("") ? Integer.valueOf(poController.Master().getStatus()) : -1);
 
         lblTotalAdjustments.setText("");
         lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));

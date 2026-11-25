@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -54,6 +55,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -61,6 +63,7 @@ import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -95,8 +98,11 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TablePositionBase;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TableSelectionModel;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -104,7 +110,12 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -112,6 +123,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
@@ -141,6 +153,7 @@ import org.guanzon.appdriver.agent.ShowMessageFX;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import static ph.com.guanzongroup.integsys.GUI.oApp;
 import ph.com.guanzongroup.integsys.views.ScreenInterface;
 
@@ -314,6 +327,109 @@ public class JFXUtil {
             }
         }
     }
+
+    /* Dynamic Highlighter for TreeTableView */
+    public static <T> void highlightByKey(
+            TreeTableView<T> table,
+            String key,
+            String color,
+            Map<String, List<String>> highlightMap) {
+
+        List<String> colors = highlightMap.computeIfAbsent(
+                key, k -> new ArrayList<String>());
+
+        if (!colors.contains(color)) {
+            colors.add(color);
+            table.refresh();
+        }
+    }
+
+    /* Disable highlight for a particular key */
+    public static <T> void disableHighlightByKey(TreeTableView<T> table, String key, Map<String, List<String>> highlightMap) {
+        highlightMap.remove(key);
+        table.refresh();
+    }
+
+    /* Disable all highlights */
+    public static <T> void disableAllHighlight(TreeTableView<T> table, Map<String, List<String>> highlightMap) {
+        highlightMap.clear();
+        table.refresh();
+    }
+
+    /* Disable highlights by color */
+    public static <T> void disableAllHighlightByColor(TreeTableView<T> table, String color, Map<String, List<String>> highlightMap) {
+        highlightMap.forEach((key, colors)
+                -> colors.removeIf(c -> c.equals(color)));
+        highlightMap.entrySet().removeIf(
+                entry -> entry.getValue().isEmpty());
+        table.refresh();
+    }
+
+    /* Apply row highlighting; call once during initialization */
+    public static <T> void applyRowHighlighting(
+            final TreeTableView<T> treeTableView,
+            final Function<T, String> keyExtractor,
+            final Map<String, List<String>> highlightMap) {
+
+        treeTableView.setRowFactory(
+                tv -> new TreeTableRow<T>() {
+            @Override
+            protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setStyle("");
+                    return;
+                }
+
+                String key = keyExtractor.apply(item);
+                List<String> colors = highlightMap.get(key);
+
+                if (colors != null && !colors.isEmpty()) {
+                    setStyle("-fx-background-color: "
+                            + colors.get(colors.size() - 1) + ";");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+    }
+
+    /* Retain final highlights and remove temporary highlights */
+    public static void showRetainedHighlight(
+            boolean isRetained,
+            TreeTableView<?> tblView,
+            String color,
+            List<Pair<String, String>> plPartial,
+            List<Pair<String, String>> plFinal,
+            Map<String, List<String>> highlightedRows,
+            boolean resetpartial) {
+
+        if (isRetained) {
+            plFinal.removeIf(finalPair
+                    -> plPartial.stream().anyMatch(partialPair
+                            -> partialPair.getKey().equals(finalPair.getKey())));
+
+            for (Pair<String, String> pair : plPartial) {
+                if (!"0".equals(pair.getValue())) {
+                    plFinal.add(new Pair<>(pair.getKey(), pair.getValue()));
+                }
+            }
+        }
+
+        if (resetpartial) {
+            disableAllHighlightByColor(tblView, color, highlightedRows);
+            plPartial.clear();
+        }
+
+        for (Pair<String, String> pair : plFinal) {
+            if (!"0".equals(pair.getValue())) {
+                highlightByKey(
+                        tblView, pair.getKey(), color, highlightedRows);
+            }
+        }
+    }
+
 
     /* Experimental function unused*/
     public static void setDatePickerNextFocusByEnter(DatePicker... datePickers) {
@@ -502,31 +618,41 @@ public class JFXUtil {
 
     /*Move the current row of TableView to next row and returns next index value*/
  /*Requires TableView*/
-    public static int moveToNextRow(TableView table) {
-        TableView<?> currentTable = table;
-        TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-        if (focusedCell != null) {
-            int nextRow = (focusedCell.getRow() + 1) % table.getItems().size();
-            table.getSelectionModel().select(nextRow);
-            return nextRow;
-        } else {
-            return 0;
-        }
+    public static int moveToNextRow(Control table) {
+        return move(table, +1);
     }
 
     /*Move the current row of TableView to previous row and returns next index value*/
  /*Requires TableView*/
-    public static int moveToPreviousRow(TableView table) {
-        TableView<?> currentTable = table;
-        TablePosition<?, ?> focusedCell = currentTable.getFocusModel().getFocusedCell();
-        if (focusedCell != null) {
-            int previousRow = (focusedCell.getRow() - 1 + table.getItems().size()) % table.getItems().size();
-            table.getSelectionModel().select(previousRow);
-            return previousRow;
+    public static int moveToPreviousRow(Control table) {
+        return move(table, -1);
+    }
+
+    private static int move(Control control, int step) {
+        TablePositionBase<?> focused;
+        int rowCount;
+        TableSelectionModel<?> sm;
+
+        if (control instanceof TableView) {
+            TableView<?> tv = (TableView<?>) control;
+            focused = tv.getFocusModel().getFocusedCell();
+            rowCount = tv.getItems().size();
+            sm = tv.getSelectionModel();
+        } else if (control instanceof TreeTableView) {
+            TreeTableView<?> ttv = (TreeTableView<?>) control;
+            focused = ttv.getFocusModel().getFocusedCell();
+            rowCount = ttv.getExpandedItemCount();
+            sm = ttv.getSelectionModel();
         } else {
-            return 0;
+            throw new IllegalArgumentException("Expected TableView or TreeTableView");
         }
 
+        if (focused == null || rowCount == 0) {
+            return 0;
+        }
+        int next = (focused.getRow() + step + rowCount) % rowCount;
+        sm.select(next);
+        return next;
     }
 
     /* Use when pagination is present in tableView */
@@ -865,22 +991,22 @@ public class JFXUtil {
     }
 
     /* Used for table column value alignment to CENTER */
-    public static void setColumnCenter(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnCenter(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER;");
         }
     }
 
     /* Used for table column value alignment to CENTER-LEFT */
-    public static void setColumnLeft(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnLeft(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER-LEFT;-fx-padding: 0 5 0 5;");
         }
     }
 
     /* Used for table column value alignment to CENTER-RIGHT */
-    public static void setColumnRight(TableColumn... columns) {
-        for (TableColumn column : columns) {
+    public static void setColumnRight(TableColumnBase<?, ?>... columns) {
+        for (TableColumnBase<?, ?> column : columns) {
             column.setStyle("-fx-alignment: CENTER-RIGHT;-fx-padding: 0 5 0 5;");
         }
     }
@@ -888,46 +1014,141 @@ public class JFXUtil {
     /* Auto link & set table values & auto disable column re-alignment */
  /*Requires TableView*/
     public static void setColumnsIndexAndDisableReordering(final TableView<?> tableView) {
-        int counter = 1;
-        for (Object obj : tableView.getColumns()) {
-            if (obj instanceof TableColumn) {
-                @SuppressWarnings("unchecked")
-                final TableColumn<Object, Object> column = (TableColumn<Object, Object>) obj;
 
-                final String indexName = String.format("index%02d", counter++);
-                column.setCellValueFactory(new PropertyValueFactory<>(indexName));
+        int[] counter = {1};
 
-                // disable sorting and editing
-                column.setSortable(false);
-                column.setEditable(false);
-
-                // Directly set cell factory without Label
-                column.setCellFactory(col -> {
-                    TableCell<Object, Object> cell = new TableCell<Object, Object>() {
-                        @Override
-                        protected void updateItem(Object item, boolean empty) {
-                            super.updateItem(item, empty);
-                            if (empty || item == null) {
-                                setText(null);
-                            } else {
-                                String text = item.toString().replaceAll("\\r?\\n", "");
-                                setText(text);
-                            }
-                        }
-                    };
-                    cell.setWrapText(false);
-                    cell.setTextOverrun(OverrunStyle.ELLIPSIS);
-                    return cell;
-                });
-            }
+        for (TableColumn<?, ?> column : tableView.getColumns()) {
+            processColumn(column, counter);
         }
 
-        // disable column reordering
-        tableView.widthProperty().addListener((obs, oldWidth, newWidth) -> {
-            TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
-            if (header != null) {
-                header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
+        // Disable column reordering
+        tableView.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            Platform.runLater(() -> disableReordering(tableView));
+        });
+
+        // Also try immediately
+        Platform.runLater(() -> disableReordering(tableView));
+    }
+
+    private static void disableReordering(final TableView<?> tableView) {
+        TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
+        if (header == null) {
+            return;
+        }
+        header.setReordering(false);
+        header.reorderingProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                header.setReordering(false);
             }
+        });
+    }
+
+    public static <T> void disableColumnReordering(final TreeTableView<T> table) {
+        if (table == null) {
+            return;
+        }
+
+        // ---- Disable sorting ----
+        table.getSortOrder().clear();
+
+        for (TreeTableColumn<T, ?> column : table.getColumns()) {
+            applyNoSort(column);
+        }
+
+        // Columns added later
+        table.getColumns().addListener((ListChangeListener<TreeTableColumn<T, ?>>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (TreeTableColumn<T, ?> column : change.getAddedSubList()) {
+                        applyNoSort(column);
+                    }
+                }
+            }
+        });
+
+        // ---- Disable reordering ----
+        if (table.getSkin() != null) {
+            installNoReorder(table);
+        } else {
+            // The skin (and header row) doesn't exist until the table is shown
+            table.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+                if (newSkin != null) {
+                    installNoReorder(table);
+                }
+            });
+        }
+    }
+
+    private static <T> void applyNoSort(TreeTableColumn<T, ?> column) {
+        column.setSortable(false);
+
+        // Nested (grouped) columns
+        for (TreeTableColumn<T, ?> child : column.getColumns()) {
+            applyNoSort(child);
+        }
+    }
+
+    private static void installNoReorder(final TreeTableView<?> table) {
+        Node node = table.lookup("TableHeaderRow");
+        if (node instanceof TableHeaderRow) {
+            final TableHeaderRow header = (TableHeaderRow) node;
+
+            // Whenever a drag-reorder begins, switch it off immediately
+            header.reorderingProperty().addListener((obs, wasReordering, isReordering) -> {
+                if (isReordering) {
+                    header.setReordering(false);
+                }
+            });
+        }
+    }
+
+    private static void processColumn(final TableColumn<?, ?> column, final int[] counter) {
+
+        // If this column has children, process the children instead
+        if (!column.getColumns().isEmpty()) {
+            for (TableColumn<?, ?> childColumn : column.getColumns()) {
+                processColumn(childColumn, counter);
+            }
+            return;
+        }
+
+        // Only process leaf/actual data columns
+        final String indexName = String.format("index%02d", counter[0]++);
+
+        @SuppressWarnings("unchecked")
+        final TableColumn<Object, Object> dataColumn
+                = (TableColumn<Object, Object>) column;
+
+        dataColumn.setCellValueFactory(
+                new PropertyValueFactory<Object, Object>(indexName)
+        );
+
+        // Disable sorting and editing
+        dataColumn.setSortable(false);
+        dataColumn.setEditable(false);
+
+        // Cell factory
+        dataColumn.setCellFactory(col -> {
+            TableCell<Object, Object> cell = new TableCell<Object, Object>() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        String text = item.toString()
+                                .replaceAll("\\r?\\n", "");
+
+                        setText(text);
+                    }
+                }
+            };
+
+            cell.setWrapText(false);
+            cell.setTextOverrun(OverrunStyle.ELLIPSIS);
+
+            return cell;
         });
     }
 
@@ -1109,12 +1330,26 @@ public class JFXUtil {
             // EXCEPTION → fully enabled, do NOT touch its children
             if (exceptions.contains(node)) {
                 node.setDisable(false);
-                continue; // ← critical
+                continue;
             }
 
             // Do NOT disable GridPane itself
             if (!(node instanceof javafx.scene.layout.GridPane)) {
                 node.setDisable(disable);
+            }
+
+            // Apply CSS style class to TextField
+            if (node instanceof javafx.scene.control.TextField) {
+                javafx.scene.control.TextField textField
+                        = (javafx.scene.control.TextField) node;
+
+                if (disable) {
+                    if (!textField.getStyleClass().contains("DisabledTextField")) {
+                        textField.getStyleClass().add("DisabledTextField");
+                    }
+                } else {
+                    textField.getStyleClass().remove("DisabledTextField");
+                }
             }
 
             // Traverse children
@@ -2603,19 +2838,36 @@ public class JFXUtil {
 //                } );
     public static class ReloadableTableTask {
 
-        private final TableView<?> tableView;
-        private final ObservableList<?> data;
+        private final Consumer<Node> placeholderSetter;
+        private final Runnable toFront;
+        private final BooleanSupplier isEmpty;
         private final Runnable content;
 
+        // ---- TableView: usage unchanged ----
         public ReloadableTableTask(TableView<?> tableView, ObservableList<?> data, Runnable content) {
-            this.tableView = tableView;
-            this.data = data;
+            this.placeholderSetter = tableView::setPlaceholder;
+            this.toFront = tableView::toFront;
+            this.isEmpty = () -> data == null || data.isEmpty();
+            this.content = content;
+        }
+
+        // ---- TreeTableView: same shape of usage ----
+        public ReloadableTableTask(TreeTableView<?> treeTableView, ObservableList<?> data, Runnable content) {
+            this.placeholderSetter = treeTableView::setPlaceholder;
+            this.toFront = treeTableView::toFront;
+            this.isEmpty = () -> {
+                if (data != null) {
+                    return data.isEmpty();
+                }
+                TreeItem<?> root = treeTableView.getRoot();
+                return root == null || root.getChildren().isEmpty();
+            };
             this.content = content;
         }
 
         public void reload() {
             LoadScreenComponents loading = createLoadingComponents();
-            tableView.setPlaceholder(loading.loadingPane);
+            placeholderSetter.accept(loading.loadingPane);
             loading.progressIndicator.setVisible(true);
 
             Task<Void> task = new Task<Void>() {
@@ -2629,18 +2881,18 @@ public class JFXUtil {
 
                 @Override
                 protected void succeeded() {
-                    if (data == null || data.isEmpty()) {
-                        tableView.setPlaceholder(loading.placeholderLabel);
+                    if (isEmpty.getAsBoolean()) {
+                        placeholderSetter.accept(loading.placeholderLabel);
                     } else {
-                        tableView.toFront();
+                        toFront.run();
                     }
                     loading.progressIndicator.setVisible(false);
                 }
 
                 @Override
                 protected void failed() {
-                    if (data == null || data.isEmpty()) {
-                        tableView.setPlaceholder(loading.placeholderLabel);
+                    if (isEmpty.getAsBoolean()) {
+                        placeholderSetter.accept(loading.placeholderLabel);
                     }
                     loading.progressIndicator.setVisible(false);
                 }
@@ -3887,14 +4139,70 @@ public class JFXUtil {
             return description; // what ComboBox displays
         }
     }
+    private static final String DATE_PATTERN = "yyyy-MM-dd";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
+    // Date -> String
     public static String formatDateToString(Date foDateValue) {
         if (foDateValue == null) {
             return "";
         }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         return sdf.format(foDateValue);
+    }
+
+// String -> Date
+    public static Date formatStringToDate(String foDateString) {
+        if (foDateString == null || foDateString.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+            sdf.setLenient(false); // reject invalid dates like 2026-02-31
+            return sdf.parse(foDateString.trim());
+        } catch (java.text.ParseException ex) {
+            Logger.getLogger(JFXUtil.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
+    // String -> LocalDate
+    public static LocalDate formatStringToLocalDate(String foDateString) {
+        if (foDateString == null || foDateString.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(foDateString.trim(), DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    // LocalDate -> String
+    public static String formatLocalDateToString(LocalDate foLocalDate) {
+        if (foLocalDate == null) {
+            return "";
+        }
+        return foLocalDate.format(DATE_FORMATTER);
+    }
+
+    // Date -> LocalDate
+    public static LocalDate formatDateToLocalDate(Date foDateValue) {
+        if (foDateValue == null) {
+            return null;
+        }
+        // Don't use foDateValue.toInstant(): it throws for java.sql.Date
+        return java.time.Instant.ofEpochMilli(foDateValue.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+    // LocalDate -> Date
+    public static Date formatLocalDateToDate(LocalDate foLocalDate) {
+        if (foLocalDate == null) {
+            return null;
+        }
+        return Date.from(foLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public static String formatTimeToString(Date foDateValue) {
@@ -3918,37 +4226,72 @@ public class JFXUtil {
         return true;
     }
 
-    public static void setNextBusinessDate(DatePicker... datePickers) {
-
-        LocalDate nextDate = LocalDate.now().plusDays(1);
-
-        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY) {
-            nextDate = LocalDate.now().plusDays(2); // Monday
-        } else if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
-            nextDate = LocalDate.now().plusDays(1); // Monday
-        }
-
-        for (DatePicker datePicker : datePickers) {
-            datePicker.setValue(nextDate);
-        }
+    public static void fireHoverEvent(Button button) {
+        button.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                fireHoverEvent(button, MouseEvent.MOUSE_ENTERED);
+            } else {
+                fireHoverEvent(button, MouseEvent.MOUSE_EXITED);
+            }
+        });
     }
 
-    public static class Data {
-
-        public String value1;
-        public String value2;
-        public String value3;
-        public String value4;
-        public String value5;
-
-        public Data(String value1, String value2, String value3,
-                String value4, String value5) {
-            this.value1 = value1;
-            this.value2 = value2;
-            this.value3 = value3;
-            this.value4 = value4;
-            this.value5 = value5;
-        }
+    private static void fireHoverEvent(Node node, javafx.event.EventType<MouseEvent> type) {
+        MouseEvent hoverEvent = new MouseEvent(
+                type,
+                0, 0, 0, 0,
+                MouseButton.NONE, 0,
+                true, true, true, true,
+                false, true, true, true, true, true,
+                null
+        );
+        Event.fireEvent(node, hoverEvent);
     }
 
+    public static boolean isValidFileName(String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            return false;
+        }
+
+        // Characters invalid/problematic in Windows file names
+        return !fileName.matches(".*[\\\\/:*?\"<>|].*");
+    }
+
+    public static String concatStrings(String... values) {
+        StringBuilder loStringBuilder = new StringBuilder();
+
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) {
+                if (loStringBuilder.length() > 0) {
+                    loStringBuilder.append(" ");
+                }
+
+                loStringBuilder.append(value);
+            }
+        }
+
+        return loStringBuilder.toString();
+    }
+
+    public static int getDetailRowFilter(ObservableList<?> dataList, int lnpn, int columnIndex) {
+        try {
+            String getterName = String.format("getIndex%02d", columnIndex);
+
+            for (int lnCtr = 0; lnCtr < dataList.size(); lnCtr++) {
+                Object item = dataList.get(lnCtr);
+
+                String value = (String) item.getClass()
+                        .getMethod(getterName)
+                        .invoke(item);
+
+                if (String.valueOf(lnpn).equals(value)) {
+                    return lnCtr;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1; // not found
+    }
 }

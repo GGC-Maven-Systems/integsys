@@ -49,7 +49,6 @@ import org.guanzon.cas.inv.InvAdjustment;
 import org.guanzon.cas.inv.services.InvControllers;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.integsys.model.*;
-import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
 
 /**
@@ -58,7 +57,6 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  * @author Team 1
  */
 public class InventoryAdjustment_SerialController implements Initializable, ScreenInterface {
-
     private GRiderCAS oApp;
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
@@ -169,6 +167,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 //                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //                }
             });
+            loadTableDetail.reload();
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -192,6 +191,15 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         return;
                     }
                     break;
+                case "btnRemove":
+                    if (poController.Serial(pnDetail).getEditMode() == EditMode.ADDNEW) {
+//                        poController.Serial().remove(pnDetail);
+                    } else {
+                        poController.Serial(pnDetail).isReverse(true);
+                    }
+                    loadTableDetail.reload();
+                    moveNext(false, false);
+                    return;
                 default:
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     break;
@@ -229,28 +237,19 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         try {
                             details_data.clear();
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getSourceNo() == null || "".equals(poController.Master().getSourceNo())) {
                                 poController.ReloadDetail();
-//                                }
-//                                poJSON = poController.computeDetailFields(true);
-//                                if ("error".equals((String) poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                }
                             }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
-                            for (int lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                            for (int lnCtr = 0; lnCtr < poController.getSerialListCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
                                 }
                                 lnRowCount += 1;
                                 details_data.add(
                                         new ModelInventoryAdjustment_Serial(String.valueOf(lnRowCount),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getBarCode(), true),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getDescription(), true),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getInventoryCost(), true)),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDebitQuantity(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getCreditQuantity(), true),
+                                                poController.Serial(lnCtr).InventorySerial().getSerial01(),
+                                                poController.Serial(lnCtr).InventorySerial().getSerial02(),
                                                 String.valueOf(lnCtr)
                                         ));
                             }
@@ -260,14 +259,14 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex11());
+                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex04());
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex04());
                                 pnDetail = lnRow;
                                 loadRecordDetail();
                             }
@@ -277,8 +276,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         }
                     });
                 });
-
-    }
+}
 
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblNo);
@@ -292,7 +290,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryAdjustment_Serial selected = (ModelInventoryAdjustment_Serial) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex04());
                     pnDetail = lnRow;
                     loadRecordDetail();
                     moveNext(false, false);
@@ -309,8 +307,8 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                     if (details_data.isEmpty()) {
                         return;
                     }
-                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex11())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex11());
+                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex04())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex04());
                     pnDetail = newIndex;
                     loadRecordDetail();
                     break;
@@ -343,12 +341,12 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                 switch (lsID) {
                     case "tfSerial1":
                         if (lsValue.isEmpty()) {
-
+                            poController.Serial(pnDetail).setSerialId("");
                         }
                         break;
                     case "tfSerial2":
                         if (lsValue.isEmpty()) {
-
+                            poController.Serial(pnDetail).setSerialId("");
                         }
                         break;
                 }
@@ -410,33 +408,38 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
-        if (continueNext) {
-            apDetail.requestFocus();
-            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
-                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
+        try {
+            if (continueNext) {
+                apDetail.requestFocus();
+                pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex04())
+                        : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex04());
+            }
+            loadRecordDetail();
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Serial(pnDetail).InventorySerial().getSerial01(), tfSerial1},
+                {poController.Serial(pnDetail).InventorySerial().getSerial02(), tfSerial2},}, tfSerial2); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-        loadRecordDetail();
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
-        }
-//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//            {poController.Detail(pnDetail).getParticularId(), tfSerial1},
-//            {poController.Detail(pnDetail).getDetailVatExempt(), tfSerial2},}, tfSerial2); // default
     }
 
     private void loadRecordDetail() {
-//        try {
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
+        try {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            tfSerial1.setText(poController.Serial(pnDetail).InventorySerial().getSerial01());
+            tfSerial2.setText(poController.Serial(pnDetail).InventorySerial().getSerial02());
+            taRemarks.setText(poController.Serial(pnDetail).getRemarks());
+            JFXUtil.updateCaretPositions(apDetail);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-//            tfSerial1.setText(poController.Detail(pnDetail).getSerial1());
-//            tfSerial2.setText(poController.Detail(pnDetail).getSerial2());
-//            taRemarks.setText(poController.Detail(pnDetail).getRemarks());
-        JFXUtil.updateCaretPositions(apDetail);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     private void initButton(int fnValue) {
