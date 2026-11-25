@@ -767,7 +767,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         JFXUtil.setFocusListener(txtDetail_Focus, tfBarcode, tfDescription, tfCost, tfCreditQty, tfDebitQty);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster, apDetail);
         JFXUtil.setCommaFormatter(tfCost);
-        CustomCommonUtil.inputIntegersOnly(tfCreditQty, tfDebitQty);
+        CustomCommonUtil.inputDecimalOnly(tfCreditQty, tfDebitQty);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail, tblAttachments);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail, tblAttachments);
     }
@@ -972,8 +972,8 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             tfDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDebitQuantity(), false));
             taRemarksDetail.setText(poController.Detail(pnDetail).getRemarks());
 
-//            lblTotalDebitQty.setText(poController);
-//            lblTotalCreditQty.setText(poController);
+            lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty()));
+            lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty()));
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
