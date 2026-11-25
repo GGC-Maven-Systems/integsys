@@ -878,6 +878,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 } else {
                                     JFXUtil.textFieldMoveNext(taRemarks);
                                 }
+                                loadRecordMaster();
                                 break;
                             //apDetail
                             case "tfBarcode":
@@ -887,6 +888,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 } else {
                                     JFXUtil.textFieldMoveNext(dpExpiryDate);
                                 }
+                                loadTableDetail.reload();
                                 break;
                             case "tfDescription":
                                 poJSON = poController.SearchInventory(lsValue, false, pnDetail);
@@ -895,6 +897,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 } else {
                                     JFXUtil.textFieldMoveNext(dpExpiryDate);
                                 }
+                                loadTableDetail.reload();
                                 break;
                         }
                         event.consume();
