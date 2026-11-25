@@ -1107,12 +1107,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnSerial);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnSerial, btnConfirm);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
-        JFXUtil.setButtonsVisibility(true, btnSerial);
-        JFXUtil.setButtonsVisibility(true, btnConfirm);
+        JFXUtil.setButtonsVisibility(lbShow1 || lbShow2, btnSerial);
 
         if (fnValue != EditMode.READY) {
             return;
