@@ -70,8 +70,8 @@ import org.guanzon.appdriver.constant.DocumentType;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.cas.inv.InvAdjustment;
-import org.guanzon.cas.inv.InvAdjustment.InvAdjustmentStatus;
 import org.guanzon.cas.inv.services.InvControllers;
+import org.guanzon.cas.inv.status.InvAdjustmentStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import ph.com.guanzongroup.integsys.model.*;
@@ -87,7 +87,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
     private GRiderCAS oApp;
     private JSONObject poJSON;
-    private static final int ROWS_PER_PAGE = 50;
     private int pnDetail = 0;
     private int pnAttachment = 0;
     private final String pxeModuleName = JFXUtil.getFormattedClassTitle(this.getClass());
@@ -98,8 +97,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-    private String psSupplierPayeeId = "";
-    private String psTransactionType = "";
 
     private unloadForm poUnload = new unloadForm();
     private ObservableList<ModelCashDisbursement_Main> main_data = FXCollections.observableArrayList();
@@ -110,8 +107,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
     private boolean pbEnteredDV = false;
-    List<Pair<String, String>> plOrderNoPartial = new ArrayList<>();
-    List<Pair<String, String>> plOrderNoFinal = new ArrayList<>();
     private int currentIndex = 0;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     Map<String, String> imageinfo_temp = new HashMap<>();
@@ -121,6 +116,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     Scene scene = null;
     private FileChooser fileChooser;
     ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
+    JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
 
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail, apAttachments, apAttachmentButtons;
@@ -200,7 +196,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     poController.setCompanyId(psCompanyId);
                     poController.setCategoryId(psCategoryId);
                     poController.Master().setBranchCode(oApp.getBranchCode());
-                    lblSource.setText(poController.Company().getCompanyName());
+                    lblSource.setText(poController.Master().Company().getCompanyName());
                     btnNew.fire();
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -391,18 +387,17 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
                         break;
                     case "btnSerial":
+                        openParameter("", "");
                         break;
                     case "btnRemove":
                         if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
                             poController.Detail().remove(pnDetail);
                         } else {
-//                            poController.Detail(pnDetail).isReverse(cbReverse.isSelected());
+                            poController.Detail(pnDetail).isReverse(true);
                         }
                         loadTableDetail.reload();
-//                        if (checkedBox.isSelected()) {
-//                            moveNext(false, false);
-//                        }
-                        break;
+                        moveNext(false, false);
+                        return;
                     case "btnAddAttachment":
                         fileChooser = new FileChooser();
                         fileChooser.setTitle("Choose Image");
@@ -523,6 +518,37 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         }
     }
 
+    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+        String lsFXML = "";
+        Object controller = new Object();
+        InventoryAdjustment_SerialController controller1 = new InventoryAdjustment_SerialController(); //Should differ the parameter calling
+        lsFXML = "/ph/com/guanzongroup/integsys/views/InventoryAdjustment_Serial.fxml";
+
+        controller1.setGRider(oApp);
+        controller1.setIndustryID(psIndustryId);
+        controller1.setCompanyID(psCompanyId);
+//        controller1.setObject(poController);
+        controller = controller1;
+
+        poJSON = new JSONObject();
+        if (stageDialog != null) {
+            stageDialog.closeDialog();
+            stageDialog = new JFXUtil.StageManager();
+        } else {
+            stageDialog = new JFXUtil.StageManager();
+        }
+        try {
+            stageDialog.setOnHidden(event -> {
+                stageDialog = null;
+                loadTableDetail.reload();
+            });
+            stageDialog.showDialog((Stage) btnClose.getScene().getWindow(), getClass().getResource(lsFXML), controller, "Inventory Adjustment Serial Dialog", true, false, false);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
+    }
+
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -532,13 +558,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         try {
                             details_data.clear();
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getSourceNo() == null || "".equals(poController.Master().getSourceNo())) {
                                 poController.ReloadDetail();
-//                                }
-//                                poJSON = poController.computeDetailFields(true);
-//                                if ("error".equals((String) poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                }
                             }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
@@ -546,20 +566,14 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
                                 }
-//                                if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
-//                                    lsParticular = poController.Detail(lnCtr).CashAdvanceDetail(poController.Master().getSourceNo()).getParticular();
-//                                } else {
-//                                    lsParticular = poController.Detail(lnCtr).Particular().getDescription();
-//                                }
-//                                lsOrNo = poController.Detail(lnCtr).getReferNo();
                                 lnRowCount += 1;
                                 details_data.add(
                                         new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getBarCode(), true),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getDescription(), true),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getInventoryCost(), true)),
+                                                poController.Detail(lnCtr).Inventory().getBarCode(),
+                                                poController.Detail(lnCtr).Inventory().getDescription(),
+                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getInventoryCost(), false)),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDebitQuantity(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getCreditQuantity(), true),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getCreditQuantity(), false),
                                                 String.valueOf(lnCtr)
                                         ));
                             }
@@ -796,6 +810,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         }
                         break;
                 }
+                loadRecordMaster();
             });
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
@@ -835,7 +850,9 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         loadTableDetail.reload();
                         break;
                 }
-                loadTableDetail.reload();
+                JFXUtil.runWithDelay(.50, () -> {
+                    loadTableDetail.reload();
+                });
             });
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -845,77 +862,82 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         String lsBranchCode = "";
         String lsDeparment = "";
         poJSON = new JSONObject();
-//        try {
-        if (null != event.getCode()) {
-            switch (event.getCode()) {
-                case TAB:
-                case ENTER:
-                    pbEntered = true;
-                    event.consume();
-                    break;
-                case F3:
-                    switch (lsID) {
-                        //apMaster
-                        case "tfCategory":
-                            break;
-                        //apDetail
-                        case "tfBarcode":
-                            break;
-                        case "tfDescription":
-                            break;
-                        case "tfCreditTo":
-//                                poJSON = poController.SearchCreditTo(lsValue, false);
-//                                if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                                } else {
-//                                    JFXUtil.textFieldMoveNext(taDVRemarks);
-//                                }
-//                                loadRecordMaster();
-                            break;
-                    }
-                    event.consume();
-                    break;
-
-                case UP:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(true, true)},});
-                    event.consume();
-                    break;
-                case DOWN:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(false, true)},});
-                    event.consume();
-                    break;
-                default:
-                    break;
+        try {
+            if (null != event.getCode()) {
+                switch (event.getCode()) {
+                    case TAB:
+                    case ENTER:
+                        pbEntered = true;
+                        event.consume();
+                        break;
+                    case F3:
+                        switch (lsID) {
+                            //apMaster
+                            case "tfCategory":
+                                poJSON = poController.SearchCategory(lsValue, false);
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                } else {
+                                    JFXUtil.textFieldMoveNext(taRemarks);
+                                }
+                                break;
+                            //apDetail
+                            case "tfBarcode":
+                                poJSON = poController.SearchInventory(lsValue, false, pnDetail);
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                } else {
+                                    JFXUtil.textFieldMoveNext(dpExpiryDate);
+                                }
+                                break;
+                            case "tfDescription":
+                                poJSON = poController.SearchInventory(lsValue, false, pnDetail);
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                } else {
+                                    JFXUtil.textFieldMoveNext(dpExpiryDate);
+                                }
+                                break;
+                        }
+                        event.consume();
+                        break;
+                    case UP:
+                        JFXUtil.altSwitch(lsID, new Object[][]{
+                            {new String[]{"tfBarcode", "tfDebitQty"}, (Runnable) () -> moveNext(true, true)},});
+                        event.consume();
+                        break;
+                    case DOWN:
+                        JFXUtil.altSwitch(lsID, new Object[][]{
+                            {new String[]{"tfBarcode", "tfDebitQty"}, (Runnable) () -> moveNext(false, true)},});
+                        event.consume();
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
-//                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        if (isSourceNoAvailable()) {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getDetailVatExempt(), tfVatExemptDetail},}, tfVatExemptDetail); // default
-//        } else {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getReferNo(), tfORNoDetail},
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getAmount(), tfAmountDetail},}, tfAmountDetail); // default
-//        }
+        try {
+            if (continueNext) {
+                apDetail.requestFocus();
+                pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
+                        : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
+            }
+            loadRecordDetail();
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+                {poController.Detail(pnDetail).Inventory().getBarCode(), tfBarcode},
+                {poController.Detail(pnDetail).getDebitQuantity(), tfDebitQty},}, tfDebitQty); // default
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void loadRecordMaster() {
@@ -948,6 +970,9 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             tfCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getCreditQuantity(), false));
             tfDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(pnDetail).getDebitQuantity(), false));
             taRemarksDetail.setText(poController.Detail(pnDetail).getRemarks());
+
+//            lblTotalDebitQty.setText(poController);
+//            lblTotalCreditQty.setText(poController);
             JFXUtil.updateCaretPositions(apDetail);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1047,29 +1072,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 String lsTransDate = "", lsPeriodToDate = "", lsPeriodFromDate = "";
                 poJSON = new JSONObject();
                 switch (datePicker.getId()) {
-                    case "dpPeriodFrom":
-//                        if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                            lsPeriodToDate = sdfFormat.format(poController.WTaxDeduction(pnDetailBIR).getModel().getPeriodTo());
-//                            periodToDate = LocalDate.parse(lsPeriodToDate, DateTimeFormatter.ofPattern(SQLUtil.FORMAT_SHORT_DATE));
-//
-//                            if (pbSuccess && (ldSelectedDate.isAfter(periodToDate))) {
-//                                JFXUtil.setJSONError(poJSON, "Period From cannot be later than the \"Period To\" date.");
-//                                pbSuccess = false;
-//                            }
-//
-//                            if (pbSuccess) {
-//                                poController.WTaxDeduction(pnDetailBIR).getModel().setPeriodFrom(SQLUtil.toDate(lsSelectedDate, SQLUtil.FORMAT_SHORT_DATE));
-//                            } else {
-//                                if ("error".equals((String) poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                }
-//                            }
-//                            pbSuccess = false; //Set to false to prevent multiple message box: Conflict with server date vs transaction date validation
-//                            loadRecordDetailBIR();
-//                            pbSuccess = true; //Set to original value
-//                        }
-                        break;
-
                     case "tfTransactionDate":
                         break;
                     case "dpExpiryDate":

@@ -78,7 +78,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     private ObservableList<ModelCashDisbursement_Main> main_data = FXCollections.observableArrayList();
     private FilteredList<ModelCashDisbursement_Main> filteredMain_Data;
 
-    private ObservableList<ModelInventoryAdjustment_Detail> details_data = FXCollections.observableArrayList();
+    private ObservableList<ModelInventoryAdjustment_Serial> details_data = FXCollections.observableArrayList();
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
@@ -237,15 +237,9 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
                                 }
-//                                if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
-//                                    lsParticular = poController.Detail(lnCtr).CashAdvanceDetail(poController.Master().getSourceNo()).getParticular();
-//                                } else {
-//                                    lsParticular = poController.Detail(lnCtr).Particular().getDescription();
-//                                }
-//                                lsOrNo = poController.Detail(lnCtr).getReferNo();
                                 lnRowCount += 1;
                                 details_data.add(
-                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                        new ModelInventoryAdjustment_Serial(String.valueOf(lnRowCount),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getBarCode(), true),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getDescription(), true),
                                                 String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getInventoryCost(), true)),
@@ -290,7 +284,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     private void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
-                ModelInventoryAdjustment_Detail selected = (ModelInventoryAdjustment_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
+                ModelInventoryAdjustment_Serial selected = (ModelInventoryAdjustment_Serial) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
                     pnDetail = lnRow;
@@ -412,25 +406,18 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
-//        if (continueNext) {
-//            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
-//                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
-//        }
-//        loadRecordDetail();
-//        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-//            return;
-//        }
-//        if (isSourceNoAvailable()) {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getDetailVatExempt(), tfVatExemptDetail},}, tfVatExemptDetail); // default
-//        } else {
-//            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-//                {poController.Detail(pnDetail).getReferNo(), tfORNoDetail},
-//                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
-//                {poController.Detail(pnDetail).getAmount(), tfAmountDetail},}, tfAmountDetail); // default
-//        }
+        if (continueNext) {
+            apDetail.requestFocus();
+            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
+                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
+        }
+        loadRecordDetail();
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
+        }
+//        JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
+//            {poController.Detail(pnDetail).getParticularId(), tfSerial1},
+//            {poController.Detail(pnDetail).getDetailVatExempt(), tfSerial2},}, tfSerial2); // default
     }
 
     private void loadRecordDetail() {
@@ -452,9 +439,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-
         JFXUtil.setDisabled(!lbShow1, apDetail);
 
         if (fnValue != EditMode.READY) {

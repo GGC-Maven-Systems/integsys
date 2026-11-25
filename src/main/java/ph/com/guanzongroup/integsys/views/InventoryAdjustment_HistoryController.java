@@ -6,6 +6,7 @@ package ph.com.guanzongroup.integsys.views;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +21,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.Pagination;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -50,6 +57,7 @@ import org.json.simple.JSONObject;
 import ph.com.guanzongroup.integsys.model.*;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
+import static ph.com.guanzongroup.integsys.utility.JFXUtil.getFirstDayOfMonth;
 
 /**
  * FXML Controller class
@@ -96,19 +104,25 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
 
     @FXML
-    private AnchorPane apBrowse, apButton, apDetail;
+    private AnchorPane apMainAnchor, apBrowse, apButton, apMaster;
+    @FXML
+    private Label lblSource, lblTotalAdjustments, lblTotalCreditQty, lblTotalDebitQty, lblOpen, lblConfirmed, lblVoided, lblCancelled;
     @FXML
     private HBox hbButtons;
     @FXML
-    private Button btnClose, btnRemove;
+    private Button btnRetrieve, btnClose;
     @FXML
-    private TextField tfSerial1, tfSerial2;
+    private TextField tfSearch, tfCategory;
     @FXML
-    private TextArea taRemarks;
+    private DatePicker dpDateFrom, dpTo;
+    @FXML
+    private ComboBox cmbStatus;
     @FXML
     private TableView tblViewDetail;
     @FXML
-    private TableColumn tblNo, tblSerial1, tblSerial2;
+    private TableColumn tblNo, tblTransactionNo, tblDate, tblReferenceNo, tblBranch, tblCategory, tblTotalCreditQty, tblTotalDebitQty, tblStatus;
+    @FXML
+    private Pagination pagination;
 
     @Override
     public void setGRider(GRiderCAS foValue) {
@@ -143,11 +157,14 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             if (!"success".equals((String) poJSON.get("result"))) {
                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
             }
+            pagination.setPageCount(1);
             initLoadTable();
             initTextFields();
             initDetailGrid();
+            initDatepicker();
             initTableOnClick();
             clearTextFields();
+            initComboboxes();
             pnEditMode = EditMode.UNKNOWN;
 
             initButton(pnEditMode);
@@ -178,6 +195,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             Button clickedButton = (Button) source;
             String lsButton = clickedButton.getId();
             switch (lsButton) {
+                case "btnRetrieve":
+                    break;
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -214,6 +233,64 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //        }
     }
 
+    EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
+            (cmbId, selectedIndex, selectedValue) -> {
+                switch (cmbId) {
+                    case "cmbStatus":
+                        break;
+                }
+            });
+
+    boolean pbSuccess = true;
+    EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
+            (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
+                poJSON = new JSONObject();
+                try {
+                    switch (datePicker.getId()) {
+                        case "dpDateFrom":
+                            LocalDate selectedFromDate = dpDateFrom.getValue();
+                            LocalDate toDate = dpTo.getValue();
+                            if (toDate != null && selectedFromDate.isAfter(toDate)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'From' date cannot be after the 'To' date.");
+                                String lsDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
+                                dpDateFrom.setValue(CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
+//                                psSearchDateFrom = CustomCommonUtil.formatDateToShortString(getFirstDayOfMonth(oApp.getServerDate()));
+                                return;
+                            }
+//                            psSearchDateFrom = CustomCommonUtil.formatLocalDateToShortString(selectedFromDate);
+                            loadTableDetail.reload();
+                            break;
+                        case "dpTo":
+                            LocalDate selectedToDate = dpTo.getValue();
+                            LocalDate fromDate = dpDateFrom.getValue();
+                            if (fromDate != null && selectedToDate.isBefore(fromDate)) {
+                                ShowMessageFX.Warning(null, pxeModuleName, "Invalid Date, The 'To' date cannot be before the 'From' date.");
+                                dpTo.setValue(CustomCommonUtil.parseDateStringToLocalDate(ldCurrentDate.toString()));
+//                                psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(ldCurrentDate);
+                                return;
+                            }
+//                            psSearchDateTo = CustomCommonUtil.formatLocalDateToShortString(selectedToDate);
+                            loadTableDetail.reload();
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+
+    private void initDatepicker() {
+        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpDateFrom, dpTo);
+        JFXUtil.setActionListener(datepicker_Action, dpDateFrom, dpTo);
+    }
+
+    private void initComboboxes() {
+//        JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(samplelist, cmbStatus));
+        JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbStatus);
+        JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbStatus);
+    }
+
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -223,34 +300,24 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         try {
                             details_data.clear();
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-//                                if (poController.Master().getSourceNo() == null || "".equals(poController.Master().getSourceNo())) {
                                 poController.ReloadDetail();
-//                                }
-//                                poJSON = poController.computeDetailFields(true);
-//                                if ("error".equals((String) poJSON.get("result"))) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-//                                }
                             }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
-                            for (int lnCtr = 0; lnCtr < poController.getDetailCount(); lnCtr++) {
+                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
                                 }
-//                                if (poController.Master().getSourceNo() != null && !"".equals(poController.Master().getSourceNo())) {
-//                                    lsParticular = poController.Detail(lnCtr).CashAdvanceDetail(poController.Master().getSourceNo()).getParticular();
-//                                } else {
-//                                    lsParticular = poController.Detail(lnCtr).Particular().getDescription();
-//                                }
-//                                lsOrNo = poController.Detail(lnCtr).getReferNo();
                                 lnRowCount += 1;
                                 details_data.add(
                                         new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getBarCode(), true),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).Inventory().getDescription(), true),
-                                                String.valueOf(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getInventoryCost(), true)),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getDebitQuantity(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.Detail(lnCtr).getCreditQuantity(), true),
+                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
                                                 String.valueOf(lnCtr)
                                         ));
                             }
@@ -260,17 +327,18 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex11());
+                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex09());
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                                 pnDetail = lnRow;
                                 loadRecordDetail();
                             }
+                            JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
                         } catch (CloneNotSupportedException | GuanzonException | SQLException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -281,8 +349,9 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     }
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblNo);
-        JFXUtil.setColumnLeft(tblSerial1, tblSerial2);
+        JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
+        JFXUtil.setColumnLeft(tblBranch, tblCategory, tblStatus);
+        JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalDebitQty);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
@@ -292,7 +361,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryAdjustment_Detail selected = (ModelInventoryAdjustment_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
                     pnDetail = lnRow;
                     loadRecordDetail();
                     moveNext(false, false);
@@ -309,8 +378,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     if (details_data.isEmpty()) {
                         return;
                     }
-                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex11())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex11());
+                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex09())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09());
                     pnDetail = newIndex;
                     loadRecordDetail();
                     break;
@@ -320,39 +389,23 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
     private void initTextFields() {
         //Initialise  TextField Focus
-        JFXUtil.setFocusListener(txtArea_Focus, taRemarks);
-        JFXUtil.setFocusListener(txtDetail_Focus, tfSerial1, tfSerial2);
-        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apDetail);
+        JFXUtil.setFocusListener(txtMaster_Focus, tfSearch, tfCategory);
+        JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
 
-    ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
+    ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
-                    case "taRemarks":
-                        poJSON = poController.Master().setRemarks(lsValue);
-                        if (!JFXUtil.isJSONSuccess(poJSON)) {
-                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                    case "tfSearch":
+//                        poJSON = poController.sear
+                        break;
+                    case "tfCategory":
+                        if (lsValue.isEmpty()) {
                         }
                         break;
                 }
-            });
-    ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
-            (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfSerial1":
-                        if (lsValue.isEmpty()) {
-
-                        }
-                        break;
-                    case "tfSerial2":
-                        if (lsValue.isEmpty()) {
-
-                        }
-                        break;
-                }
-                loadTableDetail.reload();
             });
 
     private void txtField_KeyPressed(KeyEvent event) {
@@ -372,34 +425,16 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     break;
                 case F3:
                     switch (lsID) {
-                        //apDetail
-                        case "tfSerial1":
-                            break;
-                        case "tfSerial2":
-                            break;
-
-                        case "tfCreditTo":
-//                                poJSON = poController.SearchCreditTo(lsValue, false);
-//                                if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                                } else {
-//                                    JFXUtil.textFieldMoveNext(taDVRemarks);
-//                                }
-//                                loadRecordMaster();
+                        //apMaster
+                        case "tfCategory":
                             break;
                     }
                     event.consume();
                     break;
 
                 case UP:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(true, true)},});
-                    event.consume();
                     break;
                 case DOWN:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(false, true)},});
-                    event.consume();
                     break;
                 default:
                     break;
@@ -414,8 +449,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     public void moveNext(boolean isUp, boolean continueNext) {
 //        if (continueNext) {
 //            apDetail.requestFocus();
-//            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
-//                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
+//            pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex09())
+//                    : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex09());
 //        }
 //        loadRecordDetail();
 //        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
@@ -433,15 +468,49 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //        }
     }
 
+    private void initToggleGroup() {
+        type.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            if (newToggle != null) {
+                RadioButton selected = (RadioButton) newToggle;
+                switch (selected.getId()) {
+                    case "rbSummary":
+                        // tblRowNo.setVisible(false);
+                        break;
+                    case "rbDetailed":
+                        break;
+                }
+                boolean lbShow = (selected.getId()).equals("rbSummary");
+//                tblTransactionTotal.setVisible(lbShow);
+//                tblQuantity.setVisible(!lbShow);
+//                tblUnitPrice.setVisible(!lbShow);
+//                tblTotal.setVisible(!lbShow);
+//                tblRow.setVisible(!lbShow);
+//                tblItem.setVisible(!lbShow);
+//                loadTableMain.reload();
+            }
+        });
+    }
+
     private void loadRecordDetail() {
 //        try {
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
-//            tfSerial1.setText(poController.Detail(pnDetail).getSerial1());
-//            tfSerial2.setText(poController.Detail(pnDetail).getSerial2());
-//            taRemarks.setText(poController.Detail(pnDetail).getRemarks());
-        JFXUtil.updateCaretPositions(apDetail);
+        tfSearch.setText("");
+        tfCategory.setText("");
+        dpDateFrom.setValue(null);
+        dpTo.setValue(null);
+        cmbStatus.getSelectionModel().clearSelection();
+
+        lblTotalAdjustments.setText("");
+        lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
+        lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
+        lblOpen.setText("");
+        lblConfirmed.setText("");
+        lblVoided.setText("");
+        lblCancelled.setText("");
+
+        JFXUtil.updateCaretPositions(apMaster);
 //        } catch (SQLException | GuanzonException ex) {
 //            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -455,7 +524,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
         JFXUtil.setButtonsVisibility(lbShow3, btnClose);
 
-        JFXUtil.setDisabled(!lbShow1, apDetail);
+        JFXUtil.setDisabled(!lbShow1, apMaster);
 
         if (fnValue != EditMode.READY) {
             return;
@@ -470,6 +539,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
-        JFXUtil.clearTextFields(apDetail);
+        JFXUtil.clearTextFields(apMaster);
     }
 }
