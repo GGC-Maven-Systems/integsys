@@ -72,6 +72,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
+    private String psEntryNo = "";
     private String psSupplierPayeeId = "";
     private String psTransactionType = "";
 
@@ -129,6 +130,10 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
+    }
+
+    public void setEntryNo(String lsEntryNo) {
+        psEntryNo = lsEntryNo;
     }
 
     /**
@@ -357,53 +362,51 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
         String lsBranchCode = "";
         String lsDeparment = "";
         poJSON = new JSONObject();
-//        try {
-        if (null != event.getCode()) {
-            switch (event.getCode()) {
-                case TAB:
-                case ENTER:
-                    pbEntered = true;
-                    event.consume();
-                    break;
-                case F3:
-                    switch (lsID) {
-                        //apDetail
-                        case "tfSerial1":
-                            break;
-                        case "tfSerial2":
-                            break;
-
-                        case "tfCreditTo":
-//                                poJSON = poController.SearchCreditTo(lsValue, false);
-//                                if (!JFXUtil.isJSONSuccess(poJSON)) {
-//                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
-//                                } else {
-//                                    JFXUtil.textFieldMoveNext(taDVRemarks);
-//                                }
-//                                loadRecordMaster();
-                            break;
-                    }
-                    event.consume();
-                    break;
-
-                case UP:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(true, true)},});
-                    event.consume();
-                    break;
-                case DOWN:
-                    JFXUtil.altSwitch(lsID, new Object[][]{
-                        {new String[]{"tfORNoDetail", "tfAmountDetail", "tfParticularDetail", "tfVatExemptDetail"}, (Runnable) () -> moveNext(false, true)},});
-                    event.consume();
-                    break;
-                default:
-                    break;
+        try {
+            if (null != event.getCode()) {
+                switch (event.getCode()) {
+                    case TAB:
+                    case ENTER:
+                        pbEntered = true;
+                        event.consume();
+                        break;
+                    case F3:
+                        switch (lsID) {
+                            //apDetail
+                            case "tfSerial1":
+                                poJSON = poController.SearchSerial(lsValue, true, Integer.parseInt(psEntryNo), pnDetail);
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                }
+                                break;
+                            case "tfSerial2":
+                                poJSON = poController.SearchSerial(lsValue, false, Integer.parseInt(psEntryNo), pnDetail);
+                                if (!JFXUtil.isJSONSuccess(poJSON)) {
+                                    ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                                }
+                                break;
+                        }
+                        loadTableDetail.reload();
+                        event.consume();
+                        break;
+                    case UP:
+                        JFXUtil.altSwitch(lsID, new Object[][]{
+                            {new String[]{"tfSerial1", "tfSerial2"}, (Runnable) () -> moveNext(true, true)},});
+                        event.consume();
+                        break;
+                    case DOWN:
+                        JFXUtil.altSwitch(lsID, new Object[][]{
+                            {new String[]{"tfSerial1", "tfSerial2"}, (Runnable) () -> moveNext(false, true)},});
+                        event.consume();
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {

@@ -1107,7 +1107,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory);
+        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnSerial);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
@@ -1120,7 +1120,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         switch (poController.Master().getTransactionStatus()) {
             case InvAdjustmentStatus.VOID:
             case InvAdjustmentStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnConfirm);
                 break;
         }
     }
@@ -1128,5 +1128,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster, apDetail, apAttachments);
+        lblTotalDebitQty.setText("0.00");
+        lblTotalCreditQty.setText("0.00");
     }
 }

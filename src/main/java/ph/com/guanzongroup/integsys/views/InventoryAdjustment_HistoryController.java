@@ -518,5 +518,12 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster);
+        lblTotalAdjustments.setText("0.00");
+        lblTotalCreditQty.setText("0.00");
+        lblTotalDebitQty.setText("0.00");
+        lblOpen.setText("0.00");
+        lblConfirmed.setText("0.00");
+        lblVoided.setText("0.00");
+        lblCancelled.setText("0.00");
     }
 }

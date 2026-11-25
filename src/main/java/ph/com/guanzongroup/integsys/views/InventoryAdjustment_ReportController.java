@@ -170,8 +170,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
             initButton(pnEditMode);
 
-            Platform.runLater(() -> {
-//                try {
+            Platform.runLater(() -> {//                try {
                 poController.setIndustryId(psIndustryId);
                 poController.setCompanyId(psCompanyId);
                 poController.setCategoryId(psCategoryId);
@@ -540,5 +539,12 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster);
+        lblTotalAdjustments.setText("0.00");
+        lblTotalCreditQty.setText("0.00");
+        lblTotalDebitQty.setText("0.00");
+        lblOpen.setText("0.00");
+        lblConfirmed.setText("0.00");
+        lblVoided.setText("0.00");
+        lblCancelled.setText("0.00");
     }
 }
