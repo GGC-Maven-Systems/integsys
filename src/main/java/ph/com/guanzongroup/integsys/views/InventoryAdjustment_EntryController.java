@@ -582,14 +582,14 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 if (!details_data.isEmpty()) {
                                     /* FOCUS ON FIRST ROW */
                                     JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex11());
+                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex07());
                                     pnDetail = lnRow;
                                     loadRecordDetail();
                                 }
                             } else {
                                 /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
                                 JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex07());
                                 pnDetail = lnRow;
                                 loadRecordDetail();
                             }
@@ -725,7 +725,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryAdjustment_Detail selected = (ModelInventoryAdjustment_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex11());
+                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex07());
                     pnDetail = lnRow;
                     loadRecordDetail();
                     moveNext(false, false);
@@ -742,8 +742,8 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     if (details_data.isEmpty()) {
                         return;
                     }
-                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex11())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex11());
+                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex07())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex07());
                     pnDetail = newIndex;
                     loadRecordDetail();
                     break;
@@ -923,8 +923,8 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         try {
             if (continueNext) {
                 apDetail.requestFocus();
-                pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex11())
-                        : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex11());
+                pnDetail = isUp ? Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(tblViewDetail)).getIndex07())
+                        : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex07());
             }
             loadRecordDetail();
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
