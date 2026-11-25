@@ -576,7 +576,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 11); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 07); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
