@@ -57,6 +57,7 @@ import ph.com.guanzongroup.integsys.utility.JFXUtil;
  * @author Team 1
  */
 public class InventoryAdjustment_SerialController implements Initializable, ScreenInterface {
+
     private GRiderCAS oApp;
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
@@ -70,7 +71,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-    private String psEntryNo = "";
+    public int pnEntryNo;
     private String psSupplierPayeeId = "";
     private String psTransactionType = "";
 
@@ -130,8 +131,8 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
         psCategoryId = fsValue;
     }
 
-    public void setEntryNo(String lsEntryNo) {
-        psEntryNo = lsEntryNo;
+    public void setEntryNo(int lsEntryNo) {
+        pnEntryNo = lsEntryNo;
     }
 
     /**
@@ -152,9 +153,6 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
             initDetailGrid();
             initTableOnClick();
             clearTextFields();
-            pnEditMode = EditMode.UNKNOWN;
-
-            initButton(pnEditMode);
 
             Platform.runLater(() -> {
 //                try {
@@ -167,7 +165,17 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 //                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //                }
             });
-            loadTableDetail.reload();
+            try {
+                poController.NewTransaction();
+                pnEditMode = poController.getEditMode();
+                initButton(pnEditMode);
+                loadTableDetail.reload();
+            } catch (SQLException | GuanzonException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+            } catch (CloneNotSupportedException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -276,7 +284,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         }
                     });
                 });
-}
+    }
 
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblNo);
@@ -372,13 +380,13 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         switch (lsID) {
                             //apDetail
                             case "tfSerial1":
-                                poJSON = poController.SearchSerial(lsValue, true, Integer.parseInt(psEntryNo), pnDetail);
+                                poJSON = poController.SearchSerial(lsValue, true, pnEntryNo, pnDetail);
                                 if (!JFXUtil.isJSONSuccess(poJSON)) {
                                     ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 }
                                 break;
                             case "tfSerial2":
-                                poJSON = poController.SearchSerial(lsValue, false, Integer.parseInt(psEntryNo), pnDetail);
+                                poJSON = poController.SearchSerial(lsValue, false, pnEntryNo, pnDetail);
                                 if (!JFXUtil.isJSONSuccess(poJSON)) {
                                     ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 }

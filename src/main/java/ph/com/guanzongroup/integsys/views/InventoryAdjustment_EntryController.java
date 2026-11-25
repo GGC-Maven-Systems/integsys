@@ -526,7 +526,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         controller1.setGRider(oApp);
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
-//        controller1.setObject(poController);
+        controller1.setEntryNo(poController.Detail(pnDetail).getEntryNo());
         controller = controller1;
 
         poJSON = new JSONObject();
