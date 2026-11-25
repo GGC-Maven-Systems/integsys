@@ -40,6 +40,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
 import org.guanzon.appdriver.agent.ShowMessageFX;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -181,7 +182,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-//                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                        CommonUtils.closeStage(btnClose);
                     } else {
                         return;
                     }

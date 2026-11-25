@@ -181,6 +181,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 //                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //                }
             });
+            JFXUtil.initKeyClickObject(AnchorMain, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));

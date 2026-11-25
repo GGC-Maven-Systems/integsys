@@ -184,7 +184,7 @@
                     <center>
                         <AnchorPane BorderPane.alignment="CENTER">
                      <children>
-                        <TabPane layoutY="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TabPane fx:id="tabPaneMain" layoutY="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <tabs>
                               <Tab closable="false" text="Transaction Information">
                                  <content>

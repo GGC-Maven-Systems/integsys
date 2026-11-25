@@ -180,6 +180,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //                }
             });
+            JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
@@ -466,29 +467,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //                {poController.Detail(pnDetail).getParticularId(), tfParticularDetail},
 //                {poController.Detail(pnDetail).getAmount(), tfAmountDetail},}, tfAmountDetail); // default
 //        }
-    }
-
-    private void initToggleGroup() {
-        type.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            if (newToggle != null) {
-                RadioButton selected = (RadioButton) newToggle;
-                switch (selected.getId()) {
-                    case "rbSummary":
-                        // tblRowNo.setVisible(false);
-                        break;
-                    case "rbDetailed":
-                        break;
-                }
-                boolean lbShow = (selected.getId()).equals("rbSummary");
-//                tblTransactionTotal.setVisible(lbShow);
-//                tblQuantity.setVisible(!lbShow);
-//                tblUnitPrice.setVisible(!lbShow);
-//                tblTotal.setVisible(!lbShow);
-//                tblRow.setVisible(!lbShow);
-//                tblItem.setVisible(!lbShow);
-//                loadTableMain.reload();
-            }
-        });
     }
 
     private void loadRecordDetail() {

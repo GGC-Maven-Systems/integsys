@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,6 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.util.Pair;
 import javax.script.ScriptException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -203,6 +201,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
+            JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField);
             initAttachmentPreviewPane();
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -771,7 +770,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         CustomCommonUtil.inputIntegersOnly(tfCreditQty, tfDebitQty);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail, tblAttachments);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail, tblAttachments);
-        JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
