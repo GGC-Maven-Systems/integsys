@@ -161,6 +161,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             initTableOnClick();
             clearTextFields();
             initComboboxes();
+            initToggleGroup();
             pnEditMode = EditMode.UNKNOWN;
 
             initButton(pnEditMode);
@@ -204,7 +205,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             switch (lsButton) {
                 case "btnRetrieve":
                     retrieveLists();
-                    break;
+                    return;
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -215,7 +216,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     break;
                 default:
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                    break;
+                    return;
             }
             if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
 //                    resetValues();
@@ -309,6 +310,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                             }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
+                            //should differ loop for summary and detail
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
@@ -316,15 +318,56 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                 lnRowCount += 1;
                                 details_data.add(
                                         new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
                                                 poController.TransactionList(lnCtr).Master().getTransactionNo(),
                                                 CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
                                                 poController.TransactionList(lnCtr).Master().getReferenceNo(),
-                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
                                                 poController.TransactionList(lnCtr).Master().Category().getDescription(),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-                                                String.valueOf(lnCtr)
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
+                                                String.valueOf(lnCtr), "", "", "", "", "", "", "", "total cost",
+                                                poController.TransactionList(lnCtr).Master().getRemarks(),
+                                                poController.TransactionList(lnCtr).Master().getTransactionStatus()
                                         ));
+                            }
+                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+                                if (!poController.Detail(lnCtr).isReverse()) {
+                                    continue;
+                                }
+                                lnRowCount += 1;
+
+                                //by lnctr is the index of per master
+                                //by lnctrDetail is the index of detail per master
+                                for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
+
+                                    details_data.add(
+                                            new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                    poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+                                                    poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                    poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                    CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                    poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                    poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    String.valueOf(lnCtr),
+                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
+                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
+                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
+                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getBarCode(),
+                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
+                                                    poController.TransactionList(lnCtr).Master().getRemarks(),
+                                                    poController.TransactionList(lnCtr).Master().getTransactionStatus()
+                                            ));
+                                }
                             }
                             int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 9); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
@@ -354,7 +397,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
-        JFXUtil.setColumnLeft(tblCompany, tblBranch, tblCategory, tblRow, tblBrand, tblModel, tblBarcode, tblDescription, tblRemarks, tblStatus);
+        JFXUtil.setColumnLeft(tblCompany, tblBranch, tblCategory, tblRow, tblBrand, tblModel, tblColor, tblBarcode, tblDescription, tblRemarks, tblStatus);
         JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost, tblCost, tblCreditQty, tblDebitQty, tblTotalCost);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
@@ -502,13 +545,15 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                 RadioButton selected = (RadioButton) newToggle;
                 switch (selected.getId()) {
                     case "rbSummary":
-                        // tblRowNo.setVisible(false);
                         break;
                     case "rbDetailed":
                         break;
                 }
-                boolean lbShow = (selected.getId()).equals("rbSummary");
-                JFXUtil.setVisibility(lbShow, tblBarcode, tblModel, tblColor, tblDescription, tblCreditQty, tblDebitQty);
+                boolean lbShow = selected.getId().equals("rbSummary");
+                JFXUtil.setVisibility(false, tblRow);
+                JFXUtil.setVisibility(!lbShow, tblBarcode, tblModel, tblColor, tblBarcode,tblDescription, tblCreditQty, tblDebitQty); //hide for details
+                JFXUtil.setVisibility(lbShow, tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost,
+                        tblCreditQty, tblDebitQty); //hide for summary
             }
         });
     }
@@ -517,10 +562,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
-        JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-
-        JFXUtil.setDisabled(!lbShow1, apMaster);
 
         if (fnValue != EditMode.READY) {
             return;

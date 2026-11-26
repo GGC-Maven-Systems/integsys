@@ -182,7 +182,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                     return;
                 default:
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                    break;
+                    return;
             }
             if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
 //                    resetValues();

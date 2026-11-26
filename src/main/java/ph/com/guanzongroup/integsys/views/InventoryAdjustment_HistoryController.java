@@ -191,7 +191,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             switch (lsButton) {
                 case "btnRetrieve":
                     retrieveLists();
-                    break;
+                    return;
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -202,7 +202,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     break;
                 default:
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                    break;
+                    return;
             }
 //            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
 ////                    resetValues();
@@ -425,25 +425,20 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         //Initialise  TextField Focus
         JFXUtil.setFocusListener(txtMaster_Focus, tfSearch, tfCategory);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
+        tfSearch.setOnKeyPressed(this::txtField_KeyPressed);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                try {
-                    switch (lsID) {
-                        case "tfSearch":
-                            poJSON = poController.SearchTransaction(lsValue, false);
-                            break;
-                        case "tfCategory":
-                            if (lsValue.isEmpty()) {
-                            }
-                            break;
-                    }
-                } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                switch (lsID) {
+                    case "tfSearch":
+                        break;
+                    case "tfCategory":
+                        if (lsValue.isEmpty()) {
+                        }
+                        break;
                 }
             });
 
@@ -451,38 +446,45 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         TextInputControl txtInput = (TextInputControl) event.getSource();
         String lsID = txtInput.getId();
         String lsValue = txtInput.getText() == null ? "" : txtInput.getText();
-        String lsBranchCode = "";
-        String lsDeparment = "";
         poJSON = new JSONObject();
-//        try {
-        if (null != event.getCode()) {
-            switch (event.getCode()) {
-                case TAB:
-                case ENTER:
-                    pbEntered = true;
-                    event.consume();
-                    break;
-                case F3:
-                    switch (lsID) {
-                        //apMaster
-                        case "tfCategory":
-                            break;
-                    }
-                    event.consume();
-                    break;
+        try {
+            if (null != event.getCode()) {
+                switch (event.getCode()) {
+                    case TAB:
+                    case ENTER:
+                        pbEntered = true;
+                        event.consume();
+                        break;
+                    case F3:
+                        switch (lsID) {
+                            //apMaster
+                            case "tfSearch":
+                                poJSON = poController.SearchTransaction(lsValue, false);
+                                break;
+                            case "tfCategory":
+                                poJSON = poController.SearchCategory(lsValue, false);
+                                break;
+                        }
+                        retrieveLists();
+                        event.consume();
+                        break;
 
-                case UP:
-                    break;
-                case DOWN:
-                    break;
-                default:
-                    break;
+                    case UP:
+                        break;
+                    case DOWN:
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ScriptException ex) {
+            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     private void loadRecordDetail() {

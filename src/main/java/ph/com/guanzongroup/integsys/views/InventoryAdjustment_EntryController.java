@@ -262,7 +262,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
                             ShowMessageFX.Error(MiscUtil.getException(ex), pxeModuleName, null);
                         }
-                        break;
+                        return;
                     case "btnClose":
                         unloadForm appUnload = new unloadForm();
                         if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
@@ -393,10 +393,10 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         break;
                     case "btnSearch":
                         JFXUtil.initiateBtnSearch(pxeModuleName, lastFocusedTextField, previousSearchedTextField, apMaster, apDetail);
-                        break;
+                        return;
                     case "btnSerial":
                         openParameter("", "");
-                        break;
+                        return;
                     case "btnRemove":
                         if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
                             poController.Detail().remove(pnDetail);
@@ -461,7 +461,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                             tblAttachments.getFocusModel().focus(pnAttachment);
                             tblAttachments.getSelectionModel().select(pnAttachment);
                         }
-                        break;
+                        return;
                     case "btnRemoveAttachment":
                         if (poController.getTransactionAttachmentCount() <= 0) {
                             return;
@@ -490,16 +490,16 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                             JFXUtil.clearTextFields(apAttachments);
                         }
                         initAttachmentsGrid();
-                        break;
+                        return;
                     case "btnArrowRight":
                         slideImage(1);
-                        break;
+                        return;
                     case "btnArrowLeft":
                         slideImage(-1);
-                        break;
+                        return;
                     default:
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                        break;
+                        return;
                 }
 //                if (JFXUtil.isObjectEqualTo(lsButton, "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
 ////                    resetValues();
@@ -1174,7 +1174,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 break;
             case InvAdjustmentStatus.CONFIRMED:
                 JFXUtil.setButtonsVisibility(true, btnVoid);
-                JFXUtil.setButtonsVisibility(false, btnConfirm);
+                JFXUtil.setButtonsVisibility(false, btnConfirm, btnUpdate);
                 break;
             case InvAdjustmentStatus.VOID:
             case InvAdjustmentStatus.CANCELLED:
