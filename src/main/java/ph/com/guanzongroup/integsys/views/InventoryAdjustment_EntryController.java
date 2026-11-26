@@ -116,7 +116,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private FileChooser fileChooser;
     ObservableList<String> documentType = ModelDeliveryAcceptance_Attachment.documentType;
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
-
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apTransactionInfo, apMaster, apDetail, apAttachments, apAttachmentButtons;
     @FXML
@@ -124,7 +123,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     @FXML
     private HBox hbButtons, hboxid;
     @FXML
-    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnSerial, btnConfirm, btnHistory, btnClose, btnRemove, btnAddAttachment, btnRemoveAttachment, btnArrowLeft, btnArrowRight;
+    private Button btnBrowse, btnNew, btnUpdate, btnSearch, btnSave, btnCancel, btnSerial, btnVoid, btnConfirm, btnHistory, btnClose, btnRemove, btnAddAttachment, btnRemoveAttachment, btnArrowLeft, btnArrowRight;
     @FXML
     private TabPane tabPaneMain;
     @FXML
@@ -312,6 +311,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                             loJSON = poController.ConfirmTransaction();
                                             if ("success".equals((String) loJSON.get("result"))) {
                                                 ShowMessageFX.Information((String) loJSON.get("message"), pxeModuleName, null);
+                                                poController.OpenTransaction(poController.Master().getTransactionNo());
                                             } else {
                                                 ShowMessageFX.Warning((String) loJSON.get("message"), pxeModuleName, null);
                                             }
@@ -334,6 +334,8 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 return;
                             } else {
                                 ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                poController.OpenTransaction(poController.Master().getTransactionNo());
+                                pnEditMode = poController.getEditMode();
                             }
                         } else {
                             return;
@@ -357,6 +359,9 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
                                 return;
                             } else {
+                                ShowMessageFX.Information(null, pxeModuleName, (String) poJSON.get("message"));
+                                poController.OpenTransaction(poController.Master().getTransactionNo());
+                                pnEditMode = poController.getEditMode();
                             }
                         } else {
                             return;
@@ -532,6 +537,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
         controller1.setEntryNo(poController.Detail(pnDetail).getEntryNo());
+        controller1.setObject(poController);
         controller = controller1;
 
         poJSON = new JSONObject();
@@ -970,6 +976,15 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
     private void loadRecordMaster() {
         try {
+            String lsStatus = "";
+            if (InvAdjustmentStatus.CONFIRMED.equals(poController.Master().getTransactionStatus())) {
+                lsStatus = "Cancel";
+            } else {
+                lsStatus = "Void";
+            }
+            btnVoid.setText(lsStatus);
+            boolean lbShow = pnEditMode == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfCategory);
             JFXUtil.setStatusValue(lblStatus, InvAdjustmentStatus.class, pnEditMode == EditMode.UNKNOWN ? "-1" : poController.Master().getTransactionStatus());
             tfTransactionNo.setText(poController.Master().getTransactionNo());
             String lsTransactionDate = JFXUtil.formatDateToString(poController.Master().getTransactionDate());
@@ -1143,7 +1158,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
         JFXUtil.setButtonsVisibility(!lbShow1, btnNew);
         JFXUtil.setButtonsVisibility(lbShow1, btnSearch, btnSave, btnCancel);
-        JFXUtil.setButtonsVisibility(lbShow2, btnUpdate, btnHistory, btnSerial, btnConfirm);
+        JFXUtil.setButtonsVisibility(lbShow2, btnVoid, btnUpdate, btnHistory, btnSerial, btnConfirm);
         JFXUtil.setButtonsVisibility(lbShow3, btnBrowse, btnClose);
 
         JFXUtil.setDisabled(!lbShow1, apMaster, apDetail);
@@ -1153,9 +1168,16 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             return;
         }
         switch (poController.Master().getTransactionStatus()) {
+            case InvAdjustmentStatus.OPEN:
+                JFXUtil.setButtonsVisibility(true, btnVoid, btnConfirm);
+                break;
+            case InvAdjustmentStatus.CONFIRMED:
+                JFXUtil.setButtonsVisibility(true, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnConfirm);
+                break;
             case InvAdjustmentStatus.VOID:
             case InvAdjustmentStatus.CANCELLED:
-                JFXUtil.setButtonsVisibility(false, btnUpdate, btnConfirm);
+                JFXUtil.setButtonsVisibility(false, btnUpdate, btnConfirm, btnVoid);
                 break;
         }
     }

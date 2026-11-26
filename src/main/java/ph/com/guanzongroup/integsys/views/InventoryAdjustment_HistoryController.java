@@ -195,7 +195,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                 case "btnClose":
                     unloadForm appUnload = new unloadForm();
                     if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-//                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                        appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
                     } else {
                         return;
                     }
@@ -204,11 +204,11 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     break;
             }
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-//                    resetValues();
-                pnEditMode = EditMode.UNKNOWN;
-                clearTextFields();
-            }
+//            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+////                    resetValues();
+//                pnEditMode = EditMode.UNKNOWN;
+//                clearTextFields();
+//            }
 
             if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
             } else {
@@ -431,14 +431,19 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
-                switch (lsID) {
-                    case "tfSearch":
-//                        poJSON = poController.sear
-                        break;
-                    case "tfCategory":
-                        if (lsValue.isEmpty()) {
-                        }
-                        break;
+                try {
+                    switch (lsID) {
+                        case "tfSearch":
+                            poJSON = poController.SearchTransaction(lsValue, false);
+                            break;
+                        case "tfCategory":
+                            if (lsValue.isEmpty()) {
+                            }
+                            break;
+                    }
+                } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
 
