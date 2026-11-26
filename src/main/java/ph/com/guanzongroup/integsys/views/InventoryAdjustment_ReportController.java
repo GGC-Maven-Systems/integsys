@@ -157,9 +157,9 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             initLoadTable();
             initTextFields();
             initDetailGrid();
+            clearTextFields();
             initDatepicker();
             initTableOnClick();
-            clearTextFields();
             initComboboxes();
             initToggleGroup();
             pnEditMode = EditMode.UNKNOWN;
@@ -289,8 +289,18 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             });
 
     private void initDatepicker() {
-        JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpDateFrom, dpTo);
-        JFXUtil.setActionListener(datepicker_Action, dpDateFrom, dpTo);
+        try {
+            JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpDateFrom, dpTo);
+            JFXUtil.setActionListener(datepicker_Action, dpDateFrom, dpTo);
+
+            String lsDateFrom = CustomCommonUtil.formatDateToShortString(JFXUtil.getFirstDayOfMonth(oApp.getServerDate()));
+            JFXUtil.setDateValue(dpDateFrom, JFXUtil.formatStringToLocalDate(lsDateFrom));
+
+            String lsDateTo = CustomCommonUtil.formatDateToShortString(JFXUtil.getLastDayOfMonth(oApp.getServerDate()));
+            JFXUtil.setDateValue(dpTo, JFXUtil.formatStringToLocalDate(lsDateTo));
+        } catch (SQLException ex) {
+            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void initComboboxes() {

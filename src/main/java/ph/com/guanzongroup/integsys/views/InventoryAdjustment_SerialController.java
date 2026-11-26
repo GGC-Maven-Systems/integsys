@@ -173,6 +173,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                     break;
                 case "btnRemove":
                     if (poController.Serial(pnDetail).getEditMode() == EditMode.ADDNEW) {
+                        poController.SerialList().size();
                         poController.SerialList().remove(pnDetail);
                     } else {
                         poController.Serial(pnDetail).isReverse(false);
@@ -419,7 +420,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
             }
             boolean lbShow = poController.Serial(pnDetail).getEditMode() == EditMode.UPDATE;
             JFXUtil.setDisabled(lbShow, tfSerial1, tfSerial2);
-            
+
             tfSerial1.setText(poController.Serial(pnDetail).InventorySerial().getSerial01());
             tfSerial2.setText(poController.Serial(pnDetail).InventorySerial().getSerial02());
             taRemarks.setText(poController.Serial(pnDetail).getRemarks());

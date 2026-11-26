@@ -4117,6 +4117,24 @@ public class JFXUtil {
         return calendar.getTime();
     }
 
+    public static Date getLastDayOfMonth(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        // Set to last day of the same month and year
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        // Reset time to start of the day
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTime();
+    }
+
     //For combobox when basis value are two
     public static class Status {
 
@@ -4154,18 +4172,32 @@ public class JFXUtil {
     }
 
 // String -> Date
+    private static final String[] DATE_PATTERNS = {
+        "yyyy-MM-dd",
+        "MM/dd/yyyy",
+        "dd/MM/yyyy"
+    };
+
     public static Date formatStringToDate(String foDateString) {
         if (foDateString == null || foDateString.trim().isEmpty()) {
             return null;
         }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-            sdf.setLenient(false); // reject invalid dates like 2026-02-31
-            return sdf.parse(foDateString.trim());
-        } catch (java.text.ParseException ex) {
-            Logger.getLogger(JFXUtil.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+
+        String value = foDateString.trim();
+
+        for (String pattern : DATE_PATTERNS) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+                sdf.setLenient(false); // reject invalid dates like 02/31/2026
+                return sdf.parse(value);
+            } catch (java.text.ParseException ex) {
+                // try the next pattern
+            }
         }
+
+        Logger.getLogger(JFXUtil.class.getName())
+                .log(Level.WARNING, "Unable to parse date: {0}", value);
+        return null;
     }
 
     // String -> LocalDate
