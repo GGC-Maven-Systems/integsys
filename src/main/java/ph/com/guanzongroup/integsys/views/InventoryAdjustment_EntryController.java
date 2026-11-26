@@ -496,14 +496,15 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                         break;
                 }
-                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-//                    resetValues();
-                    pnEditMode = EditMode.UNKNOWN;
-                    clearTextFields();
-                }
+//                if (JFXUtil.isObjectEqualTo(lsButton, "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+////                    resetValues();
+//                    pnEditMode = EditMode.UNKNOWN;
+//                    clearTextFields();
+//                }
 
                 if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
                 } else {
+                    clearTextFields();
                     loadTableDetail.reload();
                     loadRecordMaster();
                 }
