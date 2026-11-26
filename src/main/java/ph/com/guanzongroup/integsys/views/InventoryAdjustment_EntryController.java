@@ -105,7 +105,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
     AtomicReference<Object> previousSearchedTextField = new AtomicReference<>();
-    private boolean pbEnteredDV = false;
     private int currentIndex = 0;
     private final Map<String, List<String>> highlightedRowsMain = new HashMap<>();
     Map<String, String> imageinfo_temp = new HashMap<>();
@@ -566,6 +565,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 tblViewDetail,
                 details_data,
                 () -> {
+                    pbEntered = false;
                     Platform.runLater(() -> {
                         try {
                             details_data.clear();
@@ -860,6 +860,14 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
+                        if (Double.parseDouble(lsValue) > 0) {
+                            JFXUtil.runWithDelay(0.40, () -> {
+                                if (pbEntered) {
+                                    moveNext(false, true);
+                                    pbEntered = false;
+                                }
+                            });
+                        }
                         break;
                     case "tfDebitQty":
                         lsValue = JFXUtil.removeComma(lsValue);
@@ -871,6 +879,14 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         poJSON = poController.Detail(pnDetail).setDebitQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        }
+                        if (Double.parseDouble(lsValue) > 0) {
+                            JFXUtil.runWithDelay(0.40, () -> {
+                                if (pbEntered) {
+                                    moveNext(false, true);
+                                    pbEntered = false;
+                                }
+                            });
                         }
                         break;
                 }
