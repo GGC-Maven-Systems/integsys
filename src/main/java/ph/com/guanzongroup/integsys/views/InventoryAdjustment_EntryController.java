@@ -974,7 +974,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         switch (lsID) {
                             //apMaster
                             case "tfCategory":
-                                poJSON = poController.SearchCategory(lsValue, false);
+                                poJSON = poController.SearchCategory(lsValue, false, false);
                                 if (!JFXUtil.isJSONSuccess(poJSON)) {
                                     ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 } else {

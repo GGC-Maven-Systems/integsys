@@ -94,7 +94,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     JFXUtil.ReloadableTableTask loadTableDetail;
     AnchorPane root = null;
     Scene scene = null;
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRM", "VOID", "CANCELLED");
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRMED", "CANCELLED", "VOIDED", "ALL");
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
     @FXML
     private AnchorPane apMainAnchor, apBrowse, apButton, apMaster;
@@ -232,7 +232,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     private void retrieveLists() {
         try {
             poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
-                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()), String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
+                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()),
+                    String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
             loadTableDetail.reload();
         } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -318,9 +319,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                                if (!poController.Detail(lnCtr).isReverse()) {
-                                    continue;
-                                }
                                 lnRowCount += 1;
                                 details_data.add(
                                         new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
@@ -333,23 +331,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
                                                 String.valueOf(lnCtr)
                                         ));
-                            }
-                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 9); //this method is used only when Reverse is applied
-                            if (lnTempRow < 0 || lnTempRow
-                                    >= details_data.size()) {
-                                if (!details_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex09());
-                                    pnDetail = lnRow;
-                                    loadRecordDetail();
-                                }
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
-                                JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
-                                pnDetail = lnRow;
-                                loadRecordDetail();
                             }
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
                         } catch (CloneNotSupportedException | GuanzonException | SQLException ex) {
@@ -476,7 +457,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                 poJSON = poController.SearchTransaction(lsValue, false);
                                 break;
                             case "tfCategory":
-                                poJSON = poController.SearchCategory(lsValue, false);
+                                poJSON = poController.SearchCategory(lsValue, false, true);
+                                tfCategory.setText(poController.getCategory());
                                 break;
                         }
                         retrieveLists();

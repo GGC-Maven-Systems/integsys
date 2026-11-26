@@ -94,7 +94,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     JFXUtil.ReloadableTableTask loadTableDetail;
     AnchorPane root = null;
     Scene scene = null;
-    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRM", "VOID", "CANCELLED");
+    ObservableList<String> comboboxlist = FXCollections.observableArrayList("OPEN", "CONFIRMED", "CANCELLED", "VOIDED", "ALL");
     JFXUtil.StageManager stageDialog = new JFXUtil.StageManager();
 
     @FXML
@@ -186,7 +186,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     private void retrieveLists() {
         try {
             poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
-                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()), cmbStatus.getSelectionModel().getSelectedItem().toString());
+                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()),
+                    String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
             loadTableDetail.reload();
         } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -323,28 +324,25 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             //should differ loop for summary and detail
-                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                                if (!poController.Detail(lnCtr).isReverse()) {
-                                    continue;
-                                }
-                                lnRowCount += 1;
-                                details_data.add(
-                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-                                                poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
-                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
-                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
-                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
-                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
-                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
-                                                String.valueOf(lnCtr), "", "", "", "", "", "", "", "total cost",
-                                                poController.TransactionList(lnCtr).Master().getRemarks(),
-                                                poController.TransactionList(lnCtr).Master().getTransactionStatus()
-                                        ));
-                            }
+//                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+//                                lnRowCount += 1;
+//                                details_data.add(
+//                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+//                                                poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+//                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+//                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
+//                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+//                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
+//                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
+//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
+//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
+//                                                String.valueOf(lnCtr), "", "", "", "", "", "", "", "total cost",
+//                                                poController.TransactionList(lnCtr).Master().getRemarks(),
+//                                                poController.TransactionList(lnCtr).Master().getTransactionStatus()
+//                                        ));
+//                            }
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
@@ -363,10 +361,10 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                                     CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
                                                     poController.TransactionList(lnCtr).Master().getReferenceNo(),
                                                     poController.TransactionList(lnCtr).Master().Category().getDescription(),
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
                                                     String.valueOf(lnCtr),
                                                     poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
                                                     poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
@@ -380,23 +378,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                                     poController.TransactionList(lnCtr).Master().getTransactionStatus()
                                             ));
                                 }
-                            }
-                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 9); //this method is used only when Reverse is applied
-                            if (lnTempRow < 0 || lnTempRow
-                                    >= details_data.size()) {
-                                if (!details_data.isEmpty()) {
-                                    /* FOCUS ON FIRST ROW */
-                                    JFXUtil.selectAndFocusRow(tblViewDetail, 0);
-                                    int lnRow = Integer.parseInt(details_data.get(0).getIndex09());
-                                    pnDetail = lnRow;
-                                    loadRecordDetail();
-                                }
-                            } else {
-                                /* FOCUS ON THE ROW THAT pnDetailBIR POINTS TO */
-                                JFXUtil.selectAndFocusRow(tblViewDetail, lnTempRow);
-                                int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
-                                pnDetail = lnRow;
-                                loadRecordDetail();
                             }
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
                         } catch (CloneNotSupportedException | GuanzonException | SQLException ex) {
@@ -474,35 +455,43 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         String lsBranchCode = "";
         String lsDeparment = "";
         poJSON = new JSONObject();
-//        try {
-        if (null != event.getCode()) {
-            switch (event.getCode()) {
-                case TAB:
-                case ENTER:
-                    pbEntered = true;
-                    event.consume();
-                    break;
-                case F3:
-                    switch (lsID) {
-                        //apMaster
-                        case "tfCategory":
-                            break;
-                    }
-                    event.consume();
-                    break;
+        try {
+            if (null != event.getCode()) {
+                switch (event.getCode()) {
+                    case TAB:
+                    case ENTER:
+                        pbEntered = true;
+                        event.consume();
+                        break;
+                    case F3:
+                        switch (lsID) {
+                            case "tfSearch":
+                                poJSON = poController.SearchTransaction(lsValue, false);
+                                break;
+                            case "tfCategory":
+                                poJSON = poController.SearchCategory(lsValue, false, true);
+                                tfCategory.setText(poController.getCategory());
+                                break;
+                        }
+                        event.consume();
+                        break;
 
-                case UP:
-                    break;
-                case DOWN:
-                    break;
-                default:
-                    break;
+                    case UP:
+                        break;
+                    case DOWN:
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ScriptException ex) {
+            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     public void moveNext(boolean isUp, boolean continueNext) {
@@ -579,12 +568,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         if (fnValue != EditMode.READY) {
             return;
         }
-//        switch (poController.Master().getTransactionStatus()) {
-//            case InvAdjustmentStatus.VOID:
-//            case InvAdjustmentStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate);
-//                break;
-//        }
     }
 
     private void clearTextFields() {
