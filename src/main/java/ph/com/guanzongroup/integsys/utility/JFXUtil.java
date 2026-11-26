@@ -3683,10 +3683,10 @@ public class JFXUtil {
         }
 
         for (Object item : items) {
-            if (item instanceof Node node) {
-                node.setVisible(visible);
-            } else if (item instanceof TableColumnBase<?, ?> column) {
-                column.setVisible(visible);
+            if (item instanceof Node) {
+                ((Node) item).setVisible(visible);
+            } else if (item instanceof TableColumnBase) {
+                ((TableColumnBase<?, ?>) item).setVisible(visible);
             }
         }
     }
