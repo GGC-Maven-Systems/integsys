@@ -832,6 +832,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         loadTableDetail.reload();
                         break;
                     case "tfCreditQty":
+                        //check if debit is > 0 already
+                        if (poController.Detail(pnDetail).getDebitQuantity() > 0) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Unable to add credit; debit entry already exists.");
+                            loadRecordDetail();
+                            break;
+                        }
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setCreditQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
@@ -840,6 +846,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         loadTableDetail.reload();
                         break;
                     case "tfDebitQty":
+                        if (poController.Detail(pnDetail).getCreditQuantity() > 0) {
+                            ShowMessageFX.Warning(null, pxeModuleName, "Unable to add debit; credit entry already exists.");
+                            loadRecordDetail();
+                            break;
+                        }
                         lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setDebitQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {

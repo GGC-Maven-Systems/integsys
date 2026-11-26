@@ -454,18 +454,12 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-        JFXUtil.setButtonsVisibility(lbShow3, btnClose);
+        JFXUtil.setButtonsVisibility(true, btnClose);
         JFXUtil.setDisabled(!lbShow1, apDetail);
 
         if (fnValue != EditMode.READY) {
             return;
         }
-//        switch (poController.Master().getTransactionStatus()) {
-//            case InvAdjustmentStatus.VOID:
-//            case InvAdjustmentStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate);
-//                break;
-//        }
     }
 
     private void clearTextFields() {

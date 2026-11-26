@@ -266,7 +266,7 @@
                                                                         </AnchorPane>
                                                                                                 <TextField fx:id="tfTransactionNo" disable="true" editable="false" styleClass="DisabledTextField" GridPane.columnIndex="2" />
                                                                                                 <DatePicker fx:id="tfTransactionDate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                                                                <TextField fx:id="tfBranch" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                                                                                <TextField fx:id="tfBranch" disable="true" styleClass="DisabledTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                                                 <TextField fx:id="tfReferenceNo" GridPane.columnIndex="6" GridPane.rowIndex="2" />
                                                                                                 <TextField fx:id="tfCategory" layoutX="125.0" layoutY="75.0" promptText="Press F3: Search" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                                                                                 <TextArea fx:id="taRemarks" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="4" GridPane.rowSpan="2" />
