@@ -60,6 +60,7 @@ import javax.script.ScriptException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.guanzon.appdriver.agent.ShowMessageFX;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRiderCAS;
 import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -193,6 +194,9 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     poController.setIndustryId(psIndustryId);
                     poController.setCompanyId(psCompanyId);
                     poController.setCategoryId(psCategoryId);
+                    poController.Master().setIndustryCode(psIndustryId);
+                    poController.Master().setCompanyId(psCompanyId);
+                    poController.Master().setCategoryCode(psCategoryId);
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     lblSource.setText(poController.Master().Company().getCompanyName());
                     btnNew.fire();
@@ -829,34 +833,36 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        loadTableDetail.reload();
                         break;
                     case "tfCreditQty":
                         //check if debit is > 0 already
-                        if (poController.Detail(pnDetail).getDebitQuantity() > 0) {
+                        poJSON = poController.validateCredit(poController.Detail(pnDetail).getCreditQuantity(), pnDetail);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
+                        }
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        if (poController.Detail(pnDetail).getDebitQuantity() > 0 && Double.parseDouble(lsValue) > 0) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Unable to add credit; debit entry already exists.");
                             loadRecordDetail();
                             break;
                         }
-                        lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setCreditQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        loadTableDetail.reload();
                         break;
                     case "tfDebitQty":
-                        if (poController.Detail(pnDetail).getCreditQuantity() > 0) {
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        if (poController.Detail(pnDetail).getCreditQuantity() > 0 && Double.parseDouble(lsValue) > 0) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Unable to add debit; credit entry already exists.");
                             loadRecordDetail();
                             break;
                         }
-                        lsValue = JFXUtil.removeComma(lsValue);
                         poJSON = poController.Detail(pnDetail).setDebitQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
-                        loadTableDetail.reload();
                         break;
                 }
                 JFXUtil.runWithDelay(.50, () -> {
@@ -866,6 +872,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
 
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
+        TextField txtField = (TextField) event.getSource();
         String lsID = txtInput.getId();
         String lsValue = txtInput.getText() == null ? "" : txtInput.getText();
         String lsBranchCode = "";
@@ -877,6 +884,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     case TAB:
                     case ENTER:
                         pbEntered = true;
+                        CommonUtils.SetNextFocus(txtField);
                         event.consume();
                         break;
                     case F3:
@@ -915,12 +923,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         break;
                     case UP:
                         JFXUtil.altSwitch(lsID, new Object[][]{
-                            {new String[]{"tfBarcode", "tfDebitQty"}, (Runnable) () -> moveNext(true, true)},});
+                            {new String[]{"tfBarcode", "tfDebitQty", "tfCreditQty"}, (Runnable) () -> moveNext(true, true)},});
                         event.consume();
                         break;
                     case DOWN:
                         JFXUtil.altSwitch(lsID, new Object[][]{
-                            {new String[]{"tfBarcode", "tfDebitQty"}, (Runnable) () -> moveNext(false, true)},});
+                            {new String[]{"tfBarcode", "tfDebitQty", "tfCreditQty"}, (Runnable) () -> moveNext(false, true)},});
                         event.consume();
                         break;
                     default:
@@ -944,9 +952,16 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
-            JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
-                {poController.Detail(pnDetail).Inventory().getBarCode(), tfBarcode},
-                {poController.Detail(pnDetail).getDebitQuantity(), tfDebitQty},}, tfDebitQty); // default
+            //change here
+            if (JFXUtil.isObjectEqualTo(poController.Detail(pnDetail).Inventory().getBarCode(), null, "")) {
+                tfBarcode.requestFocus();
+            } else if (poController.Detail(pnDetail).getDebitQuantity() > 0) {
+                tfDebitQty.requestFocus();
+            } else if (poController.Detail(pnDetail).getCreditQuantity() > 0) {
+                tfCreditQty.requestFocus();
+            } else {
+                dpExpiryDate.requestFocus();
+            }
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
@@ -975,6 +990,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
                 return;
             }
+            boolean lbShow1 = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow1, tfBarcode, tfDescription);
+            
+            boolean lbShow = poController.Detail(pnDetail).isSerialized();
+            JFXUtil.setButtonsVisibility(lbShow, btnSerial);
+
             tfBarcode.setText(poController.Detail(pnDetail).Inventory().getBarCode());
             tfDescription.setText(poController.Detail(pnDetail).Inventory().getDescription());
             dpExpiryDate.setValue(poController.Detail(pnDetail).getExpiryDate() != null ? CustomCommonUtil.parseDateStringToLocalDate(SQLUtil.dateFormat(poController.Detail(pnDetail).getExpiryDate(), SQLUtil.FORMAT_SHORT_DATE)) : null);
