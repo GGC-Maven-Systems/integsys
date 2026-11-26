@@ -396,7 +396,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
                             poController.Detail().remove(pnDetail);
                         } else {
-                            poController.Detail(pnDetail).isReverse(true);
+                            poController.Detail(pnDetail).isReverse(false);
                         }
                         loadTableDetail.reload();
                         moveNext(false, false);
