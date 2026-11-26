@@ -522,18 +522,18 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
-        tfCategory.setText("");
-        dpDateFrom.setValue(null);
-        dpTo.setValue(null);
-        cmbStatus.getSelectionModel().clearSelection();
+//        tfCategory.setText("");
+//        dpDateFrom.setValue(null);
+//        dpTo.setValue(null);
+//        cmbStatus.getSelectionModel().clearSelection();
 
-        lblTotalAdjustments.setText("");
+        lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
         lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
         lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
-        lblOpen.setText("");
-        lblConfirmed.setText("");
-        lblVoided.setText("");
-        lblCancelled.setText("");
+        lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments("0")));
+        lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments("1")));
+        lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments("2")));
+        lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
 
         JFXUtil.updateCaretPositions(apMaster);
 //        } catch (SQLException | GuanzonException ex) {
@@ -580,12 +580,12 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster);
-        lblTotalAdjustments.setText("0.00");
+        lblTotalAdjustments.setText("0");
         lblTotalCreditQty.setText("0.00");
         lblTotalDebitQty.setText("0.00");
-        lblOpen.setText("0.00");
-        lblConfirmed.setText("0.00");
-        lblVoided.setText("0.00");
-        lblCancelled.setText("0.00");
+        lblOpen.setText("0");
+        lblConfirmed.setText("0");
+        lblVoided.setText("0");
+        lblCancelled.setText("0");
     }
 }

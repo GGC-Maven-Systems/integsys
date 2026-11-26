@@ -63,7 +63,7 @@ import static ph.com.guanzongroup.integsys.utility.JFXUtil.getFirstDayOfMonth;
  * @author Team 1
  */
 public class InventoryAdjustment_HistoryController implements Initializable, ScreenInterface {
-
+    
     private GRiderCAS oApp;
     private JSONObject poJSON;
     private static final int ROWS_PER_PAGE = 50;
@@ -79,11 +79,11 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     private String psCategoryId = "";
     private String psSupplierPayeeId = "";
     private String psTransactionType = "";
-
+    
     private unloadForm poUnload = new unloadForm();
     private ObservableList<ModelCashDisbursement_Main> main_data = FXCollections.observableArrayList();
     private FilteredList<ModelCashDisbursement_Main> filteredMain_Data;
-
+    
     private ObservableList<ModelInventoryAdjustment_Detail> details_data = FXCollections.observableArrayList();
     private final ObservableList<ModelDeliveryAcceptance_Attachment> attachment_data = FXCollections.observableArrayList();
     AtomicReference<Object> lastFocusedTextField = new AtomicReference<>();
@@ -116,22 +116,22 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     private TableColumn tblNo, tblTransactionNo, tblDate, tblReferenceNo, tblBranch, tblCategory, tblTotalCreditQty, tblTotalDebitQty, tblStatus;
     @FXML
     private Pagination pagination;
-
+    
     @Override
     public void setGRider(GRiderCAS foValue) {
         oApp = foValue;
     }
-
+    
     @Override
     public void setIndustryID(String fsValue) {
         psIndustryId = fsValue;
     }
-
+    
     @Override
     public void setCompanyID(String fsValue) {
         psCompanyId = fsValue;
     }
-
+    
     @Override
     public void setCategoryID(String fsValue) {
         psCategoryId = fsValue;
@@ -159,9 +159,9 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             clearTextFields();
             initComboboxes();
             pnEditMode = EditMode.UNKNOWN;
-
+            
             initButton(pnEditMode);
-
+            
             Platform.runLater(() -> {
 //                try {
                 poController.setIndustryId(psIndustryId);
@@ -179,7 +179,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
@@ -227,7 +227,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 //            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
 //        }
     }
-
+    
     private void retrieveLists() {
         try {
             poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
@@ -238,7 +238,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
         }
     }
-
+    
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
                 switch (cmbId) {
@@ -246,7 +246,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         break;
                 }
             });
-
+    
     boolean pbSuccess = true;
     EventHandler<ActionEvent> datepicker_Action = JFXUtil.DatePickerAction(
             (datePicker, sdfFormat, lsServerDate, ldCurrentDate, lsSelectedDate, ldSelectedDate) -> {
@@ -282,18 +282,18 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                 }
             });
-
+    
     private void initDatepicker() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", dpDateFrom, dpTo);
         JFXUtil.setActionListener(datepicker_Action, dpDateFrom, dpTo);
     }
-
+    
     private void initComboboxes() {
         JFXUtil.setComboBoxItems(new JFXUtil.Pairs<>(comboboxlist, cmbStatus));
         JFXUtil.setComboBoxActionListener(comboBoxActionListener, cmbStatus);
         JFXUtil.initComboBoxCellDesignColor("#FF8201", cmbStatus);
     }
-
+    
     public void initLoadTable() {
         loadTableDetail = new JFXUtil.ReloadableTableTask(
                 tblViewDetail,
@@ -349,7 +349,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     });
                 });
     }
-
+    
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
         JFXUtil.setColumnLeft(tblBranch, tblCategory, tblStatus);
@@ -357,7 +357,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
-
+    
     private void initTableOnClick() {
         tblViewDetail.setOnMouseClicked(event -> {
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
@@ -368,23 +368,25 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     loadRecordDetail();
                 }
             } else if (!details_data.isEmpty() && event.getClickCount() == 2) {
-                openParameter("", "");
+                openParameter(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex02(), "");
             }
         });
     }
-
-    private void openParameter(String lsAddOnTypeId, String lsVariantId) {
+    
+    private void openParameter(String lsTransNo, String lsVariantId) {
         String lsFXML = "";
         Object controller = new Object();
         InventoryAdjustment_EntryController controller1 = new InventoryAdjustment_EntryController(); //Should differ the parameter calling
         lsFXML = "/ph/com/guanzongroup/integsys/views/InventoryAdjustment_Entry.fxml";
-
+        
         controller1.setGRider(oApp);
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
 //        controller1.setObject(poController);
+        controller1.isUpdate(true);
+        controller1.setTransNo(lsTransNo);
         controller = controller1;
-
+        
         poJSON = new JSONObject();
         if (stageDialog != null) {
             stageDialog.closeDialog();
@@ -420,7 +422,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             }
         }
     };
-
+    
     private void initTextFields() {
         //Initialise  TextField Focus
         JFXUtil.setFocusListener(txtMaster_Focus, tfSearch, tfCategory);
@@ -429,11 +431,13 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail);
     }
-
+    
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "tfSearch":
+                        if (lsValue.isEmpty()) {
+                        }
                         break;
                     case "tfCategory":
                         if (lsValue.isEmpty()) {
@@ -441,7 +445,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         break;
                 }
             });
-
+    
     private void txtField_KeyPressed(KeyEvent event) {
         TextInputControl txtInput = (TextInputControl) event.getSource();
         String lsID = txtInput.getId();
@@ -468,7 +472,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         retrieveLists();
                         event.consume();
                         break;
-
+                    
                     case UP:
                         break;
                     case DOWN:
@@ -486,60 +490,54 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void loadRecordDetail() {
-//        try {
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
-        }
-//        tfSearch.setText(poController.Master().getSearch());
-//        tfCategory.setText(poController.Master().getCategory());
+        try {
+            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+                return;
+            }
+            tfSearch.setText(poController.Master().getTransactionNo());
+            tfCategory.setText(poController.Master().Category().getDescription());
 //        String lsDateFrom = JFXUtil.formatDateToString(poController.Master().getDateFrom());
 //        JFXUtil.setDateValue(dpDateFrom, JFXUtil.isObjectEqualTo(lsDateFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
 //        String lsTo = JFXUtil.formatDateToString(poController.Master().getTo());
 //        JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
 //        JFXUtil.setCmbValue(cmbStatus, !poController.Master().getStatus().equals("") ? Integer.valueOf(poController.Master().getStatus()) : -1);
 
-        lblTotalAdjustments.setText("");
-        lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
-        lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
-        lblOpen.setText("");
-        lblConfirmed.setText("");
-        lblVoided.setText("");
-        lblCancelled.setText("");
-
-        JFXUtil.updateCaretPositions(apMaster);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
+            lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
+            lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
+            lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
+            lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments("0")));
+            lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments("1")));
+            lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments("2")));
+            lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
+            
+            JFXUtil.updateCaretPositions(apMaster);
+        } catch (SQLException | GuanzonException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
     }
-
+    
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
+        
         if (fnValue != EditMode.READY) {
             return;
         }
-//        switch (poController.Master().getTransactionStatus()) {
-//            case InvAdjustmentStatus.VOID:
-//            case InvAdjustmentStatus.CANCELLED:
-//                JFXUtil.setButtonsVisibility(false, btnUpdate);
-//                break;
-//        }
     }
-
+    
     private void clearTextFields() {
         JFXUtil.setValueToNull(previousSearchedTextField, lastFocusedTextField);
         JFXUtil.clearTextFields(apMaster);
-        lblTotalAdjustments.setText("0.00");
+        lblTotalAdjustments.setText("0");
         lblTotalCreditQty.setText("0.00");
         lblTotalDebitQty.setText("0.00");
-        lblOpen.setText("0.00");
-        lblConfirmed.setText("0.00");
-        lblVoided.setText("0.00");
-        lblCancelled.setText("0.00");
+        lblOpen.setText("0");
+        lblConfirmed.setText("0");
+        lblVoided.setText("0");
+        lblCancelled.setText("0");
     }
 }

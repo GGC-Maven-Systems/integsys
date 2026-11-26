@@ -417,6 +417,9 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
             if (pnDetail < 0 || pnDetail > poController.getSerialListCount() - 1) {
                 return;
             }
+            boolean lbShow = poController.Serial(pnDetail).getEditMode() == EditMode.UPDATE;
+            JFXUtil.setDisabled(lbShow, tfSerial1, tfSerial2);
+            
             tfSerial1.setText(poController.Serial(pnDetail).InventorySerial().getSerial01());
             tfSerial2.setText(poController.Serial(pnDetail).InventorySerial().getSerial02());
             taRemarks.setText(poController.Serial(pnDetail).getRemarks());

@@ -96,7 +96,8 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private String psIndustryId = "";
     private String psCompanyId = "";
     private String psCategoryId = "";
-
+    public String psTransNo = "";
+    boolean fbisUpdate = false;
     private unloadForm poUnload = new unloadForm();
     private ObservableList<ModelCashDisbursement_Main> main_data = FXCollections.observableArrayList();
     private FilteredList<ModelCashDisbursement_Main> filteredMain_Data;
@@ -162,6 +163,14 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         psCategoryId = fsValue;
     }
 
+    public void setTransNo(String fsValue) {
+        psTransNo = fsValue;
+    }
+
+    public void isUpdate(boolean fbValue) {
+        fbisUpdate = fbValue;
+    }
+
     /**
      * Initializes the controller class.
      */
@@ -184,9 +193,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             initTabPane();
             clearTextFields();
             pnEditMode = EditMode.UNKNOWN;
-
             initButton(pnEditMode);
-
             Platform.runLater(() -> {
                 try {
                     poController.setIndustryId(psIndustryId);
@@ -197,10 +204,22 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     poController.Master().setCategoryCode(psCategoryId);
                     poController.Master().setBranchCode(oApp.getBranchCode());
                     lblSource.setText(poController.Master().Company().getCompanyName());
-                    btnNew.fire();
+
+                    if (fbisUpdate) {
+                        poController.OpenTransaction(psTransNo);
+                        pnEditMode = poController.getEditMode();
+                        loadTableDetail.reload();
+                        initButton(pnEditMode);
+                    } else {
+                        btnNew.fire();
+                    }
                 } catch (SQLException | GuanzonException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(InventoryAdjustment_EntryController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ScriptException ex) {
+                    Logger.getLogger(InventoryAdjustment_EntryController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField);
@@ -263,11 +282,15 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         }
                         return;
                     case "btnClose":
-                        unloadForm appUnload = new unloadForm();
-                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                        if (fbisUpdate) {
+                            CommonUtils.closeStage(btnClose);
                         } else {
-                            return;
+                            unloadForm appUnload = new unloadForm();
+                            if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                                appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
+                            } else {
+                                return;
+                            }
                         }
                         break;
                     case "btnUpdate":
