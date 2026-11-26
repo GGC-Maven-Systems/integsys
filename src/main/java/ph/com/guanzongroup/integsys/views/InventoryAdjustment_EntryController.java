@@ -511,6 +511,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 } else {
                     clearTextFields();
                     loadTableDetail.reload();
+                    loadTableAttachment.reload();
                     loadRecordMaster();
                 }
                 initButton(pnEditMode);

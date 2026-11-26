@@ -518,10 +518,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
 
-        JFXUtil.setButtonsVisibility(lbShow3, btnClose);
-
-        JFXUtil.setDisabled(!lbShow1, apMaster);
-
         if (fnValue != EditMode.READY) {
             return;
         }
