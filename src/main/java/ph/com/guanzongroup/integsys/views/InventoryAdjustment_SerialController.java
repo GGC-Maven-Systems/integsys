@@ -133,6 +133,10 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 
     public void setEntryNo(int lsEntryNo) {
         pnEntryNo = lsEntryNo;
+    }  
+    
+    public void setObject(InvAdjustment foObject) {
+        poController = foObject;
     }
 
     /**
@@ -140,46 +144,14 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try {
-            poController = new InvControllers(oApp, null).InventoryAdjustment();
-            poJSON = new JSONObject();
-            poController.setWithUI(true);
-            poJSON = poController.InitTransaction(); // Initialize transaction
-            if (!"success".equals((String) poJSON.get("result"))) {
-                ShowMessageFX.Warning(null, pxeModuleName, (String) poJSON.get("message"));
-            }
-            initLoadTable();
-            initTextFields();
-            initDetailGrid();
-            initTableOnClick();
-            clearTextFields();
-
-            Platform.runLater(() -> {
-//                try {
-                poController.setIndustryId(psIndustryId);
-                poController.setCompanyId(psCompanyId);
-                poController.setCategoryId(psCategoryId);
-                poController.Master().setBranchCode(oApp.getBranchCode());
-//                } catch (SQLException | GuanzonException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                }
-            });
-            try {
-                poController.NewTransaction();
-                pnEditMode = poController.getEditMode();
-                initButton(pnEditMode);
-                loadTableDetail.reload();
-            } catch (SQLException | GuanzonException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        }
+        initLoadTable();
+        initTextFields();
+        initDetailGrid();
+        initTableOnClick();
+        clearTextFields();
+        pnEditMode = poController.getEditMode();
+        initButton(pnEditMode);
+        loadTableDetail.reload();
     }
 
     @FXML
@@ -250,7 +222,11 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             for (int lnCtr = 0; lnCtr < poController.getSerialListCount(); lnCtr++) {
-                                if (!poController.Detail(lnCtr).isReverse()) {
+                                if (!poController.Serial(lnCtr).isReverse()) {
+                                    continue;
+                                }
+                                
+                                if (poController.Serial(lnCtr).getEntryNo() > 0 && poController.Serial(lnCtr).getEntryNo() != pnEntryNo) {
                                     continue;
                                 }
                                 lnRowCount += 1;
@@ -437,7 +413,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 
     private void loadRecordDetail() {
         try {
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            if (pnDetail < 0 || pnDetail > poController.getSerialListCount()- 1) {
                 return;
             }
             tfSerial1.setText(poController.Serial(pnDetail).InventorySerial().getSerial01());
