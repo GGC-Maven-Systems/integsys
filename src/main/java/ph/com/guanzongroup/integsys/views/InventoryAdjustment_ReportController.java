@@ -203,6 +203,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             Button clickedButton = (Button) source;
             String lsButton = clickedButton.getId();
             switch (lsButton) {
+                case "btnPrint":
+                    break;
                 case "btnRetrieve":
                     retrieveLists();
                     return;
@@ -369,7 +371,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                             ));
                                 }
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 9); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 9); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -438,7 +440,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         JFXUtil.setFocusListener(txtMaster_Focus, tfCategory);
         JFXUtil.setKeyPressedListener(this::txtField_KeyPressed, apMaster);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail);
-        JFXUtil.adjustColumnForScrollbar(tblViewDetail);
+//        JFXUtil.adjustColumnForScrollbar(tblViewDetail);
+        tblViewDetail.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     }
 
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
@@ -541,28 +544,28 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
     private void initToggleGroup() {
         type.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            if (newToggle != null) {
-                RadioButton selected = (RadioButton) newToggle;
-                switch (selected.getId()) {
-                    case "rbSummary":
-                        break;
-                    case "rbDetailed":
-                        break;
-                }
-                boolean lbShow = selected.getId().equals("rbSummary");
-                JFXUtil.setVisibility(false, tblRow);
-                JFXUtil.setVisibility(!lbShow, tblBarcode, tblModel, tblColor, tblBarcode,tblDescription, tblCreditQty, tblDebitQty); //hide for details
-                JFXUtil.setVisibility(lbShow, tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost,
-                        tblCreditQty, tblDebitQty); //hide for summary
+            if (newToggle == null) {
+                return;
             }
+
+            boolean isSummary = "rbSummary".equals(((RadioButton) newToggle).getId());
+
+            JFXUtil.setVisibility(false, tblRow);
+            JFXUtil.setVisibility(!isSummary, tblBrand, tblModel, tblColor, tblBarcode,
+                    tblDescription, tblCreditQty, tblDebitQty); // show for detailed
+            JFXUtil.setVisibility(isSummary, tblTotalCreditQty, tblTotalCreditCost,
+                    tblTotalDebitQty, tblTotalDebitCost, tblCreditQty, tblDebitQty); // show for summary
         });
+
+        type.selectToggle(null);
+        rbSummary.setSelected(true);
     }
 
     private void initButton(int fnValue) {
         boolean lbShow1 = (fnValue == EditMode.ADDNEW || fnValue == EditMode.UPDATE);
         boolean lbShow2 = fnValue == EditMode.READY;
         boolean lbShow3 = (fnValue == EditMode.READY || fnValue == EditMode.UNKNOWN);
-
+        JFXUtil.setButtonsVisibility(details_data.size() > 0, btnPrint);
         if (fnValue != EditMode.READY) {
             return;
         }

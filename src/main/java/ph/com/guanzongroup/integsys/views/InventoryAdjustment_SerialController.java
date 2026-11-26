@@ -133,8 +133,8 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 
     public void setEntryNo(int lsEntryNo) {
         pnEntryNo = lsEntryNo;
-    }  
-    
+    }
+
     public void setObject(InvAdjustment foObject) {
         poController = foObject;
     }
@@ -173,9 +173,9 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                     break;
                 case "btnRemove":
                     if (poController.Serial(pnDetail).getEditMode() == EditMode.ADDNEW) {
-//                        poController.Serial().remove(pnDetail);
+                        poController.SerialList().remove(pnDetail);
                     } else {
-                        poController.Serial(pnDetail).isReverse(true);
+                        poController.Serial(pnDetail).isReverse(false);
                     }
                     loadTableDetail.reload();
                     moveNext(false, false);
@@ -184,14 +184,15 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     return;
             }
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-//                    resetValues();
-                pnEditMode = EditMode.UNKNOWN;
-                clearTextFields();
-            }
+//            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+////                    resetValues();
+//                pnEditMode = EditMode.UNKNOWN;
+//                clearTextFields();
+//            }
 
             if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
             } else {
+                clearTextFields();
                 loadTableDetail.reload();
             }
             initButton(pnEditMode);
@@ -225,7 +226,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                                 if (!poController.Serial(lnCtr).isReverse()) {
                                     continue;
                                 }
-                                
+
                                 if (poController.Serial(lnCtr).getEntryNo() > 0 && poController.Serial(lnCtr).getEntryNo() != pnEntryNo) {
                                     continue;
                                 }
@@ -237,7 +238,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 4); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 4); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -413,7 +414,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
 
     private void loadRecordDetail() {
         try {
-            if (pnDetail < 0 || pnDetail > poController.getSerialListCount()- 1) {
+            if (pnDetail < 0 || pnDetail > poController.getSerialListCount() - 1) {
                 return;
             }
             tfSerial1.setText(poController.Serial(pnDetail).InventorySerial().getSerial01());

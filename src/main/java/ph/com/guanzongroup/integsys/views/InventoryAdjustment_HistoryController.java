@@ -324,7 +324,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 9); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 9); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {

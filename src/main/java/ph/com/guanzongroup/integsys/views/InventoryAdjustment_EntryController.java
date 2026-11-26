@@ -399,6 +399,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         return;
                     case "btnRemove":
                         if (poController.Detail(pnDetail).getEditMode() == EditMode.ADDNEW) {
+                            poController.removeSerialsOfEntry(pnDetail + 1);
                             poController.Detail().remove(pnDetail);
                         } else {
                             poController.Detail(pnDetail).isReverse(false);
@@ -537,7 +538,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         controller1.setGRider(oApp);
         controller1.setIndustryID(psIndustryId);
         controller1.setCompanyID(psCompanyId);
-        controller1.setEntryNo(poController.Detail(pnDetail).getEntryNo());
+        controller1.setEntryNo(pnDetail + 1);
         controller1.setObject(poController);
         controller = controller1;
 
@@ -588,7 +589,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                                 String.valueOf(lnCtr)
                                         ));
                             }
-                            int lnTempRow = JFXUtil.getDetailRow(details_data, pnDetail, 07); //this method is used only when Reverse is applied
+                            int lnTempRow = JFXUtil.getDetailRowFilter(details_data, pnDetail, 07); //this method is used only when Reverse is applied
                             if (lnTempRow < 0 || lnTempRow
                                     >= details_data.size()) {
                                 if (!details_data.isEmpty()) {
@@ -878,13 +879,44 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 });
             });
 
-    private void txtField_KeyPressed(KeyEvent event) {
-        TextInputControl txtInput = (TextInputControl) event.getSource();
+    private void dp_KeyPressed(KeyEvent event) {
         TextField txtField = (TextField) event.getSource();
-        String lsID = txtInput.getId();
-        String lsValue = txtInput.getText() == null ? "" : txtInput.getText();
-        String lsBranchCode = "";
-        String lsDeparment = "";
+        String lsID = txtField.getId();
+        switch (event.getCode()) {
+            case ENTER:
+                tfCost.requestFocus();
+                break;
+            case UP:
+                JFXUtil.altSwitch(lsID, new Object[][]{
+                    {new String[]{"dpExpiryDate"}, (Runnable) () -> moveNext(true, true)},});
+                event.consume();
+                break;
+            case DOWN:
+                JFXUtil.altSwitch(lsID, new Object[][]{
+                    {new String[]{"dpExpiryDate"}, (Runnable) () -> moveNext(false, true)},});
+                event.consume();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void txtField_KeyPressed(KeyEvent event) {
+        Object source = event.getSource();
+        String lsID;
+        String lsValue;
+        TextField txtField = null;
+        if (source instanceof DatePicker) {
+            DatePicker dp = (DatePicker) source;
+            lsID = dp.getId();
+            lsValue = dp.getEditor().getText() == null ? "" : dp.getEditor().getText();
+        } else {
+            TextInputControl txtInput = (TextInputControl) source;
+            lsID = txtInput.getId();
+            lsValue = txtInput.getText() == null ? "" : txtInput.getText();
+            txtField = (TextField) event.getSource();
+        }
+
         poJSON = new JSONObject();
         try {
             if (null != event.getCode()) {
@@ -892,7 +924,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                     case TAB:
                     case ENTER:
                         pbEntered = true;
-                        CommonUtils.SetNextFocus(txtField);
+                        if (source instanceof DatePicker) {
+                            tfCost.requestFocus();
+                        } else {
+                            CommonUtils.SetNextFocus(txtField);
+                        }
                         event.consume();
                         break;
                     case F3:
@@ -1150,6 +1186,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
     private void initDatePicker() {
         JFXUtil.setDatePickerFormat("MM/dd/yyyy", tfTransactionDate, dpExpiryDate);
         JFXUtil.setActionListener(datepicker_Action, tfTransactionDate, dpExpiryDate);
+
+        for (DatePicker dp : new DatePicker[]{dpExpiryDate}) {
+            dp.getEditor().setId(dp.getId()); // editor has no ID by default
+            dp.getEditor().addEventFilter(KeyEvent.KEY_PRESSED, this::dp_KeyPressed);
+        }
     }
 
     private void initButton(int fnValue) {
