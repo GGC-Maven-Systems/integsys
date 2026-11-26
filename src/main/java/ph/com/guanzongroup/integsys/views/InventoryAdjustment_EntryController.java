@@ -895,28 +895,6 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 });
             });
 
-    private void dp_KeyPressed(KeyEvent event) {
-        TextField txtField = (TextField) event.getSource();
-        String lsID = txtField.getId();
-        switch (event.getCode()) {
-            case ENTER:
-                tfCost.requestFocus();
-                break;
-            case UP:
-                JFXUtil.altSwitch(lsID, new Object[][]{
-                    {new String[]{"dpExpiryDate"}, (Runnable) () -> moveNext(true, true)},});
-                event.consume();
-                break;
-            case DOWN:
-                JFXUtil.altSwitch(lsID, new Object[][]{
-                    {new String[]{"dpExpiryDate"}, (Runnable) () -> moveNext(false, true)},});
-                event.consume();
-                break;
-            default:
-                break;
-        }
-    }
-
     private void txtField_KeyPressed(KeyEvent event) {
         Object source = event.getSource();
         String lsID;
