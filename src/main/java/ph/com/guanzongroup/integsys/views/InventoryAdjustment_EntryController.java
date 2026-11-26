@@ -836,12 +836,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         break;
                     case "tfCreditQty":
                         //check if debit is > 0 already
-                        poJSON = poController.validateCredit(poController.Detail(pnDetail).getCreditQuantity(), pnDetail);
+                        lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.validateCredit(Double.parseDouble(lsValue), pnDetail);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                             break;
                         }
-                        lsValue = JFXUtil.removeComma(lsValue);
                         if (poController.Detail(pnDetail).getDebitQuantity() > 0 && Double.parseDouble(lsValue) > 0) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Unable to add credit; debit entry already exists.");
                             loadRecordDetail();
@@ -992,7 +992,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             }
             boolean lbShow1 = poController.Detail(pnDetail).getEditMode() == EditMode.UPDATE;
             JFXUtil.setDisabled(lbShow1, tfBarcode, tfDescription);
-            
+
             boolean lbShow = poController.Detail(pnDetail).isSerialized();
             JFXUtil.setButtonsVisibility(lbShow, btnSerial);
 

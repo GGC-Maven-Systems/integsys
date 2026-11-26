@@ -3677,14 +3677,16 @@ public class JFXUtil {
         }
     }
 
-    public static void setVisibility(boolean visible, Node... nodes) {
-        if (nodes == null) {
+    public static void setVisibility(boolean visible, Object... items) {
+        if (items == null) {
             return;
         }
 
-        for (Node node : nodes) {
-            if (node != null) {
+        for (Object item : items) {
+            if (item instanceof Node node) {
                 node.setVisible(visible);
+            } else if (item instanceof TableColumnBase<?, ?> column) {
+                column.setVisible(visible);
             }
         }
     }

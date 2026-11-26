@@ -245,7 +245,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         try {
                             details_data.clear();
                             if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                poController.ReloadDetail();
+                                poController.ReloadSerial();
                             }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";

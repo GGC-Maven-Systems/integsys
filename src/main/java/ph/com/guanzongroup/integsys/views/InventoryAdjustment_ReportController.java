@@ -116,7 +116,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     @FXML
     private TableView tblViewDetail;
     @FXML
-    private TableColumn tblNo, tblTransactionNo, tblDate, tblReferenceNo, tblBranch, tblCategory, tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost, tblRow, tblSerial, tblItemDescription, tblCost, tblCreditQty, tblDebitQty, tblTotalCost, tblRemarks, tblStatus;
+    private TableColumn tblNo, tblCompany, tblBranch, tblTransactionNo, tblDate, tblReferenceNo, tblCategory, tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost, tblRow, tblBrand, tblModel, tblColor, tblBarcode, tblDescription, tblCost, tblCreditQty, tblDebitQty, tblTotalCost, tblRemarks, tblStatus;
     @FXML
     private Pagination pagination;
 
@@ -354,8 +354,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
     private void initDetailGrid() {
         JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
-        JFXUtil.setColumnLeft(tblBranch, tblCategory, tblStatus);
-        JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalDebitQty);
+        JFXUtil.setColumnLeft(tblCompany, tblBranch, tblCategory, tblRow, tblBrand, tblModel, tblBarcode, tblDescription, tblRemarks, tblStatus);
+        JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost, tblCost, tblCreditQty, tblDebitQty, tblTotalCost);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
     }
@@ -508,13 +508,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                         break;
                 }
                 boolean lbShow = (selected.getId()).equals("rbSummary");
-//                tblTransactionTotal.setVisible(lbShow);
-//                tblQuantity.setVisible(!lbShow);
-//                tblUnitPrice.setVisible(!lbShow);
-//                tblTotal.setVisible(!lbShow);
-//                tblRow.setVisible(!lbShow);
-//                tblItem.setVisible(!lbShow);
-//                loadTableMain.reload();
+                JFXUtil.setVisibility(lbShow, tblBarcode, tblModel, tblColor, tblDescription, tblCreditQty, tblDebitQty);
             }
         });
     }
