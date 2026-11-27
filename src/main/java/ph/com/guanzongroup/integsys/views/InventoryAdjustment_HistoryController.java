@@ -311,7 +311,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                                 poController.TransactionList(lnCtr).Master().Category().getDescription(),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-                                                poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()),
+                                                poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase(),
                                                 String.valueOf(lnCtr)
                                         ));
                             }

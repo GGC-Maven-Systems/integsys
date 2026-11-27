@@ -353,7 +353,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                                     CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
                                                     CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
                                                     poController.TransactionList(lnCtr).Master().getRemarks(),
-                                                    poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus())
+                                                    poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
                                             ));
                                 }
                             }
