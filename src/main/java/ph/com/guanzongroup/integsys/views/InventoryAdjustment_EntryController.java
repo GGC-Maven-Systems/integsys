@@ -993,7 +993,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                                 break;
                             //apDetail
                             case "tfBarcode":
-                                poJSON = poController.SearchInventory(lsValue, false, pnDetail);
+                                poJSON = poController.SearchInventory(lsValue, true, pnDetail);
                                 if (!JFXUtil.isJSONSuccess(poJSON)) {
                                     ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                                 } else {
