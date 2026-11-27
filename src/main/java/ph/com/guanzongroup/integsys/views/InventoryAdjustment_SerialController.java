@@ -401,7 +401,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex04());
             }
             loadRecordDetail();
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            if (pnDetail < 0 || pnDetail > poController.getSerialListCount()- 1) {
                 return;
             }
             JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
