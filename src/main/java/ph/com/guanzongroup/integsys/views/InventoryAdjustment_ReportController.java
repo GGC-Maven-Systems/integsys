@@ -393,6 +393,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                     }
                                 }
                             }
+                            JFXUtil.setButtonsVisibility(details_data.size() > 0, btnPrint);
                             loadRecordDetail();
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
                         } catch (GuanzonException | SQLException ex) {
