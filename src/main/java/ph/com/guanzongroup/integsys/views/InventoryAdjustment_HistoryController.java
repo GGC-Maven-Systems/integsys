@@ -51,6 +51,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.cas.inv.InvAdjustment;
 import org.guanzon.cas.inv.services.InvControllers;
+import org.guanzon.cas.inv.status.InvAdjustmentStatus;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.integsys.model.*;
 import ph.com.guanzongroup.integsys.utility.CustomCommonUtil;
@@ -483,13 +484,12 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             return;
         }
         lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
-        lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
-        lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
-        lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments("0")));
-        lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments("1")));
-        lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments("2")));
-        lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
-
+        lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTransactionListTotalCreditQty(), false));
+        lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTransactionListTotalDebitQty(), false));
+        lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments(InvAdjustmentStatus.OPEN)));
+        lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments(InvAdjustmentStatus.CONFIRMED)));
+        lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments(InvAdjustmentStatus.VOID)));
+        lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments(InvAdjustmentStatus.CANCELLED)));
         JFXUtil.updateCaretPositions(apMaster);
     }
 
