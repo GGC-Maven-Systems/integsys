@@ -201,7 +201,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
-//        try {
         Object source = event.getSource();
         if (source instanceof Button) {
             Button clickedButton = (Button) source;
@@ -225,7 +224,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     return;
             }
             if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-//                    resetValues();
                 pnEditMode = EditMode.UNKNOWN;
                 clearTextFields();
             }
@@ -236,16 +234,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             }
             initButton(pnEditMode);
         }
-//        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } catch (ScriptException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } catch (IOException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
