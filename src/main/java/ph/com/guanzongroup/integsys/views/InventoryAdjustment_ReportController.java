@@ -356,40 +356,88 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                 }
                             } else {
                                 for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                                    lnRowCount += 1;
                                     //by lnctrDetail is the index of detail per master
                                     for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
+                                        if(!poController.TransactionList(lnCtr).Detail(lnCtrDetail).isReverse()){
+                                            continue;
+                                        }
                                         Double ldblTotalCost = 0.00;
                                         if (poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity() > 0) {
                                             ldblTotalCost = poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity() * poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost();
                                         } else {
                                             ldblTotalCost = poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity() * poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost();
                                         }
-                                        details_data.add(
-                                                new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-                                                        poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
-                                                        poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
-                                                        poController.TransactionList(lnCtr).Master().getTransactionNo(),
-                                                        CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
-                                                        poController.TransactionList(lnCtr).Master().getReferenceNo(),
-                                                        poController.TransactionList(lnCtr).Master().Category().getDescription(),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
-                                                        String.valueOf(lnCtr),
-                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
-                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
-                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
-                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getBarCode(),
-                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
-                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(ldblTotalCost, false),
-                                                        poController.TransactionList(lnCtr).Master().getRemarks(),
-                                                        poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
-                                                ));
+                                        
+                                        if(poController.TransactionList(lnCtr).Detail(lnCtrDetail).isSerialized()){
+                                            for(int lnSerial = 0;lnSerial < poController.TransactionList(lnCtr).getSerialListCount();lnSerial++){
+                                                if (!poController.TransactionList(lnCtr).Serial(lnSerial).isReverse()) {
+                                                    continue;
+                                                }
+
+                                                if (poController.TransactionList(lnCtr).Serial(lnSerial).getEntryNo() > 0 
+                                                    && poController.TransactionList(lnCtr).Serial(lnSerial).getEntryNo() != poController.TransactionList(lnCtr).Detail(lnCtrDetail).getEntryNo()) {
+                                                    continue;
+                                                }
+                                                lnRowCount += 1;
+                                                details_data.add(
+                                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                                poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+                                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
+                                                                String.valueOf(lnCtr),
+                                                                poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
+                                                                poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
+                                                                poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
+                                                                poController.TransactionList(lnCtr).Serial(lnSerial).InventorySerial().getSerial01(),
+                                                                poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(1, false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(1, false),
+                                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
+                                                                poController.TransactionList(lnCtr).Master().getRemarks(),
+                                                                poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
+                                                        ));
+                                                
+                                            }
+                                        
+                                        } else {
+                                            lnRowCount += 1;
+                                            details_data.add(
+                                                    new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                            poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+                                                            poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                            poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                            CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                            poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                            poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
+                                                            String.valueOf(lnCtr),
+                                                            poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
+                                                            poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
+                                                            poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
+                                                            poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getBarCode(),
+                                                            poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
+                                                            CustomCommonUtil.setIntegerValueToDecimalFormat(ldblTotalCost, false),
+                                                            poController.TransactionList(lnCtr).Master().getRemarks(),
+                                                            poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
+                                                    ));
+                                        
+                                        }
+                                        
+                                        
                                     }
                                 }
                             }
