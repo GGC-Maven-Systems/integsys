@@ -333,11 +333,11 @@
                                                             <columns>
                                                                 <TableColumn fx:id="tblNo" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" resizable="false" sortable="false" text="No." />
                                                 <TableColumn fx:id="tblCompany" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" sortable="false" text="Company" />
-                                                <TableColumn fx:id="tblBranch" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" sortable="false" text="Branch" />
-                                                                <TableColumn fx:id="tblTransactionNo" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" sortable="false" text="Transaction No" />
-                                                                <TableColumn fx:id="tblDate" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" text="Date" />
+                                                <TableColumn fx:id="tblBranch" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Branch" />
+                                                                <TableColumn fx:id="tblTransactionNo" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Transaction No" />
+                                                                <TableColumn fx:id="tblDate" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" text="Date" />
                                                                 <TableColumn fx:id="tblReferenceNo" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" text="Reference No" />
-                                                                <TableColumn fx:id="tblCategory" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Category" />
+                                                                <TableColumn fx:id="tblCategory" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" sortable="false" text="Category" />
                                                                 <TableColumn fx:id="tblTotalCreditQty" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Total Credit Qty." />
                                                 <TableColumn fx:id="tblTotalCreditCost" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Total Credit Cost" />
                                                                 <TableColumn fx:id="tblTotalDebitQty" maxWidth="120.0" minWidth="120.0" prefWidth="120.0" resizable="false" sortable="false" text="Total Debit Qty." />
@@ -347,12 +347,12 @@
                                                 <TableColumn fx:id="tblModel" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Model" />
                                                 <TableColumn fx:id="tblColor" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Color" />
                                                 <TableColumn fx:id="tblBarcode" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Barcode" />
-                                                <TableColumn fx:id="tblDescription" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Description" />
-                                                <TableColumn fx:id="tblCost" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Cost" />
+                                                <TableColumn fx:id="tblDescription" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" resizable="false" sortable="false" text="Description" />
+                                                <TableColumn fx:id="tblCost" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" text="Cost" />
                                                 <TableColumn fx:id="tblCreditQty" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" text="Credit Qty." />
                                                 <TableColumn fx:id="tblDebitQty" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" text="Debit Qty." />
-                                                <TableColumn fx:id="tblTotalCost" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" sortable="false" text="Total Cost" />
-                                                <TableColumn fx:id="tblRemarks" maxWidth="170.0" minWidth="170.0" prefWidth="170.0" resizable="false" sortable="false" text="Remarks" />
+                                                <TableColumn fx:id="tblTotalCost" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" sortable="false" text="Total Cost" />
+                                                <TableColumn fx:id="tblRemarks" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" sortable="false" text="Remarks" />
                                                 <TableColumn fx:id="tblStatus" maxWidth="80.0" minWidth="80.0" resizable="false" sortable="false" text="Status" />
                                                             </columns>
                                                             <GridPane.margin>

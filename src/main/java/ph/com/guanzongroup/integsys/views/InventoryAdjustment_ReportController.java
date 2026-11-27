@@ -200,39 +200,50 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
     @FXML
     private void cmdButton_Click(ActionEvent event) {
-        poJSON = new JSONObject();
-        Object source = event.getSource();
-        if (source instanceof Button) {
-            Button clickedButton = (Button) source;
-            String lsButton = clickedButton.getId();
-            switch (lsButton) {
-                case "btnPrint":
-                    break;
-                case "btnRetrieve":
-                    retrieveLists();
-                    return;
-                case "btnClose":
-                    unloadForm appUnload = new unloadForm();
-                    if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
-//                            appUnload.unloadForm(apMainAnchor, oApp, pxeModuleName);
-                    } else {
-                        return;
-                    }
-                    break;
-                default:
-                    ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
-                    return;
-            }
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-                pnEditMode = EditMode.UNKNOWN;
-                clearTextFields();
-            }
+        try {
 
-            if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
-            } else {
-                loadTableDetail.reload();
+            poJSON = new JSONObject();
+            Object source = event.getSource();
+            if (source instanceof Button) {
+                Button clickedButton = (Button) source;
+                String lsButton = clickedButton.getId();
+                switch (lsButton) {
+                    case "btnPrint":
+                        poController.printReport(rbSummary.isSelected(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
+                                JFXUtil.formatStringToDate(dpTo.getEditor().getText()));
+                        break;
+                    case "btnRetrieve":
+                        retrieveLists();
+                        return;
+                    case "btnClose":
+                        unloadForm appUnload = new unloadForm();
+                        if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
+                            appUnload.unloadForm(AnchorMain, oApp, pxeModuleName);
+                        } else {
+                            return;
+                        }
+                        break;
+                    default:
+                        ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
+                        return;
+                }
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
+                    pnEditMode = EditMode.UNKNOWN;
+                    clearTextFields();
+                }
+
+                if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
+                } else {
+                    loadTableDetail.reload();
+                }
+                initButton(pnEditMode);
             }
-            initButton(pnEditMode);
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(InventoryAdjustment_ReportController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(InventoryAdjustment_ReportController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (GuanzonException ex) {
+            Logger.getLogger(InventoryAdjustment_ReportController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -242,6 +253,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     case "cmbStatus":
                         break;
                 }
+                retrieveLists();
             });
 
     boolean pbSuccess = true;
@@ -405,7 +417,7 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryAdjustment_Detail selected = (ModelInventoryAdjustment_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex12());
                     pnDetail = lnRow;
                     loadRecordDetail();
                 }
@@ -421,8 +433,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     if (details_data.isEmpty()) {
                         return;
                     }
-                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex09())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09());
+                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex12())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex12());
                     pnDetail = newIndex;
                     loadRecordDetail();
                     break;

@@ -232,6 +232,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     case "cmbStatus":
                         break;
                 }
+                retrieveLists();
             });
 
     boolean pbSuccess = true;
