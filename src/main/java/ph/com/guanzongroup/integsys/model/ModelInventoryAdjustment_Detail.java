@@ -96,6 +96,20 @@ public class ModelInventoryAdjustment_Detail {
             String index07,
             String index08,
             String index09,
+            String index10) {
+        init(index01, index02, index03, index04, index05, index06, index07, index08, index09, index10);
+    }
+
+    public ModelInventoryAdjustment_Detail(
+            String index01,
+            String index02,
+            String index03,
+            String index04,
+            String index05,
+            String index06,
+            String index07,
+            String index08,
+            String index09,
             String index10,
             String index11) {
         init(index01, index02, index03, index04, index05, index06, index07, index08, index09, index10, index11);

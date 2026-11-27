@@ -318,41 +318,16 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                     Platform.runLater(() -> {
                         try {
                             details_data.clear();
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                poController.ReloadDetail();
-                            }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             //should differ loop for summary and detail
-//                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-//                                lnRowCount += 1;
-//                                details_data.add(
-//                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-//                                                poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
-//                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
-//                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
-//                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
-//                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
-//                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
-//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
-//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
-//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-//                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
-//                                                String.valueOf(lnCtr), "", "", "", "", "", "", "", "total cost",
-//                                                poController.TransactionList(lnCtr).Master().getRemarks(),
-//                                                poController.TransactionList(lnCtr).Master().getTransactionStatus()
-//                                        ));
-//                            }
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
                                 if (!poController.Detail(lnCtr).isReverse()) {
                                     continue;
                                 }
                                 lnRowCount += 1;
-
-                                //by lnctr is the index of per master
                                 //by lnctrDetail is the index of detail per master
                                 for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
-
                                     details_data.add(
                                             new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
                                                     poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
@@ -379,8 +354,9 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                             ));
                                 }
                             }
+                            loadRecordDetail();
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
-                        } catch (CloneNotSupportedException | GuanzonException | SQLException ex) {
+                        } catch (GuanzonException | SQLException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
@@ -438,9 +414,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     ChangeListener<Boolean> txtMaster_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
                 switch (lsID) {
-                    case "tfSearch":
-//                        poJSON = poController.sear
-                        break;
                     case "tfCategory":
                         if (lsValue.isEmpty()) {
                         }
@@ -517,15 +490,9 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     }
 
     private void loadRecordDetail() {
-//        try {
         if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
             return;
         }
-//        tfCategory.setText("");
-//        dpDateFrom.setValue(null);
-//        dpTo.setValue(null);
-//        cmbStatus.getSelectionModel().clearSelection();
-
         lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
         lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
         lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
@@ -535,10 +502,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
         lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
 
         JFXUtil.updateCaretPositions(apMaster);
-//        } catch (SQLException | GuanzonException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     private void initToggleGroup() {

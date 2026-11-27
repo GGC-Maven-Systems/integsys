@@ -231,7 +231,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
     private void retrieveLists() {
         try {
-            poJSON = poController.loadTransactionList("", tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
+            poJSON = poController.loadTransactionList(tfSearch.getText(), tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
                     JFXUtil.formatStringToDate(dpTo.getEditor().getText()),
                     String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
             loadTableDetail.reload();
@@ -313,9 +313,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     Platform.runLater(() -> {
                         try {
                             details_data.clear();
-                            if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-                                poController.ReloadDetail();
-                            }
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
@@ -329,11 +326,13 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                                                 poController.TransactionList(lnCtr).Master().Category().getDescription(),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
                                                 CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()),
                                                 String.valueOf(lnCtr)
                                         ));
                             }
+                            loadRecordDetail();
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
-                        } catch (CloneNotSupportedException | GuanzonException | SQLException ex) {
+                        } catch (GuanzonException | SQLException ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
                         }
@@ -354,7 +353,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             if (!details_data.isEmpty() && event.getClickCount() == 1) {
                 ModelInventoryAdjustment_Detail selected = (ModelInventoryAdjustment_Detail) tblViewDetail.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex09());
+                    int lnRow = Integer.parseInt(details_data.get(tblViewDetail.getSelectionModel().getSelectedIndex()).getIndex10());
                     pnDetail = lnRow;
                     loadRecordDetail();
                 }
@@ -405,8 +404,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     if (details_data.isEmpty()) {
                         return;
                     }
-                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex09())
-                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex09());
+                    newIndex = isMovedDown ? Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(currentTable)).getIndex10())
+                            : Integer.parseInt(details_data.get(JFXUtil.moveToPreviousRow(currentTable)).getIndex10());
                     pnDetail = newIndex;
                     loadRecordDetail();
                     break;
@@ -454,7 +453,7 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                         switch (lsID) {
                             //apMaster
                             case "tfSearch":
-                                poJSON = poController.SearchTransaction(lsValue, false);
+                                retrieveLists();
                                 break;
                             case "tfCategory":
                                 poJSON = poController.SearchCategory(lsValue, false, true);
@@ -476,39 +475,22 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
         } catch (SQLException | GuanzonException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ScriptException ex) {
-            Logger.getLogger(InventoryAdjustment_HistoryController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void loadRecordDetail() {
-        try {
-            if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-                return;
-            }
-            tfSearch.setText(poController.Master().getTransactionNo());
-            tfCategory.setText(poController.Master().Category().getDescription());
-//        String lsDateFrom = JFXUtil.formatDateToString(poController.Master().getDateFrom());
-//        JFXUtil.setDateValue(dpDateFrom, JFXUtil.isObjectEqualTo(lsDateFrom, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsDateFrom, "yyyy-MM-dd"));
-//        String lsTo = JFXUtil.formatDateToString(poController.Master().getTo());
-//        JFXUtil.setDateValue(dpTo, JFXUtil.isObjectEqualTo(lsTo, "") ? null : CustomCommonUtil.parseDateStringToLocalDate(lsTo, "yyyy-MM-dd"));
-//        JFXUtil.setCmbValue(cmbStatus, !poController.Master().getStatus().equals("") ? Integer.valueOf(poController.Master().getStatus()) : -1);
-
-            lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
-            lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
-            lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
-            lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments("0")));
-            lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments("1")));
-            lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments("2")));
-            lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
-
-            JFXUtil.updateCaretPositions(apMaster);
-        } catch (SQLException | GuanzonException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
+            return;
         }
+        lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
+        lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalCreditQty(), false));
+        lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTotalDebitQty(), false));
+        lblOpen.setText(String.valueOf(poController.getTransactionListTotalAdjustments("0")));
+        lblConfirmed.setText(String.valueOf(poController.getTransactionListTotalAdjustments("1")));
+        lblVoided.setText(String.valueOf(poController.getTransactionListTotalAdjustments("2")));
+        lblCancelled.setText(String.valueOf(poController.getTransactionListTotalAdjustments("3")));
+
+        JFXUtil.updateCaretPositions(apMaster);
     }
 
     private void initButton(int fnValue) {
