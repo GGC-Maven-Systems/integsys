@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class ModelInventoryAdjustment_Detail {
 
-    private static final int MAX_INDEX = 22;
+    private static final int MAX_INDEX = 23;
 
     public SimpleStringProperty index01 = new SimpleStringProperty("");
     public SimpleStringProperty index02 = new SimpleStringProperty("");
@@ -36,6 +36,7 @@ public class ModelInventoryAdjustment_Detail {
     public SimpleStringProperty index20 = new SimpleStringProperty("");
     public SimpleStringProperty index21 = new SimpleStringProperty("");
     public SimpleStringProperty index22 = new SimpleStringProperty("");
+    public SimpleStringProperty index23 = new SimpleStringProperty("");
 
     /**
      * Fills index01..indexNN in order with the given values. Any index not
@@ -43,10 +44,12 @@ public class ModelInventoryAdjustment_Detail {
      */
     private void init(String... values) {
         SimpleStringProperty[] props = new SimpleStringProperty[]{
-            index01, index02, index03, index04, index05, index06, index07, index08, index09, index10, index11, index12, index13, index14, index15, index16, index17, index18, index19, index20, index21, index22
+            index01, index02, index03, index04, index05, index06, index07, index08,
+            index09, index10, index11, index12, index13, index14, index15, index16,
+            index17, index18, index19, index20, index21, index22, index23
         };
         for (int i = 0; i < values.length && i < MAX_INDEX; i++) {
-            props[i].set(values[i]);
+            props[i].set(values[i] == null ? "" : values[i]);
         }
     }
 
@@ -137,8 +140,9 @@ public class ModelInventoryAdjustment_Detail {
             String index19,
             String index20,
             String index21,
-            String index22) {
-        init(index01, index02, index03, index04, index05, index06, index07, index08, index09, index10, index11, index12, index13, index14, index15, index16, index17, index18, index19, index20, index21, index22);
+            String index22,
+            String index23) {
+        init(index01, index02, index03, index04, index05, index06, index07, index08, index09, index10, index11, index12, index13, index14, index15, index16, index17, index18, index19, index20, index21, index22, index23);
     }
 
     public String getIndex01() {
@@ -403,6 +407,18 @@ public class ModelInventoryAdjustment_Detail {
 
     public SimpleStringProperty index22Property() {
         return index22;
+    }
+
+    public String getIndex23() {
+        return index23.get();
+    }
+
+    public void setIndex23(String index23) {
+        this.index23.set(index23);
+    }
+
+    public SimpleStringProperty index23Property() {
+        return index23;
     }
 
 }

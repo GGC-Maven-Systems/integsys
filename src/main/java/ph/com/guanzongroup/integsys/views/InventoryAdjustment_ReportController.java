@@ -324,10 +324,10 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                             int lnRowCount = 0;
                             String lsParticular = "", lsOrNo = "";
                             //should differ loop for summary and detail
-                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                                lnRowCount += 1;
-                                //by lnctrDetail is the index of detail per master
-                                for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
+                            if (rbSummary.isSelected()) {
+                                for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+                                    lnRowCount += 1;
+                                    //by lnctrDetail is the index of detail per master
                                     details_data.add(
                                             new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
                                                     poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
@@ -341,17 +341,56 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                                                     CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
                                                     CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
                                                     String.valueOf(lnCtr),
-                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
-                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
-                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
-                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getBarCode(),
-                                                    poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
-                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
-                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
-                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    CustomCommonUtil.setIntegerValueToDecimalFormat(1, false),
                                                     poController.TransactionList(lnCtr).Master().getRemarks(),
                                                     poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
                                             ));
+                                }
+                            } else {
+                                for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+                                    lnRowCount += 1;
+                                    //by lnctrDetail is the index of detail per master
+                                    for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
+                                        Double ldblTotalCost = 0.00;
+                                        if (poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity() > 0) {
+                                            ldblTotalCost = poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity() * poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost();
+                                        } else {
+                                            ldblTotalCost = poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity() * poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost();
+                                        }
+                                        details_data.add(
+                                                new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                        poController.TransactionList(lnCtr).Master().Company().getCompanyName(),
+                                                        poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                        poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                        CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                        poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                        poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditCost(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitCost(), false),
+                                                        String.valueOf(lnCtr),
+                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Brand().getDescription(),
+                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Model().getDescription(),
+                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().Color().getDescription(),
+                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getBarCode(),
+                                                        poController.TransactionList(lnCtr).Detail(lnCtrDetail).Inventory().getDescription(),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getInventoryCost(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getCreditQuantity(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).Detail(lnCtrDetail).getDebitQuantity(), false),
+                                                        CustomCommonUtil.setIntegerValueToDecimalFormat(ldblTotalCost, false),
+                                                        poController.TransactionList(lnCtr).Master().getRemarks(),
+                                                        poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()).toUpperCase()
+                                                ));
+                                    }
                                 }
                             }
                             loadRecordDetail();
@@ -487,9 +526,11 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
             JFXUtil.setVisibility(false, tblRow);
             JFXUtil.setVisibility(!isSummary, tblBrand, tblModel, tblColor, tblBarcode,
-                    tblDescription, tblCreditQty, tblDebitQty); // show for detailed
+                    tblDescription, tblCreditQty, tblDebitQty, tblTotalCost, tblCost); // show for detailed
             JFXUtil.setVisibility(isSummary, tblTotalCreditQty, tblTotalCreditCost,
-                    tblTotalDebitQty, tblTotalDebitCost, tblCreditQty, tblDebitQty); // show for summary
+                    tblTotalDebitQty, tblTotalDebitCost); // show for summary
+
+            retrieveLists();
         });
 
         type.selectToggle(null);
