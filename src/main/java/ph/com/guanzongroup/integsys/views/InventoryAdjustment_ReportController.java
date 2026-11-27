@@ -167,15 +167,17 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
 
             initButton(pnEditMode);
 
-            Platform.runLater(() -> {//                try {
-                poController.setIndustryId(psIndustryId);
-                poController.setCompanyId(psCompanyId);
-                poController.setCategoryId(psCategoryId);
-                poController.Master().setBranchCode(oApp.getBranchCode());
-//                } catch (SQLException | GuanzonException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                }
+            Platform.runLater(() -> {
+                try {
+                    poController.setIndustryId(psIndustryId);
+                    poController.setCompanyId(psCompanyId);
+                    poController.Master().setCompanyId(psCompanyId);
+                    poController.Master().setIndustryCode(psIndustryId);
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                }
             });
             JFXUtil.initKeyClickObject(AnchorMain, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
@@ -366,8 +368,8 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     }
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
-        JFXUtil.setColumnLeft(tblCompany, tblBranch, tblCategory, tblRow, tblBrand, tblModel, tblColor, tblBarcode, tblDescription, tblRemarks, tblStatus);
+        JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo, tblStatus);
+        JFXUtil.setColumnLeft(tblCompany, tblBranch, tblCategory, tblRow, tblBrand, tblModel, tblColor, tblBarcode, tblDescription, tblRemarks);
         JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalCreditCost, tblTotalDebitQty, tblTotalDebitCost, tblCost, tblCreditQty, tblDebitQty, tblTotalCost);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);

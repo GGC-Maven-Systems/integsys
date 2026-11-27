@@ -165,15 +165,16 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
             initButton(pnEditMode);
 
             Platform.runLater(() -> {
-//                try {
-                poController.setIndustryId(psIndustryId);
-                poController.setCompanyId(psCompanyId);
-                poController.setCategoryId(psCategoryId);
-                poController.Master().setBranchCode(oApp.getBranchCode());
-//                } catch (SQLException | GuanzonException ex) {
-//                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//                }
+                try {
+                    poController.setIndustryId(psIndustryId);
+                    poController.setCompanyId(psCompanyId);
+                    poController.Master().setCompanyId(psCompanyId);
+                    poController.Master().setIndustryCode(psIndustryId);
+                    lblSource.setText(poController.Master().Company().getCompanyName() + " - " + poController.Master().Industry().getDescription());
+                } catch (SQLException | GuanzonException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                }
             });
             JFXUtil.initKeyClickObject(apMainAnchor, lastFocusedTextField, previousSearchedTextField);
         } catch (SQLException | GuanzonException ex) {
@@ -342,8 +343,8 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     }
 
     private void initDetailGrid() {
-        JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo);
-        JFXUtil.setColumnLeft(tblBranch, tblCategory, tblStatus);
+        JFXUtil.setColumnCenter(tblNo, tblTransactionNo, tblDate, tblReferenceNo, tblStatus);
+        JFXUtil.setColumnLeft(tblBranch, tblCategory);
         JFXUtil.setColumnRight(tblTotalCreditQty, tblTotalDebitQty);
         JFXUtil.setColumnsIndexAndDisableReordering(tblViewDetail);
         tblViewDetail.setItems(details_data);
