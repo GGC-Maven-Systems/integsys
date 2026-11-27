@@ -186,7 +186,6 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
     @FXML
     private void cmdButton_Click(ActionEvent event) {
         poJSON = new JSONObject();
-//        try {
         Object source = event.getSource();
         if (source instanceof Button) {
             Button clickedButton = (Button) source;
@@ -207,48 +206,25 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                     ShowMessageFX.Warning(null, pxeModuleName, "Button with name " + lsButton + " not registered.");
                     return;
             }
-//            if (JFXUtil.isObjectEqualTo(lsButton, "btnSave", "btnConfirm", "btnApprove", "btnVoid", "btnCancel")) {
-////                    resetValues();
-//                pnEditMode = EditMode.UNKNOWN;
-//                clearTextFields();
-//            }
-
             if (JFXUtil.isObjectEqualTo(lsButton, "btnRetrieve", "btnSearch", "btnHistory")) {
             } else {
                 loadTableDetail.reload();
             }
             initButton(pnEditMode);
         }
-//        } catch (SQLException | GuanzonException | ParseException | CloneNotSupportedException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, MiscUtil.getException(ex), ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } catch (ScriptException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        } catch (IOException ex) {
-//            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-//            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
-//        }
     }
 
     private void retrieveLists() {
-        // Capture UI values on the FX thread; run the query in the background task
-        final String lsSearch = tfSearch.getText();
-        final String lsCategory = tfCategory.getText();
-        final java.util.Date ldFrom = JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText());
-        final java.util.Date ldTo = JFXUtil.formatStringToDate(dpTo.getEditor().getText());
-        final String lsStatus = String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex());
-        pmPendingQuery = () -> {
-            try {
-                poController.setWithUI(false); // no dialogs from the background thread
-                poJSON = poController.loadTransactionList(lsSearch, lsCategory, ldFrom, ldTo, lsStatus);
-            } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
-                throw new RuntimeException(ex);
-            }
-        };
-        loadTableDetail.reload();
+        try {
+            poJSON = poController.loadTransactionList(tfSearch.getText(), tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
+                    JFXUtil.formatStringToDate(dpTo.getEditor().getText()),
+                    String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
+            loadTableDetail.reload();
+        } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+        }
     }
-    private volatile Runnable pmPendingQuery = null;
 
     EventHandler<ActionEvent> comboBoxActionListener = JFXUtil.CmbActionListener(
             (cmbId, selectedIndex, selectedValue) -> {
@@ -319,40 +295,33 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
                 tblViewDetail,
                 details_data,
                 () -> {
-                    // Heavy work runs on the background thread so the spinner stays animated
-                    try {
-                        details_data.clear();
-                        poController.setWithUI(false); // no dialogs from the background thread
-                        Runnable lrQuery = pmPendingQuery;
-                        pmPendingQuery = null;
-                        if (lrQuery != null) {
-                            lrQuery.run();
-                        }
-                        int lnRowCount = 0;
-                        for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                            lnRowCount += 1;
-                            details_data.add(
-                                    new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
-                                            poController.TransactionList(lnCtr).Master().getTransactionNo(),
-                                            CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
-                                            poController.TransactionList(lnCtr).Master().getReferenceNo(),
-                                            poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
-                                            poController.TransactionList(lnCtr).Master().Category().getDescription(),
-                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
-                                            CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
-                                            poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()),
-                                            String.valueOf(lnCtr)
-                                    ));
-                        }
-                        Platform.runLater(() -> {
+                    Platform.runLater(() -> {
+                        try {
+                            details_data.clear();
+                            int lnRowCount = 0;
+                            String lsParticular = "", lsOrNo = "";
+                            for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
+                                lnRowCount += 1;
+                                details_data.add(
+                                        new ModelInventoryAdjustment_Detail(String.valueOf(lnRowCount),
+                                                poController.TransactionList(lnCtr).Master().getTransactionNo(),
+                                                CustomCommonUtil.formatDateToShortString(poController.TransactionList(lnCtr).Master().getTransactionDate()),
+                                                poController.TransactionList(lnCtr).Master().getReferenceNo(),
+                                                poController.TransactionList(lnCtr).Master().Branch().getBranchName(),
+                                                poController.TransactionList(lnCtr).Master().Category().getDescription(),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalCreditQty(), false),
+                                                CustomCommonUtil.setIntegerValueToDecimalFormat(poController.TransactionList(lnCtr).getTotalDebitQty(), false),
+                                                poController.getStatus(poController.TransactionList(lnCtr).Master().getTransactionStatus()),
+                                                String.valueOf(lnCtr)
+                                        ));
+                            }
                             loadRecordDetail();
                             JFXUtil.loadTab(pagination, main_data.size(), ROWS_PER_PAGE, tblViewDetail, filteredMain_Data);
-                        });
-                    } catch (GuanzonException | SQLException | RuntimeException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        poController.setWithUI(true);
-                    }
+                        } catch (GuanzonException | SQLException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            ShowMessageFX.Error(null, pxeModuleName, MiscUtil.getException(ex));
+                        }
+                    });
                 });
     }
 

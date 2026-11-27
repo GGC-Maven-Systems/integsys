@@ -470,9 +470,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
     }
 
     private void loadRecordDetail() {
-        if (pnDetail < 0 || pnDetail > poController.getDetailCount() - 1) {
-            return;
-        }
         lblTotalAdjustments.setText(String.valueOf(poController.getTransactionListTotalAdjustments("")));
         lblTotalCreditQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTransactionListTotalCreditQty(), false));
         lblTotalDebitQty.setText(CustomCommonUtil.setIntegerValueToDecimalFormat(poController.getTransactionListTotalDebitQty(), false));

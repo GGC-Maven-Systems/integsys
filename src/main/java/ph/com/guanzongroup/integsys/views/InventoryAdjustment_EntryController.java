@@ -283,7 +283,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         return;
                     case "btnClose":
                         if (fbisUpdate) {
-                            CommonUtils.closeStage(btnClose);
+                            if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Dialog?") == true) {
+                                CommonUtils.closeStage(btnClose);
+                            } else {
+                                return;
+                            }
                         } else {
                             unloadForm appUnload = new unloadForm();
                             if (ShowMessageFX.OkayCancel(null, "Close Tab", "Are you sure you want to close this Tab?") == true) {
