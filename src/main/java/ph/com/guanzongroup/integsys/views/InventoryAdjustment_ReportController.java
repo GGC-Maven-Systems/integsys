@@ -325,9 +325,6 @@ public class InventoryAdjustment_ReportController implements Initializable, Scre
                             String lsParticular = "", lsOrNo = "";
                             //should differ loop for summary and detail
                             for (int lnCtr = 0; lnCtr < poController.getTransactionListCount(); lnCtr++) {
-                                if (!poController.Detail(lnCtr).isReverse()) {
-                                    continue;
-                                }
                                 lnRowCount += 1;
                                 //by lnctrDetail is the index of detail per master
                                 for (int lnCtrDetail = 0; lnCtrDetail < poController.TransactionList(lnCtr).getDetailCount(); lnCtrDetail++) {
