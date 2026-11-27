@@ -898,6 +898,11 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         break;
                     case "tfDebitQty":
                         lsValue = JFXUtil.removeComma(lsValue);
+                        poJSON = poController.validateDebit(Double.parseDouble(lsValue), pnDetail);
+                        if (!JFXUtil.isJSONSuccess(poJSON)) {
+                            ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                            break;
+                        }
                         if (poController.Detail(pnDetail).getCreditQuantity() > 0 && Double.parseDouble(lsValue) > 0) {
                             ShowMessageFX.Warning(null, pxeModuleName, "Unable to add debit; credit entry already exists.");
                             loadRecordDetail();
