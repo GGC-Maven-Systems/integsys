@@ -853,6 +853,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
             });
     ChangeListener<Boolean> txtDetail_Focus = JFXUtil.FocusListener(TextField.class,
             (lsID, lsValue) -> {
+                boolean lbisSerialize = poController.Detail(pnDetail).isSerialized();
                 switch (lsID) {
                     case "tfBarcode":
                         if (lsValue.isEmpty()) {
@@ -887,8 +888,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         poJSON = poController.Detail(pnDetail).setCreditQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            if (poController.Detail(pnDetail).getCreditQuantity() > 0 && lbisSerialize) {
+                                openParameter("", "");
+                            }
                         }
-                        if (Double.parseDouble(lsValue) > 0) {
+                        if (Double.parseDouble(lsValue) > 0 && !lbisSerialize) {
                             JFXUtil.runWithDelay(0.40, () -> {
                                 if (pbEntered) {
                                     moveNext(false, true);
@@ -912,8 +917,12 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         poJSON = poController.Detail(pnDetail).setDebitQuantity(Double.parseDouble(lsValue));
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
+                        } else {
+                            if (poController.Detail(pnDetail).getDebitQuantity() > 0 && lbisSerialize) {
+                                openParameter("", "");
+                            }
                         }
-                        if (Double.parseDouble(lsValue) > 0) {
+                        if (Double.parseDouble(lsValue) > 0 && !lbisSerialize) {
                             JFXUtil.runWithDelay(0.40, () -> {
                                 if (pbEntered) {
                                     moveNext(false, true);
