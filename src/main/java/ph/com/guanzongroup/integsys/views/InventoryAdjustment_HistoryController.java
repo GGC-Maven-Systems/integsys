@@ -216,9 +216,28 @@ public class InventoryAdjustment_HistoryController implements Initializable, Scr
 
     private void retrieveLists() {
         try {
+            String lsStatus = "";
+            switch(cmbStatus.getSelectionModel().getSelectedIndex()){
+                case 0:
+                    lsStatus = InvAdjustmentStatus.OPEN;
+                break;
+                case 1:
+                    lsStatus = InvAdjustmentStatus.CONFIRMED;
+                break;
+                case 2:
+                    lsStatus = InvAdjustmentStatus.CANCELLED;
+                break;
+                case 3:
+                    lsStatus = InvAdjustmentStatus.VOID;
+                break;
+                default:
+                    lsStatus = "";
+                break;
+            }
+            
             poJSON = poController.loadTransactionList(tfSearch.getText(), tfCategory.getText(), JFXUtil.formatStringToDate(dpDateFrom.getEditor().getText()),
                     JFXUtil.formatStringToDate(dpTo.getEditor().getText()),
-                    String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()).equals("4") ? "" : String.valueOf(cmbStatus.getSelectionModel().getSelectedIndex()));
+                    lsStatus);
             loadTableDetail.reload();
         } catch (SQLException | GuanzonException | ScriptException | CloneNotSupportedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
