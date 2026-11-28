@@ -46,7 +46,6 @@ import org.guanzon.appdriver.base.GuanzonException;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.cas.inv.InvAdjustment;
-import org.guanzon.cas.inv.services.InvControllers;
 import org.json.simple.JSONObject;
 import ph.com.guanzongroup.integsys.model.*;
 import ph.com.guanzongroup.integsys.utility.JFXUtil;
@@ -315,7 +314,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
             (lsID, lsValue) -> {
                 switch (lsID) {
                     case "taRemarks":
-                        poJSON = poController.Master().setRemarks(lsValue);
+                        poJSON = poController.Serial(pnDetail).setRemarks(lsValue);
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         }
@@ -401,7 +400,7 @@ public class InventoryAdjustment_SerialController implements Initializable, Scre
                         : Integer.parseInt(details_data.get(JFXUtil.moveToNextRow(tblViewDetail)).getIndex04());
             }
             loadRecordDetail();
-            if (pnDetail < 0 || pnDetail > poController.getSerialListCount()- 1) {
+            if (pnDetail < 0 || pnDetail > poController.getSerialListCount() - 1) {
                 return;
             }
             JFXUtil.requestFocusNullField(new Object[][]{ // alternative to if , else if
