@@ -4328,4 +4328,10 @@ public class JFXUtil {
 
         return -1; // not found
     }
+
+    public static void limitCharacters(TextField textField, int maxLength) {
+        textField.setTextFormatter(new TextFormatter<String>(change
+                -> change.getControlNewText().length() <= maxLength ? change : null
+        ));
+    }
 }

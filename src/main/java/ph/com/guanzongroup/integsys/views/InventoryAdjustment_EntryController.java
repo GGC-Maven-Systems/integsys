@@ -810,6 +810,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
         CustomCommonUtil.inputDecimalOnly(tfCreditQty, tfDebitQty);
         JFXUtil.setKeyEventFilter(tableKeyEvents, tblViewDetail, tblAttachments);
         JFXUtil.adjustColumnForScrollbar(tblViewDetail, tblAttachments);
+        JFXUtil.limitCharacters(tfReferenceNo, 8);
     }
 
     ChangeListener<Boolean> txtArea_Focus = JFXUtil.FocusListener(TextArea.class,
