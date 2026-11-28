@@ -889,7 +889,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         } else {
-                            if (poController.Detail(pnDetail).getCreditQuantity() > 0 && lbisSerialize) {
+                            if (poController.Detail(pnDetail).getCreditQuantity() > 0 && lbisSerialize && pbEntered) {
                                 openParameter("", "");
                             }
                         }
@@ -918,7 +918,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                         if (!JFXUtil.isJSONSuccess(poJSON)) {
                             ShowMessageFX.Warning(null, pxeModuleName, JFXUtil.getJSONMessage(poJSON));
                         } else {
-                            if (poController.Detail(pnDetail).getDebitQuantity() > 0 && lbisSerialize) {
+                            if (poController.Detail(pnDetail).getDebitQuantity() > 0 && lbisSerialize && pbEntered) {
                                 openParameter("", "");
                             }
                         }
