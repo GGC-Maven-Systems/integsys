@@ -1272,7 +1272,7 @@ public class InventoryAdjustment_EntryController implements Initializable, Scree
                 JFXUtil.setButtonsVisibility(true, btnVoid, btnConfirm);
                 break;
             case InvAdjustmentStatus.CONFIRMED:
-                JFXUtil.setButtonsVisibility(true, btnVoid);
+                JFXUtil.setButtonsVisibility(false, btnVoid);
                 JFXUtil.setButtonsVisibility(false, btnConfirm, btnUpdate);
                 break;
             case InvAdjustmentStatus.VOID:
